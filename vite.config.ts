@@ -5,9 +5,8 @@ import version from 'vite-plugin-package-version'
 // import { visualizer } from 'rollup-plugin-visualizer'
 
 // TODO: 'node:' prefix?
-import { fileURLToPath, URL } from 'url'
-// import { resolve } from 'path'
-// import path from 'path'
+import { fileURLToPath, URL } from 'node:url'
+// import path from 'node:path'
 
 import pkg from './package.json'
 
@@ -19,6 +18,10 @@ const outputsLibPath = 'lib/'
 const outputsLibVenderPath = `${outputsLibPath}vender/`
 const outputsLibAssetsPath = `${outputsLibPath}assets/`
 
+function resolve(url: string | URL) {
+  return fileURLToPath(new URL(url, import.meta.url))
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   // https://vite.dev/guide/build.html#relative-base
@@ -28,7 +31,7 @@ export default defineConfig({
       // https://rollupjs.org/configuration-options/#input
       input: [
         // main entry point
-        fileURLToPath(new URL('./index.html', import.meta.url)),
+        resolve('./index.html'),
         // separate output chunks (primarily for CSS)
         'bootstrap/dist/css/bootstrap.min.css',
       ],
@@ -64,7 +67,12 @@ export default defineConfig({
         // https://rollupjs.org/configuration-options/#output-manualchunks
         manualChunks: {
           // vendor
-          [`${outputsLibVenderPath}react`]: ['react', 'react-dom', 'react/jsx-runtime'],
+          [`${outputsLibVenderPath}react`]: [
+            'react',
+            'react-dom',
+            'react/jsx-runtime',
+            'react-router',
+          ],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
@@ -82,16 +90,21 @@ export default defineConfig({
   plugins: [
     react(),
     version(),
+    // https://github.com/pd4d10/vite-plugin-svgr
     // DEBUG
     // visualizer({ open: true, filename: 'bundle-visualization.html' }),
   ],
   define: {
     // TODO: required?
     'process.env': {},
+    'import.meta.env.CONTACT_ADDRESS': 'mailto:fcs@clarin.eu',
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@': resolve('./src'),
+      '@assets': resolve('./src/assets'),
+      '@images': resolve('./src/assets/images'),
+      '@fonts': resolve('./src/assets/fonts'),
       // '@': path.resolve(__dirname, './src'),
     },
     // extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.yaml'],

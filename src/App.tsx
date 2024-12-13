@@ -1,36 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Button from 'react-bootstrap/Button'
+import { useEffect } from 'react'
+import { Routes, Route } from 'react-router'
+import Header from '@/components/header'
+import Footer from '@/components/footer'
+import Search from '@/pages/search'
+import About from '@/pages/about'
+import Help from '@/pages/help'
+import Statistics from '@/pages/statistics'
+import setAndWatchColorMode from '@/utils/bs-color-mode'
+
+import '@/App.css'
+
+// https://vite.dev
+// https://react.dev
 
 function App() {
-  const [count, setCount] = useState(0)
+  // initial setup
+  useEffect(() => {
+    console.debug('[App] set color mode and watch for changes ...')
+    setAndWatchColorMode()
+  }, [])
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <Button>ABC</Button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p>Version: { import.meta.env.PACKAGE_VERSION }</p>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Header />
+      <main>
+        <Routes>
+          <Route index element={<Search />} />
+          <Route path="about" element={<About />} />
+          <Route path="help" element={<Help />} />
+          <Route path="stats" element={<Statistics />} />
+        </Routes>
+      </main>
+      <Footer />
     </>
   )
 }

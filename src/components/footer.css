@@ -1,0 +1,16 @@
+footer {
+  background-color: #eeeeee;
+  color: #777777;
+  border-top: 1px solid #d5d5d5;
+  min-height: 6em;
+  padding-top: 1.8rem;
+  margin-top: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  footer {
+    background-color: rgb(var(--bs-tertiary-bg-rgb));
+    color: var(--bs-body-color);
+    border-top-color: rgb(var(--bs-secondary-bg-rgb));
+  }
+}

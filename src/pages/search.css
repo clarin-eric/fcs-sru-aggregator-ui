@@ -1,0 +1,29 @@
+#fcs-query-filters button.btn {
+  --bs-btn-border-radius: 0.75rem;
+  --bs-btn-border-color: #212529ad;
+
+
+  vertical-align: baseline;
+
+  /* TODO: prettier style? */
+  --color: #226c2259;
+  border: none;
+  border-radius: 0;
+  border-bottom: 5px solid var(--color);
+  padding-inline: .25rem !important;
+}
+
+#fcs-query-filters button.btn:hover {
+  background-color: var(--color);
+}
+
+@media (prefers-color-scheme: dark) {
+  #fcs-query-filters button.btn {
+    color: var(--bs-body-color);
+  }
+}
+
+#fcs-query-filters .dropdown-toggle.no-arrow::after {
+  /* remove dropdown arrow key suffix */
+  display: none;
+}
