@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
@@ -5,22 +6,38 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import Row from 'react-bootstrap/Row'
+import { type ToggleMetadata } from '@restart/ui/Dropdown'
+import { type AxiosInstance } from 'axios'
+import { getInitData } from '@/utils/api'
 
+// TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg'
-// TODO: for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
-
 import fcsLogoUrl from '@images/logo-fcs.png'
 import fcsLogoDarkModeUrl from '@images/logo-fcs-dark.png'
 
 import './search.css'
 
-import { ToggleMetadata } from '@restart/ui/Dropdown'
-
 const numberOfResultsOptions = [10, 20, 50, 100, 200, 250]
 
-function Search() {
+export interface SearchProps {
+  axios: AxiosInstance
+}
+
+function Search({ axios }: SearchProps) {
+  // const queryClient = useQueryClient()
+
   // ------------------------------------------------------------------------
   // initialization
+
+  const {
+    isPending,
+    isError,
+    data, //: { languages, resources, weblichtLanguages },
+    error,
+  } = useQuery({
+    queryKey: ['init'],
+    queryFn: getInitData.bind(null, axios),
+  })
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -124,7 +141,9 @@ function Search() {
                 onChange={handleChangeNumberOfResults}
               >
                 {numberOfResultsOptions.map((value) => (
-                  <option value={value} key={value}>{value}</option>
+                  <option value={value} key={value}>
+                    {value}
+                  </option>
                 ))}
               </Form.Select>{' '}
               results per endpoint.
@@ -135,6 +154,15 @@ function Search() {
 
       <Row>
         <Col>Results ...</Col>
+      </Row>
+      <Row>
+        <Col>
+          {isPending ? 'Loading ...' : null}
+          <br />
+          {isError ? error.message : null}
+          <br />
+          {JSON.stringify(data, undefined, 2)}
+        </Col>
       </Row>
     </Container>
   )

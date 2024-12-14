@@ -26,7 +26,7 @@ function Header() {
           <Navbar.Toggle aria-controls="header-navbar-nav" />
           <Navbar.Collapse id="header-navbar-nav">
             <Nav className="w-100 d-flex">
-              <Nav.Link as={Link} to="/">
+              <Nav.Link as={NavLink} to="/">
                 Home
               </Nav.Link>
               <Nav.Link as={NavLink} to="/help">
@@ -38,6 +38,7 @@ function Header() {
                 </Navbar.Text>
               ) : (
                 <Nav.Link as={Link} to="/login" className="ms-auto">
+                  {/* TODO: some fancy login handling */}
                   Login/Logout
                 </Nav.Link>
               )}

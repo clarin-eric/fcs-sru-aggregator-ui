@@ -1,3 +1,8 @@
+.logo {
+  height: 10em;
+  padding: 1.5em;
+}
+
 #fcs-query-filters button.btn {
   --bs-btn-border-radius: 0.75rem;
   --bs-btn-border-color: #212529ad;

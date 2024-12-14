@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 // import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import version from 'vite-plugin-package-version'
-// import { visualizer } from 'rollup-plugin-visualizer'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // TODO: 'node:' prefix?
 import { fileURLToPath, URL } from 'node:url'
@@ -67,12 +67,8 @@ export default defineConfig({
         // https://rollupjs.org/configuration-options/#output-manualchunks
         manualChunks: {
           // vendor
-          [`${outputsLibVenderPath}react`]: [
-            'react',
-            'react-dom',
-            'react/jsx-runtime',
-            'react-router',
-          ],
+          [`${outputsLibVenderPath}react`]: ['react', 'react-dom', 'react/jsx-runtime'],
+          [`${outputsLibVenderPath}react-ext`]: ['react-router', '@tanstack/react-query', 'axios'],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
@@ -92,12 +88,14 @@ export default defineConfig({
     version(),
     // https://github.com/pd4d10/vite-plugin-svgr
     // DEBUG
-    // visualizer({ open: true, filename: 'bundle-visualization.html' }),
+    visualizer({ open: true, filename: 'bundle-visualization.html' }),
   ],
   define: {
     // TODO: required?
     'process.env': {},
-    'import.meta.env.CONTACT_ADDRESS': 'mailto:fcs@clarin.eu',
+    'import.meta.env.CONTACT_ADDRESS': '"mailto:fcs@clarin.eu"',
+    'import.meta.env.API_URL': '"https://contentsearch.clarin.eu/rest/"',
+    'import.meta.env.VALIDATOR_URL': '"https://www.clarin.eu/fcsvalidator/"',
   },
   resolve: {
     alias: {

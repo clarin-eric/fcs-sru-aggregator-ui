@@ -3,6 +3,8 @@
  * @see https://getbootstrap.com/docs/5.3/customize/color-modes/#javascript
  */
 
+import { useEffect } from 'react'
+
 function getPreferredTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
@@ -18,10 +20,19 @@ function setTheme(theme: string) {
   }
 }
 
-export default function init() {
-  setTheme(getPreferredTheme())
+export function useColorMode() {
+  useEffect(() => {
+    function updateTheme() {
+      setTheme(getPreferredTheme())
+    }
 
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    setTheme(getPreferredTheme())
-  })
+    // run initial update
+    updateTheme()
+
+    // start event listener
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme)
+    // stop event listener on dispose
+    return () =>
+      window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', updateTheme)
+  }, [])
 }

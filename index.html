@@ -3,17 +3,35 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="icon" type="image/png" sizes="40x40" href="/src/assets/images/icon-services-fcs.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vite + React + TS</title>
+  <title>FCS Aggregator – Content Search</title>
 </head>
 
 <body>
+  <noscript>
+    <p>The FCS Aggregator requires JavaScript to be enabled!</p>
+  </noscript>
   <div id="root"></div>
-  <script>
-    window.MyAggregator = window.MyAggregator || {}
+
+  <!-- global configuration -->
+  <script type="module">
+    window.MyAggregator = window.MyAggregator || {};
+    window._paq = window._paq || [];
+
+    window.MyAggregator.URLROOT = "";
+    window.MyAggregator.APIROOT = "rest/";
+    window.MyAggregator.showSearchResultLink = false;
+    window.MyAggregator.validatorUrl = "https://www.clarin.eu/fcsvalidator/";
+    window.MyAggregator.NO_MORE_RECORDS_DIAGNOSTIC_URI = "info:srw/diagnostic/1/61";
+    window.MyAggregator.multipleLanguageCode = "mul"; // see ISO-693-3
+    window.MyAggregator.VERSION = `v${import.meta.env.PACKAGE_VERSION}`;
+    // window.MyAggregator.mode
+    // window.MyAggregator.resources
+    // window.MyAggregator.xAggregationContext
+    window.MyAggregator.isLoggedIn = false;
   </script>
-  <script type="module" src="/src/main.tsx"></script>
+  <script type="module" src="/src/index.tsx"></script>
 </body>
 
 </html>
