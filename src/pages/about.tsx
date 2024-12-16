@@ -1,4 +1,5 @@
 import Container from 'react-bootstrap/Container'
+import { Link } from 'react-router'
 
 function About() {
   return (
@@ -21,6 +22,10 @@ function About() {
 
       <div>
         <h2 className="h2">Statistics</h2>
+        <p>
+          View <Link to="/stats">endpoint statistics</Link> to see details about scanned resources,
+          performed searches, warnings and errors.
+        </p>
       </div>
 
       <div>
