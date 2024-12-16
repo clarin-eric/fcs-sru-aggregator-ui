@@ -80,12 +80,12 @@ const multipleLanguageCode = 'mul' // TODO
 
 class Resources {
   resources: Resource[]
-  update: () => void
 
-  constructor(resources: Resource[], updateFn: (resources: Resources) => void) {
+  constructor(resources: Resource[]) {
     this.resources = resources
-    this.update = () => updateFn(this)
+  }
 
+  prepare() {
     const sortFn = function (x: Resource, y: Resource) {
       const r = x.institution.localeCompare(y.institution)
       if (r !== 0) {

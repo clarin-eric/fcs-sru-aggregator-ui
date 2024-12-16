@@ -27,7 +27,6 @@ function setTheme(theme: string) {
 export function useColorMode() {
   // run once, set theme, add event listener; stop event listener on dispose
   useEffect(() => {
-    console.log("do stuffs")
     function updateTheme() {
       setTheme(getPreferredTheme())
     }

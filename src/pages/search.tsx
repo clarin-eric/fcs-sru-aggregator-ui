@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
@@ -8,9 +8,6 @@ import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
-import Tab from 'react-bootstrap/Tab'
-import Tabs from 'react-bootstrap/Tabs'
-import { type ToggleMetadata } from '@restart/ui/Dropdown'
 import { type AxiosInstance } from 'axios'
 import { getInitData } from '@/utils/api'
 
@@ -20,6 +17,9 @@ import fcsLogoUrl from '@images/logo-fcs.png'
 import fcsLogoDarkModeUrl from '@images/logo-fcs-dark.png'
 
 import './search.css'
+import Resources from '@/utils/resources'
+import { Resource } from '@/utils/resources'
+import { queryTypeMap, queryTypes } from '@/utils/constants'
 
 const numberOfResultsOptions = [10, 20, 50, 100, 200, 250]
 
@@ -51,7 +51,7 @@ function LanguageModal({
   onModalClose,
 }: {
   show: boolean
-  languages: LanguageCode2NameMap
+  languages?: LanguageCode2NameMap
   searchLanguage?: string
   searchLanguageFilter?: LanguageFilterOptions
   onLanguageSelected?: (code: string) => void
@@ -64,6 +64,8 @@ function LanguageModal({
   //  = { languages: {}, searchLanguage: 'mul', searchLanguageFilter: 'byMeta' }
   const [selectedLanguage, setSelectedLanguage] = useState(searchLanguage || 'mul')
   const [selectedFilterOption, setSelectedFilterOption] = useState(searchLanguageFilter || 'byMeta')
+
+  if (!languages) return null
 
   const sortedLanguageCodes = Object.keys(languages).toSorted()
   const oneThird = Math.floor((sortedLanguageCodes.length + 2) / 3)
@@ -182,35 +184,183 @@ function LanguageModal({
   )
 }
 
+function ResourceSelectionModal({
+  show,
+  resources,
+  searchResourceIDs,
+  onModalClose,
+}: {
+  show: boolean
+  resources?: Resources
+  searchResourceIDs?: string[]
+  onModalClose: (result: { resourceIDs: string[]; action: string }) => void
+}) {
+  if (!resources) return null
+
+  function handleClose(action: string) {
+    onModalClose({ resourceIDs: [], action: action })
+  }
+
+  return (
+    <Modal show={show} onHide={() => handleClose('close')} size="xl" fullscreen="lg-down" centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Resources</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          <Container>
+            <Row className="justify-content-evenly">
+              <Col>
+                <Form.Group controlId="resource-view-options-selection">
+                  <Form.Label>View</Form.Label>
+                  <Form.Select className="d-inline-block w-auto mx-1">
+                    <option>All</option>
+                    <option>Selected only</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group controlId="resource-view-options-grouping">
+                  <Form.Label>Group by</Form.Label>
+                  <Form.Select className="d-inline-block w-auto mx-1">
+                    <option>(Resource)</option>
+                    <option>Institution</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Control type="text" placeholder="Search for ..." className="w-auto" />
+              </Col>
+              <Col>
+                <Button>Select all</Button>
+                <Button>Select visible</Button>
+                <Button>Deselect all</Button>
+              </Col>
+            </Row>
+          </Container>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => handleClose('confirm')}>
+          Confirm and Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
+
 function Search({ axios }: SearchProps) {
   const [showResourceSelectionModal, setShowResourceSelectionModal] = useState(false)
+  const [showResourceSelectionModalGrouping, setShowResourceSelectionModalGrouping] =
+    useState('resource')
   const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
+
+  // user input search state
   const [searchLanguage, setSearchLanguage] = useState('mul')
+  const [searchLanguageFilter, setSearchLanguageFilter] = useState<LanguageFilterOptions>('byMeta')
+  const [queryType, setQueryType] = useState('cql')
+  const [searchResourceIDs, setSearchResourceIDs] = useState<string[]>([])
+  const [numberOfResults, setNumberOfResults] = useState(numberOfResultsOptions[0])
+
+  //
+  const [resources, setResources] = useState<Resources>(new Resources([]))
+  const [languages, setLanguages] = useState<LanguageCode2NameMap>()
+  const [weblichtLanguages, setWeblichtLanguages] = useState<string[]>()
 
   // ------------------------------------------------------------------------
   // initialization
 
-  const {
-    data, //: { languages, resources, weblichtLanguages },
-  } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['init'],
     queryFn: getInitData.bind(null, axios),
   })
 
-  // data computation
+  useEffect(() => {
+    if (!data) return
+
+    // do some initialization (based on `data`)
+    const resources = new Resources(data.resources)
+    resources.prepare()
+    resources.recurse((resource: Resource) => {
+      if (resource.visible) resource.selected = true
+      // resource.selected |= resource.visible
+    })
+
+    // TODO: evaluate xAggregationContext
+
+    // set state
+    setLanguages(data.languages)
+    setWeblichtLanguages(data.weblichtLanguages)
+    setResources(resources)
+    setSearchResourceIDs(resources.getSelectedIds())
+  }, [data])
+
+  // ------------------------------------------------------------------------
+  // data updates/computation
+
+  useEffect(() => {
+    console.log(
+      'Update resource visibility',
+      { queryType, searchLanguage, searchLanguageFilter },
+      resources
+    )
+    resources.setVisibility(queryType, searchLanguageFilter === 'byGuess' ? 'mul' : searchLanguage)
+    setSearchResourceIDs(resources.getSelectedIds())
+  }, [resources, queryType, searchLanguage, searchLanguageFilter])
+
+  // on state update, this component is re-evaluated which re-evaluates the expressions below, too
+  const isInputDisabled = isLoading || isError
+  // console.debug('isInputDisabled', isInputDisabled, 'isLoading', isLoading, 'isError', isError)
 
   // ------------------------------------------------------------------------
   // event handlers
 
-  function handleToggle(nextShow: boolean, meta: ToggleMetadata) {
-    console.log('handleToggle', nextShow, meta)
-  }
-  function handleSelect(eventKey: string | null, event: React.SyntheticEvent<unknown>) {
-    console.log('handleSelect', eventKey, event)
+  function handleChangeQueryType(eventKey: string | null) {
+    if (!eventKey) return
+    setQueryType(eventKey)
   }
 
   function handleChangeNumberOfResults(event: React.ChangeEvent<HTMLSelectElement>) {
-    console.log('handleChangeNumberOfResults', event, event.target.value)
+    let value = Number.parseInt(event.target.value)
+    // input validation
+    if (value < 10) value = 10
+    if (value > 250) value = 250
+    setNumberOfResults(value)
+  }
+
+  function handleChangeLanguageSelection({
+    language,
+    filter,
+    action,
+  }: {
+    language: string
+    filter: LanguageFilterOptions
+    action: LanguageModelCloseActions
+  }) {
+    console.log('onModalClose', { language, filter, action })
+    // first close the modal
+    setShowLanguageSelectionModal(false)
+    // if 'abort' do nothing
+    if (action === 'abort') return
+    // process user inputs
+    setSearchLanguage(language)
+    setSearchLanguageFilter(filter)
+  }
+
+  function handleChangeResourceSelection({
+    resourceIDs,
+    action,
+  }: {
+    resourceIDs: string[]
+    action: string
+  }) {
+    // first close the modal
+    setShowResourceSelectionModal(false)
+    // if 'abort' do nothing
+    if (action === 'abort') return
+    // process user inputs
+    // TODO:
+    console.log('resourceIDs', resourceIDs)
   }
 
   // ------------------------------------------------------------------------
@@ -221,6 +371,7 @@ function Search({ axios }: SearchProps) {
 
   return (
     <Container>
+      {/* logo image */}
       <Row>
         <Col className="text-center">
           <picture>
@@ -231,6 +382,7 @@ function Search({ axios }: SearchProps) {
         </Col>
       </Row>
 
+      {/* search input */}
       <Row>
         <Col>
           <search id="fcs-query">
@@ -240,17 +392,35 @@ function Search({ axios }: SearchProps) {
                 aria-label="search query input"
                 aria-describedby="fcs-search-input-button"
                 className="text-center"
+                disabled={isInputDisabled}
+                aria-disabled={isInputDisabled}
               />
-              <Button variant="outline-secondary" id="fcs-search-input-button">
+              <Button
+                variant="outline-secondary"
+                id="fcs-search-input-button"
+                disabled={isInputDisabled}
+                aria-disabled={isInputDisabled}
+              >
                 {/* TODO: visually-hidden span with description? */}
                 Search
               </Button>
             </InputGroup>
             <div id="fcs-query-filters" className="mt-2 lh-lg text-center">
               Perform a{' '}
-              <Dropdown className="d-inline-block" onToggle={handleToggle} onSelect={handleSelect}>
-                <Dropdown.Toggle size="sm" variant="outline-dark" className="mx-1 pe-2 no-arrow">
-                  Full-text Search{' '}
+              <Dropdown
+                className="d-inline-block"
+                onSelect={handleChangeQueryType}
+                aria-disabled={isInputDisabled}
+                aria-label="Search query type"
+              >
+                <Dropdown.Toggle
+                  size="sm"
+                  variant="outline-dark"
+                  className="mx-1 pe-2 no-arrow"
+                  disabled={isInputDisabled}
+                  aria-disabled={isInputDisabled}
+                >
+                  {queryTypeMap[queryType]?.searchLabel}{' '}
                   <img
                     src={gearIcon}
                     aria-hidden="true"
@@ -259,17 +429,26 @@ function Search({ axios }: SearchProps) {
                   />
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item as="button" eventKey="cql">
-                    Text layer Contextual Query Language (CQL)
-                  </Dropdown.Item>
-                  <Dropdown.Item as="button" eventKey="fcs">
-                    Multi-layer Federated Content Search Query Language (FCS-QL)
-                  </Dropdown.Item>
+                  {queryTypes.map((info) => (
+                    <Dropdown.Item as="button" eventKey={info.id} key={info.id}>
+                      {info.name}
+                    </Dropdown.Item>
+                  ))}
                 </Dropdown.Menu>
               </Dropdown>{' '}
               in{' '}
-              <Button size="sm" variant="outline-dark" className="mx-1 pe-2">
-                XYZ Resources{' '}
+              <Button
+                size="sm"
+                variant="outline-dark"
+                className="mx-1 pe-2"
+                disabled={isInputDisabled}
+                aria-disabled={isInputDisabled}
+                onClick={() => {
+                  setShowResourceSelectionModalGrouping('resource')
+                  setShowResourceSelectionModal(true)
+                }}
+              >
+                {resources.getSelectedMessage()}{' '}
                 <img
                   src={gearIcon}
                   aria-hidden="true"
@@ -278,7 +457,17 @@ function Search({ axios }: SearchProps) {
                 />
               </Button>{' '}
               from{' '}
-              <Button size="sm" variant="outline-dark" className="mx-1 pe-2">
+              <Button
+                size="sm"
+                variant="outline-dark"
+                className="mx-1 pe-2"
+                disabled={isInputDisabled}
+                aria-disabled={isInputDisabled}
+                onClick={() => {
+                  setShowResourceSelectionModalGrouping('institution')
+                  setShowResourceSelectionModal(true)
+                }}
+              >
                 XYZ Institutions{' '}
                 <img
                   src={gearIcon}
@@ -293,6 +482,8 @@ function Search({ axios }: SearchProps) {
                 variant="outline-dark"
                 className="mx-1 pe-2"
                 onClick={() => setShowLanguageSelectionModal(true)}
+                disabled={isInputDisabled}
+                aria-disabled={isInputDisabled}
               >
                 {languageCodeToName(searchLanguage, data?.languages ?? {})}{' '}
                 <img
@@ -307,6 +498,10 @@ function Search({ axios }: SearchProps) {
                 size="sm"
                 className="d-inline-block w-auto mx-1"
                 onChange={handleChangeNumberOfResults}
+                value={numberOfResults}
+                aria-label="Number of search results per endpoint"
+                disabled={isInputDisabled}
+                aria-disabled={isInputDisabled}
               >
                 {numberOfResultsOptions.map((value) => (
                   <option value={value} key={value}>
@@ -320,23 +515,33 @@ function Search({ axios }: SearchProps) {
         </Col>
       </Row>
 
-      <Row>{/* <Col>{JSON.stringify(data?.resources, undefined, 2)}</Col> */}</Row>
+      {/* TODO: temporary output */}
+      <Row>
+        <Col>
+          {JSON.stringify(
+            { searchLanguage, searchLanguageFilter, queryType, searchResourceIDs, numberOfResults },
+            undefined,
+            2
+          )}
+        </Col>
+      </Row>
+      <Row>
+        <Col>{JSON.stringify(resources, undefined, 2)}</Col>
+      </Row>
 
+      {/* input modals */}
       <LanguageModal
-        show={showLanguageSelectionModal}
-        languages={data?.languages || {}}
+        languages={languages}
         searchLanguage={searchLanguage}
-        onModalClose={({ language, filter, action }) => {
-          console.log('onModalClose', { language, filter, action })
-          // first close the modal
-          setShowLanguageSelectionModal(false)
-          // if 'abort' do nothing
-          if (action === 'abort') return
-          // use user inputs
-          setSearchLanguage(language)
-        }}
+        show={showLanguageSelectionModal}
+        onModalClose={handleChangeLanguageSelection}
       />
-
+      <ResourceSelectionModal
+        resources={resources}
+        searchResourceIDs={searchResourceIDs}
+        show={showResourceSelectionModal}
+        onModalClose={handleChangeResourceSelection}
+      />
     </Container>
   )
 }
