@@ -27,14 +27,14 @@ function EndpointStatistics({
   statistics: InstitutionEndpointInfo
 }) {
   return (
-    <div className="ps-4" key={url}>
+    <div className="ps-sm-4 mt-sm-0 mt-2 pt-sm-0 pt-1" key={url}>
       <h4 className="h5">
         {url}{' '}
         <a href={`${import.meta.env.VALIDATOR_URL}?url=${encodeURIComponent(url)}`}>
           <img src={eyeIcon} className="align-baseline ms-2" />
         </a>
       </h4>
-      <dl className="ps-4">
+      <dl className="ps-sm-4">
         <dt>FCS Version</dt>
         <dd>{statistics.version}</dd>
         <dt>Search capabilities</dt>
@@ -150,11 +150,11 @@ function Statistics({ axios }: StatisticsProps) {
               <Tab.Pane eventKey={section} key={section}>
                 <Container className="d-grid gap-2 mt-3">
                   <Alert variant="info">
-                    <dl>
+                    <dl className="mb-0">
                       <dt>Start date</dt>
-                      <dd>{new Date(contents.date).toLocaleString()}</dd>
+                      <dd className="mb-0">{new Date(contents.date).toLocaleString()}</dd>
                       <dt>Timeout (in seconds)</dt>
-                      <dd>{contents.timeout}</dd>
+                      <dd className="mb-0">{contents.timeout}</dd>
                     </dl>
                   </Alert>
                   {Object.entries(contents.institutions)
