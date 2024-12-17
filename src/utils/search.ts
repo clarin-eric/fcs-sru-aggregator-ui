@@ -3,8 +3,10 @@ export interface LanguageCode2NameMap {
 }
 
 export type LanguageFilterOptions = 'byMeta' | 'byGuess' | 'byMetaAndGuess'
+export type ResourceSelectionModalViewOptionGrouping = 'resource' | 'institution'
 
 export const DEFAULT_SEARCH_LANGUAGE_FILTER: LanguageFilterOptions = 'byMeta'
+export const DEFAULT_RESOURCE_VIEW_GROUPING: ResourceSelectionModalViewOptionGrouping = 'resource'
 export const MULTIPLE_LANGUAGE_CODE = 'mul' // see ISO-693-3
 
 export function languageCodeToName(

@@ -124,7 +124,7 @@ class Resources {
     resources.forEach(recfn)
   }
 
-  recurseResource(resource: Resource, fn: (resource: Resource) => boolean) {
+  recurseResource(resource: Resource, fn: (resource: Resource) => boolean | void) {
     if (false === fn(resource)) {
       // no recursion
     } else {

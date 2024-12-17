@@ -1,0 +1,16 @@
+#resource-selection-modal img {
+  vertical-align: baseline;
+  margin-bottom: -1px;
+}
+
+#resource-selection-modal h4>small::before {
+  content: '–';
+  padding-inline-start: 0.8ch;
+  padding-inline-end: 1ch;
+}
+
+#resource-selection-modal input[type="checkbox"] {
+  width: 1.3em;
+  height: 1.3em;
+  margin-top: 0.15rem;
+}

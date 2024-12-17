@@ -10,18 +10,18 @@ import Row from 'react-bootstrap/Row'
 import { type AxiosInstance } from 'axios'
 
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
-import ResourceSelectionModal, {
-  type ResourceSelectionModalViewOptionGrouping,
-} from '@/components/ResourceSelectionModal'
+import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import { getInitData } from '@/utils/api'
 import Resources, { type Resource } from '@/utils/resources'
 import { numberOfResultsOptions, queryTypeMap, queryTypes } from '@/utils/constants'
 import {
   DEFAULT_SEARCH_LANGUAGE_FILTER,
+  DEFAULT_RESOURCE_VIEW_GROUPING,
   MULTIPLE_LANGUAGE_CODE,
   languageCodeToName,
   type LanguageCode2NameMap,
   type LanguageFilterOptions,
+  type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
 
 // TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
@@ -44,7 +44,7 @@ export interface SearchProps {
 function Search({ axios }: SearchProps) {
   const [showResourceSelectionModal, setShowResourceSelectionModal] = useState(false)
   const [showResourceSelectionModalGrouping, setShowResourceSelectionModalGrouping] =
-    useState<ResourceSelectionModalViewOptionGrouping>('resource')
+    useState<ResourceSelectionModalViewOptionGrouping>(DEFAULT_RESOURCE_VIEW_GROUPING)
   const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
 
   // user input search state
@@ -207,7 +207,7 @@ function Search({ axios }: SearchProps) {
                 Search
               </Button>
             </InputGroup>
-            <div id="fcs-query-filters" className="mt-2 lh-lg text-center">
+            <div id="fcs-query-filters" className="mt-2 mb-3 lh-lg text-center">
               Perform a{' '}
               <Dropdown
                 className="d-inline-block"
@@ -326,9 +326,6 @@ function Search({ axios }: SearchProps) {
             2
           )}
         </Col>
-      </Row>
-      <Row>
-        <Col>{JSON.stringify(resources, undefined, 2)}</Col>
       </Row>
 
       {/* input modals */}
