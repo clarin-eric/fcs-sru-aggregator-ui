@@ -20,3 +20,5 @@ export const queryTypes = [
 export const queryTypeMap = Object.fromEntries(
   ['cql', 'fcs'].map((id) => [id, queryTypes.find((qt) => qt.id === id)])
 )
+
+export const numberOfResultsOptions = [10, 20, 50, 100, 200, 250]

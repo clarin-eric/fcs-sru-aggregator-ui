@@ -6,263 +6,57 @@ import Container from 'react-bootstrap/Container'
 import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
-import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
 import { type AxiosInstance } from 'axios'
+
+import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
+import ResourceSelectionModal, {
+  type ResourceSelectionModalViewOptionGrouping,
+} from '@/components/ResourceSelectionModal'
 import { getInitData } from '@/utils/api'
+import Resources, { type Resource } from '@/utils/resources'
+import { numberOfResultsOptions, queryTypeMap, queryTypes } from '@/utils/constants'
+import {
+  DEFAULT_SEARCH_LANGUAGE_FILTER,
+  MULTIPLE_LANGUAGE_CODE,
+  languageCodeToName,
+  type LanguageCode2NameMap,
+  type LanguageFilterOptions,
+} from '@/utils/search'
 
 // TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg'
 import fcsLogoUrl from '@images/logo-fcs.png'
 import fcsLogoDarkModeUrl from '@images/logo-fcs-dark.png'
 
-import './search.css'
-import Resources from '@/utils/resources'
-import { Resource } from '@/utils/resources'
-import { queryTypeMap, queryTypes } from '@/utils/constants'
+import './Search.css'
 
-const numberOfResultsOptions = [10, 20, 50, 100, 200, 250]
+// --------------------------------------------------------------------------
+// types
 
 export interface SearchProps {
   axios: AxiosInstance
 }
 
-interface LanguageCode2NameMap {
-  [code: string]: string
-}
-
-type LanguageFilterOptions = 'byMeta' | 'byGuess' | 'byMetaAndGuess'
-type LanguageModelCloseActions = 'close' | 'confirm' | 'abort'
-
-function languageCodeToName(
-  code: string,
-  codeToLanguageMapping: LanguageCode2NameMap = undefined as unknown as LanguageCode2NameMap
-) {
-  if (code === 'mul') return 'Any Language'
-  return codeToLanguageMapping?.[code] || 'Unknown Language'
-}
-
-function LanguageModal({
-  show,
-  languages,
-  searchLanguage,
-  searchLanguageFilter,
-  onLanguageSelected,
-  onModalClose,
-}: {
-  show: boolean
-  languages?: LanguageCode2NameMap
-  searchLanguage?: string
-  searchLanguageFilter?: LanguageFilterOptions
-  onLanguageSelected?: (code: string) => void
-  onModalClose: (result: {
-    language: string
-    filter: LanguageFilterOptions
-    action: LanguageModelCloseActions
-  }) => void
-}) {
-  //  = { languages: {}, searchLanguage: 'mul', searchLanguageFilter: 'byMeta' }
-  const [selectedLanguage, setSelectedLanguage] = useState(searchLanguage || 'mul')
-  const [selectedFilterOption, setSelectedFilterOption] = useState(searchLanguageFilter || 'byMeta')
-
-  if (!languages) return null
-
-  const sortedLanguageCodes = Object.keys(languages).toSorted()
-  const oneThird = Math.floor((sortedLanguageCodes.length + 2) / 3)
-
-  function renderLanguageOption(code: string) {
-    const isSelected = selectedLanguage === code
-    let className = 'd-block py-0 my-1 border-0'
-    if (isSelected) className += ' fw-semibold selected'
-
-    return (
-      <Button
-        size="sm"
-        // variant="outline-dark"
-        className={className}
-        style={{
-          color: `var(${isSelected ? '--bs-green' : '--bs-body-colors'})`,
-          backgroundColor: 'var(--bs-body-bg)',
-        }}
-        onClick={() => {
-          setSelectedLanguage(code)
-          onLanguageSelected?.(code)
-        }}
-        key={code}
-      >
-        {isSelected && <span className="selected-marker me-1">✓</span>}
-        {languageCodeToName(code, languages)} <sup>{code}</sup>
-      </Button>
-    )
-  }
-
-  function handleClose(action: LanguageModelCloseActions) {
-    onModalClose({
-      language: selectedLanguage,
-      filter: selectedFilterOption,
-      action: action,
-    })
-  }
-
-  function handleReset() {
-    setSelectedLanguage(searchLanguage || 'mul')
-    setSelectedFilterOption(searchLanguageFilter || 'byMeta')
-  }
-
-  return (
-    <Modal show={show} onHide={() => handleClose('close')} size="xl" fullscreen="lg-down" centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Languages</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="px-0">
-        <Container className="px-4 pb-3 border-bottom">
-          <Row>
-            <Col sm></Col>
-            <Col sm className="mb-3 mb-sm-2">
-              {renderLanguageOption('mul')}
-            </Col>
-            <Col sm></Col>
-          </Row>
-          <Row>
-            <Col sm>
-              {sortedLanguageCodes.slice(0, oneThird).map((code) => renderLanguageOption(code))}
-            </Col>
-            <Col sm>
-              {sortedLanguageCodes
-                .slice(oneThird, 2 * oneThird)
-                .map((code) => renderLanguageOption(code))}
-            </Col>
-            <Col sm>
-              {sortedLanguageCodes.slice(2 * oneThird).map((code) => renderLanguageOption(code))}
-            </Col>
-          </Row>
-        </Container>
-        <Form>
-          <Container className="px-4 pt-3">
-            <Form.Check
-              type="radio"
-              name="filterOpts"
-              value="byMeta"
-              id="filterOpts-byMeta"
-              checked={selectedFilterOption === 'byMeta'}
-              onChange={() => setSelectedFilterOption('byMeta')}
-              label="Use the resources' specified language to filter results"
-            />
-            <Form.Check
-              type="radio"
-              name="filterOpts"
-              value="byGuess"
-              id="filterOpts-byGuess"
-              checked={selectedFilterOption === 'byGuess'}
-              onChange={() => setSelectedFilterOption('byGuess')}
-              label="Filter results by using a language detector"
-            />
-            <Form.Check
-              type="radio"
-              name="filterOpts"
-              value="byMetaAndGuess"
-              id="filterOpts-byMetaAndGuess"
-              checked={selectedFilterOption === 'byMetaAndGuess'}
-              onChange={() => setSelectedFilterOption('byMetaAndGuess')}
-              label="First use the resources' specified language then also use a language detector"
-            />
-          </Container>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleReset}>
-          Revert Selection
-        </Button>
-        <Button variant="secondary" onClick={() => handleClose('abort')}>
-          Abort
-        </Button>
-        <Button variant="primary" onClick={() => handleClose('confirm')}>
-          Confirm and Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  )
-}
-
-function ResourceSelectionModal({
-  show,
-  resources,
-  searchResourceIDs,
-  onModalClose,
-}: {
-  show: boolean
-  resources?: Resources
-  searchResourceIDs?: string[]
-  onModalClose: (result: { resourceIDs: string[]; action: string }) => void
-}) {
-  if (!resources) return null
-
-  function handleClose(action: string) {
-    onModalClose({ resourceIDs: [], action: action })
-  }
-
-  return (
-    <Modal show={show} onHide={() => handleClose('close')} size="xl" fullscreen="lg-down" centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Resources</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form>
-          <Container>
-            <Row className="justify-content-evenly">
-              <Col>
-                <Form.Group controlId="resource-view-options-selection">
-                  <Form.Label>View</Form.Label>
-                  <Form.Select className="d-inline-block w-auto mx-1">
-                    <option>All</option>
-                    <option>Selected only</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group controlId="resource-view-options-grouping">
-                  <Form.Label>Group by</Form.Label>
-                  <Form.Select className="d-inline-block w-auto mx-1">
-                    <option>(Resource)</option>
-                    <option>Institution</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Control type="text" placeholder="Search for ..." className="w-auto" />
-              </Col>
-              <Col>
-                <Button>Select all</Button>
-                <Button>Select visible</Button>
-                <Button>Deselect all</Button>
-              </Col>
-            </Row>
-          </Container>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="primary" onClick={() => handleClose('confirm')}>
-          Confirm and Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  )
-}
+// --------------------------------------------------------------------------
+// component
 
 function Search({ axios }: SearchProps) {
   const [showResourceSelectionModal, setShowResourceSelectionModal] = useState(false)
   const [showResourceSelectionModalGrouping, setShowResourceSelectionModalGrouping] =
-    useState('resource')
+    useState<ResourceSelectionModalViewOptionGrouping>('resource')
   const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
 
   // user input search state
-  const [searchLanguage, setSearchLanguage] = useState('mul')
-  const [searchLanguageFilter, setSearchLanguageFilter] = useState<LanguageFilterOptions>('byMeta')
+  const [searchLanguage, setSearchLanguage] = useState(MULTIPLE_LANGUAGE_CODE)
+  const [searchLanguageFilter, setSearchLanguageFilter] = useState<LanguageFilterOptions>(
+    DEFAULT_SEARCH_LANGUAGE_FILTER
+  )
   const [queryType, setQueryType] = useState('cql')
   const [searchResourceIDs, setSearchResourceIDs] = useState<string[]>([])
   const [numberOfResults, setNumberOfResults] = useState(numberOfResultsOptions[0])
 
-  //
+  // REST API state
   const [resources, setResources] = useState<Resources>(new Resources([]))
   const [languages, setLanguages] = useState<LanguageCode2NameMap>()
   const [weblichtLanguages, setWeblichtLanguages] = useState<string[]>()
@@ -299,14 +93,22 @@ function Search({ axios }: SearchProps) {
   // data updates/computation
 
   useEffect(() => {
-    console.log(
+    console.debug(
       'Update resource visibility',
       { queryType, searchLanguage, searchLanguageFilter },
       resources
     )
-    resources.setVisibility(queryType, searchLanguageFilter === 'byGuess' ? 'mul' : searchLanguage)
+    resources.setVisibility(
+      queryType,
+      searchLanguageFilter === 'byGuess' ? MULTIPLE_LANGUAGE_CODE : searchLanguage
+    )
     setSearchResourceIDs(resources.getSelectedIds())
   }, [resources, queryType, searchLanguage, searchLanguageFilter])
+
+  // TODO: debugging only until we find a use
+  useEffect(() => {
+    console.log('weblichtLanguages', weblichtLanguages)
+  }, [weblichtLanguages])
 
   // on state update, this component is re-evaluated which re-evaluates the expressions below, too
   const isInputDisabled = isLoading || isError
@@ -540,6 +342,7 @@ function Search({ axios }: SearchProps) {
         resources={resources}
         searchResourceIDs={searchResourceIDs}
         show={showResourceSelectionModal}
+        showGrouping={showResourceSelectionModalGrouping}
         onModalClose={handleChangeResourceSelection}
       />
     </Container>

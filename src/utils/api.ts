@@ -6,7 +6,7 @@ export async function getInitData(axios: AxiosInstance) {
   return response.data
 
   // TODO: mock
-  return { languages: [], resources: [], weblichtLanguages: [] }
+  // return { languages: [], resources: [], weblichtLanguages: [] }
 }
 
 // --------------------------------------------------------------------------
@@ -75,8 +75,8 @@ export async function getStatisticsData(axios: AxiosInstance) {
   return response.data as Statistics
 
   // TODO: mock
-  return {
-    'Last Scan': { institutions: {}, date: 0, timeout: 0, isScan: true },
-    'Recent Searches': { institutions: {}, date: 0, timeout: 0, isScan: false },
-  }
+  // return {
+  //   'Last Scan': { institutions: {}, date: 0, timeout: 0, isScan: true },
+  //   'Recent Searches': { institutions: {}, date: 0, timeout: 0, isScan: false },
+  // }
 }

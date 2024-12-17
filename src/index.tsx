@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
-import axios from 'axios'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import axios from 'axios'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
@@ -13,9 +13,13 @@ const queryClient = new QueryClient()
 const axiosClient = axios.create({
   baseURL: import.meta.env.API_URL, // TODO: this should be configurable from outside the built bundle
   timeout: 5000,
-});
+})
 
-createRoot(document.getElementById('root')!).render(
+const rootId = 'root'
+const domRoot = document.getElementById(rootId)
+const root = createRoot(domRoot!)
+
+root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
