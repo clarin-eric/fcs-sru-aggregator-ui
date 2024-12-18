@@ -57,7 +57,7 @@ function Search({ axios }: SearchProps) {
   const [numberOfResults, setNumberOfResults] = useState(numberOfResultsOptions[0])
 
   // REST API state
-  const [resources, setResources] = useState<Resources>(new Resources([]))
+  const [resources, setResources] = useState<Resources>(new Resources([], () => {}))
   const [languages, setLanguages] = useState<LanguageCode2NameMap>()
   const [weblichtLanguages, setWeblichtLanguages] = useState<string[]>()
 
@@ -73,7 +73,12 @@ function Search({ axios }: SearchProps) {
     if (!data) return
 
     // do some initialization (based on `data`)
-    const resources = new Resources(data.resources)
+    const updateResourcesFn = (resources: Resources) => {
+      // NOTE: trigger for updating resources on nested change
+      // identity ob resources needs to change! --> clone object
+      setResources(new Resources(resources.resources, updateResourcesFn))
+    }
+    const resources = new Resources(data.resources, updateResourcesFn)
     resources.prepare()
     resources.recurse((resource: Resource) => {
       if (resource.visible) resource.selected = true
@@ -102,6 +107,7 @@ function Search({ axios }: SearchProps) {
       queryType,
       searchLanguageFilter === 'byGuess' ? MULTIPLE_LANGUAGE_CODE : searchLanguage
     )
+    // resources.update() // TODO: will cause infinite callbacks
     setSearchResourceIDs(resources.getSelectedIds())
   }, [resources, queryType, searchLanguage, searchLanguageFilter])
 
@@ -113,6 +119,8 @@ function Search({ axios }: SearchProps) {
   // on state update, this component is re-evaluated which re-evaluates the expressions below, too
   const isInputDisabled = isLoading || isError
   // console.debug('isInputDisabled', isInputDisabled, 'isLoading', isLoading, 'isError', isError)
+
+  const numberOfSelectedInstitutions = resources.getSelectedInstitutions().length
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -270,7 +278,8 @@ function Search({ axios }: SearchProps) {
                   setShowResourceSelectionModal(true)
                 }}
               >
-                XYZ Institutions{' '}
+                {numberOfSelectedInstitutions} Institution
+                {numberOfSelectedInstitutions !== 1 ? 's' : ''}{' '}
                 <img
                   src={gearIcon}
                   aria-hidden="true"
@@ -321,7 +330,7 @@ function Search({ axios }: SearchProps) {
       <Row>
         <Col>
           {JSON.stringify(
-            { searchLanguage, searchLanguageFilter, queryType, searchResourceIDs, numberOfResults },
+            { searchLanguage, searchLanguageFilter, queryType, searchResourceIDs: searchResourceIDs.length, numberOfResults },
             undefined,
             2
           )}
@@ -337,7 +346,7 @@ function Search({ axios }: SearchProps) {
       />
       <ResourceSelectionModal
         resources={resources}
-        searchResourceIDs={searchResourceIDs}
+        languages={languages}
         show={showResourceSelectionModal}
         showGrouping={showResourceSelectionModalGrouping}
         onModalClose={handleChangeResourceSelection}

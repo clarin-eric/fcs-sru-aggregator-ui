@@ -93,8 +93,13 @@ export default defineConfig({
   define: {
     // TODO: required?
     'process.env': {},
+    // contact address (footer/help page)
     'import.meta.env.CONTACT_ADDRESS': '"mailto:fcs@clarin.eu"',
+    // deployment on subpath, default is "/" for root
+    'import.meta.env.DEPLOY_PATH': '"/"',
+    // API base URL for FCS SRU aggregator
     'import.meta.env.API_URL': '"https://contentsearch.clarin.eu/rest/"',
+    // base URL for FCS Endpoint Validator to build redirect links
     'import.meta.env.VALIDATOR_URL': '"https://www.clarin.eu/fcsvalidator/"',
   },
   resolve: {

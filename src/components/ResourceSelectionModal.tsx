@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
+import Alert from 'react-bootstrap/Alert'
 import Button from 'react-bootstrap/Button'
-// import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
+import Collapse from 'react-bootstrap/Collapse'
 import Container from 'react-bootstrap/Container'
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import Form from 'react-bootstrap/Form'
@@ -12,6 +13,12 @@ import Row from 'react-bootstrap/Row'
 import Resources, { Resource } from '@/utils/resources'
 import {
   DEFAULT_RESOURCE_VIEW_GROUPING,
+  DEFAULT_RESOURCE_VIEW_SORTING,
+  DEFAULT_RESOURCE_VIEW_VISIBILITY,
+  LanguageCode2NameMap,
+  languageCodeToName as languageCodeToNameHelper,
+  ResourceSelectionModalViewOptionSorting,
+  ResourceSelectionModalViewOptionVisibility,
   type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
 
@@ -24,15 +31,26 @@ import translateIcon from 'bootstrap-icons/icons/translate.svg'
 // --------------------------------------------------------------------------
 // types
 
+interface ResourcesGroupedByKeyMap {
+  [key: string]: {
+    expanded: boolean
+    resources: Resource[]
+  }
+}
+
 // --------------------------------------------------------------------------
 // component
 
 function ResourceSelector({
   resource,
-  recurseResource,
+  shouldBeShown,
+  onSelectClick,
+  languageCodeToName,
 }: {
   resource: Resource
-  recurseResource: (resource: Resource, fn: (resource: Resource) => boolean | void) => void
+  shouldBeShown: ((resource: Resource) => boolean) | boolean
+  onSelectClick: (resource: Resource, selected: boolean) => void
+  languageCodeToName: (code: string) => string
 }) {
   const [expanded, setExpanded] = useState(false)
   const [selected, setSelected] = useState(false)
@@ -41,26 +59,35 @@ function ResourceSelector({
   useEffect(() => {
     // console.log('resource.selected', resource.selected, resource.id)
     if (resource.selected !== undefined) setSelected(resource.selected)
-  }, [resource.selected, resource])
+  }, [resource.selected])
+
+  // --------------------------------------------------------------
+
+  // check if resource should even be rendered
+  if (typeof shouldBeShown === 'function' && !shouldBeShown(resource)) {
+    return null
+  } else if (shouldBeShown === false) {
+    return null
+  }
+
+  // --------------------------------------------------------------
 
   function handleToggleExpansionClick() {
     setExpanded((isExpanded) => !isExpanded)
   }
 
   function handleToggleSelectionClick() {
-    // console.log('selected', selected)
+    console.log('selected', selected)
 
-    const changeTo = !selected
-    recurseResource(resource, (r: Resource) => {
-      r.selected = changeTo
-    })
-
-    setSelected((isSelected) => !isSelected)
+    onSelectClick(resource, !selected)
+    // setSelected((isSelected) => !isSelected)
   }
 
   function handleToggleShowSubResourcesClick() {
     setShowSubResources((doShow) => !doShow)
   }
+
+  // --------------------------------------------------------------
 
   return (
     <>
@@ -103,7 +130,7 @@ function ResourceSelector({
         >
           <img src={bankIcon} /> {resource.institution}
           <br />
-          <img src={translateIcon} /> {resource.languages.join(', ')}
+          <img src={translateIcon} /> {resource.languages.map(languageCodeToName).sort().join(', ')}
         </Col>
         {/* sub resources view button */}
         {resource.subResources.length > 0 && (
@@ -117,6 +144,7 @@ function ResourceSelector({
                 className="ps-0"
                 onClick={handleToggleShowSubResourcesClick}
               >
+                {/* TODO: hint if view-selected-only and no children are selected --> empty */}
                 {showSubResources ? 'Collapse' : 'Expand'} ({resource.subResources.length}{' '}
                 subresources)
               </Button>
@@ -126,11 +154,13 @@ function ResourceSelector({
       </Row>
       {/* sub resources */}
       {showSubResources && (
-        <Card className="ms-5 ms-sm-2 border-end-0 border-top-0 rounded-end-0 rounded-top-0">
+        <Card className="ms-md-5 ms-sm-2 border-end-0 border-top-0 rounded-end-0 rounded-top-0">
           {resource.subResources.map((subResource: Resource) => (
             <ResourceSelector
               resource={subResource}
-              recurseResource={recurseResource}
+              shouldBeShown={shouldBeShown}
+              onSelectClick={onSelectClick}
+              languageCodeToName={languageCodeToName}
               key={subResource.id}
             />
           ))}
@@ -140,32 +170,348 @@ function ResourceSelector({
   )
 }
 
+function GroupedResources({
+  title,
+  resources,
+  expanded: expandedProp,
+  shouldBeShown,
+  onSelectClick,
+  onExpandToggleClick,
+  onSelectAllClick,
+  onDeselectAllClick,
+  languageCodeToName,
+}: {
+  title: React.ReactNode
+  resources: Resource[]
+  expanded: boolean
+  shouldBeShown: ((resource: Resource) => boolean) | boolean
+  onSelectClick: (resource: Resource, selected: boolean) => void
+  onExpandToggleClick: (expanded: boolean) => void
+  onSelectAllClick: (resources: Resource[]) => void
+  onDeselectAllClick: (resources: Resource[]) => void
+  languageCodeToName: (code: string) => string
+}) {
+  const [expanded, setExpanded] = useState(expandedProp)
+
+  useEffect(() => {
+    // console.log('resource.selected', resource.selected, resource.id)
+    setExpanded(expandedProp)
+  }, [expandedProp])
+
+  function handleToggleExpandButton() {
+    setExpanded((isExpanded) => !isExpanded)
+    onExpandToggleClick(!expanded) // TODO: how fast is this update above?
+  }
+
+  function renderResourceCounts() {
+    return <>{resources.length} Resources</>
+  }
+
+  return (
+    <Container className="border-bottom pb-2 mb-4 px-0">
+      <Row className="px-3">
+        <Col md={9} sm={12}>
+          <h3>{title}</h3>
+        </Col>
+        <Col
+          md={3}
+          sm={12}
+          className="gap-1 d-inline-flex column-gap-2 justify-content-evenly"
+          style={{ height: 'fit-content' }}
+        >
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={handleToggleExpandButton}
+            aria-expanded={expanded}
+          >
+            {expanded ? 'Hide' : 'Show'} Resources
+          </Button>
+          <Button size="sm" onClick={() => onSelectAllClick(resources)}>
+            Select All
+          </Button>
+          <Button size="sm" onClick={() => onDeselectAllClick(resources)}>
+            Deselect All
+          </Button>
+        </Col>
+      </Row>
+      <Row className="px-3">
+        <Col>{renderResourceCounts()}</Col>
+      </Row>
+      <Collapse in={expanded}>
+        <Container>
+          {resources.map((resource: Resource) => (
+            <ResourceSelector
+              resource={resource}
+              shouldBeShown={shouldBeShown}
+              onSelectClick={onSelectClick}
+              languageCodeToName={languageCodeToName}
+              key={resource.id}
+            />
+          ))}
+        </Container>
+      </Collapse>
+    </Container>
+  )
+}
+
 function ResourceSelectionModal({
   show,
   showGrouping,
   resources,
-  searchResourceIDs,
+  languages,
   onModalClose,
 }: {
   show: boolean
   showGrouping?: ResourceSelectionModalViewOptionGrouping
   resources: Resources
-  searchResourceIDs?: string[]
+  languages?: LanguageCode2NameMap
   onModalClose: (result: { resourceIDs: string[]; action: string }) => void
 }) {
+  const [viewResourcesVisibility, setViewResourcesVisibility] =
+    useState<ResourceSelectionModalViewOptionVisibility>(DEFAULT_RESOURCE_VIEW_VISIBILITY)
   const [viewResourcesGrouping, setViewResourcesGrouping] =
     useState<ResourceSelectionModalViewOptionGrouping>(DEFAULT_RESOURCE_VIEW_GROUPING)
-  const viewSelectedOnly = true
+  const [viewResourcesSorting, setViewResourcesSorting] =
+    useState<ResourceSelectionModalViewOptionSorting>(DEFAULT_RESOURCE_VIEW_SORTING)
+
+  const [resourcesGroupedByInstitute, setResourcesGroupedByInstitute] =
+    useState<ResourcesGroupedByKeyMap>({})
+  const [resourcesGroupedByLanguage, setResourcesGroupedByLanguage] =
+    useState<ResourcesGroupedByKeyMap>({})
 
   useEffect(() => {
     if (showGrouping) setViewResourcesGrouping(showGrouping)
     // NOTE: remove `show` dependency to let modal keep last state when re-opened with same arguments
   }, [show, showGrouping])
 
+  useEffect(() => {
+    console.debug('recompute groupings')
+
+    const instituteToResourcesMap: ResourcesGroupedByKeyMap = {}
+    const instituteToLanguagesMap: ResourcesGroupedByKeyMap = {}
+    // resources.recurse((resource: Resource) => {}) // TODO: subresources with different grouping-key than parent?
+    resources.resources.forEach((resource: Resource) => {
+      const institution = resource.institution
+      if (!Object.getOwnPropertyNames(instituteToResourcesMap).includes(institution)) {
+        instituteToResourcesMap[institution] = {
+          // expanded: resourcesGroupedByInstitute?.[institution]?.expanded ?? true,
+          expanded: true,
+          resources: [],
+        }
+      }
+      instituteToResourcesMap[institution].resources.push(resource)
+
+      resource.languages.forEach((language: string) => {
+        if (!Object.getOwnPropertyNames(instituteToLanguagesMap).includes(language)) {
+          instituteToLanguagesMap[language] = {
+            // expanded: resourcesGroupedByLanguage?.[language]?.expanded ?? true,
+            expanded: true,
+            resources: [],
+          }
+        }
+        instituteToLanguagesMap[language].resources.push(resource)
+
+        // TODO: handle children with different language than parent?
+      })
+    })
+
+    setResourcesGroupedByInstitute(instituteToResourcesMap)
+    setResourcesGroupedByLanguage(instituteToLanguagesMap)
+  }, [resources])
+
+  // --------------------------------------------------------------
+
   if (!resources) return null
+
+  // --------------------------------------------------------------
+  // state?
+
+  // TODO: keep or remove? (counters are not intuitive enough)
+  const resourcesInfo = {
+    selected: 0,
+    selectedIgnoreVisible: 0,
+    selectable: 0, // how many available to be selected
+    visible: 0, // TODO: should change by language/search ...
+    available: 0, // how many resources from API
+  }
+  resources.recurse((resource: Resource) => {
+    resourcesInfo.available += 1
+    if (resource.visible) resourcesInfo.visible += 1
+    if (resource.visible) resourcesInfo.selectable += 1
+    if (resource.selected) resourcesInfo.selectedIgnoreVisible += 1
+    if (resource.visible && resource.selected) resourcesInfo.selected += 1
+  })
+
+  // --------------------------------------------------------------
+  // helper
+
+  function languageCodeToName(code: string) {
+    return languageCodeToNameHelper(code, languages)
+  }
+
+  // --------------------------------------------------------------
+  // event handlers
 
   function handleClose(action: string) {
     onModalClose({ resourceIDs: [], action: action })
+  }
+
+  function handleViewOptionsVisibilityChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    console.log('visibility#onchange', viewResourcesVisibility, '=>', event.target.value)
+    setViewResourcesVisibility(event.target.value as ResourceSelectionModalViewOptionVisibility)
+    // resources.update()
+  }
+
+  function handleViewOptionsGroupingChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    console.debug('grouping#onchange', viewResourcesGrouping, '=>', event.target.value)
+    setViewResourcesGrouping(event.target.value as ResourceSelectionModalViewOptionGrouping)
+  }
+
+  function handleViewOptionsSortingChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    console.log('sorting#onchange', viewResourcesSorting, '=>', event.target.value)
+    setViewResourcesSorting(event.target.value as ResourceSelectionModalViewOptionSorting)
+  }
+
+  function handleSelectAllClick() {
+    resources.recurse((resource: Resource) => {
+      if (resource.visible) {
+        resource.selected = true
+      }
+    })
+    resources.update()
+  }
+
+  function handleDeselectAllClick() {
+    resources.recurse((resource: Resource) => {
+      if (resource.visible) {
+        resource.selected = false
+      }
+    })
+    resources.update()
+  }
+
+  function handleSelectVisibleClick() {
+    console.debug('handleSelectVisibleClick')
+  }
+
+  function handleResourceOnSelectClick(resource: Resource, selected: boolean) {
+    resources.recurseResource(resource, (r: Resource) => {
+      r.selected = selected
+    })
+    resources.update()
+  }
+
+  function handleGroupedResourcesOnSelectAllClick(resourcesInGroup: Resource[]) {
+    resources.recurseResources(resourcesInGroup, (resource: Resource) => {
+      if (resource.visible) {
+        resource.selected = true
+      }
+    })
+    resources.update()
+  }
+
+  function handleGroupedResourcesOnDeelectAllClick(resourcesInGroup: Resource[]) {
+    resources.recurseResources(resourcesInGroup, (resource: Resource) => {
+      if (resource.visible) {
+        resource.selected = false
+      }
+    })
+    resources.update()
+  }
+
+  // --------------------------------------------------------------
+  // rendering
+
+  function shouldResourceBeShown(resource: Resource) {
+    // invisibile resources should not be shown
+    if (!resource.visible) return false
+
+    // check view mode
+    if (viewResourcesVisibility === 'selected') {
+      // hide all not-selected resources
+      if (
+        !resources.isResourceVisibilityRequiredForChildren(
+          resource,
+          (resource: Resource) => !!resource.selected
+        )
+      ) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  function renderResources() {
+    if (viewResourcesGrouping === 'institution') {
+      return Object.entries(resourcesGroupedByInstitute).map(
+        ([institution, { expanded, resources }]: [
+          string,
+          { expanded: boolean; resources: Resource[] }
+        ]) => (
+          <GroupedResources
+            title={
+              <>
+                <img src={bankIcon} style={{ height: '1.75rem' }} /> {institution}
+              </>
+            }
+            resources={resources}
+            expanded={expanded}
+            shouldBeShown={shouldResourceBeShown}
+            onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
+            onExpandToggleClick={(expanded) => {
+              console.debug('expanded', expanded, institution)
+              setResourcesGroupedByInstitute({
+                ...resourcesGroupedByInstitute,
+                [institution]: { ...resourcesGroupedByInstitute[institution], expanded: expanded },
+              })
+            }}
+            onDeselectAllClick={handleGroupedResourcesOnDeelectAllClick}
+            onSelectClick={handleResourceOnSelectClick}
+            languageCodeToName={languageCodeToName}
+            key={institution}
+          />
+        )
+      )
+    }
+    if (viewResourcesGrouping === 'language') {
+      return Object.entries(resourcesGroupedByLanguage).map(
+        ([language, { expanded, resources }]: [
+          string,
+          { expanded: boolean; resources: Resource[] }
+        ]) => (
+          <GroupedResources
+            title={
+              <>
+                <img src={translateIcon} style={{ height: '1.75rem' }} />{' '}
+                {languageCodeToName(language)} [{language}]
+              </>
+            }
+            resources={resources}
+            expanded={expanded}
+            shouldBeShown={shouldResourceBeShown}
+            onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
+            onExpandToggleClick={(expanded) =>
+              (resourcesGroupedByLanguage[language].expanded = expanded)
+            }
+            onDeselectAllClick={handleGroupedResourcesOnDeelectAllClick}
+            onSelectClick={handleResourceOnSelectClick}
+            languageCodeToName={languageCodeToName}
+            key={language}
+          />
+        )
+      )
+    }
+    return resources.resources.map((resource: Resource) => (
+      <ResourceSelector
+        resource={resource}
+        shouldBeShown={shouldResourceBeShown}
+        onSelectClick={handleResourceOnSelectClick}
+        languageCodeToName={languageCodeToName}
+        key={resource.id}
+      />
+    ))
   }
 
   return (
@@ -186,10 +532,13 @@ function ResourceSelectionModal({
           <Container>
             <Row className="d-sm-flex row-gap-2 justify-content-around">
               <Col md={2} sm={6}>
-                <FloatingLabel label="View" controlId="resource-view-options-selection">
-                  <Form.Select>
-                    <option>All</option>
-                    <option>Selected only</option>
+                <FloatingLabel label="View" controlId="resource-view-options-visibility">
+                  <Form.Select
+                    value={viewResourcesVisibility}
+                    onChange={handleViewOptionsVisibilityChange}
+                  >
+                    <option value="all">All</option>
+                    <option value="selected">Selected only</option>
                   </Form.Select>
                 </FloatingLabel>
               </Col>
@@ -197,19 +546,28 @@ function ResourceSelectionModal({
                 <FloatingLabel label="Group by" controlId="resource-view-options-grouping">
                   <Form.Select
                     value={viewResourcesGrouping}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
-                      console.log('onchange', viewResourcesGrouping, '=>', event.target.value)
-                      setViewResourcesGrouping(
-                        event.target.value as ResourceSelectionModalViewOptionGrouping
-                      )
-                    }}
+                    onChange={handleViewOptionsGroupingChange}
                   >
                     <option value="resource">(Resource)</option>
                     <option value="institution">Institution</option>
+                    <option value="language">Language</option>
                   </Form.Select>
                 </FloatingLabel>
               </Col>
-              <Col md={4} sm={12}>
+              <Col md={2} sm={6}>
+                <FloatingLabel label="Sort by" controlId="resource-view-options-sorting">
+                  <Form.Select
+                    value={viewResourcesSorting}
+                    onChange={handleViewOptionsSortingChange}
+                  >
+                    <option value="title-up">Title (up)</option>
+                    <option value="title-down">Title (down)</option>
+                    <option value="institution-up">Institution (up)</option>
+                    <option value="institution-down">Institution (down)</option>
+                  </Form.Select>
+                </FloatingLabel>
+              </Col>
+              <Col md={3} sm={12}>
                 <FloatingLabel
                   label="Resource filter query"
                   controlId="resource-view-options-filter"
@@ -218,32 +576,32 @@ function ResourceSelectionModal({
                 </FloatingLabel>
               </Col>
               <Col
-                md={4}
+                md={3}
                 sm={12}
                 className="gap-1 d-inline-flex column-gap-2 justify-content-evenly"
               >
-                <Button>Select all</Button>
-                <Button>Select visible</Button>
-                <Button>Deselect all</Button>
+                <Button onClick={handleSelectAllClick}>Select all</Button>
+                {/* TODO: what did this one do? */}
+                <Button
+                  onClick={handleSelectVisibleClick}
+                  disabled={viewResourcesVisibility !== 'all'}
+                  className='d-none'
+                >
+                  Select visible
+                </Button>
+                <Button onClick={handleDeselectAllClick}>Deselect all</Button>
               </Col>
             </Row>
           </Container>
         </Form>
+        {/* info */}
+        <Alert variant="info" className="m-4 mb-0">
+          Selected {resourcesInfo.selected} ({resourcesInfo.selectedIgnoreVisible}) /{' '}
+          {resourcesInfo.selectable} resources. {resourcesInfo.visible} resources are shown.{' '}
+          {resourcesInfo.available} resources are available.
+        </Alert>
         {/* resources */}
-        <Container className="px-3 pt-3">
-          {resources.resources
-            .filter(
-              viewSelectedOnly ? (resource: Resource) => resource.selected ?? true : () => true
-            )
-            .map((resource: Resource) => (
-              <ResourceSelector
-                resource={resource}
-                recurseResource={resources.recurseResource.bind(resources)}
-                key={resource.id}
-              />
-            ))}
-          {/* {JSON.stringify(resources)} */}
-        </Container>
+        <Container className="px-3 pt-3">{renderResources()}</Container>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={() => handleClose('confirm')}>

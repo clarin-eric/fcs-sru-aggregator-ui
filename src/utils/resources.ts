@@ -1,17 +1,5 @@
 // https://app.quicktype.io/?l=ts
 
-export interface Endpoint {
-  url: string
-  protocol: Protocol
-  searchCapabilities: SearchCapability[]
-}
-
-export interface EndpointInstitution {
-  name: string
-  link: string
-  endpoints: Endpoint[]
-}
-
 export interface Resource {
   endpointInstitution: EndpointInstitution
   endpoint: Endpoint
@@ -35,6 +23,18 @@ export interface Resource {
   expanded?: boolean
   priority?: number
   index?: number
+}
+
+export interface Endpoint {
+  url: string
+  protocol: Protocol
+  searchCapabilities: SearchCapability[]
+}
+
+export interface EndpointInstitution {
+  name: string
+  link: string
+  endpoints: Endpoint[]
 }
 
 export interface AvailableDataView {
@@ -70,7 +70,7 @@ export type LayerType =
   | 'orth'
   | 'norm'
   | 'phonetic'
-  | 'word' // ?
+  | 'word' // TODO: 'word' non-standard/legacy layer type?
   | 'entity'
 export type AvailableDataViewIdentifier = 'hits' | 'adv' | 'cmdi' | 'kwic' | 'lex' | string
 
@@ -80,9 +80,11 @@ const multipleLanguageCode = 'mul' // TODO
 
 class Resources {
   resources: Resource[]
+  update: () => void
 
-  constructor(resources: Resource[]) {
+  constructor(resources: Resource[], updateFn: (resources: Resources) => void) {
     this.resources = resources
+    this.update = () => updateFn(this)
   }
 
   prepare() {
@@ -140,6 +142,19 @@ class Resources {
     this.recurseResources(this.resources, fn)
   }
 
+  getById(id: string): Resource | null {
+    let found: Resource | null = null
+
+    this.recurse((resource: Resource) => {
+      if (resource.id === id) {
+        found = resource
+        return false
+      }
+    })
+
+    return found
+  }
+
   getLanguageCodes() {
     const languages: { [key: string]: boolean } = {}
     this.recurse(function (resource: Resource) {
@@ -182,6 +197,37 @@ class Resources {
     // 	return true;
     // }
     return false
+  }
+
+  isResourceVisibilityRequiredForChildren(
+    resource: Resource,
+    checkFn: ((resource: Resource) => boolean) | undefined = undefined
+  ): boolean {
+    // if self is visible then skip
+    if (typeof checkFn === 'function') {
+      if (checkFn(resource)) {
+        return true
+      }
+    }
+    // else if (resource.visible) return true
+
+    // check all descendants
+    let shouldBeVisible = false
+    this.recurseResources(resource.subResources, (descendant: Resource) => {
+      if (descendant.visible) {
+        if (typeof checkFn === 'function') {
+          if (checkFn(descendant)) {
+            shouldBeVisible = true
+            return false
+          }
+        } else {
+          shouldBeVisible = true
+          return false // stop recursing
+        }
+      }
+    })
+
+    return shouldBeVisible
   }
 
   setVisibility(queryTypeId: string, languageCode: string) {
@@ -230,27 +276,53 @@ class Resources {
     return { selected: resourcesToSelect, unavailable: handlesNotFound }
   }
 
+  getAvailableIds() {
+    const ids: string[] = []
+    this.recurse(function (resource: Resource) {
+      if (resource.visible) {
+        ids.push(resource.id)
+      }
+      return true
+    })
+    return ids
+  }
+
   getSelectedIds() {
     const ids: string[] = []
     this.recurse(function (resource: Resource) {
       if (resource.visible && resource.selected) {
         ids.push(resource.id)
-        //return false; // top-most resource in tree, don't delve deeper
+        // return false // top-most resource in tree, don't delve deeper
         // TODO: But subresources are also selectable on their own?...
       }
       return true
     })
 
-    // console.debug("ids: ", ids.length, {ids:ids});
+    // console.debug('ids: ', ids.length, { ids: ids })
     return ids
+  }
+
+  getSelectedInstitutions() {
+    const institutions = new Set<string>()
+    this.recurse(function (resource: Resource) {
+      if (resource.visible && resource.selected) {
+        institutions.add(resource.institution)
+        // return false // top-most resource in tree, don't delve deeper
+      }
+      return true
+    })
+
+    // console.debug('institutions: ', institutions.size, { institutions: institutions })
+    return Array.from(institutions)
   }
 
   getSelectedMessage() {
     const selected = this.getSelectedIds().length
-    if (this.resources.length === selected) {
-      return `All available resources (${selected})`
-    } else if (selected === 1) {
+    if (selected === 1) {
       return '1 selected resource'
+    }
+    if (this.resources.length === selected || this.getAvailableIds().length === selected) {
+      return `All available resources (${selected})`
     }
     return `${selected} selected resources`
   }
