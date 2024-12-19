@@ -1,9 +1,91 @@
 import { type AxiosInstance } from 'axios'
 
+import { type LanguageCode2NameMap } from '@/utils/search'
+
+// https://app.quicktype.io/?l=ts
+
+// --------------------------------------------------------------------------
+
+export interface InitData {
+  languages: LanguageCode2NameMap
+  resources: Resource[]
+  weblichtLanguages: string[]
+}
+
+export interface Resource {
+  endpointInstitution: EndpointInstitution
+  endpoint: Endpoint
+  handle: string
+  numberOfRecords: null
+  languages: string[]
+  landingPage: null | string
+  title: string
+  description: null | string
+  institution: string
+  searchCapabilities: SearchCapability[]
+  availableDataViews: AvailableDataView[] | null
+  availableLayers: AvailableLayer[] | null
+  subResources: Resource[]
+  id: string
+  searchCapabilitiesResolved: SearchCapability[]
+}
+
+export interface Endpoint {
+  url: string
+  protocol: ProtocolVersion
+  searchCapabilities: SearchCapability[]
+}
+
+export interface EndpointInstitution {
+  name: string
+  link: string
+  endpoints: Endpoint[]
+}
+
+export interface AvailableDataView {
+  identifier: AvailableDataViewIdentifier
+  mimeType: MIMEType
+  deliveryPolicy: DeliveryPolicy
+}
+
+export interface AvailableLayer {
+  identifier: string
+  resultId: string
+  layerType: LayerType
+  encoding: Encoding
+  qualifier: null | string
+  altValueInfo: null
+  altValueInfoURI: null
+}
+
+export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH'
+export type ProtocolVersion = 'VERSION_2' | 'VERSION_1' | 'LEGACY'
+
+export type Encoding = 'VALUE' | 'EMPTY'
+export type DeliveryPolicy = 'SEND_BY_DEFAULT' | 'NEED_TO_REQUEST'
+export type MIMEType =
+  | 'application/x-clarin-fcs-hits+xml'
+  | 'application/x-clarin-fcs-adv+xml'
+  | 'application/x-cmdi+xml'
+  | 'application/x-clarin-fcs-kwic+xml'
+  | 'application/x-clarin-fcs-lex+xml'
+export type LayerType =
+  | 'text'
+  | 'lemma'
+  | 'pos'
+  | 'orth'
+  | 'norm'
+  | 'phonetic'
+  | 'word' // TODO: 'word' non-standard/legacy layer type?
+  | 'entity'
+export type AvailableDataViewIdentifier = 'hits' | 'adv' | 'cmdi' | 'kwic' | 'lex' | string
+
+// --------------------------------------------------------------------------
+
 export async function getInitData(axios: AxiosInstance) {
   const response = await axios.get('init')
   console.debug('[getInitData]', response)
-  return response.data
+  return response.data as InitData
 
   // TODO: mock
   // return { languages: [], resources: [], weblichtLanguages: [] }
@@ -24,7 +106,7 @@ export interface StatisticsSection {
 }
 
 export interface InstitutionEndpointInfo {
-  version: Version
+  version: ProtocolVersion
   searchCapabilities: SearchCapability[]
   rootResources: string[]
   maxConcurrentRequests: number
@@ -66,8 +148,7 @@ export interface Exception {
   cause: null | string
 }
 
-export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH'
-export type Version = 'VERSION_2' | 'VERSION_1'
+// --------------------------------------------------------------------------
 
 export async function getStatisticsData(axios: AxiosInstance) {
   const response = await axios.get('statistics')

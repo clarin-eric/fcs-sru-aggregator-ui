@@ -1,90 +1,58 @@
-// https://app.quicktype.io/?l=ts
+import { type Resource as RawResource } from '@/utils/api'
+import { MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 
-export interface Resource {
-  endpointInstitution: EndpointInstitution
-  endpoint: Endpoint
-  handle: string
-  numberOfRecords: null
-  languages: string[]
-  landingPage: null | string
-  title: string
-  description: null | string
-  institution: string
-  searchCapabilities: SearchCapability[]
-  availableDataViews: AvailableDataView[] | null
-  availableLayers: AvailableLayer[] | null
+export interface Resource extends RawResource {
+  // override with new type?
   subResources: Resource[]
-  id: string
-  searchCapabilitiesResolved: SearchCapability[]
-
   // will be populated on initialization of Resources
-  visible?: boolean
-  selected?: boolean
-  expanded?: boolean
-  priority?: number
-  index?: number
+  visible: boolean
+  selected: boolean
+  expanded: boolean
+  priority: number
+  index: number
 }
-
-export interface Endpoint {
-  url: string
-  protocol: Protocol
-  searchCapabilities: SearchCapability[]
-}
-
-export interface EndpointInstitution {
-  name: string
-  link: string
-  endpoints: Endpoint[]
-}
-
-export interface AvailableDataView {
-  identifier: AvailableDataViewIdentifier
-  mimeType: MIMEType
-  deliveryPolicy: DeliveryPolicy
-}
-
-export interface AvailableLayer {
-  identifier: string
-  resultId: string
-  layerType: LayerType
-  encoding: Encoding
-  qualifier: null | string
-  altValueInfo: null
-  altValueInfoURI: null
-}
-
-export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH'
-export type Encoding = 'VALUE' | 'EMPTY'
-export type DeliveryPolicy = 'SEND_BY_DEFAULT' | 'NEED_TO_REQUEST'
-export type MIMEType =
-  | 'application/x-clarin-fcs-hits+xml'
-  | 'application/x-clarin-fcs-adv+xml'
-  | 'application/x-cmdi+xml'
-  | 'application/x-clarin-fcs-kwic+xml'
-  | 'application/x-clarin-fcs-lex+xml'
-export type Protocol = 'VERSION_2' | 'VERSION_1' | 'LEGACY'
-export type LayerType =
-  | 'text'
-  | 'lemma'
-  | 'pos'
-  | 'orth'
-  | 'norm'
-  | 'phonetic'
-  | 'word' // TODO: 'word' non-standard/legacy layer type?
-  | 'entity'
-export type AvailableDataViewIdentifier = 'hits' | 'adv' | 'cmdi' | 'kwic' | 'lex' | string
 
 // --------------------------------------------------------------------------
 
-const multipleLanguageCode = 'mul' // TODO
-
 class Resources {
   resources: Resource[]
+  idToResource: { [id: string]: Resource }
   update: () => void
 
   constructor(resources: Resource[], updateFn: (resources: Resources) => void) {
     this.resources = resources
     this.update = () => updateFn(this)
+
+    // make a fast lookup table: resource.id -> resource
+    this.idToResource = {}
+    const makeIdMapFn = (resource: Resource) => {
+      this.idToResource[resource.id] = resource
+      resource.subResources.forEach(makeIdMapFn)
+    }
+    this.resources.forEach(makeIdMapFn)
+  }
+
+  static fromApi(resources: RawResource[], updateFn: (resources: Resources) => void) {
+    const prepareFn = (resource: RawResource): Resource => {
+      return {
+        // copy original
+        ...resource,
+        // override and apply to sub-resources
+        subResources: resource.subResources.map(prepareFn),
+        // the new state fields
+        visible: true, // visible in the resource view
+        selected: false, // not selected in the resource view, assign later
+        expanded: false, // not expanded in the resource view
+        priority: 1, // used for ordering search results in resource view
+        index: -1, // original order, used for stable sort
+      }
+    }
+
+    const convertedResources = new Resources(resources.map(prepareFn), updateFn)
+
+    convertedResources.prepare()
+
+    return convertedResources
   }
 
   prepare() {
@@ -102,10 +70,6 @@ class Resources {
     this.resources.sort(sortFn)
 
     this.recurse((resource: Resource, index: number) => {
-      resource.visible = true // visible in the resource view
-      resource.selected = false // not selected in the resource view, assign later
-      resource.expanded = false // not expanded in the resource view
-      resource.priority = 1 // used for ordering search results in resource view
       resource.index = index // original order, used for stable sort
     })
   }
@@ -142,17 +106,8 @@ class Resources {
     this.recurseResources(this.resources, fn)
   }
 
-  getById(id: string): Resource | null {
-    let found: Resource | null = null
-
-    this.recurse((resource: Resource) => {
-      if (resource.id === id) {
-        found = resource
-        return false
-      }
-    })
-
-    return found
+  getById(id: string): Resource | undefined {
+    return this.idToResource[id]
   }
 
   getLanguageCodes() {
@@ -175,7 +130,7 @@ class Resources {
       return false
     }
     // yes for any language
-    if (languageCode === multipleLanguageCode) {
+    if (languageCode === MULTIPLE_LANGUAGE_CODE) {
       return true
     }
     // yes if the resource is in only that language

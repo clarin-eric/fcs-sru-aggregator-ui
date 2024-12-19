@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
@@ -56,6 +56,12 @@ function Search({ axios }: SearchProps) {
   const [searchResourceIDs, setSearchResourceIDs] = useState<string[]>([])
   const [numberOfResults, setNumberOfResults] = useState(numberOfResultsOptions[0])
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQueryError, setSearchQueryError] = useState<{
+    msg: string
+    details: unknown
+  } | null>(null)
+
   // REST API state
   const [resources, setResources] = useState<Resources>(new Resources([], () => {}))
   const [languages, setLanguages] = useState<LanguageCode2NameMap>()
@@ -78,8 +84,7 @@ function Search({ axios }: SearchProps) {
       // identity ob resources needs to change! --> clone object
       setResources(new Resources(resources.resources, updateResourcesFn))
     }
-    const resources = new Resources(data.resources, updateResourcesFn)
-    resources.prepare()
+    const resources = Resources.fromApi(data.resources, updateResourcesFn)
     resources.recurse((resource: Resource) => {
       if (resource.visible) resource.selected = true
       // resource.selected |= resource.visible
@@ -115,6 +120,8 @@ function Search({ axios }: SearchProps) {
   useEffect(() => {
     console.log('weblichtLanguages', weblichtLanguages)
   }, [weblichtLanguages])
+
+  // ------------------------------------------------------------------------
 
   // on state update, this component is re-evaluated which re-evaluates the expressions below, too
   const isInputDisabled = isLoading || isError
@@ -173,6 +180,31 @@ function Search({ axios }: SearchProps) {
     console.log('resourceIDs', resourceIDs)
   }
 
+  function handleSearchQueryChange(event: React.ChangeEvent<HTMLInputElement>) {
+    // TODO: maybe input validation / syntax highlighting etc.
+    setSearchQuery(event.target.value)
+
+    setSearchQueryError(
+      event.target.value.length % 2 === 1
+        ? { msg: 'even number of characters', details: null }
+        : null
+    )
+  }
+
+  function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    console.debug('search for', {
+      searchLanguage,
+      searchLanguageFilter,
+      queryType,
+      searchResourceIDs: searchResourceIDs,
+      numberOfResults,
+    })
+
+    setSearchQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
+  }
+
   // ------------------------------------------------------------------------
   // utilities
 
@@ -196,132 +228,146 @@ function Search({ axios }: SearchProps) {
       <Row>
         <Col>
           <search id="fcs-query">
-            <InputGroup size="lg">
-              <Form.Control
-                placeholder="Elephant"
-                aria-label="search query input"
-                aria-describedby="fcs-search-input-button"
-                className="text-center"
-                disabled={isInputDisabled}
-                aria-disabled={isInputDisabled}
-              />
-              <Button
-                variant="outline-secondary"
-                id="fcs-search-input-button"
-                disabled={isInputDisabled}
-                aria-disabled={isInputDisabled}
-              >
-                {/* TODO: visually-hidden span with description? */}
-                Search
-              </Button>
-            </InputGroup>
-            <div id="fcs-query-filters" className="mt-2 mb-3 lh-lg text-center">
-              Perform a{' '}
-              <Dropdown
-                className="d-inline-block"
-                onSelect={handleChangeQueryType}
-                aria-disabled={isInputDisabled}
-                aria-label="Search query type"
-              >
-                <Dropdown.Toggle
-                  size="sm"
-                  variant="outline-dark"
-                  className="mx-1 pe-2 no-arrow"
+            <Form noValidate onSubmit={handleSearchSubmit}>
+              <InputGroup size="lg" hasValidation>
+                <Form.Control
+                  placeholder="Elephant"
+                  aria-label="search query input"
+                  aria-describedby="fcs-search-input-button"
+                  className="text-center"
                   disabled={isInputDisabled}
                   aria-disabled={isInputDisabled}
+                  value={searchQuery}
+                  onChange={handleSearchQueryChange} // TODO: onInput? (before)
+                  isInvalid={!!searchQueryError} // TODO: add syntax validation for more complex queries
+                />
+                <Button
+                  variant="outline-primary"
+                  type="submit"
+                  id="fcs-search-input-button"
+                  disabled={isInputDisabled || searchQuery.trim().length === 0}
+                  aria-disabled={isInputDisabled}
                 >
-                  {queryTypeMap[queryType]?.searchLabel}{' '}
+                  {/* TODO: visually-hidden span with description? */}
+                  Search
+                </Button>
+                <Form.Control.Feedback type="invalid">
+                  {searchQueryError?.msg}
+                </Form.Control.Feedback>
+              </InputGroup>
+              <div id="fcs-query-filters" className="mt-2 mb-3 lh-lg text-center">
+                Perform a{' '}
+                <Dropdown
+                  className="d-inline-block"
+                  onSelect={handleChangeQueryType}
+                  aria-disabled={isInputDisabled}
+                  aria-label="Search query type"
+                >
+                  <Dropdown.Toggle
+                    size="sm"
+                    variant="outline-dark"
+                    className="mx-1 pe-2 no-arrow"
+                    disabled={isInputDisabled}
+                    aria-disabled={isInputDisabled}
+                  >
+                    {queryTypeMap[queryType]?.searchLabel}{' '}
+                    <img
+                      src={gearIcon}
+                      aria-hidden="true"
+                      width={10}
+                      className="align-top rounded-circle"
+                    />
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    {queryTypes.map((info) => (
+                      <Dropdown.Item
+                        as="button"
+                        eventKey={info.id}
+                        key={info.id}
+                        onClick={(event) => event.preventDefault()}
+                      >
+                        {info.name}
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>{' '}
+                in{' '}
+                <Button
+                  size="sm"
+                  variant="outline-dark"
+                  className="mx-1 pe-2"
+                  disabled={isInputDisabled}
+                  aria-disabled={isInputDisabled}
+                  onClick={() => {
+                    setShowResourceSelectionModalGrouping('resource')
+                    setShowResourceSelectionModal(true)
+                  }}
+                >
+                  {resources.getSelectedMessage()}{' '}
                   <img
                     src={gearIcon}
                     aria-hidden="true"
                     width={10}
                     className="align-top rounded-circle"
                   />
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  {queryTypes.map((info) => (
-                    <Dropdown.Item as="button" eventKey={info.id} key={info.id}>
-                      {info.name}
-                    </Dropdown.Item>
+                </Button>{' '}
+                from{' '}
+                <Button
+                  size="sm"
+                  variant="outline-dark"
+                  className="mx-1 pe-2"
+                  disabled={isInputDisabled}
+                  aria-disabled={isInputDisabled}
+                  onClick={() => {
+                    setShowResourceSelectionModalGrouping('institution')
+                    setShowResourceSelectionModal(true)
+                  }}
+                >
+                  {numberOfSelectedInstitutions} Institution
+                  {numberOfSelectedInstitutions !== 1 ? 's' : ''}{' '}
+                  <img
+                    src={gearIcon}
+                    aria-hidden="true"
+                    width={10}
+                    className="align-top rounded-circle"
+                  />
+                </Button>{' '}
+                in{' '}
+                <Button
+                  size="sm"
+                  variant="outline-dark"
+                  className="mx-1 pe-2"
+                  onClick={() => setShowLanguageSelectionModal(true)}
+                  disabled={isInputDisabled}
+                  aria-disabled={isInputDisabled}
+                >
+                  {languageCodeToName(searchLanguage, data?.languages ?? {})}{' '}
+                  <img
+                    src={gearIcon}
+                    aria-hidden="true"
+                    width={10}
+                    className="align-top rounded-circle"
+                  />
+                </Button>{' '}
+                with up to{' '}
+                <Form.Select
+                  size="sm"
+                  className="d-inline-block w-auto mx-1"
+                  onChange={handleChangeNumberOfResults}
+                  value={numberOfResults}
+                  aria-label="Number of search results per endpoint"
+                  disabled={isInputDisabled}
+                  aria-disabled={isInputDisabled}
+                >
+                  {numberOfResultsOptions.map((value) => (
+                    <option value={value} key={value}>
+                      {value}
+                    </option>
                   ))}
-                </Dropdown.Menu>
-              </Dropdown>{' '}
-              in{' '}
-              <Button
-                size="sm"
-                variant="outline-dark"
-                className="mx-1 pe-2"
-                disabled={isInputDisabled}
-                aria-disabled={isInputDisabled}
-                onClick={() => {
-                  setShowResourceSelectionModalGrouping('resource')
-                  setShowResourceSelectionModal(true)
-                }}
-              >
-                {resources.getSelectedMessage()}{' '}
-                <img
-                  src={gearIcon}
-                  aria-hidden="true"
-                  width={10}
-                  className="align-top rounded-circle"
-                />
-              </Button>{' '}
-              from{' '}
-              <Button
-                size="sm"
-                variant="outline-dark"
-                className="mx-1 pe-2"
-                disabled={isInputDisabled}
-                aria-disabled={isInputDisabled}
-                onClick={() => {
-                  setShowResourceSelectionModalGrouping('institution')
-                  setShowResourceSelectionModal(true)
-                }}
-              >
-                {numberOfSelectedInstitutions} Institution
-                {numberOfSelectedInstitutions !== 1 ? 's' : ''}{' '}
-                <img
-                  src={gearIcon}
-                  aria-hidden="true"
-                  width={10}
-                  className="align-top rounded-circle"
-                />
-              </Button>{' '}
-              in{' '}
-              <Button
-                size="sm"
-                variant="outline-dark"
-                className="mx-1 pe-2"
-                onClick={() => setShowLanguageSelectionModal(true)}
-                disabled={isInputDisabled}
-                aria-disabled={isInputDisabled}
-              >
-                {languageCodeToName(searchLanguage, data?.languages ?? {})}{' '}
-                <img
-                  src={gearIcon}
-                  aria-hidden="true"
-                  width={10}
-                  className="align-top rounded-circle"
-                />
-              </Button>{' '}
-              with up to{' '}
-              <Form.Select
-                size="sm"
-                className="d-inline-block w-auto mx-1"
-                onChange={handleChangeNumberOfResults}
-                value={numberOfResults}
-                aria-label="Number of search results per endpoint"
-                disabled={isInputDisabled}
-                aria-disabled={isInputDisabled}
-              >
-                {numberOfResultsOptions.map((value) => (
-                  <option value={value} key={value}>
-                    {value}
-                  </option>
-                ))}
-              </Form.Select>{' '}
-              results per endpoint.
-            </div>
+                </Form.Select>{' '}
+                results per endpoint.
+              </div>
+            </Form>
           </search>
         </Col>
       </Row>
@@ -330,7 +376,13 @@ function Search({ axios }: SearchProps) {
       <Row>
         <Col>
           {JSON.stringify(
-            { searchLanguage, searchLanguageFilter, queryType, searchResourceIDs: searchResourceIDs.length, numberOfResults },
+            {
+              searchLanguage,
+              searchLanguageFilter,
+              queryType,
+              searchResourceIDs: searchResourceIDs.length,
+              numberOfResults,
+            },
             undefined,
             2
           )}

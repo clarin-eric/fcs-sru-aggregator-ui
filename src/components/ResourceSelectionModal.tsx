@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Alert from 'react-bootstrap/Alert'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
@@ -198,6 +198,8 @@ function GroupedResources({
     setExpanded(expandedProp)
   }, [expandedProp])
 
+  // TODO: hide if no visible resources
+
   function handleToggleExpandButton() {
     setExpanded((isExpanded) => !isExpanded)
     onExpandToggleClick(!expanded) // TODO: how fast is this update above?
@@ -285,7 +287,7 @@ function ResourceSelectionModal({
     // NOTE: remove `show` dependency to let modal keep last state when re-opened with same arguments
   }, [show, showGrouping])
 
-  useEffect(() => {
+  useMemo(() => {
     console.debug('recompute groupings')
 
     const instituteToResourcesMap: ResourcesGroupedByKeyMap = {}
@@ -445,7 +447,7 @@ function ResourceSelectionModal({
 
   function renderResources() {
     if (viewResourcesGrouping === 'institution') {
-      return Object.entries(resourcesGroupedByInstitute).map(
+      return Object.entries(resourcesGroupedByInstitute).toSorted().map(
         ([institution, { expanded, resources }]: [
           string,
           { expanded: boolean; resources: Resource[] }
@@ -476,7 +478,7 @@ function ResourceSelectionModal({
       )
     }
     if (viewResourcesGrouping === 'language') {
-      return Object.entries(resourcesGroupedByLanguage).map(
+      return Object.entries(resourcesGroupedByLanguage).toSorted().map(
         ([language, { expanded, resources }]: [
           string,
           { expanded: boolean; resources: Resource[] }
