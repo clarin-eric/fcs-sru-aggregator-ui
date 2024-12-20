@@ -24,3 +24,5 @@ export const queryTypeMap = Object.fromEntries(
 export type QueryTypeID = 'cql' | 'fcs'
 
 export const numberOfResultsOptions = [10, 20, 50, 100, 200, 250]
+
+export const NO_MORE_RECORDS_DIAGNOSTIC_URI = "info:srw/diagnostic/1/61"

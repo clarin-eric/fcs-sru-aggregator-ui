@@ -68,13 +68,14 @@ export default defineConfig({
         manualChunks: {
           // vendor
           [`${outputsLibVenderPath}react`]: ['react', 'react-dom', 'react/jsx-runtime'],
-          [`${outputsLibVenderPath}react-ext`]: ['react-router', '@tanstack/react-query', 'axios'],
+          [`${outputsLibVenderPath}react-ext`]: ['react-router', '@tanstack/react-query', 'axios', 'zustand'],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
       },
       // treeshake?
     },
+    // manifest: true,
     sourcemap: true,
     // DEBUG
     // minify: false,
@@ -101,6 +102,8 @@ export default defineConfig({
     'import.meta.env.API_URL': '"https://contentsearch.clarin.eu/rest/"',
     // base URL for FCS Endpoint Validator to build redirect links
     'import.meta.env.VALIDATOR_URL': '"https://www.clarin.eu/fcsvalidator/"',
+    // show direct link to search results
+    'import.meta.env.SHOW_SEARCH_RESULT_LINK': 'false',
   },
   resolve: {
     alias: {

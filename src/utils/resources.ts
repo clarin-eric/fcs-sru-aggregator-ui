@@ -303,7 +303,7 @@ function isResourceAvailableForLanguage(resource: Resource, languageCode: string
   return false
 }
 
-function isResourceAvailableDueToSubResource(
+export function isResourceAvailableDueToSubResource(
   resource: Resource,
   checkFn: (resource: Resource) => boolean
 ) {
@@ -326,7 +326,7 @@ function isResourceAvailableDueToSubResource(
   return shouldBeAvailable
 }
 
-function isResourceVisible(
+export function isResourceVisible(
   resource: Resource,
   queryTypeId: QueryTypeID,
   languageCode: string

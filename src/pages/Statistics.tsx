@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Alert from 'react-bootstrap/Alert'
@@ -9,8 +10,10 @@ import Nav from 'react-bootstrap/Nav'
 import Row from 'react-bootstrap/Row'
 import Tab from 'react-bootstrap/Tab'
 import { type AxiosInstance } from 'axios'
+
 import { getStatisticsData } from '@/utils/api'
 import type { StatisticsSection, InstitutionEndpointInfo } from '@/utils/api'
+import AppStore from '@/stores/app'
 
 import './Statistics.css'
 
@@ -24,17 +27,24 @@ export interface StatisticsProps {
 function EndpointStatistics({
   url,
   statistics,
+  validatorUrl,
 }: {
   url: string
   statistics: InstitutionEndpointInfo
+  validatorUrl: string | null
 }) {
   return (
     <div className="ps-sm-4 mt-sm-0 mt-2 pt-sm-0 pt-1" key={url}>
       <h4 className="h5">
-        {url}{' '}
-        <a href={`${import.meta.env.VALIDATOR_URL}?url=${encodeURIComponent(url)}`}>
-          <i dangerouslySetInnerHTML={{ __html: eyeIcon }} className="align-baseline ms-2" />
-        </a>
+        {url}
+        {validatorUrl && (
+          <>
+            {' '}
+            <a href={`${validatorUrl}?url=${encodeURIComponent(url)}`}>
+              <i dangerouslySetInnerHTML={{ __html: eyeIcon }} className="align-baseline ms-2" />
+            </a>
+          </>
+        )}
       </h4>
       <dl className="ps-sm-4">
         <dt>FCS Version</dt>
@@ -112,6 +122,9 @@ function Statistics({ axios }: StatisticsProps) {
     queryFn: getStatisticsData.bind(null, axios),
   })
 
+  const [validatorUrl, setValidatorUrl] = useState(AppStore.getState().validatorURL)
+  AppStore.subscribe((state) => setValidatorUrl(state.validatorURL))
+
   function refreshData() {
     console.log('Invalidate data and refresh ...')
     queryClient.invalidateQueries({ queryKey: ['statistics'] })
@@ -174,6 +187,7 @@ function Statistics({ axios }: StatisticsProps) {
                               <EndpointStatistics
                                 url={endpointUrl}
                                 statistics={endpointInfo}
+                                validatorUrl={validatorUrl}
                                 key={endpointUrl}
                               />
                             ))}

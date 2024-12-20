@@ -13,7 +13,12 @@ import LanguageModal, { type LanguageModelCloseActions } from '@/components/Lang
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import { getInitData } from '@/utils/api'
 import Resources, { type Resource } from '@/utils/resources'
-import { numberOfResultsOptions, queryTypeMap, queryTypes } from '@/utils/constants'
+import {
+  numberOfResultsOptions,
+  queryTypeMap,
+  queryTypes,
+  type QueryTypeID,
+} from '@/utils/constants'
 import {
   DEFAULT_SEARCH_LANGUAGE_FILTER,
   DEFAULT_RESOURCE_VIEW_GROUPING,
@@ -52,7 +57,7 @@ function Search({ axios }: SearchProps) {
   const [searchLanguageFilter, setSearchLanguageFilter] = useState<LanguageFilterOptions>(
     DEFAULT_SEARCH_LANGUAGE_FILTER
   )
-  const [queryType, setQueryType] = useState('cql')
+  const [queryType, setQueryType] = useState<QueryTypeID>('cql')
   const [searchResourceIDs, setSearchResourceIDs] = useState<string[]>([])
   const [numberOfResults, setNumberOfResults] = useState(numberOfResultsOptions[0])
 
@@ -134,7 +139,7 @@ function Search({ axios }: SearchProps) {
 
   function handleChangeQueryType(eventKey: string | null) {
     if (!eventKey) return
-    setQueryType(eventKey)
+    setQueryType(eventKey as QueryTypeID)
   }
 
   function handleChangeNumberOfResults(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -271,10 +276,7 @@ function Search({ axios }: SearchProps) {
                     aria-disabled={isInputDisabled}
                   >
                     {queryTypeMap[queryType]?.searchLabel}{' '}
-                    <i
-                      dangerouslySetInnerHTML={{__html: gearIcon}}
-                      aria-hidden="true"
-                    />
+                    <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
                     {queryTypes.map((info) => (
@@ -302,10 +304,7 @@ function Search({ axios }: SearchProps) {
                   }}
                 >
                   {resources.getSelectedMessage()}{' '}
-                  <i
-                    dangerouslySetInnerHTML={{__html: gearIcon}}
-                    aria-hidden="true"
-                  />
+                  <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
                 </Button>{' '}
                 from{' '}
                 <Button
@@ -321,10 +320,7 @@ function Search({ axios }: SearchProps) {
                 >
                   {numberOfSelectedInstitutions} Institution
                   {numberOfSelectedInstitutions !== 1 ? 's' : ''}{' '}
-                  <i
-                    dangerouslySetInnerHTML={{__html: gearIcon}}
-                    aria-hidden="true"
-                  />
+                  <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
                 </Button>{' '}
                 in{' '}
                 <Button
@@ -336,10 +332,7 @@ function Search({ axios }: SearchProps) {
                   aria-disabled={isInputDisabled}
                 >
                   {languageCodeToName(searchLanguage, data?.languages ?? {})}{' '}
-                  <i
-                    dangerouslySetInnerHTML={{__html: gearIcon}}
-                    aria-hidden="true"
-                  />
+                  <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
                 </Button>{' '}
                 with up to{' '}
                 <Form.Select

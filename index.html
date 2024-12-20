@@ -15,22 +15,22 @@
   <div id="root"></div>
 
   <!-- global configuration -->
-  <script type="module">
+  <script>
+    /* move configuration before main 'fcs-sru-aggregator-ui-0.0.0.js' import! */
     window.MyAggregator = window.MyAggregator || {};
     window._paq = window._paq || [];
 
-    window.MyAggregator.URLROOT = "";
-    window.MyAggregator.APIROOT = "rest/";
-    window.MyAggregator.showSearchResultLink = false;
-    window.MyAggregator.validatorUrl = "https://www.clarin.eu/fcsvalidator/";
-    window.MyAggregator.NO_MORE_RECORDS_DIAGNOSTIC_URI = "info:srw/diagnostic/1/61";
-    window.MyAggregator.multipleLanguageCode = "mul"; // see ISO-693-3
-    window.MyAggregator.VERSION = `v${import.meta.env.PACKAGE_VERSION}`;
+    // window.MyAggregator.API_URL = "rest/";
+    // window.MyAggregator.DEPLOY_PATH = null; // null for default ("/")
+    // window.MyAggregator.VALIDATOR_URL = "https://www.clarin.eu/fcsvalidator/";
+    // window.MyAggregator.SHOW_SEARCH_RESULT_LINK = false;
+    
     // window.MyAggregator.mode
     // window.MyAggregator.resources
     // window.MyAggregator.xAggregationContext
     window.MyAggregator.isLoggedIn = false;
   </script>
+
   <script type="module" src="/src/index.tsx"></script>
 </body>
 
