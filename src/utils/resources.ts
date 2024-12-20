@@ -1,16 +1,24 @@
 import { type Resource as RawResource } from '@/utils/api'
 import { MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
+import { QueryTypeID } from './constants'
 
 export interface Resource extends RawResource {
   // override with new type?
   subResources: Resource[]
   // will be populated on initialization of Resources
+  /** visible in resources view */
   visible: boolean
+  /** selected in resources view */
   selected: boolean
+  /** expanded subresources in resources view */
   expanded: boolean
-  priority: number
-  index: number
+  /** used for ordering search results in resource view */
+  priority: number // TODO: required?
+  /** original order, for stable sort */
+  index: number // TODO: required?
 }
+
+type UpdateFn = (resources: Resources) => void
 
 // --------------------------------------------------------------------------
 
@@ -19,7 +27,7 @@ class Resources {
   idToResource: { [id: string]: Resource }
   update: () => void
 
-  constructor(resources: Resource[], updateFn: (resources: Resources) => void) {
+  constructor(resources: Resource[], updateFn: UpdateFn) {
     this.resources = resources
     this.update = () => updateFn(this)
 
@@ -32,19 +40,19 @@ class Resources {
     this.resources.forEach(makeIdMapFn)
   }
 
-  static fromApi(resources: RawResource[], updateFn: (resources: Resources) => void) {
-    const prepareFn = (resource: RawResource): Resource => {
+  static fromApi(resources: RawResource[], updateFn: UpdateFn) {
+    const prepareFn = (resource: RawResource, index: number): Resource => {
       return {
         // copy original
         ...resource,
         // override and apply to sub-resources
         subResources: resource.subResources.map(prepareFn),
         // the new state fields
-        visible: true, // visible in the resource view
-        selected: false, // not selected in the resource view, assign later
-        expanded: false, // not expanded in the resource view
-        priority: 1, // used for ordering search results in resource view
-        index: -1, // original order, used for stable sort
+        visible: true,
+        selected: false,
+        expanded: false,
+        priority: 1,
+        index: index, // default, will be updatet later in #prepare()
       }
     }
 
@@ -121,39 +129,6 @@ class Resources {
     return languages
   }
 
-  isResourceVisible(resource: Resource, queryTypeId: string, languageCode: string): boolean {
-    // check search capabilities (ignore version, just check caps)
-    if (
-      queryTypeId === 'fcs' &&
-      resource.endpoint.searchCapabilities.indexOf('ADVANCED_SEARCH') === -1
-    ) {
-      return false
-    }
-    // yes for any language
-    if (languageCode === MULTIPLE_LANGUAGE_CODE) {
-      return true
-    }
-    // yes if the resource is in only that language
-    if (
-      resource.languages &&
-      resource.languages.length === 1 &&
-      resource.languages[0] === languageCode
-    ) {
-      return true
-    }
-
-    // ? yes if the resource also contains that language
-    if (resource.languages && resource.languages.indexOf(languageCode) >= 0) {
-      return true
-    }
-
-    // ? yes if the resource has no language
-    // if (!resource.languages || resource.languages.length === 0) {
-    // 	return true;
-    // }
-    return false
-  }
-
   isResourceVisibilityRequiredForChildren(
     resource: Resource,
     checkFn: ((resource: Resource) => boolean) | undefined = undefined
@@ -185,10 +160,10 @@ class Resources {
     return shouldBeVisible
   }
 
-  setVisibility(queryTypeId: string, languageCode: string) {
+  setVisibility(queryTypeId: QueryTypeID, languageCode: string) {
     // top level
     this.resources.forEach((resource: Resource) => {
-      resource.visible = this.isResourceVisible(resource, queryTypeId, languageCode)
+      resource.visible = isResourceVisible(resource, queryTypeId, languageCode)
       this.recurseResources(resource.subResources, (c: Resource) => {
         c.visible = resource.visible
       })
@@ -284,3 +259,79 @@ class Resources {
 }
 
 export default Resources
+
+// --------------------------------------------------------------------------
+
+function isResourceAvailableForQueryType(resource: Resource, queryTypeId: QueryTypeID) {
+  // check search capabilities (ignore version, just check caps)
+  if (
+    queryTypeId === 'fcs' &&
+    resource.endpoint.searchCapabilities.indexOf('ADVANCED_SEARCH') === -1
+  ) {
+    // want 'fcs' but does not have 'ADVANCED_SEARCH' capability
+    return false
+  }
+  // 'cql' is required default, so no check
+  return true
+}
+
+function isResourceAvailableForLanguage(resource: Resource, languageCode: string) {
+  // yes for any language
+  if (languageCode === MULTIPLE_LANGUAGE_CODE) {
+    return true
+  }
+
+  // yes if the resource is in only that language
+  if (
+    resource.languages &&
+    resource.languages.length === 1 &&
+    resource.languages[0] === languageCode
+  ) {
+    return true
+  }
+
+  // ? yes if the resource also contains that language
+  if (resource.languages && resource.languages.indexOf(languageCode) >= 0) {
+    return true
+  }
+
+  // ? yes if the resource has no language
+  // if (!resource.languages || resource.languages.length === 0) {
+  // 	 return true
+  // }
+
+  return false
+}
+
+function isResourceAvailableDueToSubResource(
+  resource: Resource,
+  checkFn: (resource: Resource) => boolean
+) {
+  // if no subresources, then it's not a requirement
+  if (!resource.subResources || resource.subResources.length === 0) {
+    return false
+  }
+
+  // recursively check
+  let shouldBeAvailable = false // default false if no descendant says yes
+  const recursivelyCheck = (resource: Resource) => {
+    if (checkFn?.(resource) === true) {
+      shouldBeAvailable = true
+      return
+    }
+    resource.subResources.forEach(recursivelyCheck)
+  }
+  resource.subResources.forEach(recursivelyCheck)
+
+  return shouldBeAvailable
+}
+
+function isResourceVisible(
+  resource: Resource,
+  queryTypeId: QueryTypeID,
+  languageCode: string
+): boolean {
+  if (!isResourceAvailableForQueryType(resource, queryTypeId)) return false
+  if (!isResourceAvailableForLanguage(resource, languageCode)) return false
+  return true
+}

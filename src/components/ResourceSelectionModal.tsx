@@ -24,9 +24,9 @@ import {
 
 import './ResourceSelectionModal.css'
 
-import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg'
-import bankIcon from 'bootstrap-icons/icons/bank.svg'
-import translateIcon from 'bootstrap-icons/icons/translate.svg'
+import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
+import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
+import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
 
 // --------------------------------------------------------------------------
 // types
@@ -115,7 +115,7 @@ function ResourceSelector({
             {resource.landingPage && (
               <small>
                 <a href={resource.landingPage} target="_blank">
-                  More information <img src={houseDoorIcon} />
+                  More information <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />
                 </a>
               </small>
             )}
@@ -128,9 +128,10 @@ function ResourceSelector({
           className={`${expanded ? '' : ' text-truncate'}`}
           onClick={handleToggleExpansionClick}
         >
-          <img src={bankIcon} /> {resource.institution}
+          <i dangerouslySetInnerHTML={{ __html: bankIcon }} /> {resource.institution}
           <br />
-          <img src={translateIcon} /> {resource.languages.map(languageCodeToName).sort().join(', ')}
+          <i dangerouslySetInnerHTML={{ __html: translateIcon }} />{' '}
+          {resource.languages.map(languageCodeToName).sort().join(', ')}
         </Col>
         {/* sub resources view button */}
         {resource.subResources.length > 0 && (
@@ -447,63 +448,70 @@ function ResourceSelectionModal({
 
   function renderResources() {
     if (viewResourcesGrouping === 'institution') {
-      return Object.entries(resourcesGroupedByInstitute).toSorted().map(
-        ([institution, { expanded, resources }]: [
-          string,
-          { expanded: boolean; resources: Resource[] }
-        ]) => (
-          <GroupedResources
-            title={
-              <>
-                <img src={bankIcon} style={{ height: '1.75rem' }} /> {institution}
-              </>
-            }
-            resources={resources}
-            expanded={expanded}
-            shouldBeShown={shouldResourceBeShown}
-            onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
-            onExpandToggleClick={(expanded) => {
-              console.debug('expanded', expanded, institution)
-              setResourcesGroupedByInstitute({
-                ...resourcesGroupedByInstitute,
-                [institution]: { ...resourcesGroupedByInstitute[institution], expanded: expanded },
-              })
-            }}
-            onDeselectAllClick={handleGroupedResourcesOnDeelectAllClick}
-            onSelectClick={handleResourceOnSelectClick}
-            languageCodeToName={languageCodeToName}
-            key={institution}
-          />
+      return Object.entries(resourcesGroupedByInstitute)
+        .toSorted()
+        .map(
+          ([institution, { expanded, resources }]: [
+            string,
+            { expanded: boolean; resources: Resource[] }
+          ]) => (
+            <GroupedResources
+              title={
+                <>
+                  <i dangerouslySetInnerHTML={{ __html: bankIcon }} /> {institution}
+                </>
+              }
+              resources={resources}
+              expanded={expanded}
+              shouldBeShown={shouldResourceBeShown}
+              onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
+              onExpandToggleClick={(expanded) => {
+                console.debug('expanded', expanded, institution)
+                setResourcesGroupedByInstitute({
+                  ...resourcesGroupedByInstitute,
+                  [institution]: {
+                    ...resourcesGroupedByInstitute[institution],
+                    expanded: expanded,
+                  },
+                })
+              }}
+              onDeselectAllClick={handleGroupedResourcesOnDeelectAllClick}
+              onSelectClick={handleResourceOnSelectClick}
+              languageCodeToName={languageCodeToName}
+              key={institution}
+            />
+          )
         )
-      )
     }
     if (viewResourcesGrouping === 'language') {
-      return Object.entries(resourcesGroupedByLanguage).toSorted().map(
-        ([language, { expanded, resources }]: [
-          string,
-          { expanded: boolean; resources: Resource[] }
-        ]) => (
-          <GroupedResources
-            title={
-              <>
-                <img src={translateIcon} style={{ height: '1.75rem' }} />{' '}
-                {languageCodeToName(language)} [{language}]
-              </>
-            }
-            resources={resources}
-            expanded={expanded}
-            shouldBeShown={shouldResourceBeShown}
-            onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
-            onExpandToggleClick={(expanded) =>
-              (resourcesGroupedByLanguage[language].expanded = expanded)
-            }
-            onDeselectAllClick={handleGroupedResourcesOnDeelectAllClick}
-            onSelectClick={handleResourceOnSelectClick}
-            languageCodeToName={languageCodeToName}
-            key={language}
-          />
+      return Object.entries(resourcesGroupedByLanguage)
+        .toSorted()
+        .map(
+          ([language, { expanded, resources }]: [
+            string,
+            { expanded: boolean; resources: Resource[] }
+          ]) => (
+            <GroupedResources
+              title={
+                <>
+                  <i dangerouslySetInnerHTML={{ __html: translateIcon }} />{' '}
+                  {languageCodeToName(language)} [{language}]
+                </>
+              }
+              resources={resources}
+              expanded={expanded}
+              shouldBeShown={shouldResourceBeShown}
+              onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
+              onExpandToggleClick={(expanded) =>
+                (resourcesGroupedByLanguage[language].expanded = expanded)
+              }
+              onDeselectAllClick={handleGroupedResourcesOnDeelectAllClick}
+              onSelectClick={handleResourceOnSelectClick}
+              languageCodeToName={languageCodeToName}
+              key={language}
+            />
+          )
         )
-      )
     }
     return resources.resources.map((resource: Resource) => (
       <ResourceSelector
@@ -587,7 +595,7 @@ function ResourceSelectionModal({
                 <Button
                   onClick={handleSelectVisibleClick}
                   disabled={viewResourcesVisibility !== 'all'}
-                  className='d-none'
+                  className="d-none"
                 >
                   Select visible
                 </Button>

@@ -27,14 +27,12 @@ function LanguageModal({
   languages,
   searchLanguage,
   searchLanguageFilter,
-  onLanguageSelected,
   onModalClose,
 }: {
   show: boolean
   languages?: LanguageCode2NameMap
   searchLanguage?: string
   searchLanguageFilter?: LanguageFilterOptions
-  onLanguageSelected?: (code: string) => void
   onModalClose: (result: {
     language: string
     filter: LanguageFilterOptions
@@ -66,10 +64,7 @@ function LanguageModal({
           color: `var(${isSelected ? '--bs-green' : '--bs-body-colors'})`,
           backgroundColor: 'var(--bs-body-bg)',
         }}
-        onClick={() => {
-          setSelectedLanguage(code)
-          onLanguageSelected?.(code)
-        }}
+        onClick={() => setSelectedLanguage(code)}
         key={code}
       >
         {isSelected && <span className="selected-marker me-1">✓</span>}

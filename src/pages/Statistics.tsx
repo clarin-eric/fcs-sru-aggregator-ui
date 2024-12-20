@@ -12,8 +12,10 @@ import { type AxiosInstance } from 'axios'
 import { getStatisticsData } from '@/utils/api'
 import type { StatisticsSection, InstitutionEndpointInfo } from '@/utils/api'
 
-import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg'
-import arrowClockwiseIcon from 'bootstrap-icons/icons/arrow-clockwise.svg'
+import './Statistics.css'
+
+import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
+import arrowClockwiseIcon from 'bootstrap-icons/icons/arrow-clockwise.svg?raw'
 
 export interface StatisticsProps {
   axios: AxiosInstance
@@ -31,7 +33,7 @@ function EndpointStatistics({
       <h4 className="h5">
         {url}{' '}
         <a href={`${import.meta.env.VALIDATOR_URL}?url=${encodeURIComponent(url)}`}>
-          <img src={eyeIcon} className="align-baseline ms-2" />
+          <i dangerouslySetInnerHTML={{ __html: eyeIcon }} className="align-baseline ms-2" />
         </a>
       </h4>
       <dl className="ps-sm-4">
@@ -116,7 +118,7 @@ function Statistics({ axios }: StatisticsProps) {
   }
 
   return (
-    <Container className="my-3">
+    <Container id="statistics" className="my-3">
       <h1 className="h1">Statistics</h1>
       {(isPending || isError) && (
         <Row>
@@ -141,7 +143,7 @@ function Statistics({ axios }: StatisticsProps) {
             {/* custom right aligned "refresh" tab button */}
             <Nav.Item as="li" role="presentation" className="ms-auto">
               <Nav.Link as="button" onClick={refreshData}>
-                <img src={arrowClockwiseIcon} /> Refresh
+                <i dangerouslySetInnerHTML={{ __html: arrowClockwiseIcon }} /> Refresh
               </Nav.Link>
             </Nav.Item>
           </Nav>

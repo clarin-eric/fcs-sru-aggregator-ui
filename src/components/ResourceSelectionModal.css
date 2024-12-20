@@ -1,6 +1,9 @@
-#resource-selection-modal img {
+#resource-selection-modal i>svg.bi {
   vertical-align: baseline;
   margin-bottom: -1px;
+
+  height: unset;
+  width: 0.9em;
 }
 
 #resource-selection-modal h4>small::before {

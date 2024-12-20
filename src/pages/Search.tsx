@@ -25,7 +25,7 @@ import {
 } from '@/utils/search'
 
 // TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
-import gearIcon from 'bootstrap-icons/icons/gear-fill.svg'
+import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
 import fcsLogoUrl from '@images/logo-fcs.png'
 import fcsLogoDarkModeUrl from '@images/logo-fcs-dark.png'
 
@@ -212,7 +212,7 @@ function Search({ axios }: SearchProps) {
   // UI
 
   return (
-    <Container>
+    <Container id="search">
       {/* logo image */}
       <Row>
         <Col className="text-center">
@@ -271,11 +271,9 @@ function Search({ axios }: SearchProps) {
                     aria-disabled={isInputDisabled}
                   >
                     {queryTypeMap[queryType]?.searchLabel}{' '}
-                    <img
-                      src={gearIcon}
+                    <i
+                      dangerouslySetInnerHTML={{__html: gearIcon}}
                       aria-hidden="true"
-                      width={10}
-                      className="align-top rounded-circle"
                     />
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
@@ -304,11 +302,9 @@ function Search({ axios }: SearchProps) {
                   }}
                 >
                   {resources.getSelectedMessage()}{' '}
-                  <img
-                    src={gearIcon}
+                  <i
+                    dangerouslySetInnerHTML={{__html: gearIcon}}
                     aria-hidden="true"
-                    width={10}
-                    className="align-top rounded-circle"
                   />
                 </Button>{' '}
                 from{' '}
@@ -325,11 +321,9 @@ function Search({ axios }: SearchProps) {
                 >
                   {numberOfSelectedInstitutions} Institution
                   {numberOfSelectedInstitutions !== 1 ? 's' : ''}{' '}
-                  <img
-                    src={gearIcon}
+                  <i
+                    dangerouslySetInnerHTML={{__html: gearIcon}}
                     aria-hidden="true"
-                    width={10}
-                    className="align-top rounded-circle"
                   />
                 </Button>{' '}
                 in{' '}
@@ -342,11 +336,9 @@ function Search({ axios }: SearchProps) {
                   aria-disabled={isInputDisabled}
                 >
                   {languageCodeToName(searchLanguage, data?.languages ?? {})}{' '}
-                  <img
-                    src={gearIcon}
+                  <i
+                    dangerouslySetInnerHTML={{__html: gearIcon}}
                     aria-hidden="true"
-                    width={10}
-                    className="align-top rounded-circle"
                   />
                 </Button>{' '}
                 with up to{' '}

@@ -7,7 +7,6 @@
   --bs-btn-border-radius: 0.75rem;
   --bs-btn-border-color: #212529ad;
 
-
   vertical-align: baseline;
 
   /* TODO: prettier style? */
@@ -26,6 +25,12 @@
   #fcs-query-filters button.btn {
     color: var(--bs-body-color);
   }
+}
+
+#fcs-query-filters button.btn>i>svg.bi {
+  vertical-align: top;
+  height: unset;
+  width: 0.7em;
 }
 
 #fcs-query-filters .dropdown-toggle.no-arrow::after {
