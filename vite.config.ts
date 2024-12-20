@@ -68,7 +68,12 @@ export default defineConfig({
         manualChunks: {
           // vendor
           [`${outputsLibVenderPath}react`]: ['react', 'react-dom', 'react/jsx-runtime'],
-          [`${outputsLibVenderPath}react-ext`]: ['react-router', '@tanstack/react-query', 'axios', 'zustand'],
+          [`${outputsLibVenderPath}react-ext`]: [
+            'react-router',
+            '@tanstack/react-query',
+            'axios',
+            'zustand',
+          ],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
@@ -87,9 +92,14 @@ export default defineConfig({
   plugins: [
     react(),
     version(),
-    // https://github.com/pd4d10/vite-plugin-svgr
     // DEBUG
-    visualizer({ open: true, filename: 'bundle-visualization.html' }),
+    visualizer({
+      open: true,
+      filename: 'bundle-visualization.html',
+      emitFile: false,
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
   define: {
     // TODO: required?

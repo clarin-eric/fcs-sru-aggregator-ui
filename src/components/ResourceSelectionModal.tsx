@@ -538,7 +538,7 @@ function ResourceSelectionModal({
       </Modal.Header>
       <Modal.Body className="px-0">
         {/* resource viewing options */}
-        <Form className="px-3 pb-3 border-bottom">
+        <Form className="px-3 pb-3 border-bottom" onSubmit={(event) => event.preventDefault()}>
           <Container>
             <Row className="d-sm-flex row-gap-2 justify-content-around">
               <Col md={2} sm={6}>
