@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Alert from 'react-bootstrap/Alert'
@@ -6,10 +6,13 @@ import Badge from 'react-bootstrap/Badge'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
+import Form from 'react-bootstrap/Form'
 import Nav from 'react-bootstrap/Nav'
 import Row from 'react-bootstrap/Row'
 import Tab from 'react-bootstrap/Tab'
 import { type AxiosInstance } from 'axios'
+import { useFuzzySearchList, Highlight } from '@nozbe/microfuzz/react'
+import type { HighlightRanges } from '@nozbe/microfuzz'
 
 import { getStatisticsData } from '@/utils/api'
 import type { StatisticsSection, InstitutionEndpointInfo } from '@/utils/api'
@@ -30,13 +33,16 @@ function EndpointStatistics({
   validatorUrl,
 }: {
   url: string
-  statistics: InstitutionEndpointInfo
+  statistics: InstitutionEndpointInfo & {
+    matchEndpoint: HighlightRanges | null
+    matchResources: (HighlightRanges | null)[]
+  }
   validatorUrl: string | null
 }) {
   return (
     <div className="ps-sm-4 mt-sm-0 mt-2 pt-sm-0 pt-1" key={url}>
       <h4 className="h5">
-        {url}
+        <Highlight text={url} ranges={statistics.matchEndpoint} />
         {validatorUrl && (
           <>
             {' '}
@@ -71,8 +77,10 @@ function EndpointStatistics({
             <dd>{statistics.rootResources.length} root resources</dd>
             <dd>
               <ul>
-                {statistics.rootResources.toSorted().map((name) => (
-                  <li key={name}>{name}</li>
+                {statistics.rootResources.map((name, idx) => (
+                  <li key={name}>
+                    <Highlight text={name} ranges={statistics.matchResources?.[idx] ?? null} />
+                  </li>
                 ))}
               </ul>
             </dd>
@@ -114,6 +122,124 @@ function EndpointStatistics({
   )
 }
 
+function SectionStatistics({
+  data,
+  validatorUrl,
+}: {
+  data: StatisticsSection
+  validatorUrl: string | null
+}) {
+  const [filter, setFilter] = useState('')
+
+  // make it flat
+  const flatData = useMemo(
+    () =>
+      Object.entries(data.institutions)
+        .toSorted()
+        .map(([institutionName, institutionEndpoints]) =>
+          Object.entries(institutionEndpoints)
+            .toSorted()
+            .map(([endpointUrl, endpointInfo]) => ({
+              institutionName,
+              endpointUrl,
+              endpointInfo: {
+                ...endpointInfo,
+                rootResources: endpointInfo.rootResources.toSorted(),
+              },
+            }))
+        )
+        .flat(1),
+    [data]
+  )
+
+  // filter by user query
+  const filteredData = useFuzzySearchList({
+    list: flatData,
+    queryText: filter,
+    // search on institution name, endpoint url and on each (root) resource name
+    getText: (item) => [item.institutionName, item.endpointUrl, ...item.endpointInfo.rootResources],
+    mapResultItem: ({ item, score, matches }) => ({ item, matches, score }),
+    // strategy: 'off'
+  })
+
+  // rebuild nested structure, group by first occuring institution name
+  // add highlight information
+  const institutionData = filteredData.reduce(
+    (acc, cur) => {
+      const { institutionName, endpointUrl, endpointInfo } = cur.item
+
+      // check if we have not yet seen this institution name, then add it
+      if (!Object.getOwnPropertyNames(acc).includes(institutionName)) {
+        acc[institutionName] = {
+          match: cur.matches[0], // TODO: this is repeated for each endpoint that matches, so not sure what highlighting will work best here (hopefully the first)
+          endpoints: {},
+        }
+      }
+      // add endpoint info with highlight info
+      acc[institutionName].endpoints[endpointUrl] = {
+        ...endpointInfo,
+        matchEndpoint: cur.matches[1],
+        matchResources: cur.matches.slice(2),
+      }
+      return acc
+    },
+    {} as {
+      // map with key institution name
+      [institutionName: string]: {
+        // to institution name highlight match
+        match: HighlightRanges | null
+        endpoints: {
+          // and a map with endpoint url as key
+          [endpointUrl: string]: InstitutionEndpointInfo & {
+            // information augmented with highlight match information for endpoint url and each (root) resource
+            matchEndpoint: HighlightRanges | null
+            matchResources: (HighlightRanges | null)[]
+          }
+        }
+      }
+    }
+  )
+
+  return (
+    <Container className="d-grid gap-2 mt-3">
+      <Alert variant="info" className="mb-0">
+        <dl className="mb-0">
+          <dt>Start date</dt>
+          <dd className="mb-0">{new Date(data.date).toLocaleString()}</dd>
+          <dt>Timeout (in seconds)</dt>
+          <dd className="mb-0">{data.timeout}</dd>
+        </dl>
+      </Alert>
+      <Form onSubmit={(event) => event.preventDefault()}>
+        <Form.Control
+          placeholder="Type to filter statistics ..."
+          value={filter}
+          onChange={(event) => setFilter(event.target.value)}
+        />
+      </Form>
+      {Object.entries(institutionData).map(
+        ([institutionName, { match: institutionMatch, endpoints: institutionEndpoints }]) => (
+          <Card className="p-2" key={institutionName}>
+            <h3 className="h4 pb-1 border-bottom">
+              <Highlight text={institutionName} ranges={institutionMatch} />
+            </h3>
+            {Object.entries(institutionEndpoints)
+              .toSorted()
+              .map(([endpointUrl, endpointInfo]) => (
+                <EndpointStatistics
+                  url={endpointUrl}
+                  statistics={endpointInfo}
+                  validatorUrl={validatorUrl}
+                  key={endpointUrl}
+                />
+              ))}
+          </Card>
+        )
+      )}
+    </Container>
+  )
+}
+
 function Statistics({ axios }: StatisticsProps) {
   const queryClient = useQueryClient()
 
@@ -126,7 +252,7 @@ function Statistics({ axios }: StatisticsProps) {
   AppStore.subscribe((state) => setValidatorUrl(state.validatorURL))
 
   function refreshData() {
-    console.log('Invalidate data and refresh ...')
+    console.debug('Invalidate data and refresh ...')
     queryClient.invalidateQueries({ queryKey: ['statistics'] })
   }
 
@@ -163,38 +289,7 @@ function Statistics({ axios }: StatisticsProps) {
           <Tab.Content>
             {Object.entries(data).map(([section, contents]: [string, StatisticsSection]) => (
               <Tab.Pane eventKey={section} key={section}>
-                <Container className="d-grid gap-2 mt-3">
-                  <Alert variant="info">
-                    <dl className="mb-0">
-                      <dt>Start date</dt>
-                      <dd className="mb-0">{new Date(contents.date).toLocaleString()}</dd>
-                      <dt>Timeout (in seconds)</dt>
-                      <dd className="mb-0">{contents.timeout}</dd>
-                    </dl>
-                  </Alert>
-                  {Object.entries(contents.institutions)
-                    .toSorted()
-                    .map(
-                      ([institutionName, institutionEndpoints]: [
-                        string,
-                        { [endpointUrl: string]: InstitutionEndpointInfo }
-                      ]) => (
-                        <Card className="p-2" key={institutionName}>
-                          <h3 className="h4 pb-1 border-bottom">{institutionName}</h3>
-                          {Object.entries(institutionEndpoints)
-                            .toSorted()
-                            .map(([endpointUrl, endpointInfo]) => (
-                              <EndpointStatistics
-                                url={endpointUrl}
-                                statistics={endpointInfo}
-                                validatorUrl={validatorUrl}
-                                key={endpointUrl}
-                              />
-                            ))}
-                        </Card>
-                      )
-                    )}
-                </Container>
+                <SectionStatistics data={contents} validatorUrl={validatorUrl} />
               </Tab.Pane>
             ))}
           </Tab.Content>

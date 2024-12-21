@@ -5,6 +5,8 @@ import Container from 'react-bootstrap/Container'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
+import { useFuzzySearchList, Highlight } from '@nozbe/microfuzz/react'
+import type { FuzzyMatches } from '@nozbe/microfuzz'
 
 import {
   DEFAULT_SEARCH_LANGUAGE_FILTER,
@@ -44,34 +46,19 @@ function LanguageModal({
   const [selectedFilterOption, setSelectedFilterOption] = useState(
     searchLanguageFilter || DEFAULT_SEARCH_LANGUAGE_FILTER
   )
+  const [languageFilter, setLanguageFilter] = useState('')
+
+  const filteredLanguages = useFuzzySearchList({
+    list: Object.entries(languages ?? {}).toSorted(),
+    // If `queryText` is blank, `list` is returned in whole
+    queryText: languageFilter,
+    getText: (item) => [item[0], item[1]],
+    mapResultItem: ({ item, score, matches }) => ({ item, matches, score }),
+  })
 
   if (!languages) return null
 
-  const sortedLanguageCodes = Object.keys(languages).toSorted()
-  const oneThird = Math.floor((sortedLanguageCodes.length + 2) / 3)
-
-  function renderLanguageOption(code: string) {
-    const isSelected = selectedLanguage === code
-    let className = 'd-block py-0 my-1 border-0'
-    if (isSelected) className += ' fw-semibold selected'
-
-    return (
-      <Button
-        size="sm"
-        // variant="outline-dark"
-        className={className}
-        style={{
-          color: `var(${isSelected ? '--bs-green' : '--bs-body-colors'})`,
-          backgroundColor: 'var(--bs-body-bg)',
-        }}
-        onClick={() => setSelectedLanguage(code)}
-        key={code}
-      >
-        {isSelected && <span className="selected-marker me-1">✓</span>}
-        {languageCodeToName(code, languages)} <sup>{code}</sup>
-      </Button>
-    )
-  }
+  const oneThird = Math.floor((filteredLanguages.length + 2) / 3)
 
   function handleClose(action: LanguageModelCloseActions) {
     onModalClose({
@@ -86,6 +73,40 @@ function LanguageModal({
     setSelectedFilterOption(searchLanguageFilter || DEFAULT_SEARCH_LANGUAGE_FILTER)
   }
 
+  function renderLanguageOption(
+    code: string,
+    language: string,
+    highlights?: FuzzyMatches,
+    score?: number
+  ) {
+    const isSelected = selectedLanguage === code
+    let className = 'd-block py-0 my-1 border-0'
+    if (isSelected) className += ' fw-semibold selected'
+
+    if (highlights === undefined) highlights = [null, null]
+
+    return (
+      <Button
+        size="sm"
+        // variant="outline-dark"
+        className={className}
+        style={{
+          color: `var(${isSelected ? '--bs-green' : '--bs-body-colors'})`,
+          backgroundColor: 'var(--bs-body-bg)',
+        }}
+        onClick={() => setSelectedLanguage(code)}
+        data-filter-score={score}
+        key={code}
+      >
+        {isSelected && <span className="selected-marker me-1">✓</span>}
+        <Highlight ranges={highlights[1]} text={language} />{' '}
+        <sup>
+          <Highlight ranges={highlights[0]} text={code} />
+        </sup>
+      </Button>
+    )
+  }
+
   return (
     <Modal show={show} onHide={() => handleClose('close')} size="xl" fullscreen="lg-down" centered>
       <Modal.Header closeButton>
@@ -96,21 +117,41 @@ function LanguageModal({
           <Row>
             <Col sm></Col>
             <Col sm className="mb-3 mb-sm-2">
-              {renderLanguageOption(MULTIPLE_LANGUAGE_CODE)}
+              {renderLanguageOption(
+                MULTIPLE_LANGUAGE_CODE,
+                languageCodeToName(MULTIPLE_LANGUAGE_CODE)
+              )}
             </Col>
-            <Col sm></Col>
+            <Col sm>
+              <Form.Control
+                size="sm"
+                placeholder="Filter languages ..."
+                value={languageFilter}
+                onChange={(event) => setLanguageFilter(event.target.value)}
+              />
+            </Col>
           </Row>
           <Row>
             <Col sm>
-              {sortedLanguageCodes.slice(0, oneThird).map((code) => renderLanguageOption(code))}
+              {filteredLanguages
+                .slice(0, oneThird)
+                .map(({ item: [code, language], matches, score }) =>
+                  renderLanguageOption(code, language, matches, score)
+                )}
             </Col>
             <Col sm>
-              {sortedLanguageCodes
+              {filteredLanguages
                 .slice(oneThird, 2 * oneThird)
-                .map((code) => renderLanguageOption(code))}
+                .map(({ item: [code, language], matches, score }) =>
+                  renderLanguageOption(code, language, matches, score)
+                )}
             </Col>
             <Col sm>
-              {sortedLanguageCodes.slice(2 * oneThird).map((code) => renderLanguageOption(code))}
+              {filteredLanguages
+                .slice(2 * oneThird)
+                .map(({ item: [code, language], matches, score }) =>
+                  renderLanguageOption(code, language, matches, score)
+                )}
             </Col>
           </Row>
         </Container>

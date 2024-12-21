@@ -9,6 +9,8 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
+import { useFuzzySearchList, Highlight } from '@nozbe/microfuzz/react'
+import type { FuzzyMatches } from '@nozbe/microfuzz'
 
 import Resources, { Resource } from '@/utils/resources'
 import {
@@ -43,11 +45,13 @@ interface ResourcesGroupedByKeyMap {
 
 function ResourceSelector({
   resource,
+  highlighting,
   shouldBeShown,
   onSelectClick,
   languageCodeToName,
 }: {
   resource: Resource
+  highlighting?: FuzzyMatches
   shouldBeShown: ((resource: Resource) => boolean) | boolean
   onSelectClick: (resource: Resource, selected: boolean) => void
   languageCodeToName: (code: string) => string
@@ -60,6 +64,8 @@ function ResourceSelector({
     // console.log('resource.selected', resource.selected, resource.id)
     if (resource.selected !== undefined) setSelected(resource.selected)
   }, [resource.selected])
+
+  if (highlighting === undefined) highlighting = [null, null, null]
 
   // --------------------------------------------------------------
 
@@ -111,7 +117,7 @@ function ResourceSelector({
           onClick={handleToggleExpansionClick}
         >
           <h4 className={`h5 ${expanded ? '' : 'text-truncate'}`}>
-            {resource.title}{' '}
+            <Highlight text={resource.title} ranges={highlighting[0]} />{' '}
             {resource.landingPage && (
               <small>
                 <a href={resource.landingPage} target="_blank">
@@ -120,7 +126,11 @@ function ResourceSelector({
               </small>
             )}
           </h4>
-          <p className={`mb-0 ${expanded ? '' : 'text-truncate'}`}>{resource.description}</p>
+          <p className={`mb-0 ${expanded ? '' : 'text-truncate'}`}>
+            {resource.description && (
+              <Highlight text={resource.description} ranges={highlighting[2]} />
+            )}
+          </p>
         </Col>
         <Col
           md={{ span: 3, offset: 0 }}
@@ -128,7 +138,8 @@ function ResourceSelector({
           className={`${expanded ? '' : ' text-truncate'}`}
           onClick={handleToggleExpansionClick}
         >
-          <i dangerouslySetInnerHTML={{ __html: bankIcon }} /> {resource.institution}
+          <i dangerouslySetInnerHTML={{ __html: bankIcon }} />{' '}
+          <Highlight text={resource.institution} ranges={highlighting[1]} />
           <br />
           <i dangerouslySetInnerHTML={{ __html: translateIcon }} />{' '}
           {resource.languages.map(languageCodeToName).sort().join(', ')}
@@ -278,10 +289,31 @@ function ResourceSelectionModal({
   const [viewResourcesSorting, setViewResourcesSorting] =
     useState<ResourceSelectionModalViewOptionSorting>(DEFAULT_RESOURCE_VIEW_SORTING)
 
+  const [filter, setFilter] = useState('')
+
   const [resourcesGroupedByInstitute, setResourcesGroupedByInstitute] =
     useState<ResourcesGroupedByKeyMap>({})
   const [resourcesGroupedByLanguage, setResourcesGroupedByLanguage] =
     useState<ResourcesGroupedByKeyMap>({})
+
+  // TODO: sort resources
+  const rawResources = useMemo(() => resources.resources, [resources])
+
+  // TODO: what happens with nested resources?
+  const filteredResources = useFuzzySearchList({
+    list: rawResources,
+    // TODO: only search on "resource" mode for now
+    queryText: viewResourcesGrouping === 'resource' ? filter : '',
+    getText: (item) => [
+      item.title,
+      item.institution,
+      item.description,
+      // ...item.languages.map((code) => languageCodeToNameHelper(code, languages)).toSorted(),
+    ],
+    // TODO: structure matches for better access?
+    mapResultItem: ({ item, score, matches }) => ({ item, matches, score }),
+  })
+  console.debug('filtered', filter, filteredResources)
 
   useEffect(() => {
     if (showGrouping) setViewResourcesGrouping(showGrouping)
@@ -513,9 +545,10 @@ function ResourceSelectionModal({
           )
         )
     }
-    return resources.resources.map((resource: Resource) => (
+    return filteredResources.map(({ item: resource, matches }) => (
       <ResourceSelector
         resource={resource}
+        highlighting={matches}
         shouldBeShown={shouldResourceBeShown}
         onSelectClick={handleResourceOnSelectClick}
         languageCodeToName={languageCodeToName}
@@ -582,7 +615,12 @@ function ResourceSelectionModal({
                   label="Resource filter query"
                   controlId="resource-view-options-filter"
                 >
-                  <Form.Control type="text" placeholder="Search for ..." />
+                  <Form.Control
+                    type="text"
+                    placeholder="Search for ..."
+                    value={filter}
+                    onChange={(event) => setFilter(event.target.value)}
+                  />
                 </FloatingLabel>
               </Col>
               <Col
