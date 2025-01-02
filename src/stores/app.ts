@@ -38,6 +38,7 @@ const appStore = createStore<AppStore>((set) => ({
   apiURL: import.meta.env.API_URL,
   validatorURL: import.meta.env.VALIDATOR_URL,
   showSearchResultLink: false,
+
   // actions
   setDeployPath: (path) =>
     set((state) => ({ deployPath: typeof path === 'function' ? path(state.deployPath) : path })),

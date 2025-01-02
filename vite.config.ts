@@ -73,7 +73,7 @@ export default defineConfig({
             '@tanstack/react-query',
             'axios',
             'zustand',
-            '@nozbe/microfuzz',
+            '@nozbe/microfuzz/react',
           ],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],

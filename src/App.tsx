@@ -7,7 +7,7 @@ import Search from '@/pages/Search'
 import About from '@/pages/About'
 import Help from '@/pages/Help'
 import Statistics from '@/pages/Statistics'
-import { useColorMode } from '@/utils/bs-color-mode'
+import useColorMode from '@/hooks/useColorMode'
 
 export interface AppProps {
   axios: AxiosInstance

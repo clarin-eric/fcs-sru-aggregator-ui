@@ -39,7 +39,7 @@ import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
 import fcsLogoUrl from '@images/logo-fcs.png'
 import fcsLogoDarkModeUrl from '@images/logo-fcs-dark.png'
 
-import './Search.css'
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types

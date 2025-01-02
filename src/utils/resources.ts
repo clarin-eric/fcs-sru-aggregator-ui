@@ -134,7 +134,7 @@ export function getInstitutions(resources: Resource[], resourceIDs: string[]) {
 
 // --------------------------------------------------------------------------
 
-function isResourceAvailableForQueryType(resource: Resource, queryTypeId: QueryTypeID) {
+export function isResourceAvailableForQueryType(resource: Resource, queryTypeId: QueryTypeID) {
   // check search capabilities (ignore version, just check caps)
   if (
     queryTypeId === 'fcs' &&
@@ -147,7 +147,7 @@ function isResourceAvailableForQueryType(resource: Resource, queryTypeId: QueryT
   return true
 }
 
-function isResourceAvailableForLanguage(resource: Resource, languageCode: string) {
+export function isResourceAvailableForLanguage(resource: Resource, languageCode: string) {
   // yes for any language
   if (languageCode === MULTIPLE_LANGUAGE_CODE) {
     return true

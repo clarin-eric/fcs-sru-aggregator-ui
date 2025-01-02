@@ -24,7 +24,7 @@ function setTheme(theme: string) {
  * Sets the theme for the document, adds event listener for color-scheme changes.
  * Should run once, and will stop the event listener at the lifecycle end.
  */
-export function useColorMode() {
+export default function useColorMode() {
   // run once, set theme, add event listener; stop event listener on dispose
   useEffect(() => {
     function updateTheme() {
