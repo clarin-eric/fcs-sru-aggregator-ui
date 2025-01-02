@@ -23,9 +23,17 @@ import './Statistics.css'
 import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
 import arrowClockwiseIcon from 'bootstrap-icons/icons/arrow-clockwise.svg?raw'
 
+// --------------------------------------------------------------------------
+// types
+
 export interface StatisticsProps {
   axios: AxiosInstance
 }
+
+type FilterField = 'institution' | 'endpoint' | 'resources'
+
+// --------------------------------------------------------------------------
+// component
 
 function EndpointStatistics({
   url,
@@ -130,6 +138,12 @@ function SectionStatistics({
   validatorUrl: string | null
 }) {
   const [filter, setFilter] = useState('')
+  const [filterFields, setFilterFields] = useState<FilterField[]>([
+    'institution',
+    'endpoint',
+    'resources',
+  ])
+  const [showIssuesOnly, setShowIssuesOnly] = useState(false)
 
   // make it flat
   const flatData = useMemo(
@@ -148,8 +162,20 @@ function SectionStatistics({
               },
             }))
         )
-        .flat(1),
-    [data]
+        .flat(1)
+        .filter(
+          showIssuesOnly
+            ? (item) =>
+                Object.keys(item.endpointInfo.diagnostics).length > 0 ||
+                Object.keys(item.endpointInfo.errors).length > 0
+            : () => true
+        ),
+    [data, showIssuesOnly]
+  )
+  const endpointsWithIssues = flatData.filter(
+    (item) =>
+      Object.keys(item.endpointInfo.diagnostics).length > 0 ||
+      Object.keys(item.endpointInfo.errors).length > 0
   )
 
   // filter by user query
@@ -157,7 +183,19 @@ function SectionStatistics({
     list: flatData,
     queryText: filter,
     // search on institution name, endpoint url and on each (root) resource name
-    getText: (item) => [item.institutionName, item.endpointUrl, ...item.endpointInfo.rootResources],
+    getText: (item) => {
+      const strings = []
+      if (filterFields.length === 0) {
+        strings.push(
+          ...[item.institutionName, item.endpointUrl, ...item.endpointInfo.rootResources]
+        )
+      } else {
+        if (filterFields.includes('institution')) strings.push(item.institutionName)
+        if (filterFields.includes('endpoint')) strings.push(item.endpointUrl)
+        if (filterFields.includes('resources')) strings.push(...item.endpointInfo.rootResources)
+      }
+      return strings
+    },
     mapResultItem: ({ item, score, matches }) => ({ item, matches, score }),
     // strategy: 'off'
   })
@@ -200,6 +238,18 @@ function SectionStatistics({
     }
   )
 
+  // --------------------------------------------------------------
+
+  function handleFilterOptionToggleChange(field: FilterField) {
+    if (filterFields.includes(field)) {
+      setFilterFields(filterFields.filter((f) => f !== field))
+    } else {
+      setFilterFields([...filterFields, field])
+    }
+  }
+
+  // --------------------------------------------------------------
+
   return (
     <Container className="d-grid gap-2 mt-3">
       <Alert variant="info" className="mb-0">
@@ -211,12 +261,52 @@ function SectionStatistics({
         </dl>
       </Alert>
       <Form onSubmit={(event) => event.preventDefault()}>
-        <Form.Control
-          placeholder="Type to filter statistics ..."
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-        />
+        <Row className="gy-2">
+          <Col lg={6} md={12}>
+            <Form.Control
+              placeholder="Type to filter statistics ..."
+              value={filter}
+              onChange={(event) => setFilter(event.target.value)}
+            />
+          </Col>
+          <Col id="filter-checkboxes" lg={6} md={12}>
+            <Form.Text className="me-2">Apply filter to:</Form.Text>
+            <Form.Check
+              type="checkbox"
+              checked={filterFields.includes('institution')}
+              onChange={() => handleFilterOptionToggleChange('institution')}
+              id="filter-institution-name"
+              label="Institution"
+            />
+            <Form.Check
+              type="checkbox"
+              checked={filterFields.includes('endpoint')}
+              onChange={() => handleFilterOptionToggleChange('endpoint')}
+              id="filter-endpoint-url"
+              label="Endpoint"
+            />
+            <Form.Check
+              type="checkbox"
+              checked={filterFields.includes('resources')}
+              onChange={() => handleFilterOptionToggleChange('resources')}
+              id="filter-resource-names"
+              label="Resources"
+            />
+          </Col>
+        </Row>
       </Form>
+      <Row>
+        <Col>
+          <Form.Check
+            type="checkbox"
+            checked={showIssuesOnly}
+            onChange={() => setShowIssuesOnly(!showIssuesOnly)}
+            label={`Only show endpoints with issues (errors or warnings, currently affects ${
+              endpointsWithIssues.length
+            } endpoint${endpointsWithIssues.length !== 1 ? 's' : ''})`}
+          />
+        </Col>
+      </Row>
       {Object.entries(institutionData).map(
         ([institutionName, { match: institutionMatch, endpoints: institutionEndpoints }]) => (
           <Card className="p-2" key={institutionName}>

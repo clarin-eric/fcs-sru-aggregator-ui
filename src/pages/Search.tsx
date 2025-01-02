@@ -52,6 +52,8 @@ function Search({ axios }: SearchProps) {
     useState<ResourceSelectionModalViewOptionGrouping>(DEFAULT_RESOURCE_VIEW_GROUPING)
   const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
 
+  const [hasSearch, setHasSearch] = useState(false)
+
   // user input search state
   const [searchLanguage, setSearchLanguage] = useState(MULTIPLE_LANGUAGE_CODE)
   const [searchLanguageFilter, setSearchLanguageFilter] = useState<LanguageFilterOptions>(
@@ -208,6 +210,8 @@ function Search({ axios }: SearchProps) {
     })
 
     setSearchQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
+
+    setHasSearch(true)
   }
 
   // ------------------------------------------------------------------------
@@ -219,22 +223,24 @@ function Search({ axios }: SearchProps) {
   return (
     <Container id="search">
       {/* logo image */}
-      <Row>
-        <Col className="text-center">
-          <picture>
-            <source srcSet={fcsLogoUrl} media="(prefers-color-scheme: light)" />
-            <source srcSet={fcsLogoDarkModeUrl} media="(prefers-color-scheme: dark)" />
-            <img src={fcsLogoUrl} className="logo" alt="FCS logo" />
-          </picture>
-        </Col>
-      </Row>
+      {!hasSearch && (
+        <Row>
+          <Col className="text-center">
+            <picture>
+              <source srcSet={fcsLogoUrl} media="(prefers-color-scheme: light)" />
+              <source srcSet={fcsLogoDarkModeUrl} media="(prefers-color-scheme: dark)" />
+              <img src={fcsLogoUrl} className="logo" alt="FCS logo" />
+            </picture>
+          </Col>
+        </Row>
+      )}
 
       {/* search input */}
-      <Row>
+      <Row className="mt-3">
         <Col>
           <search id="fcs-query">
             <Form noValidate onSubmit={handleSearchSubmit}>
-              <InputGroup size="lg" hasValidation>
+              <InputGroup size={!hasSearch ? 'lg' : undefined} hasValidation>
                 <Form.Control
                   placeholder="Elephant"
                   aria-label="search query input"
@@ -365,12 +371,27 @@ function Search({ axios }: SearchProps) {
               searchLanguage,
               searchLanguageFilter,
               queryType,
+              searchQuery,
               searchResourceIDs: searchResourceIDs.length,
               numberOfResults,
+              hasSearch,
             },
             undefined,
             2
           )}
+        </Col>
+      </Row>
+
+      {/* short intro text on initial visit/site load */}
+      <Row className="mt-3">
+        <Col>
+          <p>
+            To enable researchers to search for specific patterns across collections of data, CLARIN
+            offers a search engine that connects to the local data collections that are available in
+            the centres. The data itself stays at the centre where it is hosted – which is why the
+            underlying technique is called <em>federated content search</em>.
+          </p>
+          <p>TODO: some more brief intro text and maybe links for further information ...</p>
         </Col>
       </Row>
 

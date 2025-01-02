@@ -5,3 +5,17 @@
   height: unset;
   width: 0.9em;
 }
+
+/* fuzzy filter checkbox styling */
+
+#filter-checkboxes {
+  align-content: center;
+}
+
+#filter-checkboxes .form-check {
+  display: inline-block;
+}
+
+#filter-checkboxes .form-check+.form-check {
+  margin-left: 1rem;
+}

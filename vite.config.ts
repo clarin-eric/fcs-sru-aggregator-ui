@@ -97,7 +97,7 @@ export default defineConfig({
     visualizer({
       open: true,
       filename: 'bundle-visualization.html',
-      emitFile: false,
+      emitFile: false, // to place output into "dist/" folder on build
       gzipSize: true,
       brotliSize: true,
     }),
