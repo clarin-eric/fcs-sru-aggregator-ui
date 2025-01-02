@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import Alert from 'react-bootstrap/Alert'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
@@ -12,7 +11,8 @@ import Row from 'react-bootstrap/Row'
 import { useFuzzySearchList, Highlight } from '@nozbe/microfuzz/react'
 import type { FuzzyMatches } from '@nozbe/microfuzz'
 
-import Resources, { Resource } from '@/utils/resources'
+import { getResourceIDs, isResourceAvailableDueToSubResource, SORT_FNS } from '@/utils/resources'
+import { type Resource } from '@/utils/api'
 import {
   DEFAULT_RESOURCE_VIEW_GROUPING,
   DEFAULT_RESOURCE_VIEW_SORTING,
@@ -23,6 +23,7 @@ import {
   ResourceSelectionModalViewOptionVisibility,
   type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
+import useDebounce from '@/hooks/useDebounce'
 
 import './ResourceSelectionModal.css'
 
@@ -43,29 +44,58 @@ interface ResourcesGroupedByKeyMap {
 // --------------------------------------------------------------------------
 // component
 
+function DebouncedFuzzySearchInput({
+  disabled,
+  value,
+  onChange,
+  delay = 300,
+}: {
+  disabled: boolean
+  value?: string
+  onChange: (filter: string) => void
+  delay?: number
+}) {
+  const [filter, setFilter] = useState(value ?? '')
+  const deboundedFilter = useDebounce(filter, delay)
+
+  useEffect(() => {
+    onChange(deboundedFilter)
+  }, [onChange, deboundedFilter])
+
+  return (
+    <FloatingLabel label="Resource filter query" controlId="resource-view-options-filter">
+      <Form.Control
+        type="search"
+        placeholder="Search for ..."
+        value={filter}
+        onChange={(event) => setFilter(event.target.value)}
+        disabled={disabled}
+      />
+    </FloatingLabel>
+  )
+}
+
 function ResourceSelector({
   resource,
+  selectedResourceIDs,
   highlighting,
   shouldBeShown,
   onSelectClick,
   languageCodeToName,
 }: {
   resource: Resource
+  selectedResourceIDs: string[]
   highlighting?: FuzzyMatches
   shouldBeShown: ((resource: Resource) => boolean) | boolean
   onSelectClick: (resource: Resource, selected: boolean) => void
   languageCodeToName: (code: string) => string
 }) {
   const [expanded, setExpanded] = useState(false)
-  const [selected, setSelected] = useState(false)
   const [showSubResources, setShowSubResources] = useState(false)
 
-  useEffect(() => {
-    // console.log('resource.selected', resource.selected, resource.id)
-    if (resource.selected !== undefined) setSelected(resource.selected)
-  }, [resource.selected])
-
   if (highlighting === undefined) highlighting = [null, null, null]
+
+  const isSelected = selectedResourceIDs.includes(resource.id)
 
   // --------------------------------------------------------------
 
@@ -83,10 +113,7 @@ function ResourceSelector({
   }
 
   function handleToggleSelectionClick() {
-    console.log('selected', selected)
-
-    onSelectClick(resource, !selected)
-    // setSelected((isSelected) => !isSelected)
+    onSelectClick(resource, !isSelected)
   }
 
   function handleToggleShowSubResourcesClick() {
@@ -104,7 +131,7 @@ function ResourceSelector({
             aria-label={`Checkbox for resource: ${resource.title}`}
           >
             <Form.Check.Input
-              checked={selected}
+              checked={isSelected}
               onChange={() => {}} // to silence react warning, use handler from parent's parent
             />
           </Form.Check>
@@ -170,6 +197,7 @@ function ResourceSelector({
           {resource.subResources.map((subResource: Resource) => (
             <ResourceSelector
               resource={subResource}
+              selectedResourceIDs={selectedResourceIDs}
               shouldBeShown={shouldBeShown}
               onSelectClick={onSelectClick}
               languageCodeToName={languageCodeToName}
@@ -185,6 +213,7 @@ function ResourceSelector({
 function GroupedResources({
   title,
   resources,
+  selectedResourceIDs,
   expanded: expandedProp,
   shouldBeShown,
   onSelectClick,
@@ -195,6 +224,7 @@ function GroupedResources({
 }: {
   title: React.ReactNode
   resources: Resource[]
+  selectedResourceIDs: string[]
   expanded: boolean
   shouldBeShown: ((resource: Resource) => boolean) | boolean
   onSelectClick: (resource: Resource, selected: boolean) => void
@@ -210,15 +240,38 @@ function GroupedResources({
     setExpanded(expandedProp)
   }, [expandedProp])
 
-  // TODO: hide if no visible resources
+  // TODO: hide if no visible resources?
+
+  // --------------------------------------------------------------
+  // event handlers
 
   function handleToggleExpandButton() {
     setExpanded((isExpanded) => !isExpanded)
     onExpandToggleClick(!expanded) // TODO: how fast is this update above?
   }
 
+  // --------------------------------------------------------------
+  // rendering
+
   function renderResourceCounts() {
-    return <>{resources.length} Resources</>
+    const numResources = getResourceIDs(resources).length
+    const numResourcesRoot = resources.length
+    const numResourcesSelected = getResourceIDs(resources).filter((rid) =>
+      selectedResourceIDs.includes(rid)
+    ).length
+
+    return (
+      <>
+        {numResourcesRoot}{' '}
+        {numResources !== numResourcesRoot && <>(+ {numResources - numResourcesRoot} nested)</>}{' '}
+        Resource{numResources !== 1 ? 's' : ''}
+        {numResourcesSelected !== numResources && (
+          <>
+            , {numResourcesSelected} Resource{numResourcesSelected !== 1 ? 's' : ''} selected
+          </>
+        )}
+      </>
+    )
   }
 
   return (
@@ -257,6 +310,7 @@ function GroupedResources({
           {resources.map((resource: Resource) => (
             <ResourceSelector
               resource={resource}
+              selectedResourceIDs={selectedResourceIDs}
               shouldBeShown={shouldBeShown}
               onSelectClick={onSelectClick}
               languageCodeToName={languageCodeToName}
@@ -274,14 +328,24 @@ function ResourceSelectionModal({
   showGrouping,
   resources,
   languages,
+  availableResources,
+  selectedResources,
   onModalClose,
 }: {
   show: boolean
   showGrouping?: ResourceSelectionModalViewOptionGrouping
-  resources: Resources
+  resources: Resource[]
   languages?: LanguageCode2NameMap
+  availableResources: string[]
+  selectedResources: string[]
   onModalClose: (result: { resourceIDs: string[]; action: string }) => void
 }) {
+  // resources
+  const [selectedResourceIDs, setSelectedResourceIDs] = useState(
+    selectedResources || availableResources
+  )
+
+  // view options
   const [viewResourcesVisibility, setViewResourcesVisibility] =
     useState<ResourceSelectionModalViewOptionVisibility>(DEFAULT_RESOURCE_VIEW_VISIBILITY)
   const [viewResourcesGrouping, setViewResourcesGrouping] =
@@ -289,20 +353,32 @@ function ResourceSelectionModal({
   const [viewResourcesSorting, setViewResourcesSorting] =
     useState<ResourceSelectionModalViewOptionSorting>(DEFAULT_RESOURCE_VIEW_SORTING)
 
+  // fuzzy filter
   const [filter, setFilter] = useState('')
 
+  // TODO: grouping
   const [resourcesGroupedByInstitute, setResourcesGroupedByInstitute] =
     useState<ResourcesGroupedByKeyMap>({})
   const [resourcesGroupedByLanguage, setResourcesGroupedByLanguage] =
     useState<ResourcesGroupedByKeyMap>({})
 
-  // TODO: sort resources
-  const rawResources = useMemo(() => resources.resources, [resources])
+  useEffect(() => {
+    if (showGrouping) setViewResourcesGrouping(showGrouping)
+    // NOTE: remove `show` dependency to let modal keep last state when re-opened with same arguments
+  }, [show, showGrouping])
 
-  // TODO: what happens with nested resources?
+  // to update modal on open
+  useEffect(() => setSelectedResourceIDs(selectedResources), [selectedResources])
+
+  // sort resources
+  const sortedResources = resources
+    .filter((resource) => availableResources.includes(resource.id))
+    .toSorted(SORT_FNS[viewResourcesSorting])
+
+  // TODO: what happens with nested resources?, we will only use root resources for now
   const filteredResources = useFuzzySearchList({
-    list: rawResources,
-    // TODO: only search on "resource" mode for now
+    list: sortedResources,
+    // TODO: only search in "resource" mode for now
     queryText: viewResourcesGrouping === 'resource' ? filter : '',
     getText: (item) => [
       item.title,
@@ -313,20 +389,16 @@ function ResourceSelectionModal({
     // TODO: structure matches for better access?
     mapResultItem: ({ item, score, matches }) => ({ item, matches, score }),
   })
-  console.debug('filtered', filter, filteredResources)
+  // console.debug('filtered resources', filter, filteredResources)
 
-  useEffect(() => {
-    if (showGrouping) setViewResourcesGrouping(showGrouping)
-    // NOTE: remove `show` dependency to let modal keep last state when re-opened with same arguments
-  }, [show, showGrouping])
-
+  // TODO: memo with state required?
   useMemo(() => {
     console.debug('recompute groupings')
 
     const instituteToResourcesMap: ResourcesGroupedByKeyMap = {}
     const instituteToLanguagesMap: ResourcesGroupedByKeyMap = {}
     // resources.recurse((resource: Resource) => {}) // TODO: subresources with different grouping-key than parent?
-    resources.resources.forEach((resource: Resource) => {
+    resources.forEach((resource: Resource) => {
       const institution = resource.institution
       if (!Object.getOwnPropertyNames(instituteToResourcesMap).includes(institution)) {
         instituteToResourcesMap[institution] = {
@@ -360,23 +432,15 @@ function ResourceSelectionModal({
   if (!resources) return null
 
   // --------------------------------------------------------------
-  // state?
 
-  // TODO: keep or remove? (counters are not intuitive enough)
   const resourcesInfo = {
-    selected: 0,
-    selectedIgnoreVisible: 0,
-    selectable: 0, // how many available to be selected
-    visible: 0, // TODO: should change by language/search ...
-    available: 0, // how many resources from API
+    total: getResourceIDs(resources).length, // how many resources from API
+    totalRoot: resources.length, // how many resources from API (root only)
+    available: availableResources.length, // how many selectable due to other filters
+    selected: selectedResourceIDs.length, // how many selected
+    visible: getResourceIDs(filteredResources.map((annotResource) => annotResource.item)).length, // how many visible (due to fuzzy filtering)
+    visibleRoot: filteredResources.length, // how many visible (due to fuzzy filtering), root only
   }
-  resources.recurse((resource: Resource) => {
-    resourcesInfo.available += 1
-    if (resource.visible) resourcesInfo.visible += 1
-    if (resource.visible) resourcesInfo.selectable += 1
-    if (resource.selected) resourcesInfo.selectedIgnoreVisible += 1
-    if (resource.visible && resource.selected) resourcesInfo.selected += 1
-  })
 
   // --------------------------------------------------------------
   // helper
@@ -385,74 +449,65 @@ function ResourceSelectionModal({
     return languageCodeToNameHelper(code, languages)
   }
 
+  function changeSelectedResourceIDs(resourceIDs: string[], isSelected: boolean) {
+    const nextResourceIDs = selectedResourceIDs.filter((rid) => !resourceIDs.includes(rid))
+    if (isSelected) {
+      setSelectedResourceIDs([...nextResourceIDs, ...resourceIDs])
+    } else {
+      setSelectedResourceIDs(nextResourceIDs)
+    }
+  }
+
   // --------------------------------------------------------------
   // event handlers
 
   function handleClose(action: string) {
-    onModalClose({ resourceIDs: [], action: action })
+    onModalClose({
+      resourceIDs: selectedResourceIDs,
+      action: action,
+    })
   }
 
   function handleViewOptionsVisibilityChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    console.log('visibility#onchange', viewResourcesVisibility, '=>', event.target.value)
+    // console.debug('visibility#onchange', viewResourcesVisibility, '=>', event.target.value)
     setViewResourcesVisibility(event.target.value as ResourceSelectionModalViewOptionVisibility)
-    // resources.update()
   }
 
   function handleViewOptionsGroupingChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    console.debug('grouping#onchange', viewResourcesGrouping, '=>', event.target.value)
+    // console.debug('grouping#onchange', viewResourcesGrouping, '=>', event.target.value)
     setViewResourcesGrouping(event.target.value as ResourceSelectionModalViewOptionGrouping)
   }
 
   function handleViewOptionsSortingChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    console.log('sorting#onchange', viewResourcesSorting, '=>', event.target.value)
+    // console.debug('sorting#onchange', viewResourcesSorting, '=>', event.target.value)
     setViewResourcesSorting(event.target.value as ResourceSelectionModalViewOptionSorting)
   }
 
   function handleSelectAllClick() {
-    resources.recurse((resource: Resource) => {
-      if (resource.visible) {
-        resource.selected = true
-      }
-    })
-    resources.update()
+    // select all available resources
+    setSelectedResourceIDs(availableResources)
   }
 
   function handleDeselectAllClick() {
-    resources.recurse((resource: Resource) => {
-      if (resource.visible) {
-        resource.selected = false
-      }
-    })
-    resources.update()
+    // deselect all resources
+    setSelectedResourceIDs([])
   }
 
   function handleSelectVisibleClick() {
-    console.debug('handleSelectVisibleClick')
+    // select only visible resources (i.e. resources left after fuzzy filtering)
+    setSelectedResourceIDs(filteredResources.map((annotResource) => annotResource.item.id))
   }
 
   function handleResourceOnSelectClick(resource: Resource, selected: boolean) {
-    resources.recurseResource(resource, (r: Resource) => {
-      r.selected = selected
-    })
-    resources.update()
+    changeSelectedResourceIDs(getResourceIDs([resource]), selected)
   }
 
   function handleGroupedResourcesOnSelectAllClick(resourcesInGroup: Resource[]) {
-    resources.recurseResources(resourcesInGroup, (resource: Resource) => {
-      if (resource.visible) {
-        resource.selected = true
-      }
-    })
-    resources.update()
+    changeSelectedResourceIDs(getResourceIDs(resourcesInGroup), true)
   }
 
-  function handleGroupedResourcesOnDeelectAllClick(resourcesInGroup: Resource[]) {
-    resources.recurseResources(resourcesInGroup, (resource: Resource) => {
-      if (resource.visible) {
-        resource.selected = false
-      }
-    })
-    resources.update()
+  function handleGroupedResourcesOnDeselectAllClick(resourcesInGroup: Resource[]) {
+    changeSelectedResourceIDs(getResourceIDs(resourcesInGroup), false)
   }
 
   // --------------------------------------------------------------
@@ -460,15 +515,17 @@ function ResourceSelectionModal({
 
   function shouldResourceBeShown(resource: Resource) {
     // invisibile resources should not be shown
-    if (!resource.visible) return false
+    if (!availableResources.includes(resource.id)) return false
 
     // check view mode
     if (viewResourcesVisibility === 'selected') {
       // hide all not-selected resources
       if (
-        !resources.isResourceVisibilityRequiredForChildren(
-          resource,
-          (resource: Resource) => !!resource.selected
+        // resource self is not selected
+        !selectedResourceIDs.includes(resource.id) &&
+        // AND none of its children are selected
+        !isResourceAvailableDueToSubResource(resource, (subResource: Resource) =>
+          selectedResourceIDs.includes(subResource.id)
         )
       ) {
         return false
@@ -494,6 +551,7 @@ function ResourceSelectionModal({
                 </>
               }
               resources={resources}
+              selectedResourceIDs={selectedResourceIDs}
               expanded={expanded}
               shouldBeShown={shouldResourceBeShown}
               onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
@@ -507,7 +565,7 @@ function ResourceSelectionModal({
                   },
                 })
               }}
-              onDeselectAllClick={handleGroupedResourcesOnDeelectAllClick}
+              onDeselectAllClick={handleGroupedResourcesOnDeselectAllClick}
               onSelectClick={handleResourceOnSelectClick}
               languageCodeToName={languageCodeToName}
               key={institution}
@@ -531,13 +589,14 @@ function ResourceSelectionModal({
                 </>
               }
               resources={resources}
+              selectedResourceIDs={selectedResourceIDs}
               expanded={expanded}
               shouldBeShown={shouldResourceBeShown}
               onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
               onExpandToggleClick={(expanded) =>
                 (resourcesGroupedByLanguage[language].expanded = expanded)
               }
-              onDeselectAllClick={handleGroupedResourcesOnDeelectAllClick}
+              onDeselectAllClick={handleGroupedResourcesOnDeselectAllClick}
               onSelectClick={handleResourceOnSelectClick}
               languageCodeToName={languageCodeToName}
               key={language}
@@ -548,6 +607,7 @@ function ResourceSelectionModal({
     return filteredResources.map(({ item: resource, matches }) => (
       <ResourceSelector
         resource={resource}
+        selectedResourceIDs={selectedResourceIDs}
         highlighting={matches}
         shouldBeShown={shouldResourceBeShown}
         onSelectClick={handleResourceOnSelectClick}
@@ -602,6 +662,7 @@ function ResourceSelectionModal({
                   <Form.Select
                     value={viewResourcesSorting}
                     onChange={handleViewOptionsSortingChange}
+                    disabled={viewResourcesGrouping !== 'resource' || filter.trim() !== ''}
                   >
                     <option value="title-up">Title (up)</option>
                     <option value="title-down">Title (down)</option>
@@ -611,17 +672,11 @@ function ResourceSelectionModal({
                 </FloatingLabel>
               </Col>
               <Col md={3} sm={12}>
-                <FloatingLabel
-                  label="Resource filter query"
-                  controlId="resource-view-options-filter"
-                >
-                  <Form.Control
-                    type="text"
-                    placeholder="Search for ..."
-                    value={filter}
-                    onChange={(event) => setFilter(event.target.value)}
-                  />
-                </FloatingLabel>
+                <DebouncedFuzzySearchInput
+                  disabled={viewResourcesGrouping !== 'resource'}
+                  value={filter}
+                  onChange={(value) => setFilter(value)}
+                />
               </Col>
               <Col
                 md={3}
@@ -629,11 +684,9 @@ function ResourceSelectionModal({
                 className="gap-1 d-inline-flex column-gap-2 justify-content-evenly"
               >
                 <Button onClick={handleSelectAllClick}>Select all</Button>
-                {/* TODO: what did this one do? */}
                 <Button
                   onClick={handleSelectVisibleClick}
-                  disabled={viewResourcesVisibility !== 'all'}
-                  className="d-none"
+                  disabled={viewResourcesVisibility !== 'all' || filter.trim() === ''}
                 >
                   Select visible
                 </Button>
@@ -643,11 +696,12 @@ function ResourceSelectionModal({
           </Container>
         </Form>
         {/* info */}
-        <Alert variant="info" className="m-4 mb-0">
-          Selected {resourcesInfo.selected} ({resourcesInfo.selectedIgnoreVisible}) /{' '}
-          {resourcesInfo.selectable} resources. {resourcesInfo.visible} resources are shown.{' '}
-          {resourcesInfo.available} resources are available.
-        </Alert>
+        <p className="m-4 mb-0">
+          {resourcesInfo.selected} / {resourcesInfo.visible}{' '}
+          {resourcesInfo.available !== resourcesInfo.visible && <>({resourcesInfo.available})</>}{' '}
+          resources selected.
+          {/* {JSON.stringify(resourcesInfo, undefined, 2)} */}
+        </p>
         {/* resources */}
         <Container className="px-3 pt-3">{renderResources()}</Container>
       </Modal.Body>

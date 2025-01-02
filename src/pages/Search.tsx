@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
@@ -11,8 +11,13 @@ import { type AxiosInstance } from 'axios'
 
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
-import { getInitData } from '@/utils/api'
-import Resources, { type Resource } from '@/utils/resources'
+import { getInitData, type Resource } from '@/utils/api'
+import {
+  fromApi,
+  getAvailableResourceIDs,
+  getInstitutions,
+  getResourceIDs,
+} from '@/utils/resources'
 import {
   numberOfResultsOptions,
   queryTypeMap,
@@ -60,6 +65,9 @@ function Search({ axios }: SearchProps) {
     DEFAULT_SEARCH_LANGUAGE_FILTER
   )
   const [queryType, setQueryType] = useState<QueryTypeID>('cql')
+  // resource IDs the user can select (based on pre-filtering and search language selection)
+  const [validSearchResourceIDs, setValidSearchResourceIDs] = useState<string[]>([])
+  // selected resource IDs for search
   const [searchResourceIDs, setSearchResourceIDs] = useState<string[]>([])
   const [numberOfResults, setNumberOfResults] = useState(numberOfResultsOptions[0])
 
@@ -70,9 +78,9 @@ function Search({ axios }: SearchProps) {
   } | null>(null)
 
   // REST API state
-  const [resources, setResources] = useState<Resources>(new Resources([], () => {}))
+  const [resources, setResources] = useState<Resource[]>([])
   const [languages, setLanguages] = useState<LanguageCode2NameMap>()
-  const [weblichtLanguages, setWeblichtLanguages] = useState<string[]>()
+  const [, setWeblichtLanguages] = useState<string[]>()
 
   // ------------------------------------------------------------------------
   // initialization
@@ -82,51 +90,50 @@ function Search({ axios }: SearchProps) {
     queryFn: getInitData.bind(null, axios),
   })
 
+  const getAvailableResourceIDsCallback = useCallback(
+    (resources: Resource[]) => {
+      const availableResourceIDs = getAvailableResourceIDs(
+        resources,
+        queryType,
+        searchLanguageFilter === 'byGuess' ? MULTIPLE_LANGUAGE_CODE : searchLanguage
+      )
+      return availableResourceIDs
+    },
+    [queryType, searchLanguage, searchLanguageFilter]
+  )
+
   useEffect(() => {
     if (!data) return
 
     // do some initialization (based on `data`)
-    const updateResourcesFn = (resources: Resources) => {
-      // NOTE: trigger for updating resources on nested change
-      // identity ob resources needs to change! --> clone object
-      setResources(new Resources(resources.resources, updateResourcesFn))
-    }
-    const resources = Resources.fromApi(data.resources, updateResourcesFn)
-    resources.recurse((resource: Resource) => {
-      if (resource.visible) resource.selected = true
-      // resource.selected |= resource.visible
-    })
-
-    // TODO: evaluate xAggregationContext
+    const newResources = fromApi(data.resources)
 
     // set state
     setLanguages(data.languages)
     setWeblichtLanguages(data.weblichtLanguages)
-    setResources(resources)
-    setSearchResourceIDs(resources.getSelectedIds())
+    setResources(newResources)
+
+    // initialization (hack) to select all resources
+    setSearchResourceIDs(getResourceIDs(newResources))
   }, [data])
 
   // ------------------------------------------------------------------------
   // data updates/computation
 
   useEffect(() => {
+    const availableResourceIDs = getAvailableResourceIDsCallback(resources)
     console.debug(
-      'Update resource visibility',
-      { queryType, searchLanguage, searchLanguageFilter },
-      resources
+      'Update resource availability',
+      // { queryType, searchLanguage, searchLanguageFilter },
+      availableResourceIDs
     )
-    resources.setVisibility(
-      queryType,
-      searchLanguageFilter === 'byGuess' ? MULTIPLE_LANGUAGE_CODE : searchLanguage
-    )
-    // resources.update() // TODO: will cause infinite callbacks
-    setSearchResourceIDs(resources.getSelectedIds())
-  }, [resources, queryType, searchLanguage, searchLanguageFilter])
+    // TODO: evaluate xAggregationContext
+    setValidSearchResourceIDs(availableResourceIDs)
 
-  // TODO: debugging only until we find a use
-  useEffect(() => {
-    console.log('weblichtLanguages', weblichtLanguages)
-  }, [weblichtLanguages])
+    setSearchResourceIDs((resourceIDs) =>
+      resourceIDs.filter((id) => availableResourceIDs.includes(id))
+    )
+  }, [resources, getAvailableResourceIDsCallback])
 
   // ------------------------------------------------------------------------
 
@@ -134,7 +141,7 @@ function Search({ axios }: SearchProps) {
   const isInputDisabled = isLoading || isError
   // console.debug('isInputDisabled', isInputDisabled, 'isLoading', isLoading, 'isError', isError)
 
-  const numberOfSelectedInstitutions = resources.getSelectedInstitutions().length
+  const numberOfSelectedInstitutions = getInstitutions(resources, searchResourceIDs).length
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -161,7 +168,7 @@ function Search({ axios }: SearchProps) {
     filter: LanguageFilterOptions
     action: LanguageModelCloseActions
   }) {
-    console.log('onModalClose', { language, filter, action })
+    console.debug('onModalClose', { language, filter, action })
     // first close the modal
     setShowLanguageSelectionModal(false)
     // if 'abort' do nothing
@@ -178,19 +185,20 @@ function Search({ axios }: SearchProps) {
     resourceIDs: string[]
     action: string
   }) {
+    console.debug('onModalClose', { resourceIDs, action })
     // first close the modal
     setShowResourceSelectionModal(false)
     // if 'abort' do nothing
     if (action === 'abort') return
     // process user inputs
-    // TODO:
-    console.log('resourceIDs', resourceIDs)
+    setSearchResourceIDs(resourceIDs)
   }
 
   function handleSearchQueryChange(event: React.ChangeEvent<HTMLInputElement>) {
     // TODO: maybe input validation / syntax highlighting etc.
     setSearchQuery(event.target.value)
 
+    // TODO: demo
     setSearchQueryError(
       event.target.value.length % 2 === 1
         ? { msg: 'even number of characters', details: null }
@@ -219,6 +227,17 @@ function Search({ axios }: SearchProps) {
 
   // ------------------------------------------------------------------------
   // UI
+
+  function renderSelectedResourcesMsg() {
+    const selected = searchResourceIDs.length
+    if (selected === 1) {
+      return '1 selected resource'
+    }
+    if (resources.length === selected || validSearchResourceIDs.length === selected) {
+      return `All available resources (${selected})`
+    }
+    return `${selected} selected resources`
+  }
 
   return (
     <Container id="search">
@@ -309,7 +328,7 @@ function Search({ axios }: SearchProps) {
                     setShowResourceSelectionModal(true)
                   }}
                 >
-                  {resources.getSelectedMessage()}{' '}
+                  {renderSelectedResourcesMsg()}{' '}
                   <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
                 </Button>{' '}
                 from{' '}
@@ -405,6 +424,8 @@ function Search({ axios }: SearchProps) {
       <ResourceSelectionModal
         resources={resources}
         languages={languages}
+        availableResources={validSearchResourceIDs}
+        selectedResources={searchResourceIDs}
         show={showResourceSelectionModal}
         showGrouping={showResourceSelectionModalGrouping}
         onModalClose={handleChangeResourceSelection}

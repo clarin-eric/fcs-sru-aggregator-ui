@@ -1,264 +1,136 @@
-import { type Resource as RawResource } from '@/utils/api'
-import { MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
-import { QueryTypeID } from './constants'
-
-export interface Resource extends RawResource {
-  // override with new type?
-  subResources: Resource[]
-  // will be populated on initialization of Resources
-  /** visible in resources view */
-  visible: boolean
-  /** selected in resources view */
-  selected: boolean
-  /** expanded subresources in resources view */
-  expanded: boolean
-  /** used for ordering search results in resource view */
-  priority: number // TODO: required?
-  /** original order, for stable sort */
-  index: number // TODO: required?
-}
-
-type UpdateFn = (resources: Resources) => void
+import { type Resource } from '@/utils/api'
+import {
+  MULTIPLE_LANGUAGE_CODE,
+  type ResourceSelectionModalViewOptionSorting,
+} from '@/utils/search'
+import { QueryTypeID } from '@/utils/constants'
 
 // --------------------------------------------------------------------------
 
-class Resources {
-  resources: Resource[]
-  idToResource: { [id: string]: Resource }
-  update: () => void
-
-  constructor(resources: Resource[], updateFn: UpdateFn) {
-    this.resources = resources
-    this.update = () => updateFn(this)
-
-    // make a fast lookup table: resource.id -> resource
-    this.idToResource = {}
-    const makeIdMapFn = (resource: Resource) => {
-      this.idToResource[resource.id] = resource
-      resource.subResources.forEach(makeIdMapFn)
+export function fromApi(resources: Resource[]) {
+  const prepareFn = (resource: Resource): Resource => {
+    return {
+      // copy original
+      ...resource,
+      // override and apply to sub-resources
+      subResources: resource.subResources.map(prepareFn),
     }
-    this.resources.forEach(makeIdMapFn)
   }
+  const convertedResources = resources.map(prepareFn)
 
-  static fromApi(resources: RawResource[], updateFn: UpdateFn) {
-    const prepareFn = (resource: RawResource, index: number): Resource => {
-      return {
-        // copy original
-        ...resource,
-        // override and apply to sub-resources
-        subResources: resource.subResources.map(prepareFn),
-        // the new state fields
-        visible: true,
-        selected: false,
-        expanded: false,
-        priority: 1,
-        index: index, // default, will be updatet later in #prepare()
-      }
+  const sortFn = function (x: Resource, y: Resource) {
+    const r = x.institution.localeCompare(y.institution)
+    if (r !== 0) {
+      return r
     }
-
-    const convertedResources = new Resources(resources.map(prepareFn), updateFn)
-
-    convertedResources.prepare()
-
-    return convertedResources
+    return x.title.toLowerCase().localeCompare(y.title.toLowerCase())
   }
+  recurseResources(convertedResources, (resource: Resource) => {
+    resource.subResources.sort(sortFn)
+  })
+  convertedResources.sort(sortFn)
 
-  prepare() {
-    const sortFn = function (x: Resource, y: Resource) {
-      const r = x.institution.localeCompare(y.institution)
-      if (r !== 0) {
-        return r
+  return convertedResources
+}
+
+export function setAggregationContext(
+  resources: Resource[],
+  endpoints2handles: { [key: string]: string[] }
+) {
+  const selectedResourceIDs: string[] = []
+  const handlesNotFound: string[] = []
+  const resourcesToSelect: Resource[] = []
+
+  Object.entries(endpoints2handles).forEach(([endpoint, handles]) => {
+    console.debug('setAggregationContext:', { endpoint, handles })
+    handles.forEach((handle: string) => {
+      let found = false
+      recurseResources(resources, (resource: Resource) => {
+        if (resource.handle === handle) {
+          found = true
+          resourcesToSelect.push(resource)
+        }
+      })
+      if (!found) {
+        console.warn('Handle not found in resources', handle)
+        handlesNotFound.push(handle)
       }
-      return x.title.toLowerCase().localeCompare(y.title.toLowerCase())
-    }
-
-    this.recurse((resource: Resource) => {
-      resource.subResources.sort(sortFn)
     })
-    this.resources.sort(sortFn)
+  })
 
-    this.recurse((resource: Resource, index: number) => {
-      resource.index = index // original order, used for stable sort
-    })
-  }
+  recurseResources(resourcesToSelect, (resource: Resource) => {
+    selectedResourceIDs.push(resource.id)
+  })
 
-  recurseResources(
-    resources: Resource[],
-    fn:
-      | ((resource: Resource, index: number) => boolean | void)
-      | ((resource: Resource) => boolean | void)
-  ) {
-    const recfn = (resource: Resource, index: number) => {
-      if (false === fn(resource, index)) {
-        // no recursion
-      } else {
-        resource.subResources.forEach(recfn)
-      }
-    }
-    resources.forEach(recfn)
-  }
+  return { selected: selectedResourceIDs, unavailable: handlesNotFound }
+}
 
-  recurseResource(resource: Resource, fn: (resource: Resource) => boolean | void) {
-    if (false === fn(resource)) {
+// --------------------------------------------------------------------------
+
+export function recurseResources(
+  resources: Resource[],
+  fn:
+    | ((resource: Resource, index: number) => boolean | void)
+    | ((resource: Resource) => boolean | void)
+) {
+  const recfn = (resource: Resource, index: number) => {
+    if (false === fn(resource, index)) {
       // no recursion
     } else {
-      this.recurseResources(resource.subResources, fn)
+      resource.subResources.forEach(recfn)
     }
   }
+  resources.forEach(recfn)
+}
 
-  recurse(
-    fn:
-      | ((resource: Resource, index: number) => boolean | void)
-      | ((resource: Resource) => boolean | void)
-  ) {
-    this.recurseResources(this.resources, fn)
-  }
-
-  getById(id: string): Resource | undefined {
-    return this.idToResource[id]
-  }
-
-  getLanguageCodes() {
-    const languages: { [key: string]: boolean } = {}
-    this.recurse(function (resource: Resource) {
-      resource.languages.forEach(function (language) {
-        languages[language] = true
-      })
-      return true
-    })
-    return languages
-  }
-
-  isResourceVisibilityRequiredForChildren(
-    resource: Resource,
-    checkFn: ((resource: Resource) => boolean) | undefined = undefined
-  ): boolean {
-    // if self is visible then skip
-    if (typeof checkFn === 'function') {
-      if (checkFn(resource)) {
-        return true
-      }
-    }
-    // else if (resource.visible) return true
-
-    // check all descendants
-    let shouldBeVisible = false
-    this.recurseResources(resource.subResources, (descendant: Resource) => {
-      if (descendant.visible) {
-        if (typeof checkFn === 'function') {
-          if (checkFn(descendant)) {
-            shouldBeVisible = true
-            return false
-          }
-        } else {
-          shouldBeVisible = true
-          return false // stop recursing
-        }
-      }
-    })
-
-    return shouldBeVisible
-  }
-
-  setVisibility(queryTypeId: QueryTypeID, languageCode: string) {
-    // top level
-    this.resources.forEach((resource: Resource) => {
-      resource.visible = isResourceVisible(resource, queryTypeId, languageCode)
-      this.recurseResources(resource.subResources, (c: Resource) => {
-        c.visible = resource.visible
-      })
-    })
-  }
-
-  setAggregationContext(endpoints2handles: { [key: string]: string[] }) {
-    const selectSubTree = (select: boolean, resource: Resource) => {
-      resource.selected = select
-      this.recurseResources(resource.subResources, (c: Resource) => {
-        c.selected = resource.selected
-      })
-    }
-
-    this.resources.forEach(selectSubTree.bind(this, false)) // TODO: check this with arrow function
-
-    const handlesNotFound: string[] = []
-    const resourcesToSelect: Resource[] = []
-    Object.entries(endpoints2handles).forEach((endp) => {
-      const endpoint = endp[0]
-      const handles = endp[1]
-      console.debug('setAggregationContext: endpoint', endpoint)
-      console.debug('setAggregationContext: handles', handles)
-      handles.forEach((handle: string) => {
-        let found = false
-        this.recurse((resource: Resource) => {
-          if (resource.handle === handle) {
-            found = true
-            resourcesToSelect.push(resource)
-          }
-        })
-        if (!found) {
-          console.warn('Handle not found in resources', handle)
-          handlesNotFound.push(handle)
-        }
-      })
-    })
-
-    resourcesToSelect.forEach(selectSubTree.bind(this, true))
-    return { selected: resourcesToSelect, unavailable: handlesNotFound }
-  }
-
-  getAvailableIds() {
-    const ids: string[] = []
-    this.recurse(function (resource: Resource) {
-      if (resource.visible) {
-        ids.push(resource.id)
-      }
-      return true
-    })
-    return ids
-  }
-
-  getSelectedIds() {
-    const ids: string[] = []
-    this.recurse(function (resource: Resource) {
-      if (resource.visible && resource.selected) {
-        ids.push(resource.id)
-        // return false // top-most resource in tree, don't delve deeper
-        // TODO: But subresources are also selectable on their own?...
-      }
-      return true
-    })
-
-    // console.debug('ids: ', ids.length, { ids: ids })
-    return ids
-  }
-
-  getSelectedInstitutions() {
-    const institutions = new Set<string>()
-    this.recurse(function (resource: Resource) {
-      if (resource.visible && resource.selected) {
-        institutions.add(resource.institution)
-        // return false // top-most resource in tree, don't delve deeper
-      }
-      return true
-    })
-
-    // console.debug('institutions: ', institutions.size, { institutions: institutions })
-    return Array.from(institutions)
-  }
-
-  getSelectedMessage() {
-    const selected = this.getSelectedIds().length
-    if (selected === 1) {
-      return '1 selected resource'
-    }
-    if (this.resources.length === selected || this.getAvailableIds().length === selected) {
-      return `All available resources (${selected})`
-    }
-    return `${selected} selected resources`
+export function recurseResource(resource: Resource, fn: (resource: Resource) => boolean | void) {
+  if (false === fn(resource)) {
+    // no recursion
+  } else {
+    recurseResources(resource.subResources, fn)
   }
 }
 
-export default Resources
+export function getResourceIDs(resources: Resource[]) {
+  const resourceIDs: string[] = []
+  recurseResources(resources, (resource: Resource) => {
+    resourceIDs.push(resource.id)
+  })
+  return resourceIDs
+}
+
+export function getAvailableResourceIDs(
+  resources: Resource[],
+  queryTypeId: QueryTypeID,
+  languageCode: string
+) {
+  const resourceIDs: string[] = []
+  const checkFn = (resource: Resource) =>
+    isResourceAvailableDueToSubResource(resource, checkFn) ||
+    isResourceAvailable(resource, queryTypeId, languageCode)
+
+  recurseResources(resources, (resource: Resource) => {
+    if (checkFn(resource)) {
+      resourceIDs.push(resource.id)
+    }
+  })
+  return resourceIDs
+}
+
+export function getInstitutions(resources: Resource[], resourceIDs: string[]) {
+  const institutions = new Set<string>()
+
+  recurseResources(resources, (resource: Resource) => {
+    if (resourceIDs.includes(resource.id)) {
+      institutions.add(resource.institution)
+      // return false // top-most resource in tree, don't delve deeper
+    }
+    return true
+  })
+
+  // console.debug('institutions: ', institutions.size, { institutions: institutions })
+  return Array.from(institutions)
+}
 
 // --------------------------------------------------------------------------
 
@@ -326,7 +198,7 @@ export function isResourceAvailableDueToSubResource(
   return shouldBeAvailable
 }
 
-export function isResourceVisible(
+export function isResourceAvailable(
   resource: Resource,
   queryTypeId: QueryTypeID,
   languageCode: string
@@ -335,3 +207,26 @@ export function isResourceVisible(
   if (!isResourceAvailableForLanguage(resource, languageCode)) return false
   return true
 }
+
+// --------------------------------------------------------------------------
+
+export const SORT_FNS: {
+  [key in ResourceSelectionModalViewOptionSorting]: (a: Resource, b: Resource) => number
+} = {
+  'title-up': (a, b) => a.title.localeCompare(b.title),
+  'title-down': (a, b) => -a.title.localeCompare(b.title),
+  'institution-up': (a, b) => {
+    const ret = a.institution.localeCompare(b.institution)
+    return ret !== 0 ? ret : a.title.localeCompare(b.title)
+  },
+  'institution-down': (a, b) => {
+    const ret = -a.institution.localeCompare(b.institution)
+    return ret !== 0 ? ret : a.title.localeCompare(b.title)
+  },
+}
+
+// export function isResourceSelectable(resource: Resource) { return true }
+// export function isResourceAvailable(resource: Resource) { return true }
+// export function isResourceVisible(resource: Resource) { return true }
+// export function selectResource(resource: Resource, selected: boolean, propagate: boolean = true) {}
+// export function sortResources(resources: Resource[], criteria: string)
