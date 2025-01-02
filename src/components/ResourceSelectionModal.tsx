@@ -109,6 +109,9 @@ function ResourceSelector({
   // --------------------------------------------------------------
 
   function handleToggleExpansionClick() {
+    // stop de-expansion toggle if user is selecting
+    // see: https://stackoverflow.com/a/78044274/9360161
+    if (expanded && document.getSelection()?.type === 'Range') return
     setExpanded((isExpanded) => !isExpanded)
   }
 

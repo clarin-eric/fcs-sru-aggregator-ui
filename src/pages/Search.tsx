@@ -402,17 +402,19 @@ function Search({ axios }: SearchProps) {
       </Row>
 
       {/* short intro text on initial visit/site load */}
-      <Row className="mt-3">
-        <Col>
-          <p>
-            To enable researchers to search for specific patterns across collections of data, CLARIN
-            offers a search engine that connects to the local data collections that are available in
-            the centres. The data itself stays at the centre where it is hosted – which is why the
-            underlying technique is called <em>federated content search</em>.
-          </p>
-          <p>TODO: some more brief intro text and maybe links for further information ...</p>
-        </Col>
-      </Row>
+      {!hasSearch && (
+        <Row className="mt-3">
+          <Col>
+            <p>
+              To enable researchers to search for specific patterns across collections of data,
+              CLARIN offers a search engine that connects to the local data collections that are
+              available in the centres. The data itself stays at the centre where it is hosted –
+              which is why the underlying technique is called <em>federated content search</em>.
+            </p>
+            <p>TODO: some more brief intro text and maybe links for further information ...</p>
+          </Col>
+        </Row>
+      )}
 
       {/* input modals */}
       <LanguageModal
