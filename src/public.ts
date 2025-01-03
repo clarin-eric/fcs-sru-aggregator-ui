@@ -1,5 +1,7 @@
 import AppStore from '@/stores/app'
 
+// --------------------------------------------------------------------------
+
 type MyAggregatorConfiguration = {
   DEPLOY_PATH: string
   API_URL: string
@@ -13,9 +15,13 @@ declare const window: Window &
     _paq: []
   }
 
+// --------------------------------------------------------------------------
+
 // set global defaults
 window.MyAggregator = window.MyAggregator || {}
 window._paq = window._paq || []
+
+// --------------------------------------------------------------------------
 
 /**
  * Configure AppStore with `MyAggregatorConfiguration`.

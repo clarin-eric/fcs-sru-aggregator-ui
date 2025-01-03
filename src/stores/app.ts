@@ -2,6 +2,8 @@ import { createStore } from 'zustand/vanilla'
 
 // see: https://zustand.docs.pmnd.rs/apis/create-store#updating-state-based-on-previous-state
 
+// --------------------------------------------------------------------------
+
 type AppStoreState = {
   deployPath: string
   apiURL: string
@@ -31,6 +33,8 @@ type AppStoreActions = {
   ) => void
 }
 type AppStore = AppStoreState & AppStoreActions
+
+// --------------------------------------------------------------------------
 
 const appStore = createStore<AppStore>((set) => ({
   // state

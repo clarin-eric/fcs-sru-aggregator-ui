@@ -5,6 +5,8 @@
 
 import { useEffect } from 'react'
 
+// --------------------------------------------------------------------------
+
 function getPreferredTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
@@ -19,6 +21,8 @@ function setTheme(theme: string) {
     document.documentElement.setAttribute('data-bs-theme', theme)
   }
 }
+
+// --------------------------------------------------------------------------
 
 /**
  * Sets the theme for the document, adds event listener for color-scheme changes.

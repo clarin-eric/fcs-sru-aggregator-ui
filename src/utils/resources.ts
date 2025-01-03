@@ -1,9 +1,9 @@
 import { type Resource } from '@/utils/api'
+import { QueryTypeID } from '@/utils/constants'
 import {
   MULTIPLE_LANGUAGE_CODE,
   type ResourceSelectionModalViewOptionSorting,
 } from '@/utils/search'
-import { QueryTypeID } from '@/utils/constants'
 
 // --------------------------------------------------------------------------
 

@@ -1,17 +1,21 @@
-import { Routes, Route } from 'react-router'
 import { type AxiosInstance } from 'axios'
+import { Route, Routes } from 'react-router'
 
-import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import Search from '@/pages/Search'
+import Header from '@/components/Header'
+import useColorMode from '@/hooks/useColorMode'
 import About from '@/pages/About'
 import Help from '@/pages/Help'
+import Search from '@/pages/Search'
 import Statistics from '@/pages/Statistics'
-import useColorMode from '@/hooks/useColorMode'
+
+// --------------------------------------------------------------------------
 
 export interface AppProps {
   axios: AxiosInstance
 }
+
+// --------------------------------------------------------------------------
 
 function App({ axios }: AppProps) {
   // initial setup
