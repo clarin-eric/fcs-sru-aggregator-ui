@@ -1,3 +1,4 @@
+import { useFuzzySearchList } from '@nozbe/microfuzz/react'
 import { useEffect, useMemo, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
@@ -6,23 +7,22 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
-import { useFuzzySearchList } from '@nozbe/microfuzz/react'
 
-import { getResourceIDs, isResourceAvailableDueToSubResource, SORT_FNS } from '@/utils/resources'
 import { type Resource } from '@/utils/api'
+import { getResourceIDs, isResourceAvailableDueToSubResource, SORT_FNS } from '@/utils/resources'
 import {
   DEFAULT_RESOURCE_VIEW_GROUPING,
   DEFAULT_RESOURCE_VIEW_SORTING,
   DEFAULT_RESOURCE_VIEW_VISIBILITY,
   languageCodeToName as languageCodeToNameHelper,
   type LanguageCode2NameMap,
+  type ResourceSelectionModalViewOptionGrouping,
   type ResourceSelectionModalViewOptionSorting,
   type ResourceSelectionModalViewOptionVisibility,
-  type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
 import DebouncedFuzzySearchInput from './DebouncedFuzzySearchInput'
-import ResourceSelector from './ResourceSelector'
 import GroupedResources from './GroupedResources'
+import ResourceSelector from './ResourceSelector'
 
 import './styles.css'
 

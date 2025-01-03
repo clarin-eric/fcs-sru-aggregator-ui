@@ -5,8 +5,8 @@ import Collapse from 'react-bootstrap/Collapse'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 
-import { getResourceIDs } from '@/utils/resources'
 import { type Resource } from '@/utils/api'
+import { getResourceIDs } from '@/utils/resources'
 import ResourceSelector from './ResourceSelector'
 
 // --------------------------------------------------------------------------

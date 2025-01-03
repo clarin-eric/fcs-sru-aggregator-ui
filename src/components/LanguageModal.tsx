@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import type { FuzzyMatches } from '@nozbe/microfuzz'
+import { Highlight, useFuzzySearchList } from '@nozbe/microfuzz/react'
+import { useMemo, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
-import { useFuzzySearchList, Highlight } from '@nozbe/microfuzz/react'
-import type { FuzzyMatches } from '@nozbe/microfuzz'
 
+import { type Resource } from '@/utils/api'
 import {
   DEFAULT_SEARCH_LANGUAGE_FILTER,
   MULTIPLE_LANGUAGE_CODE,
@@ -27,12 +28,14 @@ export type LanguageModelCloseActions = 'close' | 'confirm' | 'abort'
 function LanguageModal({
   show,
   languages,
+  resources,
   searchLanguage,
   searchLanguageFilter,
   onModalClose,
 }: {
   show: boolean
   languages?: LanguageCode2NameMap
+  resources?: Resource[]
   searchLanguage?: string
   searchLanguageFilter?: LanguageFilterOptions
   onModalClose: (result: {
@@ -47,6 +50,22 @@ function LanguageModal({
     searchLanguageFilter || DEFAULT_SEARCH_LANGUAGE_FILTER
   )
   const [languageFilter, setLanguageFilter] = useState('')
+  const [showResourceCounts, setShowResourceCounts] = useState(false)
+
+  const languageToNumberOfResources = useMemo(() => {
+    const counts = new Map<string, number>()
+
+    if (resources) {
+      resources.forEach((resource) =>
+        resource.languages.forEach((language) =>
+          counts.set(language, (counts.get(language) ?? 0) + 1)
+        )
+      )
+      counts.set(MULTIPLE_LANGUAGE_CODE, resources.length)
+    }
+
+    return counts
+  }, [resources])
 
   const filteredLanguages = useFuzzySearchList({
     list: Object.entries(languages ?? {}).toSorted(),
@@ -60,6 +79,9 @@ function LanguageModal({
 
   const oneThird = Math.floor((filteredLanguages.length + 2) / 3)
 
+  // ------------------------------------------------------------------------
+  // event handlers
+
   function handleClose(action: LanguageModelCloseActions) {
     onModalClose({
       language: selectedLanguage,
@@ -72,6 +94,13 @@ function LanguageModal({
     setSelectedLanguage(searchLanguage || MULTIPLE_LANGUAGE_CODE)
     setSelectedFilterOption(searchLanguageFilter || DEFAULT_SEARCH_LANGUAGE_FILTER)
   }
+
+  function handleToggleShowResourceCountsChange() {
+    setShowResourceCounts((show) => !show)
+  }
+
+  // ------------------------------------------------------------------------
+  // UI
 
   function renderLanguageOption(
     code: string,
@@ -103,6 +132,9 @@ function LanguageModal({
         <sup>
           <Highlight ranges={highlights[0]} text={code} />
         </sup>
+        {showResourceCounts && languageToNumberOfResources.has(code) && (
+          <> ({languageToNumberOfResources.get(code)})</>
+        )}
       </Button>
     )
   }
@@ -116,7 +148,7 @@ function LanguageModal({
         <Container className="px-4 pb-3 border-bottom">
           <Row>
             <Col sm></Col>
-            <Col sm className="mb-3 mb-sm-2">
+            <Col sm className="mb-3 mb-sm-2 align-content-end">
               {renderLanguageOption(
                 MULTIPLE_LANGUAGE_CODE,
                 languageCodeToName(MULTIPLE_LANGUAGE_CODE)
@@ -129,6 +161,15 @@ function LanguageModal({
                 value={languageFilter}
                 onChange={(event) => setLanguageFilter(event.target.value)}
               />
+              {resources && (
+                <Form.Check
+                  checked={showResourceCounts}
+                  onChange={handleToggleShowResourceCountsChange}
+                  type="checkbox"
+                  label="Show number of resources per language"
+                  className="mt-1"
+                />
+              )}
             </Col>
           </Row>
           <Row>

@@ -1,23 +1,23 @@
+import { type AxiosInstance } from 'axios'
 import React, { useCallback, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
-import { type AxiosInstance } from 'axios'
 
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import { type Resource } from '@/utils/api'
-import { getAvailableResourceIDs, getInstitutions } from '@/utils/resources'
 import {
   numberOfResultsOptions,
   queryTypeMap,
   queryTypes,
   type QueryTypeID,
 } from '@/utils/constants'
+import { getAvailableResourceIDs, getInstitutions } from '@/utils/resources'
 import {
-  DEFAULT_SEARCH_LANGUAGE_FILTER,
   DEFAULT_RESOURCE_VIEW_GROUPING,
+  DEFAULT_SEARCH_LANGUAGE_FILTER,
   MULTIPLE_LANGUAGE_CODE,
   languageCodeToName,
   type LanguageCode2NameMap,
@@ -378,6 +378,7 @@ function SearchInput({
       {/* search input modals */}
       <LanguageModal
         languages={languages}
+        resources={resources}
         searchLanguage={language}
         show={showLanguageSelectionModal}
         onModalClose={handleChangeLanguageSelection}

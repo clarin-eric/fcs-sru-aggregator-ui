@@ -1,3 +1,5 @@
+import type { HighlightRanges } from '@nozbe/microfuzz'
+import { Highlight, useFuzzySearchList } from '@nozbe/microfuzz/react'
 import { useMemo, useState } from 'react'
 import Alert from 'react-bootstrap/Alert'
 import Card from 'react-bootstrap/Card'
@@ -5,10 +7,8 @@ import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
-import { useFuzzySearchList, Highlight } from '@nozbe/microfuzz/react'
-import type { HighlightRanges } from '@nozbe/microfuzz'
 
-import type { StatisticsSection, InstitutionEndpointInfo } from '@/utils/api'
+import type { InstitutionEndpointInfo, StatisticsSection } from '@/utils/api'
 import EndpointStatistics from './EndpointStatistics'
 
 import './styles.css'

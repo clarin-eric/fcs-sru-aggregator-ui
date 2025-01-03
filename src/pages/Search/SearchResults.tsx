@@ -106,6 +106,8 @@ function SearchResults({
         />
       </ProgressBar>
 
+      {/* TODO: add fuzzy filter for quick search through results? */}
+
       {searchId &&
         data &&
         data.results.map((result) => (

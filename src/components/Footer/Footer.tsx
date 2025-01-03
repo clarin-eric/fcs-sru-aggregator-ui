@@ -1,7 +1,7 @@
-import { Link } from 'react-router'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
+import { Link } from 'react-router'
 
 import './styles.css'
 

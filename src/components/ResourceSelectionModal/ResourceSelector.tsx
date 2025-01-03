@@ -1,18 +1,18 @@
+import type { FuzzyMatches } from '@nozbe/microfuzz'
+import { Highlight } from '@nozbe/microfuzz/react'
 import { useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
-import { Highlight } from '@nozbe/microfuzz/react'
-import type { FuzzyMatches } from '@nozbe/microfuzz'
 
 import { type Resource } from '@/utils/api'
 
 import './styles.css'
 
-import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
+import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
 
 // --------------------------------------------------------------------------

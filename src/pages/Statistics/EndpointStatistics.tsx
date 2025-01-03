@@ -1,8 +1,8 @@
-import { Fragment } from 'react/jsx-runtime'
+import type { HighlightRanges } from '@nozbe/microfuzz'
+import { Highlight } from '@nozbe/microfuzz/react'
 import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
-import { Highlight } from '@nozbe/microfuzz/react'
-import type { HighlightRanges } from '@nozbe/microfuzz'
+import { Fragment } from 'react/jsx-runtime'
 
 import type { InstitutionEndpointInfo } from '@/utils/api'
 
