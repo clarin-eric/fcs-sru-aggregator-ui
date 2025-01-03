@@ -213,36 +213,30 @@ function SearchInput({
     setQuery(event.target.value)
 
     // TODO: demo
-    setQueryError(
-      event.target.value.length % 2 === 1
-        ? { msg: 'even number of characters', details: null }
-        : null
-    )
+    // setQueryError(
+    //   event.target.value.length % 2 === 1
+    //     ? { msg: 'even number of characters', details: null }
+    //     : null
+    // )
   }
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    console.debug('search for', {
-      language,
-      languageFilter,
-      queryType,
-      query,
-      selectedResourceIDs: selectedResourceIDs,
-      numberOfResults,
-    })
-
-    // query validation
-    setQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
-
-    onSearch({
+    const searchParams = {
       language: language,
       languageFilter: languageFilter,
       queryType: queryType,
       query: query,
       resourceIDs: selectedResourceIDs ?? [],
       numberOfResults: numberOfResults,
-    })
+    }
+    console.debug('search for', searchParams)
+
+    // TODO: query validation
+    // setQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
+
+    onSearch(searchParams)
   }
 
   // ------------------------------------------------------------------------

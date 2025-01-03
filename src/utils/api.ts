@@ -161,3 +161,126 @@ export async function getStatisticsData(axios: AxiosInstance) {
   //   'Recent Searches': { institutions: {}, date: 0, timeout: 0, isScan: false },
   // }
 }
+
+// --------------------------------------------------------------------------
+
+export interface PostSearchData {
+  query: string
+  queryType: string
+  language: string
+  numberOfResults: string
+  resourceIds: string[]
+}
+
+// --------------------------------------------------------------------------
+
+export async function postSearch(axios: AxiosInstance, searchParams: PostSearchData) {
+  const response = await axios.post('search', searchParams, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  })
+  console.debug('[postSearch]', searchParams, response)
+  return response.data as string // UUID with searchID
+}
+
+// --------------------------------------------------------------------------
+
+export interface SearchResults {
+  inProgress: number
+  results: ResourceSearchResult[]
+}
+
+export interface SearchResultsMetaOnly {
+  inProgress: number
+  results: ResourceSearchResultMetaOnly[]
+}
+
+export interface ResourceSearchResult {
+  resource: Resource
+  inProgress: boolean
+  nextRecordPosition: number
+  numberOfRecords: number
+  exception: Exception | null
+  diagnostics: Diagnostic[]
+  kwics: Kwic[]
+  advancedLayers: Array<AdvancedLayer[]>
+  hasAdvResults: boolean
+}
+
+export interface ResourceSearchResultMetaOnly {
+  resourceHandle: string
+  endpointUrl: string
+  inProgress: boolean
+  nextRecordPosition: number
+  numberOfRecords: number
+  numberOfRecordsLoaded: number
+  exception: Exception | null
+  diagnostics: Diagnostic[]
+  id: string
+  hasAdvResults: boolean
+}
+
+export interface BaseResultHit {
+  pid: string
+  reference: string | null
+  language: string | null
+}
+
+export interface Kwic extends BaseResultHit {
+  fragments: Fragment[]
+  left: string
+  keyword: string
+  right: string
+}
+
+export interface AdvancedLayer extends BaseResultHit {
+  spans: Fragment[]
+}
+
+export interface Fragment {
+  text: string
+  hit: boolean
+}
+
+// --------------------------------------------------------------------------
+
+export async function getSearchResults(axios: AxiosInstance, searchID: string) {
+  if (!searchID) throw new Error('Invalid searchID parameter!')
+
+  const response = await axios.get(`search/${searchID}`)
+  console.debug('[getSearchResults]', { searchID }, response)
+  return response.data as SearchResults
+}
+
+export async function getSearchResultsMetaOnly(axios: AxiosInstance, searchID: string) {
+  if (!searchID) throw new Error('Invalid searchID parameter!')
+
+  const response = await axios.get(`search/${searchID}/metaonly`)
+  console.debug('[getSearchResultsMetaOnly]', { searchID }, response)
+  return response.data as SearchResultsMetaOnly
+}
+
+export async function getSearchResultDetails(
+  axios: AxiosInstance,
+  searchID: string,
+  resourceID: string
+) {
+  if (!searchID) throw new Error('Invalid "searchID" parameter!')
+  if (!resourceID) throw new Error('Invalid "resourceID" parameter!')
+
+  const response = await axios.get(
+    `search/${searchID}?resourceId=${encodeURIComponent(resourceID)}`
+  )
+  console.debug('[getSearchResultDetails]', { searchID, resourceID }, response)
+
+  const results = (response.data as SearchResults).results.filter(
+    (result) => result.resource.id === resourceID
+  )
+  if (results.length === 0)
+    throw new Error(
+      `Results for resource not found! (searchId: ${searchID}, resourceId: ${resourceID})`
+    )
+
+  return results[0]
+}

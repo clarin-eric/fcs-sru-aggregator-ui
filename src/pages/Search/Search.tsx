@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { type AxiosInstance } from 'axios'
+import { useEffect, useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
-
 import Row from 'react-bootstrap/Row'
-import { type AxiosInstance } from 'axios'
 
 import { getInitData, type Resource } from '@/utils/api'
 import { fromApi, getResourceIDs } from '@/utils/resources'
 import { type LanguageCode2NameMap } from '@/utils/search'
 import SearchInput, { type SearchData } from './SearchInput'
+import SearchResults from './SearchResults'
 
-import fcsLogoUrl from '@images/logo-fcs.png'
 import fcsLogoDarkModeUrl from '@images/logo-fcs-dark.png'
+import fcsLogoUrl from '@images/logo-fcs.png'
 
 import './styles.css'
 
@@ -114,21 +114,6 @@ function Search({ axios }: SearchProps) {
         </Col>
       </Row>
 
-      {/* TODO: temporary output */}
-      <Row>
-        <Col>
-          {JSON.stringify(
-            {
-              ...searchParams,
-              resourceIDs: searchParams?.resourceIDs.length,
-              hasSearch,
-            },
-            undefined,
-            2
-          )}
-        </Col>
-      </Row>
-
       {/* short intro text on initial visit/site load */}
       {!hasSearch && (
         <Row className="mt-3">
@@ -143,6 +128,8 @@ function Search({ axios }: SearchProps) {
           </Col>
         </Row>
       )}
+
+      {searchParams && <SearchResults axios={axios} params={searchParams} />}
     </Container>
   )
 }

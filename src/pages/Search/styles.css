@@ -37,3 +37,25 @@
   /* remove dropdown arrow key suffix */
   display: none;
 }
+
+/* *********************************************************************** */
+
+/* *** ResourceSearchResult.tsx *** */
+
+#search .resource-search-result>.card-header>small.text-muted::before {
+  content: '–';
+  padding-inline-start: 1ch;
+  padding-inline-end: 1ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  #search .resource-search-result .badge.text-bg-light {
+    /* basically .text-bg-dark */
+    color: #fff !important;
+    background-color: RGBA(var(--bs-dark-rgb), var(--bs-bg-opacity, 1)) !important;
+  }
+}
+
+#search .resource-search-result>.card-body>table tr:last-of-type>td {
+  border-bottom-width: 0;
+}
