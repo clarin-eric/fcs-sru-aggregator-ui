@@ -24,6 +24,7 @@ import {
   type LanguageFilterOptions,
   type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
+import ContentEditable from './ContentEditable'
 
 // TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
@@ -208,13 +209,13 @@ function SearchInput({
     setSelectedResourceIDs(resourceIDs)
   }
 
-  function handlequeryChange(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleQueryChange(value: string) {
     // TODO: maybe input validation / syntax highlighting etc.
-    setQuery(event.target.value)
+    setQuery(value)
 
     // TODO: demo
     // setQueryError(
-    //   event.target.value.length % 2 === 1
+    //   value.length % 2 === 1
     //     ? { msg: 'even number of characters', details: null }
     //     : null
     // )
@@ -232,6 +233,10 @@ function SearchInput({
       numberOfResults: numberOfResults,
     }
     console.debug('search for', searchParams)
+
+    // validate and cancel if necessary
+    if (searchParams.query === '') return
+    if (searchParams.resourceIDs.length === 0) return
 
     // TODO: query validation
     // setQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
@@ -266,7 +271,33 @@ function SearchInput({
             disabled={disabled}
             aria-disabled={disabled}
             value={query}
-            onChange={handlequeryChange} // TODO: onInput? (before)
+            onChange={(event) => handleQueryChange(event.target.value)} // TODO: onInput? (before)
+            isInvalid={!!queryError} // TODO: add syntax validation for more complex queries
+          />
+          <Button
+            variant="outline-primary"
+            type="submit"
+            id="fcs-search-input-button"
+            disabled={disabled || query.trim().length === 0}
+            aria-disabled={disabled}
+          >
+            {/* TODO: visually-hidden span with description? */}
+            Search
+          </Button>
+          <Form.Control.Feedback type="invalid">{queryError?.msg}</Form.Control.Feedback>
+        </InputGroup>
+        <InputGroup size={!hasSearch ? 'lg' : undefined} hasValidation>
+          <Form.Control
+            placeholder="Elephant"
+            aria-label="search query input"
+            aria-describedby="fcs-search-input-button"
+            className="text-center search-query-input"
+            disabled={disabled}
+            aria-disabled={disabled}
+            value={query}
+            as={ContentEditable}
+            // @ts-expect-error: intentional, typing does not work correctly
+            onChange={handleQueryChange}
             isInvalid={!!queryError} // TODO: add syntax validation for more complex queries
           />
           <Button

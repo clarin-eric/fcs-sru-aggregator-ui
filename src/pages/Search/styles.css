@@ -59,3 +59,36 @@
 #search .resource-search-result>.card-body>table tr:last-of-type>td {
   border-bottom-width: 0;
 }
+
+/* *********************************************************************** */
+
+/* *** ContentEditable.tsx *** */
+
+/* content editable input for fancy syntax highlighting */
+#search .search-query-input[contenteditable]:empty {
+  padding-inline-start: calc(50% + 1rem - 6ch);
+}
+
+#search .search-query-input[contenteditable][disabled] {
+  /* .form-control:disabled */
+  background-color: var(--bs-secondary-bg);
+  opacity: 1;
+  /* AND disable mouse, .pe-none */
+  pointer-events: none;
+}
+
+#search .search-query-input[contenteditable][placeholder] + .input-placeholder-simulacrum {
+  position: absolute;
+  width: calc(100% - 2rem - 6ch);
+  text-align: center;
+  vertical-align: middle;
+  pointer-events: none;
+  
+  line-height: 1.5;
+  font-size: 1.25rem;
+  padding: .5rem 1rem;
+
+  /* .form-control::placeholder */
+  color: var(--bs-secondary-color);
+  opacity: 1;  
+}
