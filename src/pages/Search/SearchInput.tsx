@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
+import ToggleButton from 'react-bootstrap/ToggleButton'
 
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
@@ -28,6 +29,7 @@ import ContentEditable from './ContentEditable'
 
 // TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
+import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
 
 import './styles.css'
 
@@ -100,6 +102,9 @@ function SearchInput({
   const [query, setQuery] = useState('')
   // query input validation
   const [queryError, setQueryError] = useState<queryError | null>(null)
+
+  // query input syntax highlighting
+  const [queryInputEnhanced, setQueryInputEnhanced] = useState(false)
 
   // ------------------------------------------------------------------------
   // data updates/computation
@@ -263,30 +268,7 @@ function SearchInput({
       {/* search input form */}
       <Form noValidate onSubmit={handleSearchSubmit}>
         <InputGroup size={!hasSearch ? 'lg' : undefined} hasValidation>
-          <Form.Control
-            placeholder="Elephant"
-            aria-label="search query input"
-            aria-describedby="fcs-search-input-button"
-            className="text-center"
-            disabled={disabled}
-            aria-disabled={disabled}
-            value={query}
-            onChange={(event) => handleQueryChange(event.target.value)} // TODO: onInput? (before)
-            isInvalid={!!queryError} // TODO: add syntax validation for more complex queries
-          />
-          <Button
-            variant="outline-primary"
-            type="submit"
-            id="fcs-search-input-button"
-            disabled={disabled || query.trim().length === 0}
-            aria-disabled={disabled}
-          >
-            {/* TODO: visually-hidden span with description? */}
-            Search
-          </Button>
-          <Form.Control.Feedback type="invalid">{queryError?.msg}</Form.Control.Feedback>
-        </InputGroup>
-        <InputGroup size={!hasSearch ? 'lg' : undefined} hasValidation>
+          {/* @ts-expect-error: typing does not work for onChange handler, is correct so */}
           <Form.Control
             placeholder="Elephant"
             aria-label="search query input"
@@ -295,11 +277,28 @@ function SearchInput({
             disabled={disabled}
             aria-disabled={disabled}
             value={query}
-            as={ContentEditable}
-            // @ts-expect-error: intentional, typing does not work correctly
-            onChange={handleQueryChange}
             isInvalid={!!queryError} // TODO: add syntax validation for more complex queries
+            {...(queryInputEnhanced
+              ? {
+                  as: ContentEditable,
+                  queryType: queryType,
+                  onChange: handleQueryChange,
+                }
+              : {
+                  onChange: (event) => handleQueryChange(event.target.value),
+                })}
           />
+          <ToggleButton
+            id="fcs-search-input-enhanced-button"
+            value="enhance-query" // just a dummy value
+            type="checkbox"
+            checked={queryInputEnhanced}
+            onChange={() => setQueryInputEnhanced((isChecked) => !isChecked)}
+            variant="outline-secondary"
+            aria-label="Enable enhanced visual input support"
+          >
+            <i dangerouslySetInnerHTML={{ __html: highlightsIcon }} aria-hidden="true" />
+          </ToggleButton>
           <Button
             variant="outline-primary"
             type="submit"

@@ -1,5 +1,11 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 
+import useDebounce from '@/hooks/useDebounce'
+import Prism from '@/syntax/prism'
+import { type QueryTypeID } from '@/utils/constants'
+
+import '@/syntax/prism-vs.css'
+
 // --------------------------------------------------------------------------
 // types
 
@@ -24,6 +30,8 @@ export interface ContentEditableProps {
   disabled?: boolean
   isInvalid?: boolean
   placeholder?: string
+  queryType?: QueryTypeID
+  delay?: number
   onChange?: (value: string) => void
   onValidationChange?: (isValid: boolean) => void
 }
@@ -38,16 +46,42 @@ function getAbsoluteTextCursorOffsets(container: Node, range: Range) {
   const start = getTextCursorOffset(container, range.startContainer, range.startOffset)
 
   // optimization if same node
-  if (range.endContainer === range.startContainer) {
+  if (
+    range.startContainer.nodeType === Node.TEXT_NODE &&
+    range.endContainer === range.startContainer
+  ) {
     return [start, start + (range.endOffset - range.startOffset)]
   }
 
   const end = getTextCursorOffset(container, range.endContainer, range.endOffset)
 
+  console.debug('[getAbsoluteTextCursorOffsets]', {
+    container,
+    range,
+    startContainer: range.startContainer,
+    startOffset: range.startOffset,
+    endContainer: range.endContainer,
+    endOffset: range.endOffset,
+    start,
+    end,
+  })
+
   return [start, end]
 }
 
 function getTextCursorOffset(container: Node, node: Node, offset: number = 0) {
+  // TODO: or is this only for the container element?
+  if (node === container && node.nodeType === Node.ELEMENT_NODE && offset === 1) {
+    console.debug('offset=1 on node', {
+      container,
+      node,
+      nodeType: node.nodeType,
+      offset,
+      length: node.textContent?.length,
+    })
+    return node.textContent?.length || 0
+  }
+
   // no nested children
   if (node === container || container === null) return offset
 
@@ -70,7 +104,7 @@ function getTextCursorOffset(container: Node, node: Node, offset: number = 0) {
       // see: https://stackoverflow.com/a/35213639/9360161
       lengthBefore += child.textContent?.length || 0
     } else {
-      console.warn('unknown node type', child)
+      console.warn('unknown node type', { container, node, offset, parent, i, child })
     }
   }
 
@@ -79,6 +113,11 @@ function getTextCursorOffset(container: Node, node: Node, offset: number = 0) {
 }
 
 function getRangeContainerWithOffsetFromTextOffset(container: Node, offset: number) {
+  // TODO: may be enough if at start ...?
+  // if (offset === 0) {
+  //   return { node: container, offset: offset }
+  // }
+
   // check if possible (e.g., container has enough text to contain the offset)
   const containerLength = container.textContent?.length || 0
   if (containerLength < offset) return null
@@ -97,9 +136,10 @@ function getRangeContainerWithOffsetFromTextOffset(container: Node, offset: numb
       // see: https://stackoverflow.com/a/35213639/9360161
       childLength = child.textContent?.length || 0
     } else {
-      console.warn('unknown node type, skip', child)
+      console.warn('unknown node type, skip', { container, offset, child })
     }
-    if (childLength === 0) continue
+    // skip if empty child, but do not skip if only child
+    if (childLength === 0 && children.length !== 1) continue
 
     // check if with this child content, the offset is included
     lengthBefore += childLength
@@ -115,7 +155,13 @@ function getRangeContainerWithOffsetFromTextOffset(container: Node, offset: numb
       }
     }
   }
-  console.warn('we should have found the offset ...', container, offset)
+  console.debug('we should have found the offset ...', {
+    container,
+    containerLength,
+    children,
+    childrenCount: children.length,
+    offset,
+  })
   return null
 }
 
@@ -123,18 +169,20 @@ function sanitizeValue(value?: string | null) {
   if (!value) return ''
 
   // illegal whitespace
-  value = value.replace(/\n\t/g, ' ')
+  value = value.replace(/[\n\t]/g, ' ')
   value = value.replace(/&nbsp;|\u202F|\u00A0/g, ' ')
 
+  // NOTE: not required for for pre/code
   // HTML escape, entities
-  value = value.replace(/&/g, '&amp;')
+  // value = value.replace(/&/g, '&amp;')
   // HTML
-  value = value.replace(/</g, '&lt;')
-  value = value.replace(/>/g, '&gt;')
+  // value = value.replace(/</g, '&lt;')
+  // value = value.replace(/>/g, '&gt;')
   return value
 }
 
 function setCursorPosition(container: Node, offset: number) {
+  // console.debug('[setCursorPosition]', offset)
   const isTargetFocused = document.activeElement === container
   if (!isTargetFocused) return null
 
@@ -144,10 +192,14 @@ function setCursorPosition(container: Node, offset: number) {
   const range = document.createRange()
   const startRange = getRangeContainerWithOffsetFromTextOffset(container, offset)
   if (startRange) {
-    range.setStart(startRange.node, startRange.offset)
-    range.collapse(true)
-    selection.removeAllRanges()
-    selection.addRange(range)
+    try {
+      range.setStart(startRange.node, startRange.offset)
+      range.collapse(true)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    } catch (error) {
+      console.error('Error trying to set cursor!', error, { container, offset, startRange })
+    }
   }
 }
 
@@ -168,10 +220,37 @@ function getCursorPosition(container: Node) {
 }
 
 // --------------------------------------------------------------------------
+
+function queryTypeToPrismLanguage(queryType?: string) {
+  if (queryType === 'cql') return 'fcs-cql'
+  if (queryType === 'fcs') return 'fcs-fcsql'
+  return 'plain'
+}
+
+function highlightSyntax(value: string, queryType?: string) {
+  // console.debug('do syntax highlighting ...', { value, queryType })
+
+  // value = JSON.stringify(Object.keys(Prism.languages))
+  const language = queryTypeToPrismLanguage(queryType)
+  const grammar = Prism.languages[language]
+  const pluginClasses = 'match-braces rainbow-braces'
+
+  let prismValue = value
+  try {
+    prismValue = Prism.highlight(value, grammar, language)
+  } catch (error) {
+    console.warn('Error trying to highlight value', { value, error, language })
+  }
+  const html = `<pre><code class="language-${language} ${pluginClasses}">${prismValue}</code></pre>`
+
+  return html
+}
+
+// --------------------------------------------------------------------------
 // component
 
 const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
-  ({ value, onChange, disabled, placeholder, ...props }, ref) => {
+  ({ value, onChange, disabled, placeholder, queryType, delay = 200, ...props }, ref) => {
     // ref to hidden input element (for form stuffs)
     const inputRef = useRef<HTMLInputElement>(null)
     // ref to our contentEditable input
@@ -183,10 +262,27 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
     const [sanitizedValue, setSanitizedValue] = useState(sanitizeValue(value))
     const [cursorPos, setCursorPos] = useState<number | null>(null)
 
+    // debounce to avoid unnecessary repeated calls to highlighter if value stays the same
+    const deboundedSanitizedValue = useDebounce(sanitizedValue, delay)
+    const [htmlValue, setHtmlValue] = useState(deboundedSanitizedValue)
+    useEffect(() => {
+      const valueWithStyle = highlightSyntax(deboundedSanitizedValue, queryType)
+      setHtmlValue(valueWithStyle)
+
+      if (mRef.current) {
+        const pos = getCursorPosition(mRef.current)
+        setCursorPos(pos)
+      }
+    }, [deboundedSanitizedValue, queryType])
+
+    // set visible value
     useEffect(() => {
       // if (disabled) return
 
-      setSanitizedValue(sanitizeValue(value))
+      const newValue = sanitizeValue(value)
+      setSanitizedValue(newValue)
+      // we still need to set the value (without styling) to show something to the user
+      setHtmlValue(highlightSyntax(newValue))
 
       if (mRef.current) {
         const pos = getCursorPosition(mRef.current)
@@ -194,21 +290,14 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [value])
 
+    // set cursor position
     useLayoutEffect(() => {
       if (mRef.current && cursorPos !== null) {
         // only if we have a valid cursor, otherwise let default behaviour do the work
+        // console.debug('[useLayoutEffect#setCursorPosition]', cursorPos)
         setCursorPosition(mRef.current, cursorPos)
       }
     })
-
-    // ------------------------------------------------------------------------
-
-    // TODO: syntax highlighting
-    function fancifyValue(value: string) {
-      // TODO: dummy, for testing only
-      value = value.replace(/([abcdef]+)/g, `<i>$1</i>`)
-      return value
-    }
 
     // ------------------------------------------------------------------------
     // event handlers
@@ -220,6 +309,9 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
       if (inputRef.current) {
         inputRef.current.value = value
       }
+
+      // TODO: might be required?
+      setSanitizedValue(value)
 
       onChange?.(value)
     }
@@ -239,11 +331,14 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
     }
 
     function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-      // console.debug('[handleKeyDown]', event)
+      // console.debug('[handleKeyDown]', event.key, event)
 
       // TODO: handle Ctrl-Z?
       // NOTE: Ctrl-X / cut is handled
       // NOTE: (Shift-)Tab is handled
+
+      // TODO: handle Ctrl-A Delete/Backspace
+      // TODO: handle Home/End <any-input>
 
       if (event.key === 'Enter') {
         // console.debug('[handleKeyDown:Enter]')
@@ -274,6 +369,19 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
         event.preventDefault()
 
         handleDelete()
+      } else if (event.ctrlKey && event.key === 'a') {
+        // TODO: required?
+        // if (mRef.current) {
+        //   const selection = window.getSelection()
+        //   if (selection) {
+        //     const range = document.createRange()
+        //     range.selectNodeContents(mRef.current)
+        //     selection.removeAllRanges()
+        //     selection.addRange(range)
+        //     event.stopPropagation()
+        //     event.preventDefault()
+        //   }
+        // }
       } else {
         // default, do not attempt to set cursor
         setCursorPos(null)
@@ -316,6 +424,8 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
         .toReversed()
         .reduce((text, [start, end]) => text.slice(0, start) + text.slice(end), oldValue)
 
+      // console.debug('deleting', { mode, oldValue, length: oldValue.length, newValueSpansRemoved, numDeleted, selectionIndices })
+
       if (mode === 'backspace') {
         if (numDeleted === 0) {
           // then perform normal backspace operation
@@ -323,6 +433,9 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
             .filter(([start, end]) => start === end)
             .map(([, end]) => end)
             .pop()
+
+          // did delete nothing and am at start
+          if (lastPos === 0) return null
 
           if (lastPos !== undefined) {
             // should only be a single cursor! (multiple cursors are not supported by default in browsers?)
@@ -485,7 +598,7 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
           onKeyDown={handleKeyDown}
           tabIndex={disabled ? -1 : props.tabIndex}
           contentEditable // plaintext-only?
-          dangerouslySetInnerHTML={{ __html: fancifyValue(sanitizedValue) }}
+          dangerouslySetInnerHTML={{ __html: htmlValue }}
           ref={mRef}
         />
         {placeholder && value === '' && (

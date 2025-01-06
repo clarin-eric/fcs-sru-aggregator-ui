@@ -34,12 +34,14 @@ export default defineConfig({
         resolve('./index.html'),
         // separate output chunks (primarily for CSS)
         'bootstrap/dist/css/bootstrap.min.css',
+        // separate out prismjs chunk
+        resolve('./src/syntax/prism.ts'),
       ],
       output: {
         assetFileNames(chunkInfo) {
           if (chunkInfo.names.length === 1) {
             // DEBUG
-            // console.debug({
+            // console.debug("assetFileNames", {
             //   name: chunkInfo.names,
             //   originalFileNames: chunkInfo.originalFileNames,
             //   sourceLen: chunkInfo.source.length,
@@ -57,11 +59,19 @@ export default defineConfig({
           // default output chunks (assets)
           return `${outputsLibAssetsPath}[name].[ext]`
         },
-        entryFileNames: `${outputsLibPath}${name}.js`,
+        // entryFileNames: `${outputsLibPath}${name}.js`,
+        entryFileNames(chunkInfo) {
+          // DEBUG
+          // console.debug("entryFileNames", chunkInfo)
+          if (chunkInfo.name === 'prism') {
+            return `${outputsLibVenderPath}prism.js`
+          }
+          return `${outputsLibPath}${name}.js`
+        },
         chunkFileNames: `[name].js`,
         // DEBUG
         // chunkFileNames(chunkInfo) {
-        //   console.debug(chunkInfo)
+        //   console.debug("chunkInfo", chunkInfo)
         //   return `[name].js`
         // },
         // https://rollupjs.org/configuration-options/#output-manualchunks
@@ -75,6 +85,7 @@ export default defineConfig({
             'zustand',
             '@nozbe/microfuzz/react',
           ],
+          // [`${outputsLibVenderPath}prism`]: ['prismjs/components/prism-core'],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },

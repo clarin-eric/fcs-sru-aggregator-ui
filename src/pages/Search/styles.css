@@ -96,3 +96,30 @@
   color: var(--bs-secondary-color);
   opacity: 1;
 }
+
+#search .search-query-input[contenteditable]>pre {
+  /* reset default styling (bootstrap/reboot...) */
+  margin: unset;
+  font-size: unset;
+  /* cursor */
+  height: 100%;
+  /* font */
+  font-family: var(--bs-body-font-family);
+  font-weight: var(--bs-body-font-weight);
+}
+
+#search .search-query-input[contenteditable]>pre>code {
+  /* allow wrapping */
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* unset */
+  font-size: unset;
+}
+
+#search .search-query-input[contenteditable] code .token.operator {
+  color: #28138e;
+}
+
+#search .search-query-input[contenteditable] code .token.string {
+  color: #008702;
+}
