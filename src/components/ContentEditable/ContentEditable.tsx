@@ -5,6 +5,7 @@ import Prism from '@/syntax/prism'
 import { type QueryTypeID } from '@/utils/constants'
 
 import '@/syntax/prism-vs.css'
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types

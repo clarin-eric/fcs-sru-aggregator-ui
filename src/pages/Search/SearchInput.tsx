@@ -6,6 +6,7 @@ import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 
+import ContentEditable from '@/components/ContentEditable'
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import { type Resource } from '@/utils/api'
@@ -25,7 +26,6 @@ import {
   type LanguageFilterOptions,
   type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
-import ContentEditable from './ContentEditable'
 
 // TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
