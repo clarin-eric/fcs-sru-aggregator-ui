@@ -42,7 +42,7 @@
 
 /* *** ResourceSearchResult.tsx *** */
 
-#search .resource-search-result>.card-header>small.text-muted::before {
+#search .resource-search-result>.card-header small.text-muted::before {
   content: '–';
   padding-inline-start: 1ch;
   padding-inline-end: 1ch;
@@ -56,8 +56,26 @@
   }
 }
 
-#search .resource-search-result>.card-body>table tr:last-of-type>td {
+#search .resource-search-result>.card-body table tr:last-child>td {
   border-bottom-width: 0;
+}
+
+#search .resource-search-result table tr>td.result-refs {
+  white-space: nowrap;
+}
+
+#search .resource-search-result .pid-badge {
+  --bs-badge-padding-x: 0.5em;
+  --bs-badge-padding-y: 0.35em;
+  --bs-badge-border-radius: 0.2rem;
+  font-size: 0.6rem;
+}
+
+#search .resource-search-result .tooltip-mounting-point {
+  /* a visible but too small to see element to avoid tooltip mounting flickering */
+  height: 0;
+  width: 0;
+  pointer-events: none;
 }
 
 /* *********************************************************************** */
