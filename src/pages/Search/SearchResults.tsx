@@ -10,6 +10,7 @@ import Row from 'react-bootstrap/Row'
 
 import { getSearchResultsMetaOnly, postSearch, type SearchResultsMetaOnly } from '@/utils/api'
 import { DEFAULT_VIEW_MODE, type ResultsViewMode } from '@/utils/results'
+import { type LanguageCode2NameMap } from '@/utils/search'
 import ResourceSearchResult from './ResourceSearchResult'
 import { type SearchData } from './SearchInput'
 
@@ -21,6 +22,7 @@ import './styles.css'
 export interface SearchResultsProps {
   axios: AxiosInstance
   params: SearchData
+  languages?: LanguageCode2NameMap
 }
 
 // --------------------------------------------------------------------------
@@ -30,6 +32,7 @@ export interface SearchResultsProps {
 function SearchResults({
   axios,
   params: { query, queryType, language, numberOfResults, resourceIDs },
+  languages,
 }: SearchResultsProps) {
   // the actual search
   const {
@@ -141,8 +144,12 @@ function SearchResults({
                 </Form.Select>
               </FloatingLabel>
             </Col>
-            <Col md={3} sm={6}>{/* show warnings/errors */}</Col>
-            <Col md={3} sm={6}>{/* TODO: fuzzy filter */}</Col>
+            <Col md={3} sm={6}>
+              {/* show warnings/errors */}
+            </Col>
+            <Col md={3} sm={6}>
+              {/* TODO: fuzzy filter */}
+            </Col>
           </Row>
         </Card.Body>
       </Card>
@@ -156,6 +163,9 @@ function SearchResults({
             resourceId={result.id}
             resultInfo={result}
             viewMode={viewMode}
+            showResourceDetails={true} // TODO
+            languages={languages}
+            numberOfResults={numberOfResults}
             key={`${searchId}-${result.id}`}
           />
         ))}

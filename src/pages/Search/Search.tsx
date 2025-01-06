@@ -129,7 +129,7 @@ function Search({ axios }: SearchProps) {
         </Row>
       )}
 
-      {searchParams && <SearchResults axios={axios} params={searchParams} />}
+      {searchParams && <SearchResults axios={axios} params={searchParams} languages={languages} />}
     </Container>
   )
 }

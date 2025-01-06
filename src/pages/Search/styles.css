@@ -56,6 +56,15 @@
   }
 }
 
+#search .resource-search-result .resource-info i>svg.bi,
+#search .resource-search-result .more-results-button i>svg.bi {
+  vertical-align: baseline;
+  margin-bottom: -1px;
+
+  height: unset;
+  width: 0.9em;
+}
+
 #search .resource-search-result>.card-body table tr:last-child>td {
   border-bottom-width: 0;
 }

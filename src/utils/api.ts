@@ -172,6 +172,11 @@ export interface PostSearchData {
   resourceIds: string[]
 }
 
+export interface PostSearchMoreResultsData {
+  resourceId: string
+  numberOfResults: number
+}
+
 // --------------------------------------------------------------------------
 
 export async function postSearch(axios: AxiosInstance, searchParams: PostSearchData) {
@@ -181,6 +186,20 @@ export async function postSearch(axios: AxiosInstance, searchParams: PostSearchD
     },
   })
   console.debug('[postSearch]', searchParams, response)
+  return response.data as string // UUID with searchID
+}
+
+export async function postSearchMoreResults(
+  axios: AxiosInstance,
+  searchID: string,
+  searchParams: PostSearchMoreResultsData
+) {
+  const response = await axios.post(`search/${searchID}`, searchParams, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  })
+  console.debug('[postSearchMoreResults]', { searchID, searchParams }, response)
   return response.data as string // UUID with searchID
 }
 
