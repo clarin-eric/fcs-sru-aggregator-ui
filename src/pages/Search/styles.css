@@ -73,6 +73,13 @@
   white-space: nowrap;
 }
 
+@media (max-width: 576px) {
+  /* sm-down breakpoint ? (https://getbootstrap.com/docs/5.3/layout/breakpoints/) */
+  #search .resource-search-result table tr>td.result-refs {
+    white-space: initial;
+  }
+}
+
 #search .resource-search-result .pid-badge {
   --bs-badge-padding-x: 0.5em;
   --bs-badge-padding-y: 0.35em;

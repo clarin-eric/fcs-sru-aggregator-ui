@@ -10,15 +10,18 @@ function Footer() {
     <footer className="text-muted">
       <Container>
         <Row>
-          <Col className="text-start">
+          <Col className="text-start d-flex flex-sm-row flex-column column-gap-3 row-gap-2">
             {/* On smaller screen, show about link with contact link */}
-            <Link to="/about" className="hidden-xs">
-              About
-            </Link>
-            {/* Center version on mobile */}
-            <div className="version-info text-muted text-center-xs">
-              v{import.meta.env.PACKAGE_VERSION}
+            <div>
+              <Link to="/about" className="hidden-xs">
+                About
+              </Link>
+              {/* Center version on mobile */}
+              <div className="version-info text-muted text-center-xs">
+                v{import.meta.env.PACKAGE_VERSION}
+              </div>
             </div>
+            <Link to="/stats">Statistics</Link>
           </Col>
           <Col className="text-center">
             {/* CLARIN logo and copyright (center column on larger screens) */}
@@ -30,9 +33,14 @@ function Footer() {
               Hosted by CLARIN ERIC
             </span>
           </Col>
-          <Col className="hidden-xs text-end">
+          <Col className="hidden-xs text-end d-flex flex-sm-row flex-column justify-content-sm-end column-gap-3 row-gap-2">
             {/* Contact link in right column on larger screens */}
-            <a href={import.meta.env.CONTACT_ADDRESS}>Contact</a>
+            {import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS && (
+              <a href={import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS}>Terms & Disclaimer</a>
+            )}
+            {import.meta.env.CONTACT_ADDRESS && (
+              <a href={import.meta.env.CONTACT_ADDRESS}>Contact</a>
+            )}
           </Col>
         </Row>
       </Container>

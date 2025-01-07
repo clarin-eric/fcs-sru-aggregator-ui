@@ -25,7 +25,14 @@ const apiURL = AppStore.getState().apiURL
 
 // --------------------------------------------------------------------------
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // TODO: disable for cleaner debugging and/or for production?
+      // refetchOnWindowFocus: false
+    }
+  }
+})
 const axiosClient = axios.create({
   baseURL: apiURL,
   timeout: 5000,

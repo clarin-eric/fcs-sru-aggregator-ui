@@ -1,13 +1,32 @@
-# React + TypeScript + Vite
+# FCS SRU Aggregator UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Technologies
 
-Currently, two official plugins are available:
+The frontend uses the following technologies:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ReactJS 18.3.1
+  - React Router 7.0.2 for SPA routing
+  - React Query 5.62.7 with Axios 1.7.9 for web requests
+- Bootstrap 5.3.3 with Bootstrap Icons 1.11.3, integration with `react-bootstrap` 2.10.6
+- microfuzz 1.0.0 for fuzzy searching
+- PrismJS 1.29.0 for syntax highlighting
+- Zustand 5.0.2
 
-## Expanding the ESLint configuration
+For development and building a few additional dependencies are required:
+
+- vite 6.0.1 with plugins
+- typescript 5.6.2 with `@types/*` definitions
+- eslint 9.15.0 with plugins
+
+## Development
+
+Based on _React + TypeScript + Vite_ template (`npm create vite@latest`), a minimal setup to get React working in Vite with HMR and some ESLint rules. Uses the [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) plugin for Fast Refresh.
+
+### Update dependencies
+
+- Check possible upgrades with `npx npm-check-updates`
+
+### Expanding the ESLint configuration (TODO)
 
 If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 

@@ -19,6 +19,7 @@ const outputsLibVenderPath = `${outputsLibPath}vender/`
 const outputsLibAssetsPath = `${outputsLibPath}assets/`
 
 function resolve(url: string | URL) {
+  // path.resolve(__dirname, url)
   return fileURLToPath(new URL(url, import.meta.url))
 }
 
@@ -116,8 +117,11 @@ export default defineConfig({
   define: {
     // TODO: required?
     'process.env': {},
-    // contact address (footer/help page)
+    // footer/help: contact address (footer/help page)
     'import.meta.env.CONTACT_ADDRESS': '"mailto:fcs@clarin.eu"',
+    // footer: imprint, disclaimer, ...
+    'import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS':
+      '"https://www.clarin.eu/content/terms-use-and-disclaimer"',
     // deployment on subpath, default is "/" for root
     'import.meta.env.DEPLOY_PATH': '"/"',
     // API base URL for FCS SRU aggregator
@@ -133,7 +137,6 @@ export default defineConfig({
       '@assets': resolve('./src/assets'),
       '@images': resolve('./src/assets/images'),
       '@fonts': resolve('./src/assets/fonts'),
-      // '@': path.resolve(__dirname, './src'),
     },
     // extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.yaml'],
   },
