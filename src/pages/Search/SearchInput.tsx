@@ -163,6 +163,14 @@ function SearchInput({
 
   const numberOfSelectedInstitutions = getInstitutions(resources, selectedResourceIDs ?? []).length
 
+  const hasResourcesForQueryFCS =
+    resources.find((resource) =>
+      resource.searchCapabilitiesResolved.includes('ADVANCED_SEARCH')
+    ) !== undefined
+  const hasResourcesForQueryLex =
+    resources.find((resource) => resource.searchCapabilitiesResolved.includes('LEX_SEARCH')) !==
+    undefined
+
   // ------------------------------------------------------------------------
   // event handlers
 
@@ -325,21 +333,39 @@ function SearchInput({
               className="mx-1 pe-2 no-arrow"
               disabled={disabled}
               aria-disabled={disabled}
+              style={
+                queryTypeMap[queryType]
+                  ? {
+                      '--color': queryTypeMap[queryType].color,
+                    }
+                  : {}
+              }
             >
-              {queryTypeMap[queryType]?.searchLabel}{' '}
+              {queryTypeMap[queryType]?.searchLabel || '???'}{' '}
               <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              {queryTypes.map((info) => (
-                <Dropdown.Item
-                  as="button"
-                  eventKey={info.id}
-                  key={info.id}
-                  onClick={(event) => event.preventDefault()}
-                >
-                  {info.name}
-                </Dropdown.Item>
-              ))}
+              {queryTypes
+                .filter(
+                  (info) =>
+                    info.id === 'cql' ||
+                    (info.id === 'fcs' && hasResourcesForQueryFCS) ||
+                    (info.id === 'lex' && hasResourcesForQueryLex)
+                )
+                .map((info) => (
+                  <Dropdown.Item
+                    as="button"
+                    eventKey={info.id}
+                    key={info.id}
+                    onClick={(event) => event.preventDefault()}
+                    style={{
+                      '--color': info.color,
+                      background: 'color-mix(in srgb, var(--color) 50%, transparent)',
+                    }}
+                  >
+                    {info.name}
+                  </Dropdown.Item>
+                ))}
             </Dropdown.Menu>
           </Dropdown>{' '}
           in{' '}

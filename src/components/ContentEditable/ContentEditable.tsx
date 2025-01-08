@@ -281,15 +281,19 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
       // if (disabled) return
 
       const newValue = sanitizeValue(value)
+
+      // detection if already styled and we do not need to restyle again
+      if (deboundedSanitizedValue === newValue) return
+
       setSanitizedValue(newValue)
-      // we still need to set the value (without styling) to show something to the user
+      // we still need to set the value (without styling) to show the current value to the user
       setHtmlValue(highlightSyntax(newValue))
 
       if (mRef.current) {
         const pos = getCursorPosition(mRef.current)
         setCursorPos(pos)
       }
-    }, [value])
+    }, [value, deboundedSanitizedValue])
 
     // set cursor position
     useLayoutEffect(() => {
@@ -593,6 +597,7 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
           // @ts-expect-error: expected, we want to set it for styling
           disabled={disabled}
           placeholder={placeholder}
+          spellCheck={false} // can be overwritten
           {...props}
           onInput={handleInput}
           onPaste={handlePaste}

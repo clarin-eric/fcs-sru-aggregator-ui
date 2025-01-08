@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { type AxiosInstance } from 'axios'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
@@ -8,8 +8,19 @@ import Form from 'react-bootstrap/Form'
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 
-import { getSearchResultsMetaOnly, postSearch, type SearchResultsMetaOnly } from '@/utils/api'
-import { DEFAULT_VIEW_MODE, type ResultsViewMode } from '@/utils/results'
+import {
+  getSearchResultsMetaOnly,
+  postSearch,
+  type Resource,
+  type SearchResultsMetaOnly,
+} from '@/utils/api'
+import {
+  DEFAULT_SORTING,
+  DEFAULT_VIEW_MODE,
+  SORT_FNS,
+  type ResultsSorting,
+  type ResultsViewMode,
+} from '@/utils/results'
 import { type LanguageCode2NameMap } from '@/utils/search'
 import ResourceSearchResult from './ResourceSearchResult'
 import { type SearchData } from './SearchInput'
@@ -22,16 +33,18 @@ import './styles.css'
 export interface SearchResultsProps {
   axios: AxiosInstance
   params: SearchData
+  resources?: Resource[]
   languages?: LanguageCode2NameMap
 }
 
 // --------------------------------------------------------------------------
 // component
 
-// TODO: make it cancelable! (useEffect?)
+// TODO: make it (search?) cancelable! (useEffect?)
 function SearchResults({
   axios,
   params: { query, queryType, language, numberOfResults, resourceIDs },
+  resources,
   languages,
 }: SearchResultsProps) {
   // the actual search
@@ -55,12 +68,23 @@ function SearchResults({
   console.debug('searchId', { searchId, error, isLoading, isError })
 
   const [viewMode, setViewMode] = useState<ResultsViewMode>(DEFAULT_VIEW_MODE)
+  const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
+  const [showResourceDetails, setShowResourceDetails] = useState(false)
+  const [showDiagnostics, setShowDiagnostics] = useState(false)
+
+  const sortFn = useMemo(() => {
+    const lookup = new Map()
+    resources?.forEach((resource) => {
+      lookup.set(resource.id, resource)
+    })
+    return SORT_FNS[sorting](lookup)
+  }, [sorting, resources])
 
   // polling of meta results, dependant on searchId
   const {
     data,
-    isLoading: isLoading2,
-    isError: isError2,
+    isLoading: isLoadingSearchResults,
+    isError: isErrorSearchResults,
   } = useQuery<SearchResultsMetaOnly>({
     queryKey: ['search-results', searchId],
     queryFn: getSearchResultsMetaOnly.bind(null, axios, searchId ?? ''),
@@ -71,7 +95,7 @@ function SearchResults({
       return false
     },
   })
-  console.log('search-results', data, isLoading2, isError2)
+  console.log('search-results', data, isLoadingSearchResults, isErrorSearchResults)
 
   const numRequested = resourceIDs.length
   const numInProgress = data?.inProgress ?? numRequested
@@ -95,30 +119,39 @@ function SearchResults({
     setViewMode(event.target.value as ResultsViewMode)
   }
 
+  function handleSortingChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    // console.debug('sorting#onchange', sorting, '=>', event.target.value)
+    setSorting(event.target.value as ResultsSorting)
+  }
+
   // --------------------------------------------------------------
   // rendering
 
   return (
     <div id="search-results" className="mt-2 mb-4">
       {/* TODO: add visually-hidden title for semantic site structure */}
+      {/* TODO: add tooltip with easier to read information */}
       <ProgressBar className="mb-3">
         <ProgressBar
           variant="success"
           now={numWithResults}
           max={numRequested}
           label={`${numWithResults} resources with results`}
+          aria-label="Resources with results"
         />
         <ProgressBar
           variant="secondary"
           now={numNoResults}
           max={numRequested}
           label={`${numNoResults} resources without results`}
+          aria-label="Resources without results but no issues"
         />
         <ProgressBar
           variant="warning"
           now={numNoResultsWithIssues}
           max={numRequested}
           label={`${numNoResultsWithIssues} resources with errors`}
+          aria-label="Resources with issues (warnings/diagnostics or errors)"
         />
         <ProgressBar
           striped
@@ -126,14 +159,15 @@ function SearchResults({
           now={numInProgress}
           max={numRequested}
           label={`Search through ${numInProgress} Resources`}
+          aria-label="Resources with pending results"
         />
       </ProgressBar>
 
       {/* TODO: add fuzzy filter for quick search through results? */}
-      <Card className="mb-2">
+      <Card className="mb-2" role="group" aria-label="Result display and filter options">
         <Card.Body>
-          <Row>
-            <Col md={3} sm={6}>
+          <Row className="row-gap-2">
+            <Col md={'auto'} sm={6}>
               <FloatingLabel label="View mode" controlId="results-view-mode">
                 <Form.Select value={viewMode} onChange={handleViewModeChange}>
                   <option value="plain">Plain</option>
@@ -144,8 +178,31 @@ function SearchResults({
                 </Form.Select>
               </FloatingLabel>
             </Col>
-            <Col md={3} sm={6}>
+            <Col md={'auto'} sm={6}>
+              <FloatingLabel label="Sorting" controlId="results-sorting">
+                <Form.Select value={sorting} onChange={handleSortingChange}>
+                  <option value="default">(default)</option>
+                  <option value="title-up">Title (up)</option>
+                  <option value="title-down">Title (down)</option>
+                  <option value="result-count-total-up">Total result count (up)</option>
+                  <option value="result-count-total-down">Total result count (down)</option>
+                </Form.Select>
+              </FloatingLabel>
+            </Col>
+            <Col md={'auto'} sm={12} className="align-content-center">
               {/* show warnings/errors */}
+              <Form.Check
+                checked={showResourceDetails}
+                onChange={() => setShowResourceDetails((show) => !show)}
+                id="results-view-resource-details"
+                label="Show result details"
+              />
+              <Form.Check
+                checked={showDiagnostics}
+                onChange={() => setShowDiagnostics((show) => !show)}
+                id="results-view-warnings-errors"
+                label="Show warning and error messages"
+              />
             </Col>
             <Col md={3} sm={6}>
               {/* TODO: fuzzy filter */}
@@ -156,19 +213,22 @@ function SearchResults({
 
       {searchId &&
         data &&
-        data.results.map((result) => (
-          <ResourceSearchResult
-            axios={axios}
-            searchId={searchId}
-            resourceId={result.id}
-            resultInfo={result}
-            viewMode={viewMode}
-            showResourceDetails={true} // TODO
-            languages={languages}
-            numberOfResults={numberOfResults}
-            key={`${searchId}-${result.id}`}
-          />
-        ))}
+        data.results
+          .toSorted(sortFn)
+          .map((result) => (
+            <ResourceSearchResult
+              axios={axios}
+              searchId={searchId}
+              resourceId={result.id}
+              resultInfo={result}
+              viewMode={viewMode}
+              showResourceDetails={showResourceDetails}
+              showDiagnostics={showDiagnostics}
+              languages={languages}
+              numberOfResults={numberOfResults}
+              key={`${searchId}-${result.id}`}
+            />
+          ))}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { type AxiosInstance } from 'axios'
 import { useRef, useState } from 'react'
+import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
@@ -17,6 +18,7 @@ import {
   type ResourceSearchResultMetaOnly,
   type SearchResultsMetaOnly,
 } from '@/utils/api'
+import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import { type ResultsViewMode } from '@/utils/results'
 import { type LanguageCode2NameMap, languageCodeToName } from '@/utils/search'
 
@@ -39,6 +41,7 @@ export interface ResourceSearchResultProps {
   resultInfo: ResourceSearchResultMetaOnly
   viewMode: ResultsViewMode
   showResourceDetails: boolean
+  showDiagnostics: boolean
   languages?: LanguageCode2NameMap
   numberOfResults: number
 }
@@ -280,16 +283,17 @@ function ResourceSearchResult({
   resultInfo,
   viewMode,
   showResourceDetails,
+  showDiagnostics,
   languages,
   numberOfResults,
 }: ResourceSearchResultProps) {
   const inProgress = resultInfo.inProgress
-  const hasResults = resultInfo.numberOfRecords > 0
+  const hasResults = resultInfo.numberOfRecordsLoaded > 0 // number of required default KWIC rows loaded
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['search-result-details', searchId, resourceId],
     queryFn: getSearchResultDetails.bind(null, axios, searchId, resourceId),
-    enabled: !inProgress && hasResults,
+    enabled: !inProgress, // && hasResults,
   })
   console.debug(
     'resource results',
@@ -300,7 +304,7 @@ function ResourceSearchResult({
   // TODO: filter for language "byGuess" mode
 
   if (inProgress) return null
-  if (!hasResults) return null
+  if (!showDiagnostics && !hasResults) return null
   if (!data) return null
 
   // --------------------------------------------------------------
@@ -310,7 +314,7 @@ function ResourceSearchResult({
     if (!data) return false
     if (data.nextRecordPosition === -1) return false
     if (data.numberOfRecords === -1) return false
-    if (data.numberOfRecords === data.kwics.length) return false // TODO: maybe?
+    if (data.numberOfRecords === data.kwics.length) return true // TODO: maybe?
     return true
   }
 
@@ -324,8 +328,10 @@ function ResourceSearchResult({
     if (!data) return null // TODO
 
     if (data.numberOfRecords === -1) {
+      // probably at end, since endpoints respond with -1 when trying to request more than available
       return data.kwics.length
     } else if (data.numberOfRecords === data.kwics.length && data.nextRecordPosition === -1) {
+      // either everything or possibly more
       return `${data.kwics.length} / ${data.numberOfRecords}?`
     } else {
       return `${data.kwics.length} / ${data.numberOfRecords}`
@@ -343,14 +349,20 @@ function ResourceSearchResult({
   }
 
   return (
-    <Card className="my-1 resource-search-result">
+    <Card className="my-1 resource-search-result" role="group" aria-label={`Results and details for resource ${data.resource.title}`}>
       <Card.Header className="d-flex">
         <div>
-          <Badge bg="" className="text-bg-light border me-2">
+          <Badge
+            bg=""
+            className="text-bg-light border me-2"
+            aria-label="Number of results (total amount, or currently loaded amount with total available)"
+          >
             {renderResultsCounter()}
           </Badge>
-          {data.resource.title}
-          <small className="text-muted">{data.resource.institution}</small>
+          <span aria-label="Resource title">{data.resource.title}</span>
+          <small className="text-muted" aria-label="Institution name">
+            {data.resource.institution}
+          </small>
         </div>
         <div className="d-inline-block ms-auto">
           <Button size="sm">
@@ -358,9 +370,10 @@ function ResourceSearchResult({
           </Button>
         </div>
       </Card.Header>
+      {/* result details */}
       {showResourceDetails && (
         <Card.Body className="border-bottom resource-info">
-          <dl className="mb-0">
+          <dl className="mb-0" aria-label='Resource information'>
             <dt>
               <i dangerouslySetInnerHTML={{ __html: bankIcon }} />
               <span> Institution</span>
@@ -388,7 +401,45 @@ function ResourceSearchResult({
           </dl>
         </Card.Body>
       )}
-      <Card.Body>{renderResults()}</Card.Body>
+      {/* results */}
+      {hasResults && <Card.Body>{renderResults()}</Card.Body>}
+      {/* diagnostics */}
+      {showDiagnostics && (data.exception || data.diagnostics?.length > 0) && (
+        <Card.Body className={hasResults ? 'border-top' : ''}>
+          {/* TODO: aria invisible heading, adjust levels */}
+          {data.exception && (
+            <Alert variant="danger" aria-label='Error information'>
+              <Alert.Heading style={{ fontSize: '1rem' }}>
+                <span className="text-uppercase">Exception:</span> <span aria-label='Error message'>{data.exception.message}</span>
+              </Alert.Heading>
+              {data.exception.cause && <p className="mb-0 small">Cause: {data.exception.cause}</p>}
+              {data.exception.klass && (
+                <p className="mb-0 small">
+                  Caused by: <code>{data.exception.klass}</code>
+                </p>
+              )}
+            </Alert>
+          )}
+          {data.diagnostics
+            .filter((diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI)
+            .map((diagnostic) => (
+              <Alert
+                variant="warning"
+                key={`${diagnostic.uri}-${diagnostic.message}-${diagnostic.diagnostic}`}
+              >
+                <Alert.Heading style={{ fontSize: '1rem' }}>{diagnostic.message}</Alert.Heading>
+                {diagnostic.diagnostic && (
+                  <p className="mb-0 small">Details: {diagnostic.diagnostic}</p>
+                )}
+                <p className="mb-0 small">
+                  Diagnostic type: <code>{diagnostic.uri}</code>
+                  {/* add link to list? */}
+                </p>
+              </Alert>
+            ))}
+        </Card.Body>
+      )}
+      {/* load more button */}
       {hasMoreResults() && (
         <Card.Body className="text-center border-top">
           <LoadMoreResults

@@ -1,4 +1,4 @@
-export type QueryTypeID = 'cql' | 'fcs'
+export type QueryTypeID = 'cql' | 'fcs' | 'lex'
 
 // --------------------------------------------------------------------------
 
@@ -6,23 +6,28 @@ export const queryTypes = [
   {
     id: 'cql',
     name: 'Text layer Contextual Query Language (CQL)',
-    searchPlaceholder: 'Elephant',
     searchLabel: 'Full-text search',
-    searchLabelBkColor: '#fed',
-    className: '',
+    color: '#29a900',
+    searchPlaceholder: 'Elephant',
   },
   {
     id: 'fcs',
     name: 'Multi-layer Federated Content Search Query Language (FCS-QL)',
-    searchPlaceholder: "[word = 'annotation'][word = 'focused']",
     searchLabel: 'Multi-layer annotation search',
-    searchLabelBkColor: '#efd',
-    disabled: false,
+    color: '#00a8cc',
+    searchPlaceholder: "[word = 'annotation'][word = 'focused']",
+  },
+  {
+    id: 'lex',
+    name: 'Lexical Resources Contextual Query Language (LexCQL)',
+    searchLabel: 'Lexcial resource search',
+    color: '#e77e00',
+    searchPlaceholder: 'banana',
   },
 ]
 
 export const queryTypeMap = Object.fromEntries(
-  ['cql', 'fcs'].map((id) => [id, queryTypes.find((qt) => qt.id === id)])
+  ['cql', 'fcs', 'lex'].map((id) => [id, queryTypes.find((qt) => qt.id === id)])
 )
 
 export const DEFAULT_QUERY_TYPE = 'cql'

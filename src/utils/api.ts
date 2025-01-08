@@ -58,7 +58,7 @@ export interface AvailableLayer {
   altValueInfoURI: null
 }
 
-export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH'
+export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH' | 'LEX_SEARCH'
 export type ProtocolVersion = 'VERSION_2' | 'VERSION_1' | 'LEGACY'
 
 export type Encoding = 'VALUE' | 'EMPTY'
