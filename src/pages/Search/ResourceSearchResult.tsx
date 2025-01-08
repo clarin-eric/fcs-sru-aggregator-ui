@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { type AxiosInstance } from 'axios'
-import { useRef } from 'react'
+import { useId, useRef, useState } from 'react'
 import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
+import Collapse from 'react-bootstrap/Collapse'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Table from 'react-bootstrap/Table'
 import Tooltip from 'react-bootstrap/Tooltip'
@@ -182,6 +183,9 @@ function ResourceSearchResult({
   languages,
   numberOfResults,
 }: ResourceSearchResultProps) {
+  const htmlId = useId()
+  const [expanded, setExpanded] = useState(true)
+
   const inProgress = resultInfo.inProgress
   const hasResults = resultInfo.numberOfRecordsLoaded > 0 // number of required default KWIC rows loaded
   const hasDiagnostics = resultInfo.exception || resultInfo.diagnostics?.length > 0
@@ -259,8 +263,16 @@ function ResourceSearchResult({
       role="group"
       aria-label={`Results and details for resource ${data.resource.title}`}
     >
-      <Card.Header className="d-flex">
-        <div>
+      <Card.Header className="d-flex accordion">
+        <button
+          type="button"
+          onClick={() => setExpanded((expanded) => !expanded)}
+          aria-controls={htmlId}
+          aria-expanded={expanded}
+          className={`me-3 w-auto flex-grow-1 d-block text-start collapse-toggle-btn ${
+            expanded ? '' : 'collapsed'
+          }`}
+        >
           <Badge
             bg=""
             className="text-bg-light border me-2"
@@ -272,94 +284,101 @@ function ResourceSearchResult({
           <small className="text-muted" aria-label="Institution name">
             {data.resource.institution}
           </small>
-        </div>
+        </button>
         <div className="d-inline-block ms-auto">
           <Button size="sm">
             <i dangerouslySetInnerHTML={{ __html: eyeIcon }} /> View
           </Button>
         </div>
       </Card.Header>
-      {/* result details */}
-      {showResourceDetails && (
-        <Card.Body className="border-bottom resource-info">
-          <dl className="mb-0" aria-label="Resource information">
-            <dt>
-              <i dangerouslySetInnerHTML={{ __html: bankIcon }} />
-              <span> Institution</span>
-            </dt>
-            <dd className="mb-0">{data.resource.institution}</dd>
-            <dt>
-              <i dangerouslySetInnerHTML={{ __html: infoCircleIcon }} />
-              <span> Description</span>
-            </dt>
-            {data.resource.description && (
-              <>
-                <dd className="mb-0">{data.resource.description}</dd>
+      {/* data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample" */}
+      <Collapse in={expanded}>
+        <div id={htmlId}>
+          {/* result details */}
+          {showResourceDetails && (
+            <Card.Body className="border-bottom resource-info">
+              <dl className="mb-0" aria-label="Resource information">
                 <dt>
-                  <i dangerouslySetInnerHTML={{ __html: translateIcon }} />
-                  <span> Languages</span>
+                  <i dangerouslySetInnerHTML={{ __html: bankIcon }} />
+                  <span> Institution</span>
                 </dt>
-              </>
-            )}
-            <dd className="mb-0">
-              {data.resource.languages
-                .map(languages ? (code) => languageCodeToName(code, languages) : (x) => x)
-                .toSorted()
-                .join(', ')}
-            </dd>
-          </dl>
-        </Card.Body>
-      )}
-      {/* results */}
-      {hasResults && <Card.Body>{renderResults()}</Card.Body>}
-      {/* diagnostics */}
-      {showDiagnostics && hasDiagnostics && (
-        <Card.Body className={hasResults ? 'border-top' : ''}>
-          {/* TODO: aria invisible heading, adjust levels */}
-          {data.exception && (
-            <Alert variant="danger" aria-label="Error information">
-              <Alert.Heading style={{ fontSize: '1rem' }}>
-                <span className="text-uppercase">Exception:</span>{' '}
-                <span aria-label="Error message">{data.exception.message}</span>
-              </Alert.Heading>
-              {data.exception.cause && <p className="mb-0 small">Cause: {data.exception.cause}</p>}
-              {data.exception.klass && (
-                <p className="mb-0 small">
-                  Caused by: <code>{data.exception.klass}</code>
-                </p>
-              )}
-            </Alert>
-          )}
-          {data.diagnostics
-            .filter((diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI)
-            .map((diagnostic) => (
-              <Alert
-                variant="warning"
-                key={`${diagnostic.uri}-${diagnostic.message}-${diagnostic.diagnostic}`}
-              >
-                <Alert.Heading style={{ fontSize: '1rem' }}>{diagnostic.message}</Alert.Heading>
-                {diagnostic.diagnostic && (
-                  <p className="mb-0 small">Details: {diagnostic.diagnostic}</p>
+                <dd className="mb-0">{data.resource.institution}</dd>
+                <dt>
+                  <i dangerouslySetInnerHTML={{ __html: infoCircleIcon }} />
+                  <span> Description</span>
+                </dt>
+                {data.resource.description && (
+                  <>
+                    <dd className="mb-0">{data.resource.description}</dd>
+                    <dt>
+                      <i dangerouslySetInnerHTML={{ __html: translateIcon }} />
+                      <span> Languages</span>
+                    </dt>
+                  </>
                 )}
-                <p className="mb-0 small">
-                  Diagnostic type: <code>{diagnostic.uri}</code>
-                  {/* add link to list? */}
-                </p>
-              </Alert>
-            ))}
-        </Card.Body>
-      )}
-      {/* load more button */}
-      {hasMoreResults() && (
-        <Card.Body className="text-center border-top">
-          <LoadMoreResultsButton
-            axios={axios}
-            searchId={searchId}
-            resourceId={resourceId}
-            numberOfResults={numberOfResults}
-          />
-        </Card.Body>
-      )}
+                <dd className="mb-0">
+                  {data.resource.languages
+                    .map(languages ? (code) => languageCodeToName(code, languages) : (x) => x)
+                    .toSorted()
+                    .join(', ')}
+                </dd>
+              </dl>
+            </Card.Body>
+          )}
+          {/* results */}
+          {hasResults && <Card.Body>{renderResults()}</Card.Body>}
+          {/* diagnostics */}
+          {showDiagnostics && hasDiagnostics && (
+            <Card.Body className={hasResults ? 'border-top' : ''}>
+              {/* TODO: aria invisible heading, adjust levels */}
+              {data.exception && (
+                <Alert variant="danger" aria-label="Error information">
+                  <Alert.Heading style={{ fontSize: '1rem' }}>
+                    <span className="text-uppercase">Exception:</span>{' '}
+                    <span aria-label="Error message">{data.exception.message}</span>
+                  </Alert.Heading>
+                  {data.exception.cause && (
+                    <p className="mb-0 small">Cause: {data.exception.cause}</p>
+                  )}
+                  {data.exception.klass && (
+                    <p className="mb-0 small">
+                      Caused by: <code>{data.exception.klass}</code>
+                    </p>
+                  )}
+                </Alert>
+              )}
+              {data.diagnostics
+                .filter((diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI)
+                .map((diagnostic) => (
+                  <Alert
+                    variant="warning"
+                    key={`${diagnostic.uri}-${diagnostic.message}-${diagnostic.diagnostic}`}
+                  >
+                    <Alert.Heading style={{ fontSize: '1rem' }}>{diagnostic.message}</Alert.Heading>
+                    {diagnostic.diagnostic && (
+                      <p className="mb-0 small">Details: {diagnostic.diagnostic}</p>
+                    )}
+                    <p className="mb-0 small">
+                      Diagnostic type: <code>{diagnostic.uri}</code>
+                      {/* add link to list? */}
+                    </p>
+                  </Alert>
+                ))}
+            </Card.Body>
+          )}
+          {/* load more button */}
+          {hasMoreResults() && (
+            <Card.Body className="text-center border-top">
+              <LoadMoreResultsButton
+                axios={axios}
+                searchId={searchId}
+                resourceId={resourceId}
+                numberOfResults={numberOfResults}
+              />
+            </Card.Body>
+          )}
+        </div>
+      </Collapse>
       {/* <Card.Footer className='text-center'>More Results?</Card.Footer> */}
     </Card>
   )
