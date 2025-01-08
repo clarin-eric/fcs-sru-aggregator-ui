@@ -8,6 +8,7 @@ import Form from 'react-bootstrap/Form'
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 
+import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import {
   getSearchResultsMetaOnly,
   postSearch,
@@ -69,6 +70,7 @@ function SearchResults({
 
   const [viewMode, setViewMode] = useState<ResultsViewMode>(DEFAULT_VIEW_MODE)
   const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
+  const [filter, setFilter] = useState('')
   const [showResourceDetails, setShowResourceDetails] = useState(false)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
 
@@ -97,19 +99,33 @@ function SearchResults({
   })
   console.log('search-results', data, isLoadingSearchResults, isErrorSearchResults)
 
+  const sortedResults = useMemo(() => data?.results.toSorted(sortFn) || [], [data, sortFn])
+
   const numRequested = resourceIDs.length
   const numInProgress = data?.inProgress ?? numRequested
-  const numWithResults = data?.results.filter((result) => result.numberOfRecords > 0).length ?? 0
-  const numNoResultsWithIssues =
-    data?.results.filter(
-      (result) =>
-        result.numberOfRecords <= 0 && (result.diagnostics.length > 0 || result.exception !== null)
-    ).length ?? 0
-  const numNoResults =
-    data?.results.filter(
-      (result) =>
-        result.numberOfRecords <= 0 && result.diagnostics.length === 0 && result.exception === null
-    ).length ?? 0
+  const numWithResults = useMemo(
+    () => data?.results.filter((result) => result.numberOfRecords > 0).length ?? 0,
+    [data]
+  )
+  const numNoResultsWithIssues = useMemo(
+    () =>
+      data?.results.filter(
+        (result) =>
+          result.numberOfRecords <= 0 &&
+          (result.diagnostics.length > 0 || result.exception !== null)
+      ).length ?? 0,
+    [data]
+  )
+  const numNoResults = useMemo(
+    () =>
+      data?.results.filter(
+        (result) =>
+          result.numberOfRecords <= 0 &&
+          result.diagnostics.length === 0 &&
+          result.exception === null
+      ).length ?? 0,
+    [data]
+  )
 
   // --------------------------------------------------------------
   // event handlers
@@ -167,7 +183,7 @@ function SearchResults({
       <Card className="mb-2" role="group" aria-label="Result display and filter options">
         <Card.Body>
           <Row className="row-gap-2">
-            <Col md={'auto'} sm={6}>
+            <Col lg={'auto'} md={6} sm={6}>
               <FloatingLabel label="View mode" controlId="results-view-mode">
                 <Form.Select value={viewMode} onChange={handleViewModeChange}>
                   <option value="plain">Plain</option>
@@ -175,10 +191,11 @@ function SearchResults({
                   {queryType === 'fcs' && (
                     <option value="annotation-layers">Annotation Layers</option>
                   )}
+                  {queryType === 'lex' && <option value="lex-props">Dictionary</option>}
                 </Form.Select>
               </FloatingLabel>
             </Col>
-            <Col md={'auto'} sm={6}>
+            <Col lg={'auto'} md={6} sm={6}>
               <FloatingLabel label="Sorting" controlId="results-sorting">
                 <Form.Select value={sorting} onChange={handleSortingChange}>
                   <option value="default">(default)</option>
@@ -189,8 +206,16 @@ function SearchResults({
                 </Form.Select>
               </FloatingLabel>
             </Col>
-            <Col md={'auto'} sm={12} className="align-content-center">
-              {/* show warnings/errors */}
+            <Col lg={'auto'} md={12} sm={6} className="flex-fill order-xl-4">
+              <FloatingLabel label="Result filter query" controlId="result-filter">
+                <DebouncedFuzzySearchInput
+                  disabled={sorting !== 'default' || true} // TODO: implement
+                  value={filter}
+                  onChange={(value) => setFilter(value)}
+                />
+              </FloatingLabel>
+            </Col>
+            <Col lg={'auto'} md={12} sm={12} className="align-content-center order-xl-3">
               <Form.Check
                 checked={showResourceDetails}
                 onChange={() => setShowResourceDetails((show) => !show)}
@@ -204,31 +229,26 @@ function SearchResults({
                 label="Show warning and error messages"
               />
             </Col>
-            <Col md={3} sm={6}>
-              {/* TODO: fuzzy filter */}
-            </Col>
           </Row>
         </Card.Body>
       </Card>
 
       {searchId &&
         data &&
-        data.results
-          .toSorted(sortFn)
-          .map((result) => (
-            <ResourceSearchResult
-              axios={axios}
-              searchId={searchId}
-              resourceId={result.id}
-              resultInfo={result}
-              viewMode={viewMode}
-              showResourceDetails={showResourceDetails}
-              showDiagnostics={showDiagnostics}
-              languages={languages}
-              numberOfResults={numberOfResults}
-              key={`${searchId}-${result.id}`}
-            />
-          ))}
+        sortedResults.map((result) => (
+          <ResourceSearchResult
+            axios={axios}
+            searchId={searchId}
+            resourceId={result.id}
+            resultInfo={result}
+            viewMode={viewMode}
+            showResourceDetails={showResourceDetails}
+            showDiagnostics={showDiagnostics}
+            languages={languages}
+            numberOfResults={numberOfResults}
+            key={`${searchId}-${result.id}`}
+          />
+        ))}
     </div>
   )
 }

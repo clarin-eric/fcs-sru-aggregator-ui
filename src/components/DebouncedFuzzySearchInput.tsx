@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import Form from 'react-bootstrap/Form'
 
 import useDebounce from '@/hooks/useDebounce'
@@ -25,15 +24,13 @@ function DebouncedFuzzySearchInput({
   }, [onChange, deboundedFilter])
 
   return (
-    <FloatingLabel label="Resource filter query" controlId="resource-view-options-filter">
-      <Form.Control
-        type="search"
-        placeholder="Search for ..."
-        value={filter}
-        onChange={(event) => setFilter(event.target.value)}
-        disabled={disabled}
-      />
-    </FloatingLabel>
+    <Form.Control
+      type="search"
+      placeholder="Search for ..."
+      value={filter}
+      onChange={(event) => setFilter(event.target.value)}
+      disabled={disabled}
+    />
   )
 }
 

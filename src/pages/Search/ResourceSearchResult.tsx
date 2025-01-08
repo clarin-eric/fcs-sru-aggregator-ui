@@ -289,6 +289,7 @@ function ResourceSearchResult({
 }: ResourceSearchResultProps) {
   const inProgress = resultInfo.inProgress
   const hasResults = resultInfo.numberOfRecordsLoaded > 0 // number of required default KWIC rows loaded
+  const hasDiagnostics = resultInfo.exception || resultInfo.diagnostics?.length > 0
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['search-result-details', searchId, resourceId],
@@ -297,14 +298,23 @@ function ResourceSearchResult({
   })
   console.debug(
     'resource results',
-    { searchId, resourceId, inProgress },
+    { searchId, resourceId, inProgress, hasResults, hasDiagnostics },
     { data, isLoading, isError }
   )
 
   // TODO: filter for language "byGuess" mode
 
+  // do not show when
+  // (a) still in progress
   if (inProgress) return null
-  if (!showDiagnostics && !hasResults) return null
+  // (b) if no results, check if diags and diags should be shown
+  if (!hasResults) {
+    // if show diags but do not have diags => hide
+    if (showDiagnostics && !hasDiagnostics) return null
+    // if no results && do not want to show diags => hide
+    if (!showDiagnostics) return null
+  }
+  // (c) does not yet have data
   if (!data) return null
 
   // --------------------------------------------------------------
@@ -349,7 +359,11 @@ function ResourceSearchResult({
   }
 
   return (
-    <Card className="my-1 resource-search-result" role="group" aria-label={`Results and details for resource ${data.resource.title}`}>
+    <Card
+      className="my-1 resource-search-result"
+      role="group"
+      aria-label={`Results and details for resource ${data.resource.title}`}
+    >
       <Card.Header className="d-flex">
         <div>
           <Badge
@@ -373,7 +387,7 @@ function ResourceSearchResult({
       {/* result details */}
       {showResourceDetails && (
         <Card.Body className="border-bottom resource-info">
-          <dl className="mb-0" aria-label='Resource information'>
+          <dl className="mb-0" aria-label="Resource information">
             <dt>
               <i dangerouslySetInnerHTML={{ __html: bankIcon }} />
               <span> Institution</span>
@@ -404,13 +418,14 @@ function ResourceSearchResult({
       {/* results */}
       {hasResults && <Card.Body>{renderResults()}</Card.Body>}
       {/* diagnostics */}
-      {showDiagnostics && (data.exception || data.diagnostics?.length > 0) && (
+      {showDiagnostics && hasDiagnostics && (
         <Card.Body className={hasResults ? 'border-top' : ''}>
           {/* TODO: aria invisible heading, adjust levels */}
           {data.exception && (
-            <Alert variant="danger" aria-label='Error information'>
+            <Alert variant="danger" aria-label="Error information">
               <Alert.Heading style={{ fontSize: '1rem' }}>
-                <span className="text-uppercase">Exception:</span> <span aria-label='Error message'>{data.exception.message}</span>
+                <span className="text-uppercase">Exception:</span>{' '}
+                <span aria-label="Error message">{data.exception.message}</span>
               </Alert.Heading>
               {data.exception.cause && <p className="mb-0 small">Cause: {data.exception.cause}</p>}
               {data.exception.klass && (

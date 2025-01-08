@@ -8,6 +8,7 @@ import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
 
+import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import { type Resource } from '@/utils/api'
 import { getResourceIDs, isResourceAvailableDueToSubResource, SORT_FNS } from '@/utils/resources'
 import {
@@ -20,7 +21,6 @@ import {
   type ResourceSelectionModalViewOptionSorting,
   type ResourceSelectionModalViewOptionVisibility,
 } from '@/utils/search'
-import DebouncedFuzzySearchInput from './DebouncedFuzzySearchInput'
 import GroupedResources from './GroupedResources'
 import ResourceSelector from './ResourceSelector'
 
@@ -391,11 +391,16 @@ function ResourceSelectionModal({
                 </FloatingLabel>
               </Col>
               <Col md={3} sm={12}>
-                <DebouncedFuzzySearchInput
-                  disabled={viewResourcesGrouping !== 'resource'}
-                  value={filter}
-                  onChange={(value) => setFilter(value)}
-                />
+                <FloatingLabel
+                  label="Resource filter query"
+                  controlId="resource-view-options-filter"
+                >
+                  <DebouncedFuzzySearchInput
+                    disabled={viewResourcesGrouping !== 'resource'}
+                    value={filter}
+                    onChange={(value) => setFilter(value)}
+                  />
+                </FloatingLabel>
               </Col>
               <Col
                 md={3}
