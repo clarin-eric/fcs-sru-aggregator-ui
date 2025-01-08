@@ -1,26 +1,23 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { type AxiosInstance } from 'axios'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
-import Spinner from 'react-bootstrap/Spinner'
 import Table from 'react-bootstrap/Table'
 import Tooltip from 'react-bootstrap/Tooltip'
 
 import {
   getSearchResultDetails,
-  getSearchResultsMetaOnly,
-  postSearchMoreResults,
   type ResourceSearchResult,
   type ResourceSearchResultMetaOnly,
-  type SearchResultsMetaOnly,
 } from '@/utils/api'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import { type ResultsViewMode } from '@/utils/results'
 import { type LanguageCode2NameMap, languageCodeToName } from '@/utils/search'
+import LoadMoreResultsButton from './LoadMoreResultsButton'
 
 import './styles.css'
 
@@ -28,7 +25,6 @@ import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import eyeIcon from 'bootstrap-icons/icons/eye.svg?raw'
 import infoCircleIcon from 'bootstrap-icons/icons/info-circle.svg?raw'
 import link45degIcon from 'bootstrap-icons/icons/link-45deg.svg?raw'
-import threeDotsIcon from 'bootstrap-icons/icons/three-dots.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
 
 // --------------------------------------------------------------------------
@@ -52,13 +48,6 @@ export interface ViewPlainProps {
 
 export interface ViewKwicProps {
   data: ResourceSearchResult
-}
-
-export interface LoadMoreResultsProps {
-  axios: AxiosInstance
-  searchId: string
-  resourceId: string
-  numberOfResults: number
 }
 
 // --------------------------------------------------------------------------
@@ -179,100 +168,6 @@ function ViewKwic({ data }: ViewKwicProps) {
       {/* overlay mounting point to avoid flickering due to redrawing */}
       <div ref={ref} className="tooltip-mounting-point"></div>
     </>
-  )
-}
-
-function LoadMoreResults({ axios, searchId, resourceId, numberOfResults }: LoadMoreResultsProps) {
-  const queryClient = useQueryClient()
-
-  const [enableRequests, setEnableRequests] = useState(false)
-
-  // request more
-  const {
-    data: searchIdNewButSame,
-    isLoading: isLoadingRequesting,
-    // isError: isErrorRequesting,
-  } = useQuery({
-    queryKey: ['search-result-load-more', searchId, resourceId],
-    queryFn: postSearchMoreResults.bind(null, axios, searchId, { resourceId, numberOfResults }),
-    enabled: enableRequests,
-    // NOTE: we never want this to automatically fetch more unless user requests it
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  })
-  // console.debug('request more results', { enableRequests, searchId, resourceId, searchIdNewButSame, isLoadingRequesting, isErrorRequesting })
-  if (searchIdNewButSame !== undefined && searchId !== searchIdNewButSame) {
-    console.warn('SearchIDs should be the same?!', { searchId, searchIdNewButSame, resourceId })
-  }
-  const hasRequestedMore = searchIdNewButSame !== undefined
-
-  // poll for more
-  const {
-    data: dataPolling,
-    isLoading: isLoadingPolling,
-    // isError: isErrorPolling,
-  } = useQuery<SearchResultsMetaOnly>({
-    queryKey: ['search-results', searchId, resourceId],
-    queryFn: getSearchResultsMetaOnly.bind(null, axios, searchId),
-    enabled: enableRequests && hasRequestedMore,
-    refetchInterval(query) {
-      // console.debug('[LoadMoreResults#refetchInterval]', { searchId, resourceId, hasRequestedMore, query })
-      if (query.state.data && query.state.data.inProgress > 0) return 1500
-      return false
-    },
-  })
-  // console.debug('polling for more results finished?', { dataPolling, isLoadingPolling, isErrorPolling, searchId, resourceId })
-
-  const isLoading = isLoadingRequesting || isLoadingPolling
-  const isFinished =
-    !!dataPolling &&
-    // either everything is finished
-    (dataPolling.inProgress === 0 ||
-      // or the resource we requested more results for is finished
-      dataPolling.results.filter(
-        (metaResult) => metaResult.id === resourceId && metaResult.inProgress === false
-      ).length === 1)
-
-  // console.debug('before render', { enableRequests, isLoading, isFinished, hasRequestedMore, searchId, resourceId })
-  if (enableRequests && hasRequestedMore && isFinished) {
-    if (enableRequests) {
-      // console.debug('disable requests for next')
-      setEnableRequests(false)
-    }
-
-    // console.debug('Invalidate data for refresh ...', { searchId, resourceId, queryKey: ['search-result-details', searchId, resourceId] })
-    // details
-    queryClient.invalidateQueries({ queryKey: ['search-result-details', searchId, resourceId] })
-  }
-
-  async function handleLoadMoreClick() {
-    // console.log('[handleLoadMoreClick]', { searchId, resourceId })
-
-    // TODO: unsure about removeQueries / resetQueries, required to completely clear state
-    // more results
-    await queryClient.resetQueries({ queryKey: ['search-result-load-more', searchId, resourceId] })
-    // polling (we do here ourselves)
-    await queryClient.resetQueries({ queryKey: ['search-results', searchId, resourceId] })
-
-    setEnableRequests(true)
-  }
-
-  return (
-    <Button
-      className="more-results-button"
-      disabled={isLoading || enableRequests}
-      onClick={handleLoadMoreClick}
-    >
-      {isLoading ? (
-        <>
-          <Spinner animation="border" />
-        </>
-      ) : (
-        <>
-          <i dangerouslySetInnerHTML={{ __html: threeDotsIcon }} /> Load more results
-        </>
-      )}
-    </Button>
   )
 }
 
@@ -457,7 +352,7 @@ function ResourceSearchResult({
       {/* load more button */}
       {hasMoreResults() && (
         <Card.Body className="text-center border-top">
-          <LoadMoreResults
+          <LoadMoreResultsButton
             axios={axios}
             searchId={searchId}
             resourceId={resourceId}

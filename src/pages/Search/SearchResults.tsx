@@ -9,12 +9,7 @@ import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
-import {
-  getSearchResultsMetaOnly,
-  postSearch,
-  type Resource,
-  type SearchResultsMetaOnly,
-} from '@/utils/api'
+import { getSearchResultsMetaOnly, type Resource, type SearchResultsMetaOnly } from '@/utils/api'
 import {
   DEFAULT_SORTING,
   DEFAULT_VIEW_MODE,
@@ -33,7 +28,8 @@ import './styles.css'
 
 export interface SearchResultsProps {
   axios: AxiosInstance
-  params: SearchData
+  searchId: string
+  searchParams: SearchData
   resources?: Resource[]
   languages?: LanguageCode2NameMap
 }
@@ -44,30 +40,11 @@ export interface SearchResultsProps {
 // TODO: make it (search?) cancelable! (useEffect?)
 function SearchResults({
   axios,
-  params: { query, queryType, language, numberOfResults, resourceIDs },
+  searchId,
+  searchParams: { queryType, numberOfResults, resourceIDs },
   resources,
   languages,
 }: SearchResultsProps) {
-  // the actual search
-  const {
-    data: searchId,
-    error,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['search', { query, queryType, language, numberOfResults, resourceIDs }],
-    queryFn: postSearch.bind(null, axios, {
-      query,
-      queryType,
-      language,
-      numberOfResults: numberOfResults.toString(),
-      resourceIds: resourceIDs,
-    }),
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
-  })
-  console.debug('searchId', { searchId, error, isLoading, isError })
-
   const [viewMode, setViewMode] = useState<ResultsViewMode>(DEFAULT_VIEW_MODE)
   const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
   const [filter, setFilter] = useState('')
@@ -147,6 +124,7 @@ function SearchResults({
     <div id="search-results" className="mt-2 mb-4">
       {/* TODO: add visually-hidden title for semantic site structure */}
       {/* TODO: add tooltip with easier to read information */}
+      {/* TODO: mobile design: hide labels and maybe add below? */}
       <ProgressBar className="mb-3">
         <ProgressBar
           variant="success"
@@ -179,7 +157,6 @@ function SearchResults({
         />
       </ProgressBar>
 
-      {/* TODO: add fuzzy filter for quick search through results? */}
       <Card className="mb-2" role="group" aria-label="Result display and filter options">
         <Card.Body>
           <Row className="row-gap-2">

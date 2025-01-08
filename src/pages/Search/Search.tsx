@@ -1,11 +1,12 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { type AxiosInstance } from 'axios'
 import { useEffect, useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
+import Spinner from 'react-bootstrap/Spinner'
 
-import { getInitData, type Resource } from '@/utils/api'
+import { getInitData, postSearch, type Resource } from '@/utils/api'
 import { fromApi, getResourceIDs } from '@/utils/resources'
 import { type LanguageCode2NameMap } from '@/utils/search'
 import SearchInput, { type SearchData } from './SearchInput'
@@ -67,6 +68,29 @@ function Search({ axios }: SearchProps) {
   // console.debug('isInputDisabled', isInputDisabled, 'isLoading', isLoading, 'isError', isError)
 
   // ------------------------------------------------------------------------
+  // search request
+
+  // the actual search
+  const {
+    mutate: mutateSearch,
+    data: searchId,
+    error: searchError,
+    isPending: isSearchPending,
+    isError: isSearchError,
+  } = useMutation({
+    mutationKey: ['search'],
+    mutationFn: ({ query, queryType, language, numberOfResults, resourceIDs }: SearchData) =>
+      postSearch(axios, {
+        query,
+        queryType,
+        language,
+        numberOfResults: numberOfResults.toString(),
+        resourceIds: resourceIDs,
+      }),
+  })
+  console.debug('searchId', { searchId, searchError, isSearchPending, isSearchError })
+
+  // ------------------------------------------------------------------------
   // event handlers
 
   function handleSearch(searchData: SearchData) {
@@ -76,6 +100,8 @@ function Search({ axios }: SearchProps) {
 
     setSearchParams(searchData)
     setHasSearch(true)
+
+    mutateSearch(searchData)
   }
 
   // ------------------------------------------------------------------------
@@ -129,7 +155,22 @@ function Search({ axios }: SearchProps) {
         </Row>
       )}
 
-      {searchParams && <SearchResults axios={axios} params={searchParams} resources={resources} languages={languages} />}
+      {hasSearch && isSearchPending && (
+        <Row>
+          <Col className="text-center my-5">
+            <Spinner animation="border" />
+          </Col>
+        </Row>
+      )}
+      {searchParams && searchId && (
+        <SearchResults
+          axios={axios}
+          searchId={searchId}
+          searchParams={searchParams}
+          resources={resources}
+          languages={languages}
+        />
+      )}
     </Container>
   )
 }
