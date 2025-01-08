@@ -61,7 +61,7 @@ function LoadMoreResultsButton({
 
       // polling (we do here ourselves)
       // TODO: unsure about removeQueries / resetQueries, required to completely clear state
-      await queryClient.resetQueries({ queryKey: ['search-results', searchId, resourceId] })
+      await queryClient.invalidateQueries({ queryKey: ['search-results', searchId, resourceId] })
       setIsPolling(true)
     },
   })
@@ -110,7 +110,7 @@ function LoadMoreResultsButton({
   return (
     <Button className="more-results-button" disabled={showSpinner} onClick={handleLoadMoreClick}>
       {showSpinner ? (
-        <Spinner animation="border" />
+        <Spinner animation="border" className='d-block' />
       ) : (
         <>
           <i dangerouslySetInnerHTML={{ __html: threeDotsIcon }} /> Load more results

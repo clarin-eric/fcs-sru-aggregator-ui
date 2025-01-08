@@ -368,7 +368,7 @@ function ResourceSearchResult({
           )}
           {/* load more button */}
           {hasMoreResults() && (
-            <Card.Body className="text-center border-top">
+            <Card.Body className="text-center border-top py-2">
               <LoadMoreResultsButton
                 axios={axios}
                 searchId={searchId}
