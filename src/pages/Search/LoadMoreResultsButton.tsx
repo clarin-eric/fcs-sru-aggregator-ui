@@ -5,9 +5,9 @@ import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
 
 import {
-  getSearchResultsMetaOnly,
+  getSearchResultsMetaOnlyForResource,
   postSearchMoreResults,
-  type SearchResultsMetaOnly,
+  type ResourceSearchResultMetaOnly,
 } from '@/utils/api'
 
 import './styles.css'
@@ -22,6 +22,7 @@ export interface LoadMoreResultsButtonProps {
   searchId: string
   resourceId: string
   numberOfResults: number
+  pollDelay?: number
 }
 
 // --------------------------------------------------------------------------
@@ -32,6 +33,7 @@ function LoadMoreResultsButton({
   searchId,
   resourceId,
   numberOfResults,
+  pollDelay = 1500,
 }: LoadMoreResultsButtonProps) {
   const queryClient = useQueryClient()
 
@@ -65,31 +67,25 @@ function LoadMoreResultsButton({
   })
 
   // poll for data ready
+  pollDelay ??= 1500
   const {
     data: dataPolling,
     isLoading: isLoadingPolling,
     isFetching: isFetchingPolling,
-  } = useQuery<SearchResultsMetaOnly>({
+  } = useQuery<ResourceSearchResultMetaOnly>({
     queryKey: ['search-results', searchId, resourceId],
-    queryFn: getSearchResultsMetaOnly.bind(null, axios, searchId),
+    queryFn: getSearchResultsMetaOnlyForResource.bind(null, axios, searchId, resourceId),
     enabled: isPolling,
     refetchInterval(query) {
       // console.debug('[refetchInterval]', { searchId, resourceId, query })
-      if (query.state.data && query.state.data.inProgress > 0) return 1500
+      if (query.state.data && query.state.data.inProgress) return pollDelay
       return false
     },
   })
   // console.debug('polling for more results finished?', { dataPolling, isLoadingPolling, isErrorPolling, searchId, resourceId })
 
   const isLoading = isPendingRequesting || isLoadingPolling || isFetchingPolling
-  const isFinished =
-    !!dataPolling &&
-    // either everything is finished
-    (dataPolling.inProgress === 0 ||
-      // or the resource we requested more results for is finished
-      dataPolling.results.filter(
-        (metaResult) => metaResult.id === resourceId && metaResult.inProgress === false
-      ).length === 1)
+  const isFinished = !!dataPolling && !dataPolling.inProgress
   const showSpinner = isLoading || isPolling
 
   // console.debug('before render', { isPolling, isLoading, isFinished, searchId, resourceId })

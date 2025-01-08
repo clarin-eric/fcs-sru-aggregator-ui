@@ -32,6 +32,7 @@ export interface SearchResultsProps {
   searchParams: SearchData
   resources?: Resource[]
   languages?: LanguageCode2NameMap
+  pollDelay?: number
 }
 
 // --------------------------------------------------------------------------
@@ -44,6 +45,7 @@ function SearchResults({
   searchParams: { queryType, numberOfResults, resourceIDs },
   resources,
   languages,
+  pollDelay = 1500,
 }: SearchResultsProps) {
   const [viewMode, setViewMode] = useState<ResultsViewMode>(DEFAULT_VIEW_MODE)
   const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
@@ -60,6 +62,7 @@ function SearchResults({
   }, [sorting, resources])
 
   // polling of meta results, dependant on searchId
+  pollDelay ??= 1500
   const {
     data,
     isLoading: isLoadingSearchResults,
@@ -70,7 +73,7 @@ function SearchResults({
     enabled: !!searchId,
     refetchInterval(query) {
       console.log('[refetchInterval]', query, query.state.data)
-      if (query.state.data && query.state.data.inProgress > 0) return 1500
+      if (query.state.data && query.state.data.inProgress > 0) return pollDelay
       return false
     },
   })

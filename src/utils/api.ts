@@ -265,7 +265,7 @@ export interface Fragment {
 // --------------------------------------------------------------------------
 
 export async function getSearchResults(axios: AxiosInstance, searchID: string) {
-  if (!searchID) throw new Error('Invalid searchID parameter!')
+  if (!searchID) throw new Error('Invalid "searchID" parameter!')
 
   const response = await axios.get(`search/${searchID}`)
   console.debug('[getSearchResults]', { searchID }, response)
@@ -273,11 +273,35 @@ export async function getSearchResults(axios: AxiosInstance, searchID: string) {
 }
 
 export async function getSearchResultsMetaOnly(axios: AxiosInstance, searchID: string) {
-  if (!searchID) throw new Error('Invalid searchID parameter!')
+  if (!searchID) throw new Error('Invalid "searchID" parameter!')
 
   const response = await axios.get(`search/${searchID}/metaonly`)
   console.debug('[getSearchResultsMetaOnly]', { searchID }, response)
   return response.data as SearchResultsMetaOnly
+}
+
+export async function getSearchResultsMetaOnlyForResource(
+  axios: AxiosInstance,
+  searchID: string,
+  resourceID: string
+) {
+  if (!searchID) throw new Error('Invalid "searchID" parameter!')
+  if (!resourceID) throw new Error('Invalid "resourceID" parameter!')
+
+  const response = await axios.get(
+    `search/${searchID}/metaonly?resourceId=${encodeURIComponent(resourceID)}`
+  )
+  console.debug('[getSearchResultsMetaOnlyForResource]', { searchID, resourceID }, response)
+
+  const results = (response.data as SearchResultsMetaOnly).results.filter(
+    (result) => result.id === resourceID
+  )
+  if (results.length === 0)
+    throw new Error(
+      `Results (meta) for resource not found! (searchId: ${searchID}, resourceId: ${resourceID})`
+    )
+
+  return results[0]
 }
 
 export async function getSearchResultDetails(
