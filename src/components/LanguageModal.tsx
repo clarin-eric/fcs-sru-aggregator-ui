@@ -22,17 +22,7 @@ import {
 
 export type LanguageModelCloseActions = 'close' | 'confirm' | 'abort'
 
-// --------------------------------------------------------------------------
-// component
-
-function LanguageModal({
-  show,
-  languages,
-  resources,
-  searchLanguage,
-  searchLanguageFilter,
-  onModalClose,
-}: {
+interface LanguageModalProps {
   show: boolean
   languages?: LanguageCode2NameMap
   resources?: Resource[]
@@ -43,7 +33,19 @@ function LanguageModal({
     filter: LanguageFilterOptions
     action: LanguageModelCloseActions
   }) => void
-}) {
+}
+
+// --------------------------------------------------------------------------
+// component
+
+function LanguageModal({
+  show,
+  languages,
+  resources,
+  searchLanguage,
+  searchLanguageFilter,
+  onModalClose,
+}: LanguageModalProps) {
   //  = { languages: {}, searchLanguage: MULTIPLE_LANGUAGE_CODE, searchLanguageFilter: DEFAULT_SEARCH_LANGUAGE_FILTER }
   const [selectedLanguage, setSelectedLanguage] = useState(searchLanguage || MULTIPLE_LANGUAGE_CODE)
   const [selectedFilterOption, setSelectedFilterOption] = useState(

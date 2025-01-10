@@ -39,6 +39,16 @@ interface ResourcesGroupedByKeyMap {
   }
 }
 
+interface ResourceSelectionModalProps {
+  show: boolean
+  showGrouping?: ResourceSelectionModalViewOptionGrouping
+  resources: Resource[]
+  languages?: LanguageCode2NameMap
+  availableResources: string[]
+  selectedResources: string[]
+  onModalClose: (result: { resourceIDs: string[]; action: string }) => void
+}
+
 // --------------------------------------------------------------------------
 // component
 
@@ -50,15 +60,7 @@ function ResourceSelectionModal({
   availableResources,
   selectedResources,
   onModalClose,
-}: {
-  show: boolean
-  showGrouping?: ResourceSelectionModalViewOptionGrouping
-  resources: Resource[]
-  languages?: LanguageCode2NameMap
-  availableResources: string[]
-  selectedResources: string[]
-  onModalClose: (result: { resourceIDs: string[]; action: string }) => void
-}) {
+}: ResourceSelectionModalProps) {
   // resources
   const [selectedResourceIDs, setSelectedResourceIDs] = useState(
     selectedResources || availableResources

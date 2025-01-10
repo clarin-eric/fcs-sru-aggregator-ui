@@ -10,6 +10,7 @@ import Row from 'react-bootstrap/Row'
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
+import { useSearchParams } from '@/providers/SearchParamsContext'
 import { getSearchResultsMetaOnly, type SearchResultsMetaOnly } from '@/utils/api'
 import {
   DEFAULT_SORTING,
@@ -19,7 +20,6 @@ import {
   type ResultsViewMode,
 } from '@/utils/results'
 import ResourceSearchResult from './ResourceSearchResult'
-import { type SearchData } from './SearchInput'
 
 import './styles.css'
 
@@ -28,7 +28,6 @@ import './styles.css'
 
 export interface SearchResultsProps {
   searchId: string
-  searchParams: SearchData
   pollDelay?: number
 }
 
@@ -36,13 +35,10 @@ export interface SearchResultsProps {
 // component
 
 // TODO: make it (search?) cancelable! (useEffect?)
-function SearchResults({
-  searchId,
-  searchParams: { queryType, numberOfResults, resourceIDs },
-  pollDelay = 1500,
-}: SearchResultsProps) {
+function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
   const axios = useAxios()
   const { resources } = useAggregatorData()
+  const { queryType, resourceIDs } = useSearchParams()
 
   const [viewMode, setViewMode] = useState<ResultsViewMode>(DEFAULT_VIEW_MODE)
   const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
@@ -220,7 +216,6 @@ function SearchResults({
             viewMode={viewMode}
             showResourceDetails={showResourceDetails}
             showDiagnostics={showDiagnostics}
-            numberOfResults={numberOfResults}
             key={`${searchId}-${result.id}`}
           />
         ))}

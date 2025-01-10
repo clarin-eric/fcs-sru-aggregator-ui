@@ -7,6 +7,7 @@ import Spinner from 'react-bootstrap/Spinner'
 
 import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
+import { SearchParamsProvider } from '@/providers/SearchParamsContext'
 import { getInitData, postSearch, type Resource } from '@/utils/api'
 import { fromApi, getResourceIDs } from '@/utils/resources'
 import { type LanguageCode2NameMap } from '@/utils/search'
@@ -167,7 +168,9 @@ function Search() {
           languages={languages}
           weblichtLanguages={weblichtLanguages}
         >
-          <SearchResults searchId={searchId} searchParams={searchParams} />
+          <SearchParamsProvider {...searchParams}>
+            <SearchResults searchId={searchId} />
+          </SearchParamsProvider>
         </AggregatorDataProvider>
       )}
     </Container>

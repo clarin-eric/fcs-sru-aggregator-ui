@@ -57,7 +57,8 @@
 }
 
 #search .resource-search-result .resource-info i>svg.bi,
-#search .resource-search-result .more-results-button i>svg.bi {
+#search .resource-search-result .more-results-button i>svg.bi,
+.resource-search-result-modal .resource-info i>svg.bi {
   vertical-align: baseline;
   margin-bottom: -1px;
 
@@ -116,32 +117,37 @@
 }
 
 /* *********************************************************************** */
-/* *** ViewPlain / ViewKwic *** */
+/* *** ViewPlain.tsx / ViewKwic.tsx *** */
 
-#search .resource-search-result .card-body table tr:last-child>td {
+#search .resource-search-result .card-body table tr:last-child>td,
+.resource-search-result-modal .modal-body table tr:last-child>td {
   border-bottom-width: 0;
 }
 
-#search .resource-search-result table tr>td.result-refs {
+#search .resource-search-result table tr>td.result-refs,
+.resource-search-result-modal table tr>td.result-refs {
   white-space: nowrap;
 }
 
 @media (max-width: 576px) {
 
   /* sm-down breakpoint ? (https://getbootstrap.com/docs/5.3/layout/breakpoints/) */
-  #search .resource-search-result table tr>td.result-refs {
+  #search .resource-search-result table tr>td.result-refs,
+  .resource-search-result-modal table tr>td.result-refs {
     white-space: initial;
   }
 }
 
-#search .resource-search-result .pid-badge {
+#search .resource-search-result .pid-badge,
+.resource-search-result-modal .pid-badge {
   --bs-badge-padding-x: 0.5em;
   --bs-badge-padding-y: 0.35em;
   --bs-badge-border-radius: 0.2rem;
   font-size: 0.6rem;
 }
 
-#search .resource-search-result .tooltip-mounting-point {
+#search .resource-search-result .tooltip-mounting-point,
+.resource-search-result-modal .tooltip-mounting-point {
   /* a visible but too small to see element to avoid tooltip mounting flickering */
   height: 0;
   width: 0;

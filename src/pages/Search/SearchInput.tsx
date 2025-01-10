@@ -11,17 +11,18 @@ import LanguageModal, { type LanguageModelCloseActions } from '@/components/Lang
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import { type Resource } from '@/utils/api'
 import {
-  numberOfResultsOptions,
-  queryTypeMap,
-  queryTypes,
+  NUMBER_OF_RESULTS,
+  QUERY_TYPE_MAP,
+  QUERY_TYPES,
+  type NumberOfResults,
   type QueryTypeID,
 } from '@/utils/constants'
 import { getAvailableResourceIDs, getInstitutions } from '@/utils/resources'
 import {
   DEFAULT_RESOURCE_VIEW_GROUPING,
   DEFAULT_SEARCH_LANGUAGE_FILTER,
-  MULTIPLE_LANGUAGE_CODE,
   languageCodeToName,
+  MULTIPLE_LANGUAGE_CODE,
   type LanguageCode2NameMap,
   type LanguageFilterOptions,
   type ResourceSelectionModalViewOptionGrouping,
@@ -56,7 +57,7 @@ export interface SearchData {
   queryType: QueryTypeID
   query: string
   resourceIDs: string[]
-  numberOfResults: number
+  numberOfResults: NumberOfResults
 }
 
 export interface queryError {
@@ -97,7 +98,7 @@ function SearchInput({
     selectedResourcesProps ?? []
   )
 
-  const [numberOfResults, setNumberOfResults] = useState(numberOfResultsOptions[0])
+  const [numberOfResults, setNumberOfResults] = useState<NumberOfResults>(NUMBER_OF_RESULTS[0])
 
   const [query, setQuery] = useState('')
   // query input validation
@@ -184,7 +185,10 @@ function SearchInput({
     // input validation
     if (value < 10) value = 10
     if (value > 250) value = 250
-    setNumberOfResults(value)
+    if (!(NUMBER_OF_RESULTS as unknown as number[]).includes(value)) {
+      console.warn('Invalid number of results?!', { valid: NUMBER_OF_RESULTS, value })
+    }
+    setNumberOfResults(value as NumberOfResults)
   }
 
   function handleChangeLanguageSelection({
@@ -334,38 +338,36 @@ function SearchInput({
               disabled={disabled}
               aria-disabled={disabled}
               style={
-                queryTypeMap[queryType]
+                QUERY_TYPE_MAP[queryType]
                   ? {
-                      '--color': queryTypeMap[queryType].color,
+                      '--color': QUERY_TYPE_MAP[queryType].color,
                     }
                   : {}
               }
             >
-              {queryTypeMap[queryType]?.searchLabel || '???'}{' '}
+              {QUERY_TYPE_MAP[queryType]?.searchLabel || '???'}{' '}
               <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              {queryTypes
-                .filter(
-                  (info) =>
-                    info.id === 'cql' ||
-                    (info.id === 'fcs' && hasResourcesForQueryFCS) ||
-                    (info.id === 'lex' && hasResourcesForQueryLex)
-                )
-                .map((info) => (
-                  <Dropdown.Item
-                    as="button"
-                    eventKey={info.id}
-                    key={info.id}
-                    onClick={(event) => event.preventDefault()}
-                    style={{
-                      '--color': info.color,
-                      background: 'color-mix(in srgb, var(--color) 50%, transparent)',
-                    }}
-                  >
-                    {info.name}
-                  </Dropdown.Item>
-                ))}
+              {QUERY_TYPES.filter(
+                (info) =>
+                  info.id === 'cql' ||
+                  (info.id === 'fcs' && hasResourcesForQueryFCS) ||
+                  (info.id === 'lex' && hasResourcesForQueryLex)
+              ).map((info) => (
+                <Dropdown.Item
+                  as="button"
+                  eventKey={info.id}
+                  key={info.id}
+                  onClick={(event) => event.preventDefault()}
+                  style={{
+                    '--color': info.color,
+                    background: 'color-mix(in srgb, var(--color) 50%, transparent)',
+                  }}
+                >
+                  {info.name}
+                </Dropdown.Item>
+              ))}
             </Dropdown.Menu>
           </Dropdown>{' '}
           in{' '}
@@ -421,7 +423,7 @@ function SearchInput({
             disabled={disabled}
             aria-disabled={disabled}
           >
-            {numberOfResultsOptions.map((value) => (
+            {NUMBER_OF_RESULTS.map((value) => (
               <option value={value} key={value}>
                 {value}
               </option>

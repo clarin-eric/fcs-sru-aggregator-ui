@@ -1,6 +1,6 @@
 import { type AxiosInstance } from 'axios'
 
-import { type LanguageFilterOptions, type LanguageCode2NameMap } from '@/utils/search'
+import { type LanguageCode2NameMap, type LanguageFilterOptions } from '@/utils/search'
 import { type DownloadFormats } from './constants'
 
 // https://app.quicktype.io/?l=ts
@@ -357,12 +357,18 @@ export function getURLForWeblicht(
   axios: AxiosInstance,
   searchID: string,
   resourceID: string,
-  language: string
+  languageForWeblicht: string | null,
+  language: string,
+  languageFilter: LanguageFilterOptions
 ) {
   const params = new URLSearchParams({
     resourceId: resourceID, // encodeURIComponent
-    filterLanguage: language,
   })
+  if (languageForWeblicht) {
+    params.set('filterLanguage', languageForWeblicht)
+  } else if (languageFilter === 'byGuess' || languageFilter === 'byMetaAndGuess') {
+    params.set('filterLanguage', language)
+  }
   const relURL = `search/${searchID}/toWeblicht?${params.toString()}`
   return axios.getUri({ url: relURL })
 }
