@@ -1,4 +1,3 @@
-import { type AxiosInstance } from 'axios'
 import { Route, Routes } from 'react-router'
 
 import Footer from '@/components/Footer'
@@ -11,13 +10,7 @@ import Statistics from '@/pages/Statistics'
 
 // --------------------------------------------------------------------------
 
-export interface AppProps {
-  axios: AxiosInstance
-}
-
-// --------------------------------------------------------------------------
-
-function App({ axios }: AppProps) {
+function App() {
   // initial setup
   console.debug('[App] set color mode and watch for changes ...')
   useColorMode() // TODO: or move to index.tsx?
@@ -27,10 +20,10 @@ function App({ axios }: AppProps) {
       <Header />
       <main>
         <Routes>
-          <Route index element={<Search axios={axios} />} />
+          <Route index element={<Search />} />
           <Route path="about" element={<About />} />
           <Route path="help" element={<Help />} />
-          <Route path="stats" element={<Statistics axios={axios} />} />
+          <Route path="stats" element={<Statistics />} />
         </Routes>
       </main>
       <Footer />

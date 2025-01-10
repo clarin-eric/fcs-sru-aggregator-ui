@@ -1,6 +1,7 @@
 import { type AxiosInstance } from 'axios'
 
-import { type LanguageCode2NameMap } from '@/utils/search'
+import { type LanguageFilterOptions, type LanguageCode2NameMap } from '@/utils/search'
+import { type DownloadFormats } from './constants'
 
 // https://app.quicktype.io/?l=ts
 
@@ -66,9 +67,9 @@ export type DeliveryPolicy = 'SEND_BY_DEFAULT' | 'NEED_TO_REQUEST'
 export type MIMEType =
   | 'application/x-clarin-fcs-hits+xml'
   | 'application/x-clarin-fcs-adv+xml'
-  | 'application/x-cmdi+xml'
-  | 'application/x-clarin-fcs-kwic+xml'
   | 'application/x-clarin-fcs-lex+xml'
+  | 'application/x-clarin-fcs-kwic+xml'
+  | 'application/x-cmdi+xml'
 export type LayerType =
   | 'text'
   | 'lemma'
@@ -326,4 +327,42 @@ export async function getSearchResultDetails(
     )
 
   return results[0]
+}
+
+// --------------------------------------------------------------------------
+
+// TODO: alternatively to axios use AppStore?
+// const apiURL = AppStore.getState().apiURL
+
+export function getURLForDownload(
+  axios: AxiosInstance,
+  searchID: string,
+  resourceID: string,
+  format: DownloadFormats,
+  language: string,
+  languageFilter: LanguageFilterOptions
+) {
+  const params = new URLSearchParams({
+    resourceId: resourceID, // encodeURIComponent
+    format: format,
+  })
+  if (languageFilter === 'byGuess' || languageFilter === 'byMetaAndGuess') {
+    params.set('filterLanguage', language)
+  }
+  const relURL = `search/${searchID}/download?${params.toString()}`
+  return axios.getUri({ url: relURL })
+}
+
+export function getURLForWeblicht(
+  axios: AxiosInstance,
+  searchID: string,
+  resourceID: string,
+  language: string
+) {
+  const params = new URLSearchParams({
+    resourceId: resourceID, // encodeURIComponent
+    filterLanguage: language,
+  })
+  const relURL = `search/${searchID}/toWeblicht?${params.toString()}`
+  return axios.getUri({ url: relURL })
 }

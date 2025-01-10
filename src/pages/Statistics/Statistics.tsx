@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { type AxiosInstance } from 'axios'
 import { useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
@@ -7,6 +6,7 @@ import Nav from 'react-bootstrap/Nav'
 import Row from 'react-bootstrap/Row'
 import Tab from 'react-bootstrap/Tab'
 
+import { useAxios } from '@/providers/AxiosContext'
 import AppStore from '@/stores/app'
 import type { StatisticsSection } from '@/utils/api'
 import { getStatisticsData } from '@/utils/api'
@@ -19,14 +19,11 @@ import arrowClockwiseIcon from 'bootstrap-icons/icons/arrow-clockwise.svg?raw'
 // --------------------------------------------------------------------------
 // types
 
-export interface StatisticsProps {
-  axios: AxiosInstance
-}
-
 // --------------------------------------------------------------------------
 // component
 
-function Statistics({ axios }: StatisticsProps) {
+function Statistics() {
+  const axios = useAxios()
   const queryClient = useQueryClient()
 
   const { isPending, isError, data, error } = useQuery({

@@ -1,11 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { type AxiosInstance } from 'axios'
 import { useEffect, useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Spinner from 'react-bootstrap/Spinner'
 
+import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
+import { useAxios } from '@/providers/AxiosContext'
 import { getInitData, postSearch, type Resource } from '@/utils/api'
 import { fromApi, getResourceIDs } from '@/utils/resources'
 import { type LanguageCode2NameMap } from '@/utils/search'
@@ -20,18 +21,16 @@ import './styles.css'
 // --------------------------------------------------------------------------
 // types
 
-export interface SearchProps {
-  axios: AxiosInstance
-}
-
 // --------------------------------------------------------------------------
 // component
 
-function Search({ axios }: SearchProps) {
+function Search() {
+  const axios = useAxios()
+
   // REST API state
   const [resources, setResources] = useState<Resource[]>([])
-  const [languages, setLanguages] = useState<LanguageCode2NameMap>()
-  const [, setWeblichtLanguages] = useState<string[]>()
+  const [languages, setLanguages] = useState<LanguageCode2NameMap>({})
+  const [weblichtLanguages, setWeblichtLanguages] = useState<string[]>([])
 
   const [searchResourceIDs, setSearchResourceIDs] = useState<string[] | null>(null)
 
@@ -163,13 +162,13 @@ function Search({ axios }: SearchProps) {
         </Row>
       )}
       {searchParams && searchId && (
-        <SearchResults
-          axios={axios}
-          searchId={searchId}
-          searchParams={searchParams}
+        <AggregatorDataProvider
           resources={resources}
           languages={languages}
-        />
+          weblichtLanguages={weblichtLanguages}
+        >
+          <SearchResults searchId={searchId} searchParams={searchParams} />
+        </AggregatorDataProvider>
       )}
     </Container>
   )

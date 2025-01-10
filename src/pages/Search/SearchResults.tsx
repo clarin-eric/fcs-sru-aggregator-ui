@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { type AxiosInstance } from 'axios'
 import { useMemo, useState } from 'react'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
@@ -9,7 +8,9 @@ import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
-import { getSearchResultsMetaOnly, type Resource, type SearchResultsMetaOnly } from '@/utils/api'
+import { useAggregatorData } from '@/providers/AggregatorDataContext'
+import { useAxios } from '@/providers/AxiosContext'
+import { getSearchResultsMetaOnly, type SearchResultsMetaOnly } from '@/utils/api'
 import {
   DEFAULT_SORTING,
   DEFAULT_VIEW_MODE,
@@ -17,7 +18,6 @@ import {
   type ResultsSorting,
   type ResultsViewMode,
 } from '@/utils/results'
-import { type LanguageCode2NameMap } from '@/utils/search'
 import ResourceSearchResult from './ResourceSearchResult'
 import { type SearchData } from './SearchInput'
 
@@ -27,11 +27,8 @@ import './styles.css'
 // types
 
 export interface SearchResultsProps {
-  axios: AxiosInstance
   searchId: string
   searchParams: SearchData
-  resources?: Resource[]
-  languages?: LanguageCode2NameMap
   pollDelay?: number
 }
 
@@ -40,13 +37,13 @@ export interface SearchResultsProps {
 
 // TODO: make it (search?) cancelable! (useEffect?)
 function SearchResults({
-  axios,
   searchId,
   searchParams: { queryType, numberOfResults, resourceIDs },
-  resources,
-  languages,
   pollDelay = 1500,
 }: SearchResultsProps) {
+  const axios = useAxios()
+  const { resources } = useAggregatorData()
+
   const [viewMode, setViewMode] = useState<ResultsViewMode>(DEFAULT_VIEW_MODE)
   const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
   const [filter, setFilter] = useState('')
@@ -217,14 +214,12 @@ function SearchResults({
         data &&
         sortedResults.map((result) => (
           <ResourceSearchResult
-            axios={axios}
             searchId={searchId}
             resourceId={result.id}
             resultInfo={result}
             viewMode={viewMode}
             showResourceDetails={showResourceDetails}
             showDiagnostics={showDiagnostics}
-            languages={languages}
             numberOfResults={numberOfResults}
             key={`${searchId}-${result.id}`}
           />

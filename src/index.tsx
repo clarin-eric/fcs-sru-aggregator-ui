@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
 
 import App from '@/App.tsx'
+import { AxiosProvider } from '@/providers/AxiosContext'
 import { configure } from '@/public'
 import AppStore from '@/stores/app'
 
@@ -30,8 +31,8 @@ const queryClient = new QueryClient({
     queries: {
       // TODO: disable for cleaner debugging and/or for production?
       // refetchOnWindowFocus: false
-    }
-  }
+    },
+  },
 })
 const axiosClient = axios.create({
   baseURL: apiURL,
@@ -53,10 +54,12 @@ const root = createRoot(domRoot!)
 
 root.render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename={basename}>
-        <App axios={axiosClient} />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <AxiosProvider axios={axiosClient}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter basename={basename}>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </AxiosProvider>
   </StrictMode>
 )

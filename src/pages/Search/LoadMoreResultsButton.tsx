@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { type AxiosInstance } from 'axios'
 import { useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
 
+import { useAxios } from '@/providers/AxiosContext'
 import {
   getSearchResultsMetaOnlyForResource,
   postSearchMoreResults,
@@ -18,7 +18,6 @@ import threeDotsIcon from 'bootstrap-icons/icons/three-dots.svg?raw'
 // types
 
 export interface LoadMoreResultsButtonProps {
-  axios: AxiosInstance
   searchId: string
   resourceId: string
   numberOfResults: number
@@ -29,12 +28,12 @@ export interface LoadMoreResultsButtonProps {
 // component
 
 function LoadMoreResultsButton({
-  axios,
   searchId,
   resourceId,
   numberOfResults,
   pollDelay = 1500,
 }: LoadMoreResultsButtonProps) {
+  const axios = useAxios()
   const queryClient = useQueryClient()
 
   const [isPolling, setIsPolling] = useState(false)

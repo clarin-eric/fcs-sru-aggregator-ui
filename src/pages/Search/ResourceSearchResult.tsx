@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { type AxiosInstance } from 'axios'
 import { useId, useRef, useState } from 'react'
 import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
@@ -10,6 +9,8 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Table from 'react-bootstrap/Table'
 import Tooltip from 'react-bootstrap/Tooltip'
 
+import { useAggregatorData } from '@/providers/AggregatorDataContext'
+import { useAxios } from '@/providers/AxiosContext'
 import {
   getSearchResultDetails,
   type ResourceSearchResult,
@@ -17,7 +18,7 @@ import {
 } from '@/utils/api'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import { type ResultsViewMode } from '@/utils/results'
-import { type LanguageCode2NameMap, languageCodeToName } from '@/utils/search'
+import { languageCodeToName } from '@/utils/search'
 import LoadMoreResultsButton from './LoadMoreResultsButton'
 
 import './styles.css'
@@ -32,14 +33,12 @@ import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
 // types
 
 export interface ResourceSearchResultProps {
-  axios: AxiosInstance
   searchId: string
   resourceId: string
   resultInfo: ResourceSearchResultMetaOnly
   viewMode: ResultsViewMode
   showResourceDetails: boolean
   showDiagnostics: boolean
-  languages?: LanguageCode2NameMap
   numberOfResults: number
 }
 
@@ -173,16 +172,17 @@ function ViewKwic({ data }: ViewKwicProps) {
 }
 
 function ResourceSearchResult({
-  axios,
   searchId,
   resourceId,
   resultInfo,
   viewMode,
   showResourceDetails,
   showDiagnostics,
-  languages,
   numberOfResults,
 }: ResourceSearchResultProps) {
+  const axios = useAxios()
+  const { languages } = useAggregatorData()
+
   const htmlId = useId()
   const [expanded, setExpanded] = useState(true)
 
@@ -370,7 +370,6 @@ function ResourceSearchResult({
           {hasMoreResults() && (
             <Card.Body className="text-center border-top py-2">
               <LoadMoreResultsButton
-                axios={axios}
                 searchId={searchId}
                 resourceId={resourceId}
                 numberOfResults={numberOfResults}

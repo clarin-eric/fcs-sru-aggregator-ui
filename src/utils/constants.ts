@@ -1,4 +1,5 @@
 export type QueryTypeID = 'cql' | 'fcs' | 'lex'
+export type DownloadFormats = 'text' | 'tcf' | 'ods' | 'excel' | 'csv'
 
 // --------------------------------------------------------------------------
 
