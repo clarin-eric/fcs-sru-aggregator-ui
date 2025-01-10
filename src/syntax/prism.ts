@@ -14,5 +14,6 @@ import './languages/prism-cql'
 // - FCS query languages
 import './languages/prism-fcs-cql'
 import './languages/prism-fcs-fcsql'
+import './languages/prism-fcs-lexcql'
 
 export default Prism

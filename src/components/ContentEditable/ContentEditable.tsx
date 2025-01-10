@@ -225,6 +225,7 @@ function getCursorPosition(container: Node) {
 function queryTypeToPrismLanguage(queryType?: string) {
   if (queryType === 'cql') return 'fcs-cql'
   if (queryType === 'fcs') return 'fcs-fcsql'
+  if (queryType === 'lex') return 'fcs-lexcql'
   return 'plain'
 }
 
