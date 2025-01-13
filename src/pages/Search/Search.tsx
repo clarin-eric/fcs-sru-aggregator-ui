@@ -1,15 +1,18 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Spinner from 'react-bootstrap/Spinner'
+import Toast from 'react-bootstrap/Toast'
+import ToastContainer from 'react-bootstrap/ToastContainer'
+import { useSearchParams } from 'react-router'
 
 import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { SearchParamsProvider } from '@/providers/SearchParamsContext'
 import { getInitData, postSearch, type Resource } from '@/utils/api'
-import { fromApi, getResourceIDs } from '@/utils/resources'
+import { evaluateAggregationContext, fromApi, getResourceIDs } from '@/utils/resources'
 import { type LanguageCode2NameMap } from '@/utils/search'
 import SearchInput, { type SearchData } from './SearchInput'
 import SearchResults from './SearchResults'
@@ -22,11 +25,28 @@ import './styles.css'
 // --------------------------------------------------------------------------
 // types
 
+interface ToastMessage {
+  title: ReactNode
+  body: ReactNode
+  variant?:
+    | 'info'
+    | 'success'
+    | 'warning'
+    | 'danger'
+    | 'primary'
+    | 'secondary'
+    | 'light'
+    | 'dark'
+    | string
+}
+
 // --------------------------------------------------------------------------
 // component
 
 function Search() {
   const axios = useAxios()
+
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
 
   // REST API state
   const [resources, setResources] = useState<Resource[]>([])
@@ -37,6 +57,8 @@ function Search() {
 
   const [hasSearch, setHasSearch] = useState(false)
   const [searchParams, setSearchParams] = useState<SearchData | null>(null)
+
+  const [toasts, setToasts] = useState<ToastMessage[]>([])
 
   // ------------------------------------------------------------------------
   // initialization
@@ -60,6 +82,94 @@ function Search() {
     // initialization (hack) to select all resources
     setSearchResourceIDs(getResourceIDs(newResources))
   }, [data])
+
+  useEffect(() => {
+    console.debug('searchParams', urlSearchParams)
+    if (!resources || resources.length === 0) return
+
+    const aggregationContext = urlSearchParams.get('x-aggregation-context')
+    if (aggregationContext) {
+      try {
+        const endpoints2handles = JSON.parse(aggregationContext)
+
+        const { selected, unavailable } = evaluateAggregationContext(resources, endpoints2handles)
+        console.debug('aggregationContext', {
+          aggregationContext,
+          resources,
+          endpoints2handles,
+          evaluated: { selected, unavailable },
+        })
+        if (selected.length > 0) {
+          setSearchResourceIDs(selected)
+
+          setToasts((toasts) => [
+            ...toasts,
+            {
+              title: 'Resource Selection',
+              body: (
+                <>
+                  Preselected <strong>{selected.length}</strong> resources:
+                  <br />
+                  <ul className="ps-3">
+                    {selected.map((rid) => (
+                      <li style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>{rid}</li>
+                    ))}
+                  </ul>
+                </>
+              ),
+              variant: 'success',
+            },
+          ])
+        }
+        if (unavailable.length > 0) {
+          setToasts((toasts) => [
+            ...toasts,
+            {
+              title: 'Resource Selection',
+              body: (
+                <>
+                  Unable to select <strong>{unavailable.length}</strong> resources:
+                  <br />
+                  <ul className="ps-3">
+                    {unavailable.map((rid) => (
+                      <li style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>{rid}</li>
+                    ))}
+                  </ul>
+                </>
+              ),
+              variant: 'warning',
+            },
+          ])
+        }
+      } catch (error) {
+        console.error(
+          'Error trying to parse "x-aggregation-context" search parameter!',
+          {
+            aggregationContext,
+          },
+          error
+        )
+        if (error instanceof Error) {
+          setToasts((toasts) => [
+            ...toasts,
+            {
+              title: 'Resource Selection',
+              body: (
+                <>
+                  Unable to preselect resources: {error.name}
+                  <br />
+                  <small>{error.message}</small>
+                </>
+              ),
+              variant: 'error',
+            },
+          ])
+        }
+      }
+      // remove after use, will trigger next evaluation of URLSearchParams ...
+      setUrlSearchParams((params) => (params.delete('x-aggregation-context'), params))
+    }
+  }, [resources, urlSearchParams, setUrlSearchParams])
 
   // ------------------------------------------------------------------------
 
@@ -112,6 +222,28 @@ function Search() {
 
   return (
     <Container id="search">
+      {/* toasters */}
+      <div aria-live="polite" aria-atomic="true" className="bg-dark position-relative">
+        {/* TODO: animate? */}
+        <ToastContainer position="top-end" className="mt-2" style={{ zIndex: 100 }}>
+          {toasts.map((toast, index) => (
+            <Toast
+              bg={toast.variant}
+              key={index}
+              // show={toasts.find((oldToast) => oldToast === toast) !== undefined}
+              onClose={() => setToasts((toasts) => toasts.filter((oldToast) => oldToast !== toast))}
+              delay={5000}
+              autohide
+            >
+              <Toast.Header closeButton={true}>
+                <strong className="me-auto">{toast.title}</strong>
+              </Toast.Header>
+              <Toast.Body>{toast.body}</Toast.Body>
+            </Toast>
+          ))}
+        </ToastContainer>
+      </div>
+
       {/* logo image */}
       {!hasSearch && (
         <Row>

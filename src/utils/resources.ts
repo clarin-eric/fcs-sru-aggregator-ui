@@ -33,7 +33,7 @@ export function fromApi(resources: Resource[]) {
   return convertedResources
 }
 
-export function setAggregationContext(
+export function evaluateAggregationContext(
   resources: Resource[],
   endpoints2handles: { [key: string]: string[] }
 ) {
@@ -42,7 +42,7 @@ export function setAggregationContext(
   const resourcesToSelect: Resource[] = []
 
   Object.entries(endpoints2handles).forEach(([endpoint, handles]) => {
-    console.debug('setAggregationContext:', { endpoint, handles })
+    console.debug('evaluateAggregationContext:', { endpoint, handles })
     handles.forEach((handle: string) => {
       let found = false
       recurseResources(resources, (resource: Resource) => {

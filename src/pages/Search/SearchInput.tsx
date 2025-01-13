@@ -5,12 +5,14 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import ToggleButton from 'react-bootstrap/ToggleButton'
+import { useSearchParams } from 'react-router'
 
 import ContentEditable from '@/components/ContentEditable'
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import { type Resource } from '@/utils/api'
 import {
+  DEFAULT_QUERY_TYPE,
   NUMBER_OF_RESULTS,
   QUERY_TYPE_MAP,
   QUERY_TYPES,
@@ -66,6 +68,27 @@ export interface queryError {
 }
 
 // --------------------------------------------------------------------------
+
+function getQueryFromSearchParams(params: URLSearchParams, fallback: string = '') {
+  const newQuery = params.get('query')
+  if (newQuery) {
+    return newQuery
+  }
+  return fallback
+}
+
+function getQueryTypeFromSearchParams(params: URLSearchParams, fallback: QueryTypeID = 'cql') {
+  const newQueryType = params.get('queryType')
+  if (newQueryType) {
+    if (QUERY_TYPES.find((qt) => qt.id === newQueryType) !== undefined) {
+      return newQueryType as QueryTypeID
+    }
+    console.warn('Found unsupported queryType in search params', newQueryType)
+  }
+  return fallback
+}
+
+// --------------------------------------------------------------------------
 // component
 
 function SearchInput({
@@ -77,6 +100,8 @@ function SearchInput({
   hasSearch = false,
   disabled = false,
 }: SearchInputProps) {
+  const [searchParams, setSearchParams] = useSearchParams()
+
   // input modals (trigger)
   const [showResourceSelectionModal, setShowResourceSelectionModal] = useState(false)
   const [showResourceSelectionModalGrouping, setShowResourceSelectionModalGrouping] =
@@ -89,7 +114,9 @@ function SearchInput({
     DEFAULT_SEARCH_LANGUAGE_FILTER
   )
 
-  const [queryType, setQueryType] = useState<QueryTypeID>('cql')
+  const [queryType, setQueryType] = useState<QueryTypeID>(
+    getQueryTypeFromSearchParams(searchParams, DEFAULT_QUERY_TYPE)
+  )
 
   // resource IDs the user can select (based on pre-filtering and search language selection)
   const [validResourceIDs, setValidResourceIDs] = useState<string[]>(availableResourcesProps ?? [])
@@ -100,7 +127,7 @@ function SearchInput({
 
   const [numberOfResults, setNumberOfResults] = useState<NumberOfResults>(NUMBER_OF_RESULTS[0])
 
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(getQueryFromSearchParams(searchParams, ''))
   // query input validation
   const [queryError, setQueryError] = useState<queryError | null>(null)
 
@@ -159,6 +186,63 @@ function SearchInput({
       resourceIDs.filter((id) => availableResourceIDs.includes(id))
     )
   }, [resources, getAvailableResourceIDsCallback])
+
+  // ------------------------------------------------------------------------
+
+  const doSearch = useCallback(() => {
+    const searchParams = {
+      language: language,
+      languageFilter: languageFilter,
+      queryType: queryType,
+      query: query,
+      resourceIDs: selectedResourceIDs ?? [],
+      numberOfResults: numberOfResults,
+    }
+    console.debug('search for', searchParams)
+
+    // validate and cancel if necessary
+    if (searchParams.query === '') return
+    if (searchParams.resourceIDs.length === 0) return
+
+    // TODO: query validation
+    // setQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
+
+    onSearch(searchParams)
+  }, [language, languageFilter, numberOfResults, onSearch, query, queryType, selectedResourceIDs])
+
+  useEffect(() => {
+    console.debug('searchParams', searchParams)
+
+    if (searchParams) {
+      setQuery((query) => getQueryFromSearchParams(searchParams, query))
+      setQueryType((queryType) => getQueryTypeFromSearchParams(searchParams, queryType))
+
+      const aggregationContext = searchParams.get('x-aggregation-context')
+      if (!aggregationContext) {
+        // wait until the aggregation context parameter has been evaluated (in another/parent component) (and then removed to trigger a reevaluation here)
+        // and only then trigger possible automatic search if requested
+        // this will (hopefully delay long enough to pre-select resources first before starting a search)
+        const mode = searchParams.get('mode')
+        if (mode) {
+          if (mode === 'search') {
+            console.log('Trigger search due to URL parameter!')
+            doSearch()
+          }
+          setSearchParams((params) => (params.delete('mode'), params))
+        }
+      }
+    }
+  }, [searchParams, setSearchParams, doSearch])
+
+  // update URL with query params
+  useEffect(
+    () => setSearchParams((params) => (params.set('query', query), params)),
+    [query, setSearchParams]
+  )
+  useEffect(
+    () => setSearchParams((params) => (params.set('queryType', queryType), params)),
+    [queryType, setSearchParams]
+  )
 
   // ------------------------------------------------------------------------
 
@@ -240,25 +324,7 @@ function SearchInput({
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
-    const searchParams = {
-      language: language,
-      languageFilter: languageFilter,
-      queryType: queryType,
-      query: query,
-      resourceIDs: selectedResourceIDs ?? [],
-      numberOfResults: numberOfResults,
-    }
-    console.debug('search for', searchParams)
-
-    // validate and cancel if necessary
-    if (searchParams.query === '') return
-    if (searchParams.resourceIDs.length === 0) return
-
-    // TODO: query validation
-    // setQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
-
-    onSearch(searchParams)
+    doSearch()
   }
 
   // ------------------------------------------------------------------------
