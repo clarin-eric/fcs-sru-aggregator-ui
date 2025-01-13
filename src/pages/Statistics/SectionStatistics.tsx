@@ -192,6 +192,7 @@ function SectionStatistics({
             type="checkbox"
             checked={showIssuesOnly}
             onChange={() => setShowIssuesOnly(!showIssuesOnly)}
+            id="filter-show-issues-only"
             label={`Only show endpoints with issues (errors or warnings, currently affects ${
               endpointsWithIssues.length
             } endpoint${endpointsWithIssues.length !== 1 ? 's' : ''})`}

@@ -599,6 +599,8 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
           disabled={disabled}
           placeholder={placeholder}
           spellCheck={false} // can be overwritten
+          autoCapitalize="off"
+          autoCorrect="off"
           {...props}
           onInput={handleInput}
           onPaste={handlePaste}

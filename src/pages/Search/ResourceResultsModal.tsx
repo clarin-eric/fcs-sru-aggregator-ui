@@ -36,6 +36,7 @@ interface ResourceResultsModalProps {
   resourceId: string
   result: ResourceSearchResult
   viewMode: ResultsViewMode
+  showDiagnostics: boolean
   onModalClose: () => void
 }
 
@@ -48,19 +49,22 @@ function ResourceResultsModal({
   resourceId,
   result,
   viewMode: viewModeProps,
+  showDiagnostics: showDiagnosticsProps,
   onModalClose,
 }: ResourceResultsModalProps) {
   const axios = useAxios()
   const { languages, weblichtLanguages } = useAggregatorData()
   const { numberOfResults, queryType, language, languageFilter } = useSearchParams()
 
-  const [showDiagnostics] = useState(false)
+  const [showDiagnostics, setShowDiagnostics] = useState(showDiagnosticsProps)
+  useEffect(() => setShowDiagnostics(showDiagnosticsProps), [showDiagnosticsProps])
   const [viewMode, setViewMode] = useState(viewModeProps)
-  useEffect(() => {
-    setViewMode(viewModeProps)
-  }, [viewModeProps])
+  useEffect(() => setViewMode(viewModeProps), [viewModeProps])
 
-  const hasDiagnostics = result.exception || result.diagnostics?.length > 0
+  const hasDiagnostics =
+    result.exception ||
+    result.diagnostics?.filter((diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI)
+      .length > 0
 
   // --------------------------------------------------------------
   // helper
@@ -117,6 +121,23 @@ function ResourceResultsModal({
     return <ViewPlain data={result} />
   }
 
+  function renderResultsCountMessage() {
+    return (
+      <>
+        Showing <strong>{result.kwics.length}</strong>
+        {hasMoreResults() ? (
+          <>
+            {' / '}
+            <strong>{result.numberOfRecords}</strong>
+          </>
+        ) : (
+          ''
+        )}{' '}
+        results.
+      </>
+    )
+  }
+
   return (
     <Modal
       show={show}
@@ -158,7 +179,7 @@ function ResourceResultsModal({
         </dl>
         <hr />
         <Row className="row-gap-2">
-          <Col lg={'auto'} md={6} sm={6}>
+          <Col lg={'auto'} md={3} sm={6}>
             <FloatingLabel label="View mode" controlId="results-view-mode">
               <Form.Select value={viewMode} onChange={handleViewModeChange}>
                 <option value="plain">Plain</option>
@@ -169,6 +190,15 @@ function ResourceResultsModal({
                 {queryType === 'lex' && <option value="lex-props">Dictionary</option>}
               </Form.Select>
             </FloatingLabel>
+          </Col>
+          <Col lg={3} md={3} sm={6} className="align-content-center">
+            <Form.Check
+              disabled={!hasDiagnostics}
+              checked={showDiagnostics}
+              onChange={() => setShowDiagnostics((show) => !show)}
+              id="results-modal-view-warnings-errors"
+              label="Show warning and error messages"
+            />
           </Col>
           <Col
             lg={'auto'}
@@ -216,6 +246,8 @@ function ResourceResultsModal({
           </Col>
         </Row>
         <hr />
+        {/* results */}
+        <p>{renderResultsCountMessage()}</p>
         {renderResults()}
       </Modal.Body>
       {/* diagnostics */}
@@ -259,6 +291,7 @@ function ResourceResultsModal({
       {/* load more button */}
       {hasMoreResults() && (
         <Modal.Footer className="justify-content-center border-top py-2">
+          {/* TODO: maybe split button to choose how many to load? */}
           <LoadMoreResultsButton
             searchId={searchId}
             resourceId={resourceId}

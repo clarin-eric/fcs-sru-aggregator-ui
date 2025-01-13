@@ -59,7 +59,11 @@ function ResourceSearchResult({
 
   const inProgress = resultInfo.inProgress
   const hasResults = resultInfo.numberOfRecordsLoaded > 0 // number of required default KWIC rows loaded
-  const hasDiagnostics = resultInfo.exception || resultInfo.diagnostics?.length > 0
+  const hasDiagnostics =
+    resultInfo.exception ||
+    resultInfo.diagnostics?.filter(
+      (diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI
+    ).length > 0
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['search-result-details', searchId, resourceId],
@@ -246,6 +250,7 @@ function ResourceSearchResult({
         resourceId={resourceId}
         result={data}
         viewMode={viewMode}
+        showDiagnostics={showDiagnostics}
         onModalClose={handleModalClose}
       />
     </>

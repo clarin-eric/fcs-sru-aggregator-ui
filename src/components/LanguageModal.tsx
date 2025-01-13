@@ -160,11 +160,14 @@ function LanguageModal({
               <Form.Control
                 size="sm"
                 placeholder="Filter languages ..."
+                name="languages-filter"
                 value={languageFilter}
                 onChange={(event) => setLanguageFilter(event.target.value)}
               />
               {resources && (
                 <Form.Check
+                  name="languages-show-count"
+                  id="languages-show-count"
                   checked={showResourceCounts}
                   onChange={handleToggleShowResourceCountsChange}
                   type="checkbox"
