@@ -8,6 +8,7 @@ import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
+import ResourceSearchResult from '@/components/ResourceSearchResult'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
@@ -19,7 +20,6 @@ import {
   type ResultsSorting,
   type ResultsViewMode,
 } from '@/utils/results'
-import ResourceSearchResult from './ResourceSearchResult'
 
 import './styles.css'
 
@@ -40,6 +40,8 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
   const { resources } = useAggregatorData()
   const { queryType, resourceIDs } = useSearchParams()
 
+  // TODO: useTransition for changes?
+
   const [viewMode, setViewMode] = useState<ResultsViewMode>(DEFAULT_VIEW_MODE)
   const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
   const [filter, setFilter] = useState('')
@@ -58,19 +60,19 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
   pollDelay ??= 1500
   const {
     data,
-    isLoading: isLoadingSearchResults,
-    isError: isErrorSearchResults,
+    // isLoading: isLoadingSearchResults,
+    // isError: isErrorSearchResults,
   } = useQuery<SearchResultsMetaOnly>({
     queryKey: ['search-results', searchId],
     queryFn: getSearchResultsMetaOnly.bind(null, axios, searchId ?? ''),
     enabled: !!searchId,
     refetchInterval(query) {
-      console.log('[refetchInterval]', query, query.state.data)
+      // console.debug('[refetchInterval]', query, query.state.data)
       if (query.state.data && query.state.data.inProgress > 0) return pollDelay
       return false
     },
   })
-  console.log('search-results', data, isLoadingSearchResults, isErrorSearchResults)
+  // console.debug('search-results', data, isLoadingSearchResults, isErrorSearchResults)
 
   const sortedResults = useMemo(() => data?.results.toSorted(sortFn) || [], [data, sortFn])
 
