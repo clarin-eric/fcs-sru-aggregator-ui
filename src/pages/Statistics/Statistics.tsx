@@ -5,6 +5,7 @@ import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Row from 'react-bootstrap/Row'
 import Tab from 'react-bootstrap/Tab'
+import { Helmet } from 'react-helmet'
 
 import { useAxios } from '@/providers/AxiosContext'
 import AppStore from '@/stores/app'
@@ -40,45 +41,50 @@ function Statistics() {
   }
 
   return (
-    <Container id="statistics" className="my-3">
-      <h1 className="h1">Statistics</h1>
-      {(isPending || isError) && (
-        <Row>
-          <Col>
-            {isPending ? 'Loading ...' : null}
-            <br />
-            {isError ? error.message : null}
-          </Col>
-        </Row>
-      )}
-      {/* TODO: add some fuzzy search on title/endpoint/resource names */}
-      {data && (
-        <Tab.Container defaultActiveKey={Object.keys(data).concat(null as unknown as string)[0]}>
-          <Nav className="nav-tabs" as="ul">
-            {Object.keys(data).map((section: string) => (
-              <Nav.Item as="li" role="presentation" key={section}>
-                <Nav.Link as="button" eventKey={section}>
-                  {section}
+    <>
+      <Helmet>
+        <title>FCS Aggregator – Content Search – Statistics</title>
+      </Helmet>
+      <Container id="statistics" className="my-3">
+        <h1 className="h1">Statistics</h1>
+        {(isPending || isError) && (
+          <Row>
+            <Col>
+              {isPending ? 'Loading ...' : null}
+              <br />
+              {isError ? error.message : null}
+            </Col>
+          </Row>
+        )}
+        {/* TODO: add some fuzzy search on title/endpoint/resource names */}
+        {data && (
+          <Tab.Container defaultActiveKey={Object.keys(data).concat(null as unknown as string)[0]}>
+            <Nav className="nav-tabs" as="ul">
+              {Object.keys(data).map((section: string) => (
+                <Nav.Item as="li" role="presentation" key={section}>
+                  <Nav.Link as="button" eventKey={section}>
+                    {section}
+                  </Nav.Link>
+                </Nav.Item>
+              ))}
+              {/* custom right aligned "refresh" tab button */}
+              <Nav.Item as="li" role="presentation" className="ms-auto">
+                <Nav.Link as="button" onClick={refreshData}>
+                  <i dangerouslySetInnerHTML={{ __html: arrowClockwiseIcon }} /> Refresh
                 </Nav.Link>
               </Nav.Item>
-            ))}
-            {/* custom right aligned "refresh" tab button */}
-            <Nav.Item as="li" role="presentation" className="ms-auto">
-              <Nav.Link as="button" onClick={refreshData}>
-                <i dangerouslySetInnerHTML={{ __html: arrowClockwiseIcon }} /> Refresh
-              </Nav.Link>
-            </Nav.Item>
-          </Nav>
-          <Tab.Content>
-            {Object.entries(data).map(([section, contents]: [string, StatisticsSection]) => (
-              <Tab.Pane eventKey={section} key={section}>
-                <SectionStatistics data={contents} validatorUrl={validatorUrl} />
-              </Tab.Pane>
-            ))}
-          </Tab.Content>
-        </Tab.Container>
-      )}
-    </Container>
+            </Nav>
+            <Tab.Content>
+              {Object.entries(data).map(([section, contents]: [string, StatisticsSection]) => (
+                <Tab.Pane eventKey={section} key={section}>
+                  <SectionStatistics data={contents} validatorUrl={validatorUrl} />
+                </Tab.Pane>
+              ))}
+            </Tab.Content>
+          </Tab.Container>
+        )}
+      </Container>
+    </>
   )
 }
 

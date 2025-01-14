@@ -85,6 +85,7 @@ export default defineConfig({
             'axios',
             'zustand',
             '@nozbe/microfuzz/react',
+            'react-helmet',
           ],
           // [`${outputsLibVenderPath}prism`]: ['prismjs/components/prism-core'],
           // ui
@@ -117,19 +118,26 @@ export default defineConfig({
   define: {
     // TODO: required?
     'process.env': {},
+
+    // head stuffs
+    'import.meta.env.HEAD_TITLE': '"FCS Aggregator – Content Search"',
     // footer/help: contact address (footer/help page)
     'import.meta.env.CONTACT_ADDRESS': '"mailto:fcs@clarin.eu"',
     // footer: imprint, disclaimer, ...
     'import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS':
       '"https://www.clarin.eu/content/terms-use-and-disclaimer"',
+
     // deployment on subpath, default is "/" for root
     'import.meta.env.DEPLOY_PATH': '"/"',
-    // API base URL for FCS SRU aggregator
+    // API base URL for FCS SRU Aggregator
     'import.meta.env.API_URL': '"https://contentsearch.clarin.eu/rest/"',
     // base URL for FCS Endpoint Validator to build redirect links
     'import.meta.env.VALIDATOR_URL': '"https://www.clarin.eu/fcsvalidator/"',
+
     // show direct link to search results
     'import.meta.env.SHOW_SEARCH_RESULT_LINK': 'false',
+    // features
+    'import.meta.env.FEATURE_TRACKING_MATOMO': 'true',
   },
   resolve: {
     alias: {

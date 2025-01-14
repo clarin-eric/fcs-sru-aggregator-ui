@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
@@ -13,6 +13,7 @@ import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { getSearchResultsMetaOnly, type SearchResultsMetaOnly } from '@/utils/api'
+import { trackSiteSearch } from '@/utils/matomo'
 import {
   DEFAULT_SORTING,
   DEFAULT_VIEW_MODE,
@@ -38,7 +39,7 @@ export interface SearchResultsProps {
 function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
   const axios = useAxios()
   const { resources } = useAggregatorData()
-  const { queryType, resourceIDs } = useSearchParams()
+  const { query, queryType, resourceIDs } = useSearchParams()
 
   // TODO: useTransition for changes?
 
@@ -101,6 +102,28 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
       ).length ?? 0,
     [data]
   )
+
+  // TODO: add total result counter?
+
+  // --------------------------------------------------------------
+
+  if (import.meta.env.FEATURE_TRACKING_MATOMO) {
+    /* eslint-disable react-hooks/rules-of-hooks */
+    const [sent, setSent] = useState(false)
+    useEffect(() => {
+      if (data && numInProgress === 0) {
+        if (!sent) {
+          setSent(true)
+
+          // TODO: sum total (not yet requested) or only loaded by user
+          const numResultsTotal = data.results
+            .map((result) => result.numberOfRecordsLoaded)
+            .reduce((acc, cur) => acc + cur, 0)
+          trackSiteSearch(query, queryType, numResultsTotal)
+        }
+      }
+    }, [data, numInProgress, query, queryType, searchId, sent])
+  }
 
   // --------------------------------------------------------------
   // event handlers

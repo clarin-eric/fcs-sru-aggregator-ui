@@ -12,7 +12,7 @@ type MyAggregatorConfiguration = {
 declare const window: Window &
   typeof globalThis & {
     MyAggregator: MyAggregatorConfiguration & { [key: string]: unknown }
-    _paq: []
+    _paq: unknown[] | { push: (params: unknown[]) => void }
   }
 
 // --------------------------------------------------------------------------
