@@ -85,7 +85,7 @@ export default defineConfig({
             'axios',
             'zustand',
             '@nozbe/microfuzz/react',
-            'react-helmet',
+            'react-helmet-async',
           ],
           // [`${outputsLibVenderPath}prism`]: ['prismjs/components/prism-core'],
           // ui
@@ -102,6 +102,12 @@ export default defineConfig({
   css: {
     // NOTE: only for dev-mode
     devSourcemap: true,
+  },
+  esbuild: {
+    // strip from production build, mostly for development only so simply remove it
+    // see: https://github.com/vitejs/vite/discussions/7920
+    drop: ['debugger'],
+    pure: ['console.log', 'console.debug'],
   },
   plugins: [
     react(),
@@ -138,6 +144,7 @@ export default defineConfig({
     'import.meta.env.SHOW_SEARCH_RESULT_LINK': 'false',
     // features
     'import.meta.env.FEATURE_TRACKING_MATOMO': 'true',
+    // 'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': JSON.stringify({ srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }),
   },
   resolve: {
     alias: {

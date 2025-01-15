@@ -18,8 +18,8 @@ declare const window: Window &
 // --------------------------------------------------------------------------
 
 // set global defaults
-window.MyAggregator = window.MyAggregator || {}
-window._paq = window._paq || []
+window.MyAggregator = window['MyAggregator'] || {}
+window._paq = window['_paq'] || []
 
 // --------------------------------------------------------------------------
 

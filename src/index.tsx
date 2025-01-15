@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import axios from 'axios'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { HelmetProvider } from 'react-helmet-async'
 import { BrowserRouter } from 'react-router'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -11,6 +12,7 @@ import App from '@/App.tsx'
 import { AxiosProvider } from '@/providers/AxiosContext'
 import { configure } from '@/public'
 import AppStore from '@/stores/app'
+import { setupAndInstallFromConfigString } from '@/utils/matomo'
 
 // --------------------------------------------------------------------------
 
@@ -47,6 +49,13 @@ const axiosClient = axios.create({
 
 // --------------------------------------------------------------------------
 
+if (import.meta.env.FEATURE_TRACKING_MATOMO) {
+  const successful = setupAndInstallFromConfigString(import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS)
+  if (!successful) console.warn('Unable to setup tracking ...')
+}
+
+// --------------------------------------------------------------------------
+
 // App mount point
 const rootId = 'root'
 const domRoot = document.getElementById(rootId)
@@ -56,9 +65,11 @@ root.render(
   <StrictMode>
     <AxiosProvider axios={axiosClient}>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter basename={basename}>
-          <App />
-        </BrowserRouter>
+        <HelmetProvider>
+          <BrowserRouter basename={basename}>
+            <App />
+          </BrowserRouter>
+        </HelmetProvider>
       </QueryClientProvider>
     </AxiosProvider>
   </StrictMode>

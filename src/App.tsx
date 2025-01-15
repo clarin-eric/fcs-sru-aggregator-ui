@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { Route, Routes, useLocation } from 'react-router'
 
 import Footer from '@/components/Footer'
@@ -9,7 +10,6 @@ import Help from '@/pages/Help'
 import Search from '@/pages/Search'
 import Statistics from '@/pages/Statistics'
 import { trackPageView } from '@/utils/matomo'
-import { Helmet } from 'react-helmet'
 
 // --------------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ function App() {
         // switched page
         setPathname(newPathname + location.search)
         // console.debug('location', pathname, '=>', newPathname, location)
-        trackPageView(newPathname)
+        trackPageView(newPathname, document.title, pathname) // TODO: maybe referrer pathname should be absolute?
       }
     }, [location, pathname])
   }
