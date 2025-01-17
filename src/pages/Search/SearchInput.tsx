@@ -374,6 +374,7 @@ function SearchInput({
             onChange={() => setQueryInputEnhanced((isChecked) => !isChecked)}
             variant="outline-secondary"
             aria-label="Enable enhanced visual input support"
+            className="d-flex align-items-center"
           >
             <i dangerouslySetInnerHTML={{ __html: highlightsIcon }} aria-hidden="true" />
           </ToggleButton>

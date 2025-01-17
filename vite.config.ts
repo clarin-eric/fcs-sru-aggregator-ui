@@ -36,7 +36,7 @@ export default defineConfig({
         // separate output chunks (primarily for CSS)
         'bootstrap/dist/css/bootstrap.min.css',
         // separate out prismjs chunk
-        resolve('./src/syntax/prism.ts'),
+        resolve('./src/vendor/prismjs'),
       ],
       output: {
         assetFileNames(chunkInfo) {
@@ -63,8 +63,11 @@ export default defineConfig({
         // entryFileNames: `${outputsLibPath}${name}.js`,
         entryFileNames(chunkInfo) {
           // DEBUG
-          // console.debug("entryFileNames", chunkInfo)
-          if (chunkInfo.name === 'prism') {
+          // console.debug('entryFileNames', chunkInfo)
+          if (
+            chunkInfo.name === 'index' &&
+            chunkInfo.facadeModuleId?.endsWith('vendor/prismjs/index.ts')
+          ) {
             return `${outputsLibVenderPath}prism.js`
           }
           return `${outputsLibPath}${name}.js`
@@ -87,7 +90,6 @@ export default defineConfig({
             '@nozbe/microfuzz/react',
             'react-helmet-async',
           ],
-          // [`${outputsLibVenderPath}prism`]: ['prismjs/components/prism-core'],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
@@ -152,6 +154,7 @@ export default defineConfig({
       '@assets': resolve('./src/assets'),
       '@images': resolve('./src/assets/images'),
       '@fonts': resolve('./src/assets/fonts'),
+      '@vendor': resolve('./src/vendor'),
     },
     // extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.yaml'],
   },

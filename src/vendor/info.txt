@@ -1,0 +1,18 @@
+# Vendor info
+
+## prismjs
+
+- remote: `https://github.com/PrismJS/prism.git`
+- tree: `origin/v2`
+- commit: `ffab2edc5b67d7248fabe75cc5cf26945c6ef190`
+- date-added: 2025-01-17
+- note:
+  - removed everything besides 'src/' and some info text files (LICENSE, README.md, ...)
+  - removed most languages (except 'plain', 'regex')
+  - removed most plugins (except 'custom-class', 'match-braces')
+  - removed most themes (except 'vs' with customizations)
+  - removed 'shared/meta' build generated info files, not required
+  - removed 'auto-start.ts' and 'load-languages.ts', not required for static configured usage
+  - added custom languages (CQL, FCS*)
+  - added entry 'index.ts' with auto-configured Prism instance export (languages, plugins)
+  - some minor source changes (TS/ESLint warnings)

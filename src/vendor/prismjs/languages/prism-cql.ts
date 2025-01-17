@@ -1,8 +1,10 @@
-import Prism from 'prismjs/components/prism-core'
+import type { GrammarToken, LanguageProto, Grammar } from '../types'
+
+// --------------------------------------------------------------------------
 
 const boolExp = /\b(?:AND|NOT|OR|PROX)\b/i
 const stringExp = /(?:"(?:\\[\s\S]|(?!")[^\\])*")/
-const wordExp = /[^\s()=<>"\/]+/
+const wordExp = /[^\s()=<>"/]+/
 const identifierExp = RegExp('(?:' + stringExp.source + '|' + wordExp.source + ')')
 
 const comparitorNamedExp = identifierExp
@@ -24,6 +26,8 @@ const modifierListExp = RegExp('(?:\\s*' + modifierExp.source + ')*')
 
 const relationExp = RegExp(comparitorExp.source + modifierListExp.source)
 
+// --------------------------------------------------------------------------
+
 const modifier = {
   pattern: modifierExp,
   inside: {
@@ -31,18 +35,18 @@ const modifier = {
       pattern: RegExp('(/\\s*)' + identifierExp.source),
       lookbehind: true,
       alias: 'property',
-    },
+    } as GrammarToken,
     value: {
       pattern: RegExp(identifierExp.source + '$'),
       alias: 'string',
-    },
+    } as GrammarToken,
     comparitor: {
       pattern: comparitorSymbolExp,
       alias: 'operator',
-    },
+    } as GrammarToken,
     punctuation: /\//,
-  },
-}
+  } as Grammar,
+} as GrammarToken
 
 const searchClause = {
   pattern: RegExp(
@@ -53,19 +57,19 @@ const searchClause = {
     term: {
       pattern: RegExp(identifierExp.source + '(?!.)'),
       alias: 'string',
-    },
+    } as GrammarToken,
     // optional index with relation
     index: {
       pattern: RegExp('^' + identifierExp.source),
       alias: 'property',
-    },
+    } as GrammarToken,
     'relation-modifier': modifier,
     relation: {
       pattern: comparitorExp,
       alias: 'operator',
-    },
-  },
-}
+    } as GrammarToken,
+  } as Grammar,
+} as GrammarToken
 
 const boolClause = {
   pattern: RegExp(boolExp.source + modifierListExp.source, 'i'),
@@ -73,10 +77,10 @@ const boolClause = {
     boolean: {
       pattern: boolExp,
       alias: 'operator',
-    },
+    } as GrammarToken,
     'boolean-modifier': modifier,
-  },
-}
+  } as Grammar,
+} as GrammarToken
 
 const prefix = {
   pattern: RegExp('(^\\s*)>\\s*(?:' + identifierExp.source + '\\s*=\\s*)?' + identifierExp.source),
@@ -85,14 +89,14 @@ const prefix = {
     uri: {
       pattern: RegExp(identifierExp.source + '$'),
       alias: 'string',
-    },
+    } as GrammarToken,
     prefix: {
       pattern: identifierExp,
       alias: 'property',
-    },
+    } as GrammarToken,
     punctuation: /[>=]/,
-  },
-}
+  } as Grammar,
+} as GrammarToken
 
 const sortby = {
   // XXX: too complex exponential/polynomial backtracking possible ...
@@ -104,20 +108,26 @@ const sortby = {
     index: {
       pattern: identifierExp,
       alias: 'property',
-    },
-  },
-}
+    } as GrammarToken,
+  } as Grammar,
+} as GrammarToken
 
-Prism.languages['cql'] = {
-  // prefix / suffix
-  prefix: prefix,
-  sortby: sortby,
+// --------------------------------------------------------------------------
 
-  // conjuctions
-  'bool-group': boolClause,
-  // search clause triples
-  'search-clause': searchClause,
+export default {
+  id: 'cql',
+  grammar: () =>
+    ({
+      // prefix / suffix
+      prefix: prefix,
+      sortby: sortby,
 
-  // grouping
-  punctuation: /[()]/,
-}
+      // conjuctions
+      'bool-group': boolClause,
+      // search clause triples
+      'search-clause': searchClause,
+
+      // grouping
+      punctuation: /[()]/,
+    } as Grammar),
+} as LanguageProto<'cql'>

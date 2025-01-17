@@ -1,4 +1,6 @@
-import Prism from 'prismjs/components/prism-core'
+import type { LanguageProto } from '../types'
+
+// --------------------------------------------------------------------------
 
 const identifierExp = /[a-zA-Z](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?/
 
@@ -10,6 +12,8 @@ const attributeExp = RegExp(
 const stringExp = /("|')(?:\\[\s\S]|(?!\1)[^\\])*\1/
 const regexpFlagExp = /\/(?:[iIcCld]+)/
 const expressionTripleOperatorExp = /=|!=/
+
+// --------------------------------------------------------------------------
 
 const string = {
   pattern: stringExp,
@@ -65,38 +69,43 @@ const expressionTriple = {
   },
 }
 
-Prism.languages['fcs-fcsql'] = {
-  // segment query
-  segment: {
-    pattern: /\[.*?(?:[|&()=]\s*(?:("|')(\\[\s\S]|(?!\1)[^\\])*\1)[^\]=]*?)*\]/,
-    // pattern: /(?:\[.*?)(?:[=|&()]\s*("|')(\\[\s\S]|(?!\1)[^\\])*\1[^\]=]*?)*\]/,
-    //pattern: /\[(.*?)\]/,
-    inside: {
-      'basic-expression': expressionTriple,
-      'invalid-expression': stringExp,
-      operator: /[!&|]/,
-      punctuation: /[()[\]]/,
+// --------------------------------------------------------------------------
+
+export default {
+  id: 'fcs-fcsql',
+  grammar: () => ({
+    // segment query
+    segment: {
+      pattern: /\[.*?(?:[|&()=]\s*(?:("|')(\\[\s\S]|(?!\1)[^\\])*\1)[^\]=]*?)*\]/,
+      // pattern: /(?:\[.*?)(?:[=|&()]\s*("|')(\\[\s\S]|(?!\1)[^\\])*\1[^\]=]*?)*\]/,
+      //pattern: /\[(.*?)\]/,
+      inside: {
+        'basic-expression': expressionTriple,
+        'invalid-expression': stringExp,
+        operator: /[!&|]/,
+        punctuation: /[()[\]]/,
+      },
     },
-  },
-  // implicit query (string outside explicit token "[...]")
-  string: string,
-  // quantifier for segment, string or group
-  quantifier: {
-    pattern: /(?:[*+?])|\{(?:\d+|\d+,|,\d+|\d+,\d+)\}/,
-    alias: 'operator',
-    inside: {
-      number: /\d+/,
-      punctuation: /[{},]/,
+    // implicit query (string outside explicit token "[...]")
+    string: string,
+    // quantifier for segment, string or group
+    quantifier: {
+      pattern: /(?:[*+?])|\{(?:\d+|\d+,|,\d+|\d+,\d+)\}/,
+      alias: 'operator',
+      inside: {
+        number: /\d+/,
+        punctuation: /[{},]/,
+      },
     },
-  },
-  'regexp-flag': regexpFlag,
-  // global "within" qualifier
-  within: {
-    pattern: /within\s+\b(?:p|paragraph|s|sentence|session|t|text|turn|u|utterance)\b/,
-    inside: {
-      keyword: /\w+/,
+    'regexp-flag': regexpFlag,
+    // global "within" qualifier
+    within: {
+      pattern: /within\s+\b(?:p|paragraph|s|sentence|session|t|text|turn|u|utterance)\b/,
+      inside: {
+        keyword: /\w+/,
+      },
     },
-  },
-  operator: /\|/,
-  punctuation: /[{}[\](),]/,
-}
+    operator: /\|/,
+    punctuation: /[{}[\](),]/,
+  }),
+} as LanguageProto<'fcs-fcsql'>

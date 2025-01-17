@@ -1,10 +1,10 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 
 import useDebounce from '@/hooks/useDebounce'
-import Prism from '@/syntax/prism'
 import { type QueryTypeID } from '@/utils/constants'
+import Prism from '@vendor/prismjs'
 
-import '@/syntax/prism-vs.css'
+import '@vendor/prismjs/themes/prism-vs.css'
 import './styles.css'
 
 // --------------------------------------------------------------------------
@@ -234,12 +234,11 @@ function highlightSyntax(value: string, queryType?: string) {
 
   // value = JSON.stringify(Object.keys(Prism.languages))
   const language = queryTypeToPrismLanguage(queryType)
-  const grammar = Prism.languages[language]
   const pluginClasses = 'match-braces rainbow-braces'
 
   let prismValue = value
   try {
-    prismValue = Prism.highlight(value, grammar, language)
+    prismValue = Prism.highlight(value, language)
   } catch (error) {
     console.warn('Error trying to highlight value', { value, error, language })
   }
