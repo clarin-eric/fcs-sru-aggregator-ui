@@ -4,11 +4,13 @@ import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
 
 import { useAxios } from '@/providers/AxiosContext'
+// import { useSearchParams } from '@/providers/SearchParamsContext'
 import {
   getSearchResultsMetaOnlyForResource,
   postSearchMoreResults,
   type ResourceSearchResultMetaOnly,
 } from '@/utils/api'
+// import { trackSiteSearch } from '@/utils/matomo'
 
 import './styles.css'
 
@@ -94,6 +96,14 @@ function LoadMoreResultsButton({
       setIsPolling(false)
     }
 
+    // matomo tracking stuff
+    // if (import.meta.env.FEATURE_TRACKING_MATOMO) {
+    //   /* eslint-disable react-hooks/rules-of-hooks */
+    //   const { query, queryType } = useSearchParams()  // really unsure about here, maybe more on top?
+    //   const numResultsTotal = dataPolling.numberOfRecordsLoaded // TODO: will only contain current search result count
+    //   trackSiteSearch(query, queryType, numResultsTotal) // TODO: dimension with resourceID?
+    // }
+
     // console.debug('Invalidate data for refresh ...', { searchId, resourceId, queryKey: ['search-result-details', searchId, resourceId] })
     // details
     queryClient.invalidateQueries({ queryKey: ['search-result-details', searchId, resourceId] })
@@ -109,7 +119,7 @@ function LoadMoreResultsButton({
   return (
     <Button className="more-results-button" disabled={showSpinner} onClick={handleLoadMoreClick}>
       {showSpinner ? (
-        <Spinner animation="border" className='d-block' />
+        <Spinner animation="border" className="d-block" />
       ) : (
         <>
           <i dangerouslySetInnerHTML={{ __html: threeDotsIcon }} /> Load more results

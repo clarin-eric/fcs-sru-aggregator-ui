@@ -52,6 +52,8 @@ export function setup({
 
   if (enableLinkTracking) {
     window._paq.push(['enableLinkTracking'])
+    // https://developer.matomo.org/guides/tracking-javascript-guide#changing-the-pause-timer
+    window._paq.push(['setLinkTrackingTimer', 250]) // 250 milliseconds
   }
 }
 
@@ -139,10 +141,5 @@ export function trackSiteSearchWithDimensions(
 ) {
   window._paq.push(['trackSiteSearch', query, category, count, dimensions])
 }
-
-// export function trackUserId(userId: string) {
-//   window._paq.push(['setUserId', userId])
-//   window._paq.push(['trackPageView'])
-// }
 
 // --------------------------------------------------------------------------

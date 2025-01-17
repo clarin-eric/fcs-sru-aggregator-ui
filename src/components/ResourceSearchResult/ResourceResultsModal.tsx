@@ -24,6 +24,7 @@ import './styles.css'
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import downloadIcon from 'bootstrap-icons/icons/download.svg?raw'
 import envelopeArrowUpIcon from 'bootstrap-icons/icons/envelope-arrow-up.svg?raw'
+import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 import infoCircleIcon from 'bootstrap-icons/icons/info-circle.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
 
@@ -176,7 +177,14 @@ function ResourceResultsModal({
               .toSorted()
               .join(', ')}
           </dd>
+          <dt>Persistent Identifier</dt>
+          <dd>{result.resource.handle}</dd>
         </dl>
+        {result.resource.landingPage && (
+          <a href={result.resource.landingPage} className="matomo_link" target="_blank">
+            <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} /> More Information ...
+          </a>
+        )}
         <hr />
         <Row className="row-gap-2">
           <Col lg={'auto'} md={3} sm={6}>
@@ -221,6 +229,8 @@ function ResourceResultsModal({
                       language,
                       languageFilter
                     )}
+                    className="matomo_download"
+                    key={format}
                   >
                     As <strong>{label}</strong> file
                   </Dropdown.Item>
@@ -239,6 +249,7 @@ function ResourceResultsModal({
                 language,
                 languageFilter
               )}
+              className="matomo_link"
               target="_blank"
             >
               <i dangerouslySetInnerHTML={{ __html: envelopeArrowUpIcon }} /> Send to Weblicht

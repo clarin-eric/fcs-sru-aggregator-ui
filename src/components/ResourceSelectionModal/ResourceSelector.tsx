@@ -92,7 +92,7 @@ function ResourceSelector({
             <Highlight text={resource.title} ranges={highlighting[0]} />{' '}
             {resource.landingPage && (
               <small>
-                <a href={resource.landingPage} target="_blank">
+                <a href={resource.landingPage} className="matomo_link" target="_blank">
                   More information <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />
                 </a>
               </small>

@@ -83,6 +83,7 @@ npm run dev
 ### Update dependencies
 
 - Check possible upgrades with `npx npm-check-updates`
+- Check system information (for bug reports etc.) `npx envinfo --system --npmPackages --binaries --browsers`
 
 ### Expanding the ESLint configuration (TODO)
 

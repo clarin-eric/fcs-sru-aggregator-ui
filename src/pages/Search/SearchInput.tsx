@@ -129,7 +129,7 @@ function SearchInput({
 
   const [query, setQuery] = useState(getQueryFromSearchParams(searchParams, ''))
   // query input validation
-  const [queryError, setQueryError] = useState<queryError | null>(null)
+  const [queryError] = useState<queryError | null>(null)
 
   // query input syntax highlighting
   const [queryInputEnhanced, setQueryInputEnhanced] = useState(false)

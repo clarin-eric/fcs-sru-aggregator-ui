@@ -43,7 +43,7 @@ function ViewKwic({ data }: ViewKwicProps) {
               </td>
               <td scope="row" className="result-refs">
                 {kwic.reference && (
-                  <a href={kwic.reference} target="_blank">
+                  <a href={kwic.reference} className="matomo_link" target="_blank">
                     <i dangerouslySetInnerHTML={{ __html: link45degIcon }} />
                   </a>
                 )}{' '}
