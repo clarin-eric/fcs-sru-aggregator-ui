@@ -2,7 +2,14 @@
   "name": "fcs-sru-aggregator-ui",
   "private": true,
   "version": "0.0.0",
+  
+  "license": "GPL-3.0-or-later",
   "type": "module",
+  
+  "repository": {
+    "type": "git",
+    "url": "https://git.saw-leipzig.de/text-plus/FCS/fcs-sru-aggregator-ui.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

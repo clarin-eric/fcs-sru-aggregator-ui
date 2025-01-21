@@ -2,6 +2,7 @@
 
 ## prismjs
 
+- license: MIT
 - remote: `https://github.com/PrismJS/prism.git`
 - tree: `origin/v2`
 - commit: `ffab2edc5b67d7248fabe75cc5cf26945c6ef190`
