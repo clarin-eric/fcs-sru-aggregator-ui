@@ -27,6 +27,10 @@ For development and building a few additional dependencies are required:
 
 <a id="footnote-1">¹</a> The build process will generate multiple JS and CSS files to split application code from vendor code but those files only need to be included as scripts/styles in a static `index.html` page without requiring any complicated server setup.
 
+## Requirements
+
+- Node 18+ (?)
+
 ## How to deploy
 
 ### Building
