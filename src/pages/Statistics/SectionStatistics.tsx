@@ -100,15 +100,28 @@ function SectionStatistics({
       // check if we have not yet seen this institution name, then add it
       if (!Object.getOwnPropertyNames(acc).includes(institutionName)) {
         acc[institutionName] = {
-          match: cur.matches[0], // TODO: this is repeated for each endpoint that matches, so not sure what highlighting will work best here (hopefully the first)
+          match:
+            filterFields.length === 0 || filterFields.includes('institution')
+              ? cur.matches[0]
+              : null, // TODO: this is repeated for each endpoint that matches, so not sure what highlighting will work best here (hopefully the first)
           endpoints: {},
         }
       }
       // add endpoint info with highlight info
       acc[institutionName].endpoints[endpointUrl] = {
         ...endpointInfo,
-        matchEndpoint: cur.matches[1],
-        matchResources: cur.matches.slice(2),
+        matchEndpoint:
+          filterFields.length === 0 || filterFields.includes('endpoint')
+            ? cur.matches[filterFields.length === 0 || filterFields.includes('institution') ? 1 : 0]
+            : null,
+        matchResources:
+          filterFields.length === 0 || filterFields.includes('resources')
+            ? cur.matches.slice(
+                0 +
+                  (filterFields.length === 0 || filterFields.includes('institution') ? 1 : 0) +
+                  (filterFields.length === 0 || filterFields.includes('endpoint') ? 1 : 0)
+              )
+            : [],
       }
       return acc
     },
