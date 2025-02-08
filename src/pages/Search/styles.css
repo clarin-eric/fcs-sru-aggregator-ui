@@ -37,3 +37,8 @@
   /* remove dropdown arrow key suffix */
   display: none;
 }
+
+#fcs-query .form-control.is-invalid {
+  /* disable, to avoid jumping text for */
+  padding-right: unset;
+}

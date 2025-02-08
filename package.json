@@ -2,23 +2,25 @@
   "name": "fcs-sru-aggregator-ui",
   "private": true,
   "version": "0.0.0",
-  
   "license": "GPL-3.0-or-later",
   "type": "module",
-  
   "repository": {
     "type": "git",
     "url": "https://git.saw-leipzig.de/text-plus/FCS/fcs-sru-aggregator-ui.git"
   },
   "scripts": {
     "dev": "vite",
+    "preview": "vite preview",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "build:antlr4ng": "npm run build:antlr4ng:fcsql && npm run build:antlr4ng:lexcql",
+    "build:antlr4ng:fcsql": "antlr4ng -Dlanguage=TypeScript -o src/parsers/ -visitor -listener -Xexact-output-dir src/vendor/fcs-ql/FCSLexer.g4 src/vendor/fcs-ql/FCSParser.g4",
+    "build:antlr4ng:lexcql": "antlr4ng -Dlanguage=TypeScript -o src/parsers/ -visitor -listener -Xexact-output-dir src/vendor/lexcql/LexLexer.g4 src/vendor/lexcql/LexParser.g4",
   },
   "dependencies": {
     "@nozbe/microfuzz": "^1.0.0",
     "@tanstack/react-query": "^5.64.2",
+    "antlr4ng": "^3.0.14",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
@@ -36,6 +38,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "antlr4ng-cli": "^2.0.0",
     "eslint": "^9.18.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.18",

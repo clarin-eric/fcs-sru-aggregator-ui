@@ -17,3 +17,20 @@
   - added custom languages (CQL, FCS*)
   - added entry 'index.ts' with auto-configured Prism instance export (languages, plugins)
   - some minor source changes (TS/ESLint warnings)
+
+## fcs-ql
+
+- license: GPLv3
+- remote: `https://github.com/clarin-eric/fcs-ql.git`
+- tree: `main`
+- commit: `0db4e1eac83a0744cae6d36be001c96862ca7992`
+- date-added: 2025-01-20
+- note:
+  - clean copy with clear provenience
+  - whitespaces to HIDDEN channel
+
+## lexcql
+
+- date-added: 2025-02-10
+- note:
+  - not yet in public repo

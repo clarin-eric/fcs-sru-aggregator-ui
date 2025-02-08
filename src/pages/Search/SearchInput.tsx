@@ -9,6 +9,7 @@ import { useSearchParams } from 'react-router'
 
 import ContentEditable from '@/components/ContentEditable'
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
+import QueryBuilderModal from '@/components/QueryBuilder'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import { type Resource } from '@/utils/api'
 import {
@@ -33,6 +34,7 @@ import {
 // TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
 import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
+import magicIcon from 'bootstrap-icons/icons/magic.svg?raw'
 
 import './styles.css'
 
@@ -107,6 +109,7 @@ function SearchInput({
   const [showResourceSelectionModalGrouping, setShowResourceSelectionModalGrouping] =
     useState<ResourceSelectionModalViewOptionGrouping>(DEFAULT_RESOURCE_VIEW_GROUPING)
   const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
+  const [showQueryBuilderModal, setShowQueryBuilderModal] = useState(false)
 
   // user search input states
   const [language, setLanguage] = useState(MULTIPLE_LANGUAGE_CODE)
@@ -256,6 +259,8 @@ function SearchInput({
     resources.find((resource) => resource.searchCapabilitiesResolved.includes('LEX_SEARCH')) !==
     undefined
 
+  const showQueryBuilderButton = ['fcs'].includes(queryType)
+
   // ------------------------------------------------------------------------
   // event handlers
 
@@ -308,6 +313,19 @@ function SearchInput({
     if (action === 'abort') return
     // process user inputs
     setSelectedResourceIDs(resourceIDs)
+  }
+
+  function handleChangeQueryBuilderQuery({ query, action }: { query: string; action: string }) {
+    console.debug('onModalClose', { query, action })
+    // first close the modal
+    setShowQueryBuilderModal(false)
+    // if 'abort' do nothing
+    if (action === 'abort') return
+    // if 'close' (ESC / x button) then also do nothing
+    if (action === 'close') return
+    // explicitely wait for confirm
+    // process user inputs
+    setQuery(query)
   }
 
   function handleQueryChange(value: string) {
@@ -366,6 +384,17 @@ function SearchInput({
                   onChange: (event) => handleQueryChange(event.target.value),
                 })}
           />
+          {showQueryBuilderButton && (
+            <Button
+              id="fcs-search-input-query-builder-button"
+              variant="outline-secondary"
+              aria-label="Use visual query builder to construct search query"
+              className="border-end-0 d-none d-md-block"
+              onClick={() => setShowQueryBuilderModal(true)}
+            >
+              <i dangerouslySetInnerHTML={{ __html: magicIcon }} aria-hidden="true" />
+            </Button>
+          )}
           <ToggleButton
             id="fcs-search-input-enhanced-button"
             value="enhance-query" // just a dummy value
@@ -517,6 +546,15 @@ function SearchInput({
         showGrouping={showResourceSelectionModalGrouping}
         onModalClose={handleChangeResourceSelection}
       />
+      {queryType === 'fcs' && (
+        <QueryBuilderModal
+          query={query}
+          queryType={queryType}
+          resources={resources}
+          show={showQueryBuilderModal}
+          onModalClose={handleChangeQueryBuilderQuery}
+        />
+      )}
     </search>
   )
 }

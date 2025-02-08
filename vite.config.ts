@@ -37,6 +37,7 @@ export default defineConfig({
         'bootstrap/dist/css/bootstrap.min.css',
         // separate out prismjs chunk
         resolve('./src/vendor/prismjs'),
+        // resolve('./src/vendor/antlr4ng'),
       ],
       output: {
         assetFileNames(chunkInfo) {
@@ -70,6 +71,12 @@ export default defineConfig({
           ) {
             return `${outputsLibVenderPath}prism.js`
           }
+          // if (
+          //   chunkInfo.name === 'index' &&
+          //   chunkInfo.facadeModuleId?.endsWith('vendor/antlr4ng/index.ts')
+          // ) {
+          //   return `${outputsLibVenderPath}antlr.js`
+          // }
           return `${outputsLibPath}${name}.js`
         },
         chunkFileNames: `[name].js`,
@@ -90,6 +97,7 @@ export default defineConfig({
             '@nozbe/microfuzz/react',
             'react-helmet-async',
           ],
+          [`${outputsLibVenderPath}antlr`]: ['antlr4ng'],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },

@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "lokalise.i18n-ally",
+    "mike-lischke.vscode-antlr4"
+    // "rioj7.command-variable"
+  ]
+}

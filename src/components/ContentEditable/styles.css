@@ -1,13 +1,16 @@
-#search .search-query-input[contenteditable] {
+#search .search-query-input[contenteditable],
+#query-builder-modal .query-builder-input[contenteditable] {
   white-space-collapse: preserve-spaces;
 }
 
 /* content editable input for fancy syntax highlighting */
-#search .search-query-input[contenteditable]:empty {
+#search .search-query-input[contenteditable]:empty,
+#query-builder-modal .query-builder-input[contenteditable]:empty {
   padding-inline-start: calc(50% + 1rem - 3rem - 16px - 6ch);
 }
 
-#search .search-query-input[contenteditable][disabled] {
+#search .search-query-input[contenteditable][disabled],
+#query-builder-modal .query-builder-input[contenteditable][disabled] {
   /* .form-control:disabled */
   background-color: var(--bs-secondary-bg);
   opacity: 1;
@@ -15,15 +18,16 @@
   pointer-events: none;
 }
 
-#search .search-query-input[contenteditable][placeholder]+.input-placeholder-simulacrum {
+#search .search-query-input[contenteditable][placeholder]+.input-placeholder-simulacrum,
+#query-builder-modal .query-builder-input[contenteditable][placeholder]+.input-placeholder-simulacrum {
   position: absolute;
   width: calc(100% - 2rem - 6ch);
   text-align: center;
   vertical-align: middle;
   pointer-events: none;
 
-  line-height: 1.5;
-  font-size: 1.25rem;
+  /* line-height: 1.5; */
+  /* font-size: 1.25rem; */
   padding: .5rem 1rem;
 
   /* .form-control::placeholder */
@@ -31,9 +35,17 @@
   opacity: 1;
 }
 
+#search .input-group-lg .search-query-input[contenteditable][placeholder]+.input-placeholder-simulacrum,
+#query-builder-modal .input-group-lg .query-builder-input[contenteditable][placeholder]+.input-placeholder-simulacrum {
+  line-height: 1.5;
+  font-size: 1.25rem;
+  padding: .5rem 1rem;
+}
+
 /* *********************************************************************** */
 
-#search .search-query-input[contenteditable]>pre {
+#search .search-query-input[contenteditable]>pre,
+#query-builder-modal .query-builder-input[contenteditable]>pre {
   /* reset default styling (bootstrap/reboot...) */
   margin: unset;
   font-size: unset;
@@ -44,7 +56,8 @@
   font-weight: var(--bs-body-font-weight);
 }
 
-#search .search-query-input[contenteditable]>pre>code {
+#search .search-query-input[contenteditable]>pre>code,
+#query-builder-modal .query-builder-input[contenteditable]>pre>code {
   /* allow wrapping */
   white-space: pre-wrap;
   word-break: break-word;
@@ -54,10 +67,12 @@
 
 /* *********************************************************************** */
 
-#search .search-query-input[contenteditable] code .token.operator {
+#search .search-query-input[contenteditable] code .token.operator,
+#query-builder-modal .query-builder-input[contenteditable] code .token.operator {
   color: #28138e;
 }
 
-#search .search-query-input[contenteditable] code .token.string {
+#search .search-query-input[contenteditable] code .token.string,
+#query-builder-modal .query-builder-input[contenteditable] code .token.string {
   color: #008702;
 }

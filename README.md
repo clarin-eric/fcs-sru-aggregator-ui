@@ -10,6 +10,7 @@ The frontend uses the following technologies:
 - [Bootstrap](https://getbootstrap.com/) 5.3.3 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.11.3, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.6
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
 - [PrismJS](https://github.com/PrismJS/prism) 1.29.0 for syntax highlighting
+- [ANTLR4ng](https://github.com/mike-lischke/antlr4ng) 3.0.14 for syntax parsing (visual query builder, syntax validation)
 - [Zustand](https://github.com/pmndrs/zustand) 5.0.2 for state management of external bundle configuration
 - [React Helmet (Async Fork)](https://github.com/staylor/react-helmet-async) 2.0.5 for webpage meta information
 

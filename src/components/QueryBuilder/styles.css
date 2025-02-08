@@ -1,0 +1,4 @@
+#query-builder-modal .query-builder-input.form-control.is-invalid {
+  /* disable, to avoid jumping text for */
+  padding-right: unset;
+}
