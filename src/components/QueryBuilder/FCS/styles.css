@@ -65,8 +65,30 @@
 
 #query-builder .basic-expression>.actions {
   font-size: 0;
-  transform: translate(-100%, -50%);
+  /* transform: translate(-100%, -50%); */
   left: calc(100% + var(--action-btn-size) - var(--action-btn-padding));
+}
+
+/* "fix" action buttons translate-middle for popper.js */
+
+#query-builder .translate-middle:has(>.action-btn) {
+  transform: unset !important;
+}
+
+#query-builder .translate-middle>.action-btn {
+  /* p-1 == 0.25rem */
+  transform: translateX(calc(-50% - 0.25rem)) translateY(calc(-50% - 0.25rem)) !important;
+}
+
+#query-builder .basic-expression>.actions>div>.action-btn,
+#query-builder .basic-expression>.actions>.action-btn {
+  /* for both wrap and delete button */
+  transform: translateX(calc(-100% - 100%)) translateY(-50%) !important;
+}
+
+#query-builder .basic-expression>.actions>.action-btn:only-child {
+  /* if wrap button hidden */
+  transform: translateX(calc(-100%)) translateY(-50%) !important;
 }
 
 /* syntax components */
