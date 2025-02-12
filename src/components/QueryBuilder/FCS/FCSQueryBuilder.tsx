@@ -5,7 +5,6 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
 
 import {
-  AttributeContext,
   Expression_andContext,
   Expression_basicContext,
   Expression_groupContext,
@@ -13,19 +12,12 @@ import {
   Expression_orContext,
   ExpressionContext,
   FCSParser,
-  Main_queryContext,
   QuantifierContext,
   Query_disjunctionContext,
   Query_groupContext,
-  Query_implicitContext,
-  Query_segmentContext,
   Query_sequenceContext,
   Query_simpleContext,
   QueryContext,
-  Regexp_patternContext,
-  RegexpContext,
-  Within_part_simpleContext,
-  Within_partContext,
 } from '@/parsers/FCSParser'
 import { type ParseTree, TerminalNode, TokenStreamRewriter } from 'antlr4ng'
 import {
@@ -50,11 +42,18 @@ import {
 } from './constants'
 import { FCSParserLexerProvider } from './FCSParserLexerContext'
 import {
+  type FCSQueryBuilderConfig,
   FCSQueryBuilderConfigProvider,
   useFCSQueryBuilderConfig,
 } from './FCSQueryBuilderConfigContext'
 import { FCSQueryUpdaterProvider, useFCSQueryUpdater } from './FCSQueryUpdaterContext'
-import { parseQuery } from './utils'
+import {
+  escapeQuotes,
+  escapeRegexValue,
+  parseQuery,
+  unescapeQuotes,
+  unescapeRegexValue,
+} from './utils'
 
 import bracesIcon from 'bootstrap-icons/icons/braces.svg?raw'
 import plusCircleIcon from 'bootstrap-icons/icons/plus-circle.svg?raw'
@@ -67,16 +66,14 @@ import './styles.css'
 
 interface FCSQueryBuilderProps {
   query?: string
-  // flags for supported features
-  enableWithin?: boolean
   onChange?: (query: string) => void
 }
 
 export function FCSQueryBuilder({
   query: queryProp,
-  enableWithin = false,
   onChange,
-}: FCSQueryBuilderProps) {
+  ...props
+}: FCSQueryBuilderProps & Partial<FCSQueryBuilderConfig>) {
   const [query, setQuery] = useState(queryProp ?? '')
   useEffect(() => setQuery(queryProp ?? ''), [queryProp])
 
@@ -115,11 +112,13 @@ export function FCSQueryBuilder({
   return (
     <div id="query-builder" className="fcs-query border rounded p-1">
       <FCSQueryBuilderConfigProvider
-        enableWithin={enableWithin}
-        enableImplicitQuery={false}
-        enableWrapGroup={false}
-        enableWrapNegation={false}
-        enableMultipleQuerySegments={true}
+        enableWithin={props.enableWithin || false}
+        enableWrapGroup={props.enableWrapGroup || false}
+        enableWrapNegation={props.enableWrapNegation || false}
+        enableImplicitQuery={props.enableImplicitQuery || false}
+        enableMultipleQuerySegments={props.enableMultipleQuerySegments || true}
+        enableQuantifiers={props.enableQuantifiers || true}
+        enableRegexpFlags={props.enableRegexpFlags || false}
       >
         {parsed ? (
           <FCSParserLexerProvider parser={parsed.parser} lexer={parsed.lexer}>
@@ -424,13 +423,14 @@ function Query({ tree, onChange }: { tree: QueryContext; onChange?: () => void }
   const { enableWithin } = useFCSQueryBuilderConfig()
 
   // required child if valid query, so should not be null
-  const queryCtx = tree.getRuleContext(0, Main_queryContext)!
+  const queryCtx = tree.main_query()
 
   const queryChildCtx = queryCtx.getChild(0)
   const queryChildrenCtx = flattenQueryChildren(queryChildCtx!, false)
 
-  const withinCtx = enableWithin ? tree.getRuleContext(0, Within_partContext) : null
+  const withinCtx = enableWithin ? tree.within_part() : null
   const withinValue = withinCtx?.getText() ?? ''
+
   const [within, setWithin] = useState(withinValue)
   useEffect(() => setWithin(withinValue), [withinValue])
 
@@ -456,7 +456,7 @@ function Query({ tree, onChange }: { tree: QueryContext; onChange?: () => void }
     setWithin(newWithin)
 
     if (withinCtx) {
-      const withinPartCtx = withinCtx.getRuleContext(0, Within_part_simpleContext)
+      const withinPartCtx = withinCtx.within_part_simple()
       const token = withinPartCtx?.SIMPLE_WITHIN_SCOPE()
       if (token) {
         rewriter.replaceSingle(token.symbol, newWithin)
@@ -580,6 +580,7 @@ function ImplicitQueryInput({
   onChange?: (value: string) => void
 }) {
   const [value, setValue] = useState(valueProp)
+  useEffect(() => setValue(valueProp), [valueProp])
 
   return (
     <Form.Control
@@ -603,18 +604,29 @@ function BasicExpressionInput({
 }) {
   const { rewriter } = useFCSQueryUpdater()
 
-  const attributeCtx = ctx.getRuleContext(0, AttributeContext)!
-
+  const attributeCtx = ctx.attribute()
   const operatorNode = ctx.getChild(1) as TerminalNode
-  const isOpEq = operatorNode.symbol.type === FCSParser.OPERATOR_EQ
+  const regexpNode = ctx.regexp().regexp_pattern().REGEXP()
 
-  const regexpCtx = ctx.getRuleContext(0, RegexpContext)!
-  const regexpNode = regexpCtx.getRuleContext(0, Regexp_patternContext)!.REGEXP()
-  const valueQuoted = regexpNode.symbol.text
+  const [layer, setLayer] = useState('text')
+  const [operator, setOperator] = useState('is')
+  const [value, setValue] = useState('')
 
-  const [layer, setLayer] = useState('')
-  const [operator, setOperator] = useState(isOpEq ? 'is' : 'is-not')
-  const [value, setValue] = useState(valueQuoted?.slice(1, -1) ?? '')
+  // update from outside (query input change)
+  useEffect(() => {
+    const isOpEq = operatorNode.symbol.type === FCSParser.OPERATOR_EQ
+
+    const valueQuoted = regexpNode.symbol.text
+    const quoteChar = valueQuoted?.charAt(0)
+    // TODO: quote escapes? if both single and double?
+    const newValue = unescapeQuotes(
+      unescapeRegexValue(valueQuoted?.slice(1, -1)),
+      quoteChar === "'"
+    )
+
+    setOperator(isOpEq ? 'is' : 'is-not')
+    setValue(newValue ?? '')
+  }, [attributeCtx, operatorNode, regexpNode])
 
   const parentCtx = ctx.parent
   const allowedWrapIds = (Object.keys(WRAP_EXPRESSION_MAP) as WrapExpressionType[])
@@ -642,8 +654,9 @@ function BasicExpressionInput({
 
   function handleRegexpChange() {
     // TODO: escape if quotes!
+    const escapedValue = escapeRegexValue(value)
     // TODO: handle regexp escapes
-    rewriter.replaceSingle(regexpNode.symbol, `"${value}"`)
+    rewriter.replaceSingle(regexpNode.symbol, `"${escapedValue}"`)
     // do we want to build a query and return? or use a custom rewrite program to extract our change?
     onChange?.()
   }
@@ -904,12 +917,11 @@ function QuerySimple({ ctx, onChange }: { ctx: Query_simpleContext; onChange?: (
   const { rewriter } = useFCSQueryUpdater()
   const { enableQuantifiers } = useFCSQueryBuilderConfig()
 
-  const queryInnerCtx = ctx.getChild(0)
-  if (!queryInnerCtx) throw Error('Missing parse tree context!')
+  const queryImplicitCtx = ctx.query_implicit()
+  const querySegmentCtx = ctx.query_segment()
+  const quantifierCtx = ctx.quantifier()
 
-  const isImplicit = queryInnerCtx instanceof Query_implicitContext
-
-  const quantifierCtx = ctx.getRuleContext(0, QuantifierContext)
+  const isImplicit = queryImplicitCtx !== null
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -929,41 +941,38 @@ function QuerySimple({ ctx, onChange }: { ctx: Query_simpleContext; onChange?: (
   // UI
 
   function renderQuery() {
-    if (isImplicit) {
-      const regexpCtx = queryInnerCtx.getRuleContext(0, RegexpContext)
-      if (!regexpCtx) throw Error('Invalid parse tree. Expected "regexp" context.')
-
-      const regexpNode = regexpCtx.getRuleContext(0, Regexp_patternContext)!.REGEXP()
+    if (queryImplicitCtx !== null) {
+      const regexpNode = queryImplicitCtx.regexp().regexp_pattern().REGEXP()
       const valueQuoted = regexpNode.symbol.text
-      const value = valueQuoted?.slice(1, -1)
-      // TODO: store quotes or simply normalize?
+      const quoteChar = valueQuoted?.charAt(0)
+      const value = unescapeQuotes(valueQuoted?.slice(1, -1), quoteChar === "'")
 
       function handleValueChange(value: string) {
-        // TODO: escape if quotes
-        rewriter.replaceSingle(regexpNode.symbol, `"${value}"`)
+        rewriter.replaceSingle(regexpNode.symbol, `"${escapeQuotes(value)}"`)
         onChange?.()
       }
 
       return <ImplicitQueryInput value={value ?? ''} onChange={handleValueChange} />
     }
 
-    if (!(queryInnerCtx instanceof Query_segmentContext)) {
-      throw Error('Invalid parse tree. Expected "query-segment" context.')
-    }
-    const expressionCtx = queryInnerCtx.getRuleContext(0, ExpressionContext)
+    if (querySegmentCtx !== null) {
+      const expressionCtx = querySegmentCtx.expression()
 
-    // empty (placeholder) query segment
-    if (!expressionCtx) {
-      function handleAddExpressionList(type: NewExpressionType) {
-        const text = NEW_EXPRESSIONS_MAP[type].new
-        rewriter.insertAfter(ctx.start!, ` ${text} `)
-        onChange?.()
+      // empty (placeholder) query segment
+      if (!expressionCtx) {
+        function handleAddExpressionList(type: NewExpressionType) {
+          const text = NEW_EXPRESSIONS_MAP[type].new
+          rewriter.insertAfter(ctx.start!, ` ${text} `)
+          onChange?.()
+        }
+
+        return <AddExpressionButton onClick={(type) => handleAddExpressionList(type)} />
       }
 
-      return <AddExpressionButton onClick={(type) => handleAddExpressionList(type)} />
+      return <Expression ctx={expressionCtx} onChange={onChange} />
     }
 
-    return <Expression ctx={expressionCtx} onChange={onChange} />
+    throw Error('Invalid parse tree. Expected "query-segment" context.')
   }
 
   return (

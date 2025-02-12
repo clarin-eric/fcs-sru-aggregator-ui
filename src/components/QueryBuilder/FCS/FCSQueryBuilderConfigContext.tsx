@@ -2,7 +2,7 @@ import { createContext, type ReactNode, useContext } from 'react'
 
 // --------------------------------------------------------------------------
 
-interface FCSQueryBuilderConfig {
+export interface FCSQueryBuilderConfig {
   enableWithin: boolean
   enableWrapGroup: boolean
   enableWrapNegation: boolean

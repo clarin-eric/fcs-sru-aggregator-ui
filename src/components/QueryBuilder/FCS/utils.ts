@@ -199,3 +199,73 @@ function _dumpTokenStream(tokenStream: CommonTokenStream, lexer: FCSLexer) {
 // const input = '([ text ="a" ] [ text = "c" & text = "d" | text = "e"]) within s | "a"' // error
 
 // --------------------------------------------------------------------------
+
+/* escape regex syntax characters with `\` prefix */
+const REGEXP_ESCAPES = /([\^$\\.*+?()[\]{}|/])/g
+const REGEXP_ESCAPES_ESCAPED = /\\([\^$\\.*+?()[\]{}|/])/g
+/* other punctuation characters */
+const REGEXP_OTHER_PUNCT = /([,-=<>#&!%:;@~'`"])/g
+/* find \xFF escaped characters, group 1 is backslashes before, group 2 is string FF */
+const REGEXP_ESCAPED_X = /(?<!\\)((?:\\{2})*)\\x([A-Fa-f0-9]{2})/g
+/* unescaped quotes */
+const REGEXP_UNESCAPED_DBLQUOTE = /(?<!\\)((?:\\{2})*")/g
+const REGEXP_UNESCAPED_SGLQUOTE = /(?<!\\)((?:\\{2})*')/g
+/* escaped quotes */
+const REGEXP_ESCAPED_DBLQUOTE = /(?<!\\)\\((?:\\{2})*")/g
+const REGEXP_ESCAPED_SGLQUOTE = /(?<!\\)\\((?:\\{2})*')/g
+
+/**
+ * Escape a string to be used in regular expressions.
+ *
+ * @param value value to escape for use in regex
+ * @returns escaped string, can be used in regex to match exactly the input value
+ * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/escape
+ */
+export function escapeRegexValue(value: string | undefined) {
+  // import 'core-js-pure/actual/escape'
+  if (!value) return value
+
+  // NOTE: maybe not too escaped strings, reduce usability, less userfriendly
+  // if (Object.hasOwn(RegExp, 'escape')) {
+  //   // @ts-expect-error: this is now valid
+  //   return RegExp.escape(value)
+  // }
+
+  let escaped = value
+  escaped = value.replace(REGEXP_ESCAPES, '\\$1')
+  escaped = value.replace(REGEXP_OTHER_PUNCT, (match) => `\\x${match.charCodeAt(0).toString(16)}`)
+
+  return escaped
+}
+
+export function unescapeRegexValue(value: string | undefined) {
+  if (!value) return value
+
+  let unescaped = value
+  // revert `\xFF` escape sequences? (seems to happen automatically in browser)
+  unescaped = unescaped.replace(
+    REGEXP_ESCAPED_X,
+    (_, p1, p2) => `${p1}${String.fromCharCode(parseInt(p2, 16))}`
+  )
+  unescaped = decodeURIComponent(unescaped)
+  // remove double backslashes
+  // unescaped = unescaped.replaceAll('\\\\', '\\')
+  unescaped = unescaped.replace(REGEXP_ESCAPES_ESCAPED, '$1')
+  console.log('dd', { value, unescaped })
+  return unescaped
+}
+
+export function escapeQuotes(value: string | undefined, isSingleQuote: boolean = false) {
+  if (!value) return value
+  return value.replace(
+    isSingleQuote ? REGEXP_UNESCAPED_SGLQUOTE : REGEXP_UNESCAPED_DBLQUOTE,
+    '\\$1'
+  )
+}
+
+export function unescapeQuotes(value: string | undefined, isSingleQuote: boolean = false) {
+  if (!value) return value
+  return value.replace(isSingleQuote ? REGEXP_ESCAPED_SGLQUOTE : REGEXP_ESCAPED_DBLQUOTE, '$1')
+}
+
+// --------------------------------------------------------------------------

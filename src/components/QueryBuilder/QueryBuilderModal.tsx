@@ -9,15 +9,14 @@ import Row from 'react-bootstrap/Row'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 
 import ContentEditable from '@/components/ContentEditable'
+import useDebounce from '@/hooks/useDebounce'
+import useDebouncedState from '@/hooks/useDebouncedState'
 import { type Resource } from '@/utils/api'
-import { parseQuery } from './FCS/utils'
-import { FCSQueryBuilder } from './FCS'
+import { FCSQueryBuilder, parseQuery } from './FCS'
 
 import './styles.css'
 
 import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
-import useDebouncedState from '@/hooks/useDebouncedState'
-import useDebounce from '@/hooks/useDebounce'
 
 // --------------------------------------------------------------------------
 // types
