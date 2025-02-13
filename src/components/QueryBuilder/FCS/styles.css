@@ -142,3 +142,17 @@
     /* background-color: var(--bs-gray-900); */
   }
 }
+
+/* make dropdown look like select */
+
+#query-builder .dropdown>.form-select {
+  padding-right: 2.25rem;
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+}
+
+#query-builder .dropdown>.form-select::after {
+  /* remove dropdown icon and use the one from .form-select */
+  content: unset;
+}

@@ -5,6 +5,7 @@ import {
   Expression_notContext,
   Expression_orContext,
 } from '@/parsers/FCSParser'
+import { type Resource } from '@/utils/api'
 
 // --------------------------------------------------------------------------
 
@@ -16,10 +17,39 @@ export type ExpressionListChild =
 export type ExpressionChild = ExpressionListChild | Expression_basicContext
 
 export type QuantifierChoicesType = (typeof QUANTIFIER_CHOICES)[number]['id']
+
+export type AdvancedLayerType = (typeof ADVANCED_LAYERS)[number]['id']
 export type NewQuerySegmentType = (typeof NEW_QUERY_SEGMENTS)[number]['id']
 export type NewExpressionType = (typeof NEW_EXPRESSIONS)[number]['id']
 export type ChangeToExpressionListType = (typeof CHANGE_TO_EXPRESSION_LIST)[number]['id']
 export type WrapExpressionType = (typeof WRAP_EXPRESSION)[number]['id']
+
+export interface ResourceLayerIDInfo {
+  resultIDs: string[]
+  qualifiers: string[]
+}
+export interface ResourcesWithLayerIDInfo {
+  resource: Resource
+  layerIDs: ResourceLayerIDInfo
+}
+export interface LayerInfo {
+  resources: ResourcesWithLayerIDInfo[]
+  qualifiers: Map<string, Resource[]>
+}
+
+// --------------------------------------------------------------------------
+
+export const ADVANCED_LAYERS = [
+  { id: 'text', label: 'textual representation' },
+  { id: 'lemma', label: 'lemmatization of tokens' },
+  { id: 'pos', label: 'part-of-speech UD v2.0 tagset' },
+  { id: 'orth', label: 'orthographic transcription' },
+  { id: 'norm', label: 'orthographic normalization' },
+  { id: 'phonetic', label: 'phonetic transcription SAMPA' },
+] as const
+export const ADVANCED_LAYERS_MAP = Object.fromEntries(
+  ADVANCED_LAYERS.map((item) => [item.id, item])
+)
 
 // --------------------------------------------------------------------------
 

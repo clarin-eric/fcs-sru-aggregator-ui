@@ -12,7 +12,7 @@ import ContentEditable from '@/components/ContentEditable'
 import useDebounce from '@/hooks/useDebounce'
 import useDebouncedState from '@/hooks/useDebouncedState'
 import { type Resource } from '@/utils/api'
-import { FCSQueryBuilder, parseQuery } from './FCS'
+import { FCSQueryBuilder, parseQuery as parseFCSQuery } from './FCS'
 
 import './styles.css'
 
@@ -26,8 +26,9 @@ interface QueryBuilderModalProps {
   query?: string
   queryType: 'fcs'
   resources?: Resource[]
+  selectedResources?: string[]
   delay?: number
-  onModalClose: (result: { query: string; action: string }) => void
+  onModalClose: (result: { query: string; validResources: string[]; action: string }) => void
 }
 
 // --------------------------------------------------------------------------
@@ -38,6 +39,7 @@ function QueryBuilderModal({
   query: queryProp,
   queryType,
   resources,
+  selectedResources,
   delay = 1000,
   onModalClose,
 }: QueryBuilderModalProps) {
@@ -54,10 +56,17 @@ function QueryBuilderModal({
     delay
   )
 
+  const resourcesForQueryBuilder = resources
+    ? selectedResources // && selectedResources.length > 0
+      ? resources.filter((resource) => selectedResources.includes(resource.id))
+      : resources
+    : undefined
+
   // --------------------------------------------------------------
   // query syntax error handling
 
-  const parsed = parseQuery(query)
+  // queryType conditional parsing
+  const parsed = parseFCSQuery(query)
 
   if (parsed) {
     if (parsed.errors.length > 0 && queryError !== parsed.errors[0]) {
@@ -79,6 +88,7 @@ function QueryBuilderModal({
   function handleClose(action: string) {
     onModalClose({
       query: query,
+      validResources: selectedResources ?? [], // TODO: implement filtering
       action: action,
     })
   }
@@ -93,6 +103,141 @@ function QueryBuilderModal({
 
   // --------------------------------------------------------------
   // rendering
+
+  const [enableWithin, setEnableWithin] = useState(false)
+  const [enableWrapGroup, setEnableWrapGroup] = useState(false)
+  const [enableWrapNegation, setEnableWrapNegation] = useState(false)
+  const [enableImplicitQuery, setEnableImplicitQuery] = useState(false)
+  const [enableMultipleQuerySegments, setEnableMultipleQuerySegments] = useState(true)
+  const [enableQuantifiers, setEnableQuantifiers] = useState(false)
+  const [enableRegexpFlags, setEnableRegexpFlags] = useState(false)
+  const [showBasicLayer, setShowBasicLayer] = useState(true)
+  const [showAllAdvancedLayers, setShowAllAdvancedLayers] = useState(true)
+  const [showCustomLayers, setShowCustomLayers] = useState(true)
+
+  function renderQueryBuilder() {
+    // make conditional on query type
+    return (
+      <>
+        {/* TODO: testing */}
+        {queryType === 'fcs' && (
+          <Form className="my-2 p-2 border rounded" style={{ textIndent: '3.6rem hanging' }}>
+            <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
+              Enable
+            </Form.Text>
+            <Form.Check
+              inline
+              label="Within"
+              type="checkbox"
+              name="enableWithin"
+              id="enableWithin"
+              checked={enableWithin}
+              onChange={() => setEnableWithin((checked) => !checked)}
+            />
+            <Form.Check
+              inline
+              label="Expression Grouping"
+              type="checkbox"
+              name="enableWrapGroup"
+              id="enableWrapGroup"
+              checked={enableWrapGroup}
+              onChange={() => setEnableWrapGroup((checked) => !checked)}
+            />
+            <Form.Check
+              inline
+              label="Expression Negation"
+              type="checkbox"
+              name="enableWrapNegation"
+              id="enableWrapNegation"
+              checked={enableWrapNegation}
+              onChange={() => setEnableWrapNegation((checked) => !checked)}
+            />
+            <Form.Check
+              inline
+              label="Implicit Query"
+              type="checkbox"
+              name="enableImplicitQuery"
+              id="enableImplicitQuery"
+              checked={enableImplicitQuery}
+              onChange={() => setEnableImplicitQuery((checked) => !checked)}
+            />
+            <Form.Check
+              inline
+              label="Multiple Query Segments"
+              type="checkbox"
+              name="enableMultipleQuerySegments"
+              id="enableMultipleQuerySegments"
+              checked={enableMultipleQuerySegments}
+              onChange={() => setEnableMultipleQuerySegments((checked) => !checked)}
+              disabled
+            />
+            <Form.Check
+              inline
+              label="Quantifiers"
+              type="checkbox"
+              name="enableQuantifiers"
+              id="enableQuantifiers"
+              checked={enableQuantifiers}
+              onChange={() => setEnableQuantifiers((checked) => !checked)}
+            />
+            <Form.Check
+              inline
+              label="Regex Flags"
+              type="checkbox"
+              name="enableRegexpFlags"
+              id="enableRegexpFlags"
+              checked={enableRegexpFlags}
+              onChange={() => setEnableRegexpFlags((checked) => !checked)}
+              disabled
+            />
+            <Form.Check
+              inline
+              label="BASIC Layer"
+              type="checkbox"
+              name="showBasicLayer"
+              id="showBasicLayer"
+              checked={showBasicLayer}
+              onChange={() => setShowBasicLayer((checked) => !checked)}
+            />
+            <Form.Check
+              inline
+              label="All Advanced Layers"
+              type="checkbox"
+              name="showAllAdvancedLayers"
+              id="showAllAdvancedLayers"
+              checked={showAllAdvancedLayers}
+              onChange={() => setShowAllAdvancedLayers((checked) => !checked)}
+            />
+            <Form.Check
+              inline
+              label="Custom Layers"
+              type="checkbox"
+              name="showCustomLayers"
+              id="showCustomLayers"
+              checked={showCustomLayers}
+              onChange={() => setShowCustomLayers((checked) => !checked)}
+            />
+          </Form>
+        )}
+        <FCSQueryBuilder
+          query={queryDebounded}
+          onChange={handleQueryBuilderQueryChange}
+          resources={resourcesForQueryBuilder}
+          // feature flags
+          enableWithin={enableWithin}
+          enableWrapGroup={enableWrapGroup}
+          enableWrapNegation={enableWrapNegation}
+          enableImplicitQuery={enableImplicitQuery}
+          enableMultipleQuerySegments={enableMultipleQuerySegments}
+          enableQuantifiers={enableQuantifiers}
+          enableRegexpFlags={enableRegexpFlags}
+          showBasicLayer={showBasicLayer}
+          showAllAdvancedLayers={showAllAdvancedLayers}
+          showCustomLayers={showCustomLayers}
+        />
+      </>
+    )
+  }
 
   return (
     <Modal
@@ -150,9 +295,7 @@ function QueryBuilderModal({
           </Container>
         </Form>
         {/* query builder */}
-        <Container className="px-3 pt-3">
-          <FCSQueryBuilder query={queryDebounded} onChange={handleQueryBuilderQueryChange} />
-        </Container>
+        <Container className="px-3 pt-3">{renderQueryBuilder()}</Container>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={() => handleClose('abort')}>

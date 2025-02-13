@@ -10,6 +10,9 @@ export interface FCSQueryBuilderConfig {
   enableMultipleQuerySegments: boolean
   enableQuantifiers: boolean
   enableRegexpFlags: boolean
+  showBasicLayer: boolean
+  showAllAdvancedLayers: boolean
+  showCustomLayers: boolean
 }
 
 type FCSQueryBuilderConfigProviderProps = Partial<FCSQueryBuilderConfig> & {
@@ -31,6 +34,9 @@ function FCSQueryBuilderConfigProvider({
   enableMultipleQuerySegments = true,
   enableQuantifiers = true,
   enableRegexpFlags = true,
+  showBasicLayer = true,
+  showAllAdvancedLayers = true,
+  showCustomLayers = true,
   children,
 }: FCSQueryBuilderConfigProviderProps) {
   const data = {
@@ -41,6 +47,9 @@ function FCSQueryBuilderConfigProvider({
     enableMultipleQuerySegments,
     enableQuantifiers,
     enableRegexpFlags,
+    showBasicLayer,
+    showAllAdvancedLayers,
+    showCustomLayers,
   }
 
   return (

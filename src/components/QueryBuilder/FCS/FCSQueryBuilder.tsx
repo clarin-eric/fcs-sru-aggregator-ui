@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
@@ -19,13 +19,17 @@ import {
   Query_simpleContext,
   QueryContext,
 } from '@/parsers/FCSParser'
+import { type Resource } from '@/utils/api'
 import { type ParseTree, TerminalNode, TokenStreamRewriter } from 'antlr4ng'
 import {
+  ADVANCED_LAYERS,
+  ADVANCED_LAYERS_MAP,
   CHANGE_TO_EXPRESSION_LIST,
   CHANGE_TO_EXPRESSION_LIST_MAP,
   type ChangeToExpressionListType,
   DEFAULT_NEW_QUANTIFIER,
   type ExpressionChild,
+  type LayerInfo,
   NEW_EXPRESSIONS,
   NEW_EXPRESSIONS_MAP,
   NEW_QUERY_SEGMENTS,
@@ -35,6 +39,7 @@ import {
   QUANTIFIER_CHOICES,
   QUANTIFIER_CHOICES_MAP,
   type QuantifierChoicesType,
+  type ResourceLayerIDInfo,
   WITHIN_CHOICES,
   WRAP_EXPRESSION,
   WRAP_EXPRESSION_MAP,
@@ -47,6 +52,10 @@ import {
   useFCSQueryBuilderConfig,
 } from './FCSQueryBuilderConfigContext'
 import { FCSQueryUpdaterProvider, useFCSQueryUpdater } from './FCSQueryUpdaterContext'
+import {
+  FCSResourceLayerInfoProvider,
+  useFCSResourceLayerInfo,
+} from './FCSResourceLayerInfoContext'
 import {
   escapeQuotes,
   escapeRegexValue,
@@ -66,16 +75,85 @@ import './styles.css'
 
 interface FCSQueryBuilderProps {
   query?: string
+  resources?: Resource[]
   onChange?: (query: string) => void
 }
 
 export function FCSQueryBuilder({
   query: queryProp,
+  resources: resourcesProp,
   onChange,
   ...props
 }: FCSQueryBuilderProps & Partial<FCSQueryBuilderConfig>) {
   const [query, setQuery] = useState(queryProp ?? '')
   useEffect(() => setQuery(queryProp ?? ''), [queryProp])
+
+  // let's again filter for resources that have the ADV Data View? or ADVANCED_SEARCH search capability and at least one layer
+  const resources = useMemo(() => {
+    const filtered =
+      resourcesProp?.filter(
+        (resource) =>
+          (resource.availableDataViews?.find(
+            (dataview) => dataview.mimeType === 'application/x-clarin-fcs-adv+xml'
+          ) !== undefined ||
+            resource.searchCapabilitiesResolved.includes('ADVANCED_SEARCH')) &&
+          resource.availableLayers !== null &&
+          resource.availableLayers.length > 0
+      ) ?? []
+
+    if (resourcesProp && resourcesProp.length !== filtered.length) {
+      const resourcesDiff = resourcesProp.filter((resource) => !filtered.includes(resource))
+      console.warn(
+        'Filter out resource(s) that does not correctly declare ADV query support',
+        resourcesDiff
+      )
+    }
+
+    return filtered
+  }, [resourcesProp])
+
+  // compute list of layers we know and want to make available
+  const layerInfo = useMemo(() => {
+    return resources
+      .map((resource) => {
+        const layerTypeToID = new Map<string, ResourceLayerIDInfo>()
+        resource.availableLayers!.forEach((layer) => {
+          if (!layerTypeToID.has(layer.layerType)) {
+            layerTypeToID.set(layer.layerType, { resultIDs: [], qualifiers: [] })
+          }
+          const data = layerTypeToID.get(layer.layerType)!
+          data.resultIDs.push(layer.resultId)
+          if (layer.qualifier !== null) {
+            data.qualifiers.push(layer.qualifier)
+          }
+        })
+        return [...layerTypeToID.entries()].map(([layerType, layerIDs]) => ({
+          layerType,
+          resource,
+          layerIDs,
+        }))
+      })
+      .reduce((map, item) => {
+        item.forEach(({ layerType, resource, layerIDs }) => {
+          if (!map.has(layerType)) {
+            map.set(layerType, { resources: [], qualifiers: new Map() })
+          }
+          const data = map.get(layerType)!
+          data.resources.push({ resource, layerIDs })
+          if (layerIDs.qualifiers.length > 0) {
+            layerIDs.qualifiers.forEach((qualifier) => {
+              if (!data.qualifiers.has(qualifier)) {
+                data.qualifiers.set(qualifier, [])
+              }
+              data.qualifiers.get(qualifier)!.push(resource)
+            })
+          }
+        })
+        return map
+      }, new Map<string, LayerInfo>())
+  }, [resources])
+
+  console.debug('layerInfo', { resources, layerInfo })
 
   console.debug('Parse query', { query, queryProp })
   const parsed = parseQuery(query)
@@ -110,25 +188,30 @@ export function FCSQueryBuilder({
   // UI
 
   return (
-    <div id="query-builder" className="fcs-query border rounded p-1">
+    <div id="query-builder" className="fcs-query">
       <FCSQueryBuilderConfigProvider
-        enableWithin={props.enableWithin || false}
-        enableWrapGroup={props.enableWrapGroup || false}
-        enableWrapNegation={props.enableWrapNegation || false}
-        enableImplicitQuery={props.enableImplicitQuery || false}
-        enableMultipleQuerySegments={props.enableMultipleQuerySegments || true}
-        enableQuantifiers={props.enableQuantifiers || true}
-        enableRegexpFlags={props.enableRegexpFlags || false}
+        enableWithin={props.enableWithin ?? false}
+        enableWrapGroup={props.enableWrapGroup ?? false}
+        enableWrapNegation={props.enableWrapNegation ?? false}
+        enableImplicitQuery={props.enableImplicitQuery ?? false}
+        enableMultipleQuerySegments={props.enableMultipleQuerySegments ?? true}
+        enableQuantifiers={props.enableQuantifiers ?? true}
+        enableRegexpFlags={props.enableRegexpFlags ?? false}
+        showBasicLayer={props.showBasicLayer ?? true}
+        showAllAdvancedLayers={props.showAllAdvancedLayers ?? false}
+        showCustomLayers={props.showCustomLayers ?? true}
       >
-        {parsed ? (
-          <FCSParserLexerProvider parser={parsed.parser} lexer={parsed.lexer}>
-            <FCSQueryUpdaterProvider rewriter={parsed.rewriter}>
-              <Query tree={parsed.tree} onChange={handleQueryChange} />
-            </FCSQueryUpdaterProvider>
-          </FCSParserLexerProvider>
-        ) : (
-          <AddQuerySegmentButton onClick={handleAddQuery} />
-        )}
+        <FCSResourceLayerInfoProvider resources={resources} layerInfo={layerInfo}>
+          {parsed ? (
+            <FCSParserLexerProvider parser={parsed.parser} lexer={parsed.lexer}>
+              <FCSQueryUpdaterProvider rewriter={parsed.rewriter}>
+                <Query tree={parsed.tree} onChange={handleQueryChange} />
+              </FCSQueryUpdaterProvider>
+            </FCSParserLexerProvider>
+          ) : (
+            <AddQuerySegmentButton onClick={handleAddQuery} />
+          )}
+        </FCSResourceLayerInfoProvider>
       </FCSQueryBuilderConfigProvider>
     </div>
   )
@@ -603,6 +686,13 @@ function BasicExpressionInput({
   onChange?: () => void
 }) {
   const { rewriter } = useFCSQueryUpdater()
+  const { layerInfo } = useFCSResourceLayerInfo()
+  const { showBasicLayer, showAllAdvancedLayers, showCustomLayers } = useFCSQueryBuilderConfig()
+
+  const standardLayers = ['basic'].concat(Object.keys(ADVANCED_LAYERS_MAP))
+  const customLayers = showCustomLayers
+    ? [...layerInfo.keys()].filter((layer) => !standardLayers.includes(layer)).toSorted()
+    : []
 
   const attributeCtx = ctx.attribute()
   const operatorNode = ctx.getChild(1) as TerminalNode
@@ -614,6 +704,13 @@ function BasicExpressionInput({
 
   // update from outside (query input change)
   useEffect(() => {
+    const identifierCtx = attributeCtx.identifier()
+    const qualifierCtx = attributeCtx.qualifier()
+    const newLayer =
+      qualifierCtx !== null
+        ? `${qualifierCtx.getText()}:${identifierCtx.getText()}`
+        : `${identifierCtx.getText()}`
+
     const isOpEq = operatorNode.symbol.type === FCSParser.OPERATOR_EQ
 
     const valueQuoted = regexpNode.symbol.text
@@ -624,6 +721,7 @@ function BasicExpressionInput({
       quoteChar === "'"
     )
 
+    setLayer(newLayer ?? '')
     setOperator(isOpEq ? 'is' : 'is-not')
     setValue(newValue ?? '')
   }, [attributeCtx, operatorNode, regexpNode])
@@ -653,9 +751,9 @@ function BasicExpressionInput({
   }
 
   function handleRegexpChange() {
-    // TODO: escape if quotes!
+    // escape if quotes!
     const escapedValue = escapeRegexValue(value)
-    // TODO: handle regexp escapes
+    // TODO: handle regexp escapes?
     rewriter.replaceSingle(regexpNode.symbol, `"${escapedValue}"`)
     // do we want to build a query and return? or use a custom rewrite program to extract our change?
     onChange?.()
@@ -711,10 +809,53 @@ function BasicExpressionInput({
       <div className="d-flex justify-content-center column-gap-2">
         {/* TODO: adjust sizes a bit if longer selections? */}
         {/* field */}
-        <Form.Select style={{ width: '10ch' }} value={layer} onChange={handleLayerChange}>
-          <option value="text">text</option>
-          <option value="pos">pos</option>
-        </Form.Select>
+        <Dropdown>
+          <Dropdown.Toggle className="form-select">{layer}</Dropdown.Toggle>
+          <Dropdown.Menu>
+            {showBasicLayer && (
+              <>
+                <Dropdown.Header>Basic Search Layer</Dropdown.Header>
+                <Dropdown.Item>
+                  <strong>word</strong>
+                  <br />
+                  <small className="text-body-secondary">
+                    Supported by {layerInfo.get('word')?.resources.length ?? 0} resources.
+                  </small>
+                </Dropdown.Item>
+                <Dropdown.Divider />
+              </>
+            )}
+            {(showBasicLayer || (showCustomLayers && customLayers.length > 0)) && (
+              <Dropdown.Header>Advanced Search Layers</Dropdown.Header>
+            )}
+            {ADVANCED_LAYERS.filter(
+              !showAllAdvancedLayers ? (layer) => layerInfo.has(layer.id) : () => true
+            ).map((layer) => (
+              <Dropdown.Item eventKey={layer.id} key={layer.id}>
+                <strong>{layer.id}</strong>: {layer.label}
+                <br />
+                <small className="text-body-secondary">
+                  Supported by {layerInfo.get(layer.id)?.resources.length ?? 0} resources.
+                </small>
+              </Dropdown.Item>
+            ))}
+            {showCustomLayers && customLayers.length > 0 && (
+              <>
+                <Dropdown.Divider />
+                <Dropdown.Header>Custom Layers</Dropdown.Header>
+                {customLayers.map((layer) => (
+                  <Dropdown.Item eventKey={layer} key={layer}>
+                    <strong>{layer}</strong>
+                    <br />
+                    <small className="text-body-secondary">
+                      Supported by {layerInfo.get(layer)?.resources.length ?? 0} resources.
+                    </small>
+                  </Dropdown.Item>
+                ))}
+              </>
+            )}
+          </Dropdown.Menu>
+        </Dropdown>
         {/* op */}
         <Form.Select style={{ width: '10ch' }} value={operator} onChange={handleOperatorChange}>
           <option value="is">is</option>
@@ -819,9 +960,9 @@ function QuantifierInput({ ctx, onChange }: { ctx: QuantifierContext; onChange?:
 
   function handleQuantifierNChange(event: React.ChangeEvent<HTMLInputElement>) {
     const value = Number.parseInt(event.target.value)
-    setQuantifierN(value)
+    setQuantifierN(!Number.isNaN(value) ? value : null)
 
-    if (nodeN !== null) {
+    if (nodeN !== null && !Number.isNaN(value)) {
       rewriter.replaceSingle(nodeN, value.toString())
       onChange?.()
     }
@@ -829,9 +970,9 @@ function QuantifierInput({ ctx, onChange }: { ctx: QuantifierContext; onChange?:
 
   function handleQuantifierMChange(event: React.ChangeEvent<HTMLInputElement>) {
     const value = Number.parseInt(event.target.value)
-    setQuantifierM(value)
+    setQuantifierM(!Number.isNaN(value) ? value : null)
 
-    if (nodeM !== null) {
+    if (nodeM !== null && !Number.isNaN(value)) {
       rewriter.replaceSingle(nodeM, value.toString())
       onChange?.()
     }
