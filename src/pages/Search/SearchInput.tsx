@@ -551,6 +551,7 @@ function SearchInput({
           query={query}
           queryType={queryType}
           resources={resources}
+          selectedResources={selectedResourceIDs}
           show={showQueryBuilderModal}
           onModalClose={handleChangeQueryBuilderQuery}
         />

@@ -13,6 +13,8 @@ export interface FCSQueryBuilderConfig {
   showBasicLayer: boolean
   showAllAdvancedLayers: boolean
   showCustomLayers: boolean
+  showLayerQualifiers: boolean
+  showResourceCountForLayer: boolean
 }
 
 type FCSQueryBuilderConfigProviderProps = Partial<FCSQueryBuilderConfig> & {
@@ -37,6 +39,8 @@ function FCSQueryBuilderConfigProvider({
   showBasicLayer = true,
   showAllAdvancedLayers = true,
   showCustomLayers = true,
+  showLayerQualifiers = true,
+  showResourceCountForLayer = true,
   children,
 }: FCSQueryBuilderConfigProviderProps) {
   const data = {
@@ -50,6 +54,8 @@ function FCSQueryBuilderConfigProvider({
     showBasicLayer,
     showAllAdvancedLayers,
     showCustomLayers,
+    showLayerQualifiers,
+    showResourceCountForLayer,
   }
 
   return (

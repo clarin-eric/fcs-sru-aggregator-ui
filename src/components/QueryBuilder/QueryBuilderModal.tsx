@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
@@ -66,8 +66,12 @@ function QueryBuilderModal({
   // query syntax error handling
 
   // queryType conditional parsing
-  const parsed = parseFCSQuery(query)
+  const parsed = useMemo(() => {
+    console.debug('parse query for input validation', { query, queryType })
+    return parseFCSQuery(query)
+  }, [query, queryType])
 
+  // NOTE: do not wrap in `useEffect` as it causes flickering and hinders debouncing
   if (parsed) {
     if (parsed.errors.length > 0 && queryError !== parsed.errors[0]) {
       setQueryError(parsed.errors[0])
@@ -78,9 +82,6 @@ function QueryBuilderModal({
       setQueryErrorImmediate(null)
     }
   }
-
-  // --------------------------------------------------------------
-  // helper
 
   // --------------------------------------------------------------
   // event handlers
@@ -111,9 +112,11 @@ function QueryBuilderModal({
   const [enableMultipleQuerySegments, setEnableMultipleQuerySegments] = useState(true)
   const [enableQuantifiers, setEnableQuantifiers] = useState(false)
   const [enableRegexpFlags, setEnableRegexpFlags] = useState(false)
-  const [showBasicLayer, setShowBasicLayer] = useState(true)
-  const [showAllAdvancedLayers, setShowAllAdvancedLayers] = useState(true)
+  const [showBasicLayer, setShowBasicLayer] = useState(false)
+  const [showAllAdvancedLayers, setShowAllAdvancedLayers] = useState(false)
   const [showCustomLayers, setShowCustomLayers] = useState(true)
+  const [showLayerQualifiers, setShowLayerQualifiers] = useState(true)
+  const [showResourceCountForLayer, setShowResourceCountForLayer] = useState(true)
 
   function renderQueryBuilder() {
     // make conditional on query type
@@ -125,6 +128,7 @@ function QueryBuilderModal({
             <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
               Enable
             </Form.Text>
+            {/* query structures */}
             <Form.Check
               inline
               label="Within"
@@ -171,6 +175,7 @@ function QueryBuilderModal({
               onChange={() => setEnableMultipleQuerySegments((checked) => !checked)}
               disabled
             />
+            {/* inputs */}
             <Form.Check
               inline
               label="Quantifiers"
@@ -190,6 +195,7 @@ function QueryBuilderModal({
               onChange={() => setEnableRegexpFlags((checked) => !checked)}
               disabled
             />
+            {/* layers */}
             <Form.Check
               inline
               label="BASIC Layer"
@@ -217,6 +223,24 @@ function QueryBuilderModal({
               checked={showCustomLayers}
               onChange={() => setShowCustomLayers((checked) => !checked)}
             />
+            <Form.Check
+              inline
+              label="Layer Qualifiers"
+              type="checkbox"
+              name="showLayerQualifiers"
+              id="showLayerQualifiers"
+              checked={showLayerQualifiers}
+              onChange={() => setShowLayerQualifiers((checked) => !checked)}
+            />
+            <Form.Check
+              inline
+              label="Resource Count for Layer"
+              type="checkbox"
+              name="showResourceCountForLayer"
+              id="showResourceCountForLayer"
+              checked={showResourceCountForLayer}
+              onChange={() => setShowResourceCountForLayer((checked) => !checked)}
+            />
           </Form>
         )}
         <FCSQueryBuilder
@@ -234,6 +258,8 @@ function QueryBuilderModal({
           showBasicLayer={showBasicLayer}
           showAllAdvancedLayers={showAllAdvancedLayers}
           showCustomLayers={showCustomLayers}
+          showLayerQualifiers={showLayerQualifiers}
+          showResourceCountForLayer={showResourceCountForLayer}
         />
       </>
     )
@@ -249,7 +275,7 @@ function QueryBuilderModal({
       fullscreen={true}
       centered
     >
-      <Modal.Header closeButton>
+      <Modal.Header className="py-2" closeButton>
         <Modal.Title>Query Builder</Modal.Title>
       </Modal.Header>
       <Modal.Body className="px-0">
@@ -297,7 +323,7 @@ function QueryBuilderModal({
         {/* query builder */}
         <Container className="px-3 pt-3">{renderQueryBuilder()}</Container>
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer className="py-2">
         <Button variant="secondary" onClick={() => handleClose('abort')}>
           Cancel
         </Button>

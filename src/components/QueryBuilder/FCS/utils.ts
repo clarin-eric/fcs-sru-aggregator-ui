@@ -203,16 +203,16 @@ function _dumpTokenStream(tokenStream: CommonTokenStream, lexer: FCSLexer) {
 /* escape regex syntax characters with `\` prefix */
 const REGEXP_ESCAPES = /([\^$\\.*+?()[\]{}|/])/g
 const REGEXP_ESCAPES_ESCAPED = /\\([\^$\\.*+?()[\]{}|/])/g
-/* other punctuation characters */
-const REGEXP_OTHER_PUNCT = /([,-=<>#&!%:;@~'`"])/g
-/* find \xFF escaped characters, group 1 is backslashes before, group 2 is string FF */
-const REGEXP_ESCAPED_X = /(?<!\\)((?:\\{2})*)\\x([A-Fa-f0-9]{2})/g
+/* regex to check regex characters when replacing, without backslashes */
+const REGEXP_CONTAINS_REGEXP = /(^|[^\\])([\^$.*+?()[\]{}|/])/g
+// /* other punctuation characters */
+// const REGEXP_OTHER_PUNCT = /([,-=<>#&!%:;@~'`"])/g
+// /* find \xFF escaped characters, group 1 is backslashes before, group 2 is string FF */
+// const REGEXP_ESCAPED_X = /((?:^|[^\\])(?:\\{2})*)\\x([A-Fa-f0-9]{2})/g
 /* unescaped quotes */
-const REGEXP_UNESCAPED_DBLQUOTE = /(?<!\\)((?:\\{2})*")/g
-const REGEXP_UNESCAPED_SGLQUOTE = /(?<!\\)((?:\\{2})*')/g
+const REGEXP_UNESCAPED_QUOTE = /(^|[^\\])((?:\\{2})*['"])/g
 /* escaped quotes */
-const REGEXP_ESCAPED_DBLQUOTE = /(?<!\\)\\((?:\\{2})*")/g
-const REGEXP_ESCAPED_SGLQUOTE = /(?<!\\)\\((?:\\{2})*')/g
+const REGEXP_ESCAPED_QUOTE = /(^|[^\\])\\((?:\\{2})*['"])/g
 
 /**
  * Escape a string to be used in regular expressions.
@@ -232,9 +232,9 @@ export function escapeRegexValue(value: string | undefined) {
   // }
 
   let escaped = value
-  escaped = value.replace(REGEXP_ESCAPES, '\\$1')
-  escaped = value.replace(REGEXP_OTHER_PUNCT, (match) => `\\x${match.charCodeAt(0).toString(16)}`)
-
+  escaped = escaped.replace(REGEXP_ESCAPES, '\\$1')
+  // escaped = escaped.replace(REGEXP_OTHER_PUNCT, (match) => `\\x${match.charCodeAt(0).toString(16)}`)
+  escaped = escaped.replace(REGEXP_UNESCAPED_QUOTE, '$1\\$2')
   return escaped
 }
 
@@ -242,30 +242,35 @@ export function unescapeRegexValue(value: string | undefined) {
   if (!value) return value
 
   let unescaped = value
-  // revert `\xFF` escape sequences? (seems to happen automatically in browser)
-  unescaped = unescaped.replace(
-    REGEXP_ESCAPED_X,
-    (_, p1, p2) => `${p1}${String.fromCharCode(parseInt(p2, 16))}`
-  )
-  unescaped = decodeURIComponent(unescaped)
-  // remove double backslashes
-  // unescaped = unescaped.replaceAll('\\\\', '\\')
+  // // revert `\xFF` escape sequences? (seems to happen automatically in browser)
+  // unescaped = unescaped.replace(
+  //   REGEXP_ESCAPED_X,
+  //   (_, p1, p2) => `${p1}${String.fromCharCode(parseInt(p2, 16))}`
+  // )
+  // unescaped = decodeURIComponent(unescaped)
+  // // remove double backslashes
+  // // unescaped = unescaped.replaceAll('\\\\', '\\')
+  unescaped = unescaped.replace(REGEXP_ESCAPED_QUOTE, '$1$2')
   unescaped = unescaped.replace(REGEXP_ESCAPES_ESCAPED, '$1')
-  console.log('dd', { value, unescaped })
   return unescaped
 }
 
-export function escapeQuotes(value: string | undefined, isSingleQuote: boolean = false) {
-  if (!value) return value
-  return value.replace(
-    isSingleQuote ? REGEXP_UNESCAPED_SGLQUOTE : REGEXP_UNESCAPED_DBLQUOTE,
-    '\\$1'
-  )
+export function checkIfContainsRegex(value: string | undefined) {
+  if (!value) return false
+
+  const escapedValue = value.replace(REGEXP_CONTAINS_REGEXP, '\\$1$2')
+  // console.debug('is regex escaped', { value, escapedValue, contains: escapedValue !== value })
+  return escapedValue !== value
 }
 
-export function unescapeQuotes(value: string | undefined, isSingleQuote: boolean = false) {
+export function escapeQuotes(value: string | undefined) {
   if (!value) return value
-  return value.replace(isSingleQuote ? REGEXP_ESCAPED_SGLQUOTE : REGEXP_ESCAPED_DBLQUOTE, '$1')
+  return value.replaceAll('\\', '\\\\').replace(REGEXP_UNESCAPED_QUOTE, '$1\\$2')
+}
+
+export function unescapeQuotes(value: string | undefined) {
+  if (!value) return value
+  return value.replace(REGEXP_ESCAPED_QUOTE, '$1$2').replaceAll('\\\\', '\\')
 }
 
 // --------------------------------------------------------------------------

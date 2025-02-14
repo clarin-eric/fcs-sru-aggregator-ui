@@ -8,6 +8,7 @@ import { FCSLexer } from '@/parsers/FCSLexer'
 interface FCSParserLexer {
   parser: FCSParser
   lexer: FCSLexer
+  cursorPos?: number
 }
 
 type FCSParserLexerProviderProps = FCSParserLexer & {
@@ -21,8 +22,13 @@ FCSParserLexerContext.displayName = 'FCSParserLexerContext'
 
 // --------------------------------------------------------------------------
 
-function FCSParserLexerProvider({ parser, lexer, children }: FCSParserLexerProviderProps) {
-  const data = { parser, lexer }
+function FCSParserLexerProvider({
+  parser,
+  lexer,
+  cursorPos,
+  children,
+}: FCSParserLexerProviderProps) {
+  const data = { parser, lexer, cursorPos }
   return <FCSParserLexerContext.Provider value={data}>{children}</FCSParserLexerContext.Provider>
 }
 

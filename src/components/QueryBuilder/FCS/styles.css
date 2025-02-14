@@ -77,7 +77,7 @@
 
 #query-builder .translate-middle>.action-btn {
   /* p-1 == 0.25rem */
-  transform: translateX(calc(-50% - 0.25rem)) translateY(calc(-50% - 0.25rem)) !important;
+  transform: translateX(calc(-50% - 0.25rem)) translateY(calc(-50% - 0.25rem - 0.15rem)) !important;
 }
 
 #query-builder .basic-expression>.actions>div>.action-btn,
@@ -89,6 +89,13 @@
 #query-builder .basic-expression>.actions>.action-btn:only-child {
   /* if wrap button hidden */
   transform: translateX(calc(-100%)) translateY(-50%) !important;
+}
+
+/* initial add button */
+
+#query-builder> :only-child>.action-btn>i {
+  height: 1.5rem !important;
+  width: 1.5rem !important;
 }
 
 /* syntax components */
@@ -155,4 +162,18 @@
 #query-builder .dropdown>.form-select::after {
   /* remove dropdown icon and use the one from .form-select */
   content: unset;
+}
+
+/* custom focus ring, de-emphasize others */
+
+#query-builder .focus-ring:not(:only-of-type):focus-within {
+  /* show focus ring if not same tag-type siblings */
+  outline: 0;
+  box-shadow: var(--bs-focus-ring-x, 0) var(--bs-focus-ring-y, 0) var(--bs-focus-ring-blur, 0) var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+
+#query-builder .focus-ring:has(~*:focus-within),
+#query-builder *:focus-within~.focus-ring {
+  /* de-emphasize un-focused siblings */
+  opacity: 0.5;
 }

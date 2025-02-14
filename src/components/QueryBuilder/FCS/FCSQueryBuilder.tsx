@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
@@ -28,7 +28,10 @@ import {
   CHANGE_TO_EXPRESSION_LIST_MAP,
   type ChangeToExpressionListType,
   DEFAULT_NEW_QUANTIFIER,
+  EXPRESSION_OPERATORS,
+  EXPRESSION_OPERATORS_MAP,
   type ExpressionChild,
+  LAYER_VALUE_OPTIONS_MAP,
   type LayerInfo,
   NEW_EXPRESSIONS,
   NEW_EXPRESSIONS_MAP,
@@ -57,6 +60,7 @@ import {
   useFCSResourceLayerInfo,
 } from './FCSResourceLayerInfoContext'
 import {
+  checkIfContainsRegex,
   escapeQuotes,
   escapeRegexValue,
   parseQuery,
@@ -75,12 +79,15 @@ import './styles.css'
 
 interface FCSQueryBuilderProps {
   query?: string
+  /** curso position in query */
+  cursorPos?: number
   resources?: Resource[]
   onChange?: (query: string) => void
 }
 
 export function FCSQueryBuilder({
   query: queryProp,
+  cursorPos,
   resources: resourcesProp,
   onChange,
   ...props
@@ -152,11 +159,10 @@ export function FCSQueryBuilder({
         return map
       }, new Map<string, LayerInfo>())
   }, [resources])
+  // console.debug('layerInfo', { resources, layerInfo })
 
-  console.debug('layerInfo', { resources, layerInfo })
-
-  console.debug('Parse query', { query, queryProp })
-  const parsed = parseQuery(query)
+  // console.debug('Parse query', { query, queryProp })
+  const parsed = useMemo(() => parseQuery(query), [query])
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -178,17 +184,17 @@ export function FCSQueryBuilder({
   }
 
   function handleAddQuery(type: NewQuerySegmentType) {
-    // add dummy to trigger adding of gui element
+    // add text query to trigger adding of gui element
     const text = NEW_QUERY_SEGMENTS_MAP[type].new
     setQuery(text)
-    handleQueryChange()
+    onChange?.(text)
   }
 
   // ------------------------------------------------------------------------
   // UI
 
   return (
-    <div id="query-builder" className="fcs-query">
+    <div id="query-builder" className="fcs-query d-flex justify-content-center">
       <FCSQueryBuilderConfigProvider
         enableWithin={props.enableWithin ?? false}
         enableWrapGroup={props.enableWrapGroup ?? false}
@@ -200,10 +206,16 @@ export function FCSQueryBuilder({
         showBasicLayer={props.showBasicLayer ?? true}
         showAllAdvancedLayers={props.showAllAdvancedLayers ?? false}
         showCustomLayers={props.showCustomLayers ?? true}
+        showLayerQualifiers={props.showLayerQualifiers ?? true}
+        showResourceCountForLayer={props.showResourceCountForLayer ?? true}
       >
         <FCSResourceLayerInfoProvider resources={resources} layerInfo={layerInfo}>
           {parsed ? (
-            <FCSParserLexerProvider parser={parsed.parser} lexer={parsed.lexer}>
+            <FCSParserLexerProvider
+              parser={parsed.parser}
+              lexer={parsed.lexer}
+              cursorPos={cursorPos}
+            >
               <FCSQueryUpdaterProvider rewriter={parsed.rewriter}>
                 <Query tree={parsed.tree} onChange={handleQueryChange} />
               </FCSQueryUpdaterProvider>
@@ -571,7 +583,7 @@ function Query({ tree, onChange }: { tree: QueryContext; onChange?: () => void }
   // UI
 
   return (
-    <div className="block query d-flex flex-wrap row-gap-2 column-gap-1 border rounded p-1">
+    <div className="block query flex-grow-1 justify-content-center d-flex flex-wrap row-gap-2 column-gap-1 border rounded p-1">
       <QuerySequence children={queryChildrenCtx} onChange={onChange} />
       {enableWithin &&
         (within ? (
@@ -590,7 +602,7 @@ function Query({ tree, onChange }: { tree: QueryContext; onChange?: () => void }
             />
           </div>
         ) : (
-          <Button size="sm" onClick={handleAddWithinClause}>
+          <Button size="sm" onClick={handleAddWithinClause} style={{ alignSelf: 'center' }}>
             Add within clause
           </Button>
         ))}
@@ -687,12 +699,26 @@ function BasicExpressionInput({
 }) {
   const { rewriter } = useFCSQueryUpdater()
   const { layerInfo } = useFCSResourceLayerInfo()
-  const { showBasicLayer, showAllAdvancedLayers, showCustomLayers } = useFCSQueryBuilderConfig()
+  const {
+    showBasicLayer,
+    showAllAdvancedLayers,
+    showCustomLayers,
+    showLayerQualifiers,
+    showResourceCountForLayer,
+  } = useFCSQueryBuilderConfig()
 
-  const standardLayers = ['basic'].concat(Object.keys(ADVANCED_LAYERS_MAP))
+  const basicLayer = 'word'
+  const advancedLayers = Object.keys(ADVANCED_LAYERS_MAP)
+  const standardLayers = [basicLayer, ...advancedLayers]
   const customLayers = showCustomLayers
     ? [...layerInfo.keys()].filter((layer) => !standardLayers.includes(layer)).toSorted()
     : []
+
+  const hasBasicLayer = layerInfo.has(basicLayer)
+  const hasAdvancedLayers =
+    [...layerInfo.keys()].filter((layer) => Object.keys(ADVANCED_LAYERS_MAP).includes(layer))
+      .length > 0
+  const hasCustomLayers = customLayers.length > 0
 
   const attributeCtx = ctx.attribute()
   const operatorNode = ctx.getChild(1) as TerminalNode
@@ -701,6 +727,7 @@ function BasicExpressionInput({
   const [layer, setLayer] = useState('text')
   const [operator, setOperator] = useState('is')
   const [value, setValue] = useState('')
+  const oldOperatorRef = useRef(operator)
 
   // update from outside (query input change)
   useEffect(() => {
@@ -714,16 +741,46 @@ function BasicExpressionInput({
     const isOpEq = operatorNode.symbol.type === FCSParser.OPERATOR_EQ
 
     const valueQuoted = regexpNode.symbol.text
-    const quoteChar = valueQuoted?.charAt(0)
-    // TODO: quote escapes? if both single and double?
-    const newValue = unescapeQuotes(
-      unescapeRegexValue(valueQuoted?.slice(1, -1)),
-      quoteChar === "'"
-    )
+    const valueUnquoted = valueQuoted?.slice(1, -1)
+
+    const processedInput = getInputParsed(valueUnquoted ?? '', isOpEq)
+    let newOperator = processedInput.operator
+    let newValue = unescapeValue(processedInput.value, newOperator)!
+    console.debug('parsed input', { valueUnquoted, processedInput, newValue })
+
+    // TODO: we may not want to change the operator if we simply switch from "regex" to "not-regex"
+    // TODO: or lets simply delay, so that we only update the UI if required? --> onBlur on whole expression?
+    if (
+      oldOperatorRef.current !== newOperator &&
+      ['regex', 'not-regex'].includes(oldOperatorRef.current)
+    ) {
+      console.debug('overwriting computed newOperator?', {
+        newOperator,
+        oldOperatorRef: oldOperatorRef.current,
+      })
+      newOperator = oldOperatorRef.current
+    }
+
+    // check for layers with vocabulary if value is known, otherwise replace with defaul
+    const layerInfo = LAYER_VALUE_OPTIONS_MAP[newLayer]
+    if (
+      layerInfo &&
+      layerInfo.options &&
+      layerInfo.options.length > 0 &&
+      // @ts-expect-error: we do want to check here
+      (!layerInfo.options.map((option) => option.value).includes(newValue) || !newValue)
+    ) {
+      newValue = layerInfo.options[0]?.value ?? ''
+      newOperator = 'is'
+
+      // TODO: if we change here, then we need to update the query, too ...
+      // BUT will need to prevent recursive updates, too
+    }
 
     setLayer(newLayer ?? '')
-    setOperator(isOpEq ? 'is' : 'is-not')
-    setValue(newValue ?? '')
+    setOperator(newOperator)
+    setValue(newValue)
+    oldOperatorRef.current = newOperator
   }, [attributeCtx, operatorNode, regexpNode])
 
   const parentCtx = ctx.parent
@@ -731,30 +788,124 @@ function BasicExpressionInput({
     .filter(parentCtx instanceof Expression_groupContext ? (id) => id !== 'group' : () => true)
     .filter(parentCtx instanceof Expression_notContext ? (id) => id !== 'group' : () => true)
 
+  const layerValueInputInfo = LAYER_VALUE_OPTIONS_MAP[layer]
+
+  // ------------------------------------------------------------------------
+  // helpers
+
+  function getInputParsed(value: string, isOpEq: boolean) {
+    const startsWithAnything = value.startsWith('.*')
+    const endsWithAnything = value.endsWith('.*')
+
+    const valueWithoutAnythingMatcher =
+      startsWithAnything && endsWithAnything
+        ? value.slice(2, -2)
+        : startsWithAnything
+        ? value.slice(2)
+        : endsWithAnything
+        ? value.slice(0, -2)
+        : value
+
+    const containsRegexExpressions = checkIfContainsRegex(valueWithoutAnythingMatcher)
+
+    if (!containsRegexExpressions) {
+      if (isOpEq) {
+        if (startsWithAnything && endsWithAnything) {
+          return { operator: 'contains', value: valueWithoutAnythingMatcher }
+        }
+        if (startsWithAnything) {
+          return { operator: 'ends-with', value: value.slice(2) }
+        }
+        if (endsWithAnything) {
+          return { operator: 'starts-with', value: value.slice(0, -2) }
+        }
+        return { operator: 'is', value: value }
+      }
+      if (startsWithAnything || endsWithAnything) {
+        return { operator: 'not-regex', value: value }
+      }
+      return { operator: 'is-not', value: value }
+    }
+    return { operator: isOpEq ? 'regex' : 'not-regex', value: value }
+  }
+
+  function unescapeValue(value: string | undefined, operator: string) {
+    return ['regex', 'not-regex'].includes(operator)
+      ? unescapeQuotes(value)
+      : unescapeRegexValue(value)
+  }
+
+  function escapeValue(value: string | undefined, operator: string) {
+    return ['regex', 'not-regex'].includes(operator) ? escapeQuotes(value) : escapeRegexValue(value)
+  }
+
   // ------------------------------------------------------------------------
   // event handlers
 
-  function handleLayerChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    const newLayer = event.target.value
-    setLayer(newLayer) // unnecessary if we completely rebuild UI
+  function handleLayerChange(eventKey: string | null) {
+    const newLayer = eventKey
+    if (!newLayer) return
+    if (newLayer === layer) return
 
+    // TODO: need to clear value/regexp?
+    // TODO: update operator if not fitting?
+
+    setLayer(newLayer) // unnecessary if we completely rebuild UI?
     rewriter.replace(attributeCtx.start!, attributeCtx.stop!, newLayer)
     onChange?.()
   }
 
   function handleOperatorChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const newOperator = event.target.value
+    const oldOperator = operator
     setOperator(newOperator) // unnecessary if we completely rebuild UI
+    oldOperatorRef.current = newOperator
 
-    rewriter.replaceSingle(operatorNode.symbol, newOperator === 'is' ? '=' : '!=')
+    const opSybmol = ['is-not', 'not-regex'].includes(newOperator) ? '!=' : '='
+    rewriter.replaceSingle(operatorNode.symbol, opSybmol)
+
+    let newValue = value ?? ''
+
+    const newOpInfo = EXPRESSION_OPERATORS_MAP[newOperator]
+    const oldOpInfo = EXPRESSION_OPERATORS_MAP[oldOperator]
+    // bail out if unexpected
+    if (!newOpInfo) {
+      console.warn('Unexpected state, did not find known operator value!', {
+        newOpInfo,
+        oldOpInfo,
+        newOperator,
+        oldOperator,
+      })
+      return
+    }
+
+    newValue = escapeValue(newValue, newOperator)!
+
+    // TODO: do we want to use the regex input value from "contains"/"starts-with"/"ends-with" when changing to "regex"/"not-regex"?
+    // if (['regex', 'not-regex'].includes(newOperator)) {
+    //   newValue = `${oldOpInfo.valueBefore ?? ''}${newValue}${oldOpInfo.valueAfter ?? ''}`
+    // }
+
+    rewriter.replaceSingle(
+      regexpNode.symbol,
+      `"${newOpInfo.valueBefore ?? ''}${newValue}${newOpInfo.valueAfter ?? ''}"`
+    )
+
     onChange?.()
   }
 
   function handleRegexpChange() {
     // escape if quotes!
-    const escapedValue = escapeRegexValue(value)
-    // TODO: handle regexp escapes?
-    rewriter.replaceSingle(regexpNode.symbol, `"${escapedValue}"`)
+    const escapedValue = ['regex', 'not-regex'].includes(operator)
+      ? escapeQuotes(value)
+      : escapeRegexValue(value)
+
+    const opInfo = EXPRESSION_OPERATORS_MAP[operator]
+
+    rewriter.replaceSingle(
+      regexpNode.symbol,
+      `"${opInfo?.valueBefore ?? ''}${escapedValue}${opInfo?.valueAfter ?? ''}"`
+    )
     // do we want to build a query and return? or use a custom rewrite program to extract our change?
     onChange?.()
   }
@@ -797,8 +948,104 @@ function BasicExpressionInput({
   // ------------------------------------------------------------------------
   // UI
 
+  function renderLayerItem(layerId: string, description: string | undefined = undefined) {
+    if (!description) {
+      return (
+        <>
+          <strong>{layerId}</strong>
+          {renderLayerResourceCount(layerId)}
+        </>
+      )
+    }
+
+    return (
+      <>
+        <strong>{layerId}</strong>: {description}
+        {renderLayerResourceCount(layerId)}
+      </>
+    )
+  }
+
+  function renderLayerResourceCount(layer: string, qualifier: string | undefined = undefined) {
+    if (!showResourceCountForLayer) return null
+
+    const countLayer = layerInfo.get(layer)?.resources.length ?? 0
+    const countQualifier = qualifier
+      ? layerInfo.get(layer)?.qualifiers?.get(qualifier)?.length ?? 0
+      : undefined
+
+    // if same counts, then do not output
+    if (qualifier && countLayer === countQualifier) return null
+
+    const count = qualifier ? countQualifier : countLayer
+
+    return (
+      <>
+        <br />
+        <small className="text-body-secondary">Supported by {count} resources.</small>
+      </>
+    )
+  }
+
+  function renderLayerQualifiers(layerId: string) {
+    if (!showLayerQualifiers) return null
+
+    const qualifiers = layerInfo.get(layerId)?.qualifiers
+    if (!qualifiers || qualifiers.size === 0) return null
+
+    const qualifierKeys = [...qualifiers.keys()]
+
+    return qualifierKeys.map((qualifierId) => {
+      const id = `${qualifierId}:${layerId}`
+
+      return (
+        <Dropdown.Item eventKey={id} active={layer === id} key={id}>
+          <div className="ms-3">
+            <strong>{qualifierId}</strong>:{layerId}
+            {renderLayerResourceCount(layerId, qualifierId)}
+          </div>
+        </Dropdown.Item>
+      )
+    })
+  }
+
+  function renderRegexpInput() {
+    if (layerValueInputInfo && layerValueInputInfo.options?.length > 0) {
+      return (
+        <Dropdown
+          onSelect={(eventKey) => setValue(eventKey ?? '')}
+          // TODO: does onBlur reliably fire after onSelect has finished processing the state update?
+          onBlur={handleRegexpChange}
+        >
+          <Dropdown.Toggle className="form-select">{value}</Dropdown.Toggle>
+          <Dropdown.Menu>
+            {layerValueInputInfo.options.map((option) => (
+              <Dropdown.Item
+                eventKey={option.value}
+                key={option.value}
+                active={value === option.value}
+              >
+                {option.label}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
+      )
+    }
+
+    return (
+      <Form.Control
+        className="d-inline"
+        style={{ width: '10ch' }}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        onBlur={handleRegexpChange}
+      />
+    )
+  }
+
   return (
-    <div className="block input-block basic-expression position-relative border rounded py-3 ps-2 pe-3 my-2 ms-1 me-2">
+    <div className="block input-block basic-expression position-relative focus-ring border rounded py-3 ps-2 pe-3 my-2 ms-1 me-2">
       {showChangeToExpressionListButton && (
         <ChangeToExpressionListButton
           className="position-absolute top-0 start-50 translate-middle rounded-circle p-1"
@@ -807,68 +1054,78 @@ function BasicExpressionInput({
       )}
 
       <div className="d-flex justify-content-center column-gap-2">
-        {/* TODO: adjust sizes a bit if longer selections? */}
         {/* field */}
-        <Dropdown>
+        <Dropdown onSelect={handleLayerChange}>
           <Dropdown.Toggle className="form-select">{layer}</Dropdown.Toggle>
           <Dropdown.Menu>
-            {showBasicLayer && (
-              <>
-                <Dropdown.Header>Basic Search Layer</Dropdown.Header>
-                <Dropdown.Item>
-                  <strong>word</strong>
-                  <br />
-                  <small className="text-body-secondary">
-                    Supported by {layerInfo.get('word')?.resources.length ?? 0} resources.
-                  </small>
-                </Dropdown.Item>
-                <Dropdown.Divider />
-              </>
-            )}
-            {(showBasicLayer || (showCustomLayers && customLayers.length > 0)) && (
-              <Dropdown.Header>Advanced Search Layers</Dropdown.Header>
-            )}
-            {ADVANCED_LAYERS.filter(
-              !showAllAdvancedLayers ? (layer) => layerInfo.has(layer.id) : () => true
-            ).map((layer) => (
-              <Dropdown.Item eventKey={layer.id} key={layer.id}>
-                <strong>{layer.id}</strong>: {layer.label}
-                <br />
-                <small className="text-body-secondary">
-                  Supported by {layerInfo.get(layer.id)?.resources.length ?? 0} resources.
-                </small>
-              </Dropdown.Item>
-            ))}
-            {showCustomLayers && customLayers.length > 0 && (
-              <>
-                <Dropdown.Divider />
-                <Dropdown.Header>Custom Layers</Dropdown.Header>
-                {customLayers.map((layer) => (
-                  <Dropdown.Item eventKey={layer} key={layer}>
-                    <strong>{layer}</strong>
-                    <br />
-                    <small className="text-body-secondary">
-                      Supported by {layerInfo.get(layer)?.resources.length ?? 0} resources.
-                    </small>
-                  </Dropdown.Item>
+            <div className="d-flex">
+              <div
+                className={([] as string[])
+                  .concat(showCustomLayers && hasCustomLayers ? ['border-end pe-1'] : [])
+                  .join(' ')}
+              >
+                {/* custom user input? - "unknown layer" category */}
+                {showBasicLayer && (
+                  <>
+                    <Dropdown.Header>Basic Search Layer</Dropdown.Header>
+                    <Dropdown.Item eventKey={basicLayer} active={layer === basicLayer}>
+                      {renderLayerItem(basicLayer)}
+                    </Dropdown.Item>
+                    <Dropdown.Divider />
+                  </>
+                )}
+                {(showBasicLayer || (showCustomLayers && customLayers.length > 0)) && (
+                  <Dropdown.Header>Advanced Search Layers</Dropdown.Header>
+                )}
+                {ADVANCED_LAYERS.filter(
+                  !showAllAdvancedLayers ? (layerData) => layerInfo.has(layerData.id) : () => true
+                ).map((layerData) => (
+                  <Fragment key={layerData.id}>
+                    <Dropdown.Item eventKey={layerData.id} active={layer === layerData.id}>
+                      <strong>{layerData.id}</strong>: {layerData.label}
+                      {renderLayerResourceCount(layerData.id)}
+                    </Dropdown.Item>
+                    {renderLayerQualifiers(layerData.id)}
+                  </Fragment>
                 ))}
-              </>
-            )}
+              </div>
+              <div
+                className={([] as string[])
+                  .concat((showBasicLayer && hasBasicLayer) || hasAdvancedLayers ? ['ps-1'] : [])
+                  .join(' ')}
+              >
+                {showCustomLayers && customLayers.length > 0 && (
+                  <>
+                    <Dropdown.Header>Custom Layers</Dropdown.Header>
+                    {customLayers.map((layerId) => (
+                      <Fragment key={layerId}>
+                        <Dropdown.Item eventKey={layerId} active={layer === layerId}>
+                          <strong>{layerId}</strong>
+                          {renderLayerResourceCount(layerId)}
+                        </Dropdown.Item>
+                        {renderLayerQualifiers(layerId)}
+                      </Fragment>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
           </Dropdown.Menu>
         </Dropdown>
         {/* op */}
-        <Form.Select style={{ width: '10ch' }} value={operator} onChange={handleOperatorChange}>
-          <option value="is">is</option>
-          <option value="is-not">is not</option>
+        <Form.Select
+          style={{ width: 'fit-content' }}
+          value={operator}
+          onChange={handleOperatorChange}
+        >
+          {EXPRESSION_OPERATORS.map((operator) => (
+            <option key={operator.id} value={operator.id}>
+              {operator.label}
+            </option>
+          ))}
         </Form.Select>
         {/* regexp */}
-        <Form.Control
-          className="d-inline"
-          style={{ width: '10ch' }}
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          onBlur={handleRegexpChange}
-        />
+        {renderRegexpInput()}
       </div>
 
       {showChangeToExpressionListButton && (
@@ -1085,8 +1342,8 @@ function QuerySimple({ ctx, onChange }: { ctx: Query_simpleContext; onChange?: (
     if (queryImplicitCtx !== null) {
       const regexpNode = queryImplicitCtx.regexp().regexp_pattern().REGEXP()
       const valueQuoted = regexpNode.symbol.text
-      const quoteChar = valueQuoted?.charAt(0)
-      const value = unescapeQuotes(valueQuoted?.slice(1, -1), quoteChar === "'")
+      // const quoteChar = valueQuoted?.charAt(0)
+      const value = unescapeQuotes(valueQuoted?.slice(1, -1))
 
       function handleValueChange(value: string) {
         rewriter.replaceSingle(regexpNode.symbol, `"${escapeQuotes(value)}"`)
@@ -1117,7 +1374,7 @@ function QuerySimple({ ctx, onChange }: { ctx: Query_simpleContext; onChange?: (
   }
 
   return (
-    <div className="block query-simple border rounded p-1 pe-2 my-2 position-relative d-flex align-items-center">
+    <div className="block query-simple focus-ring border rounded p-1 pe-2 my-2 position-relative d-flex align-items-center">
       {isImplicit ? <code className="delims">"</code> : <code className="delims">[</code>}
       {renderQuery()}
       {isImplicit ? <code className="delims">"</code> : <code className="delims">]</code>}
