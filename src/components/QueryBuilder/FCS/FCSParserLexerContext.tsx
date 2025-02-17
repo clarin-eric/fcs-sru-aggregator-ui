@@ -8,7 +8,7 @@ import { FCSLexer } from '@/parsers/FCSLexer'
 interface FCSParserLexer {
   parser: FCSParser
   lexer: FCSLexer
-  cursorPos?: number
+  cursorPos?: [number, number] | number
 }
 
 type FCSParserLexerProviderProps = FCSParserLexer & {

@@ -166,6 +166,7 @@
 
 /* custom focus ring, de-emphasize others */
 
+#query-builder .cursor-focus:not(:has(.cursor-focus)),
 #query-builder .focus-ring:not(:only-of-type):focus-within {
   /* show focus ring if not same tag-type siblings */
   outline: 0;

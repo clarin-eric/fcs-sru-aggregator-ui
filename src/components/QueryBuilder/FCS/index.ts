@@ -1,4 +1,6 @@
 import { FCSQueryBuilder } from './FCSQueryBuilder'
-import { parseQuery } from './utils'
+import type { SupportedResourcesInfo } from './utils'
+import { getLayersUsedInQuery, getResourcesLayerSupportInfo, parseQuery } from './utils'
 
-export { FCSQueryBuilder, parseQuery }
+export { FCSQueryBuilder, getLayersUsedInQuery, getResourcesLayerSupportInfo, parseQuery }
+export type { SupportedResourcesInfo }

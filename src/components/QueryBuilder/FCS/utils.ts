@@ -16,7 +16,9 @@ import {
 } from 'antlr4ng'
 
 import { FCSLexer } from '@/parsers/FCSLexer'
-import { FCSParser } from '@/parsers/FCSParser'
+import { AttributeContext, FCSParser, QueryContext } from '@/parsers/FCSParser'
+import { FCSParserVisitor } from '@/parsers/FCSParserVisitor'
+import { type Resource } from '@/utils/api'
 
 // --------------------------------------------------------------------------
 
@@ -65,6 +67,131 @@ export function parseQuery(input?: string) {
   console.log(/*#__PURE__*/ _formatTreeItems(treeItems))
 
   return { tree, lexer, parser, rewriter, errors: errorListener.errors }
+}
+
+// --------------------------------------------------------------------------
+
+export function isCursorOnContext(
+  ctx: ParseTree | null,
+  cursorPos: [number, number] | number | undefined
+) {
+  if (!ctx) return false
+  if (cursorPos === undefined) return false
+
+  const cursorStart = Array.isArray(cursorPos) ? cursorPos[0] : cursorPos
+  const cursorEnd = Array.isArray(cursorPos) ? cursorPos[1] : cursorPos
+
+  if (ctx instanceof ParserRuleContext && ctx.start !== null && ctx.stop !== null) {
+    const ctxStart = ctx.start.start
+    const ctxEnd = ctx.stop.stop + 1
+
+    // cursor if inside
+    if (ctxStart < cursorStart && cursorStart < ctxEnd) return true
+    if (ctxStart < cursorEnd && cursorEnd < ctxEnd) return true
+    // single cursor, hit if directly besides; for ranges only if overlap (above condition)
+    if (cursorStart === cursorEnd && (ctxStart === cursorEnd || cursorEnd === ctxEnd)) return true
+    // if cursor range across
+    if (cursorStart <= ctxStart && ctxEnd <= cursorEnd) return true
+  }
+
+  return false
+}
+
+// --------------------------------------------------------------------------
+
+class CollectLayersVisitor extends FCSParserVisitor<void> {
+  public layers: string[] = []
+
+  public visitAttribute = (ctx: AttributeContext) => {
+    this.layers.push(ctx.getText())
+  }
+
+  // public visitQuery_implicit = (ctx: Query_implicitContext) => {
+  //   // "text"?
+  // }
+}
+
+export function getLayersUsedInQuery(ctx?: QueryContext | ParseTree) {
+  // collect layers in query
+  const layerCollector = new CollectLayersVisitor()
+  if (ctx) {
+    layerCollector.visit(ctx)
+  }
+
+  const usedLayers = layerCollector.layers
+  const uniqLayers = new Set(usedLayers)
+  // console.log('layers', { usedLayers, uniqLayers })
+
+  return [...uniqLayers]
+}
+
+export interface SupportedResourcesInfo {
+  supported: Resource[]
+  unsupported: (readonly [Resource, string[]])[]
+  unsupportedByLayer: Map<string, Resource[]>
+}
+
+export function getResourcesLayerSupportInfo(resources: Resource[], layers: string[]): SupportedResourcesInfo {
+  // NOTE: skip non-standard, legacy-support "word" layer
+  // TODO: hmm, maybe skip missing "text" layer?
+  const layersRequired = layers
+    .filter((layer) => layer !== 'word')
+    .filter((layer) => layer !== 'text')
+
+  if (layersRequired.length === 0 || resources.length === 0) {
+    return {
+      supported: resources,
+      unsupported: [],
+      unsupportedByLayer: new Map<string, Resource[]>(),
+    }
+  }
+
+  const layersInQuery = layersRequired.map((layer) => layer.split(':').toReversed())
+
+  // find resources that do have these layers
+  // TODO: use `layerInfo` where it is precomputed?
+  const resourcesWithLayer = resources.map((resource) => {
+    const notAvailableLayers: string[] = []
+
+    layersInQuery.forEach(([layerId, qualifierId]) => {
+      if (!qualifierId) {
+        if (!resource.availableLayers?.find((layer) => layer.layerType === layerId)) {
+          notAvailableLayers.push(layerId)
+        }
+      } else {
+        if (
+          !resource.availableLayers?.find(
+            (layer) => layer.layerType === layerId && layer.qualifier === qualifierId
+          )
+        ) {
+          notAvailableLayers.push(`${qualifierId}:${layerId}`)
+        }
+      }
+    })
+
+    return [resource, notAvailableLayers] as const
+  })
+
+  const validResources = resourcesWithLayer
+    .filter(([, layers]) => layers.length === 0)
+    .map(([resource]) => resource)
+  const invalidResources = resourcesWithLayer.filter(([, layers]) => layers.length !== 0)
+  const invalidResourcesByLayer = invalidResources
+    .map(([resource, layers]) => layers.map((layer) => [layer, resource] as const))
+    .flat(1)
+    .reduce((map, [layer, resource]) => {
+      if (!map.has(layer)) {
+        map.set(layer, [])
+      }
+      map.get(layer)!.push(resource)
+      return map
+    }, new Map<string, Resource[]>())
+
+  return {
+    supported: validResources,
+    unsupported: invalidResources,
+    unsupportedByLayer: invalidResourcesByLayer,
+  }
 }
 
 // --------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Alert from 'react-bootstrap/Alert'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
@@ -12,7 +13,12 @@ import ContentEditable from '@/components/ContentEditable'
 import useDebounce from '@/hooks/useDebounce'
 import useDebouncedState from '@/hooks/useDebouncedState'
 import { type Resource } from '@/utils/api'
-import { FCSQueryBuilder, parseQuery as parseFCSQuery } from './FCS'
+import {
+  FCSQueryBuilder,
+  getLayersUsedInQuery,
+  getResourcesLayerSupportInfo,
+  parseQuery as parseFCSQuery,
+} from './FCS'
 
 import './styles.css'
 
@@ -45,7 +51,11 @@ function QueryBuilderModal({
 }: QueryBuilderModalProps) {
   // query input
   const [query, setQuery] = useState(queryProp ?? '')
-  useEffect(() => setQuery(queryProp ?? ''), [queryProp])
+  const [cursorPos, setCursorPos] = useState<[number, number] | number | null>(null)
+  useEffect(() => {
+    setQuery(queryProp ?? '')
+    setCursorPos(null)
+  }, [queryProp])
 
   const queryDebounded = useDebounce(query, delay)
   // query input syntax highlighting
@@ -84,6 +94,38 @@ function QueryBuilderModal({
   }
 
   // --------------------------------------------------------------
+
+  const [unavailableResources, setUnavailableResources] = useState<number>(0)
+  const [unavailableResourcesByValue, setUnavailableResourcesByValue] = useState<
+    Map<string, Resource[]> | undefined
+  >(undefined)
+
+  // conditional update with custom equality check since objects ...
+  if (resources && parsed) {
+    const layersUsedInQuery = getLayersUsedInQuery(parsed?.tree)
+    const resourcesWithMissingLayers = getResourcesLayerSupportInfo(resources, layersUsedInQuery)
+
+    const newUnavailable = resourcesWithMissingLayers.unsupported.length
+    if (newUnavailable !== unavailableResources) {
+      setUnavailableResources(newUnavailable)
+    }
+    const newLayers = [...resourcesWithMissingLayers.unsupportedByLayer.keys()]
+    const oldLayers = unavailableResourcesByValue ? [...unavailableResourcesByValue.keys()] : []
+    if (
+      newLayers.length !== oldLayers.length ||
+      !newLayers.every((layer) => oldLayers.includes(layer))
+    ) {
+      setUnavailableResourcesByValue(resourcesWithMissingLayers.unsupportedByLayer)
+    }
+  }
+  if (!parsed) {
+    if (unavailableResources !== 0) {
+      setUnavailableResources(0)
+      setUnavailableResourcesByValue(undefined)
+    }
+  }
+
+  // --------------------------------------------------------------
   // event handlers
 
   function handleClose(action: string) {
@@ -96,6 +138,23 @@ function QueryBuilderModal({
 
   function handleQueryInputChange(query: string) {
     setQuery(query)
+  }
+
+  function handleQueryInputCursorChange(
+    event:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | React.KeyboardEvent<HTMLInputElement>
+      | React.MouseEvent<HTMLInputElement>
+  ) {
+    if ((event.target as HTMLElement).nodeName === 'INPUT') {
+      const start = (event.target as HTMLInputElement).selectionStart
+      const end = (event.target as HTMLInputElement).selectionEnd
+      if (start !== null && end !== null && start !== end) {
+        setCursorPos([start, end])
+      } else {
+        setCursorPos(start)
+      }
+    }
   }
 
   function handleQueryBuilderQueryChange(query: string) {
@@ -245,6 +304,7 @@ function QueryBuilderModal({
         )}
         <FCSQueryBuilder
           query={queryDebounded}
+          cursorPos={cursorPos ?? undefined}
           onChange={handleQueryBuilderQueryChange}
           resources={resourcesForQueryBuilder}
           // feature flags
@@ -292,14 +352,28 @@ function QueryBuilderModal({
                     className="text-center query-builder-input"
                     value={query}
                     isInvalid={!!queryError}
+                    // remove cursor highlight if not in focus anymore
+                    onBlur={() => setCursorPos(null)}
                     {...(queryInputEnhanced
                       ? {
                           as: ContentEditable,
                           queryType: queryType,
                           onChange: handleQueryInputChange,
+                          onCursorChange: (start: number | null, end?: number) => {
+                            if (start !== end && start !== null && end !== undefined) {
+                              setCursorPos([start, end])
+                            } else {
+                              setCursorPos(start)
+                            }
+                          },
                         }
                       : {
-                          onChange: (event) => handleQueryInputChange(event.target.value),
+                          onChange: (event) => {
+                            handleQueryInputChange(event.target.value)
+                            handleQueryInputCursorChange(event)
+                          },
+                          onKeyUp: handleQueryInputCursorChange,
+                          onClick: handleQueryInputCursorChange,
                         })}
                   />
                   <ToggleButton
@@ -320,6 +394,25 @@ function QueryBuilderModal({
             </Row>
           </Container>
         </Form>
+        {/* resource warning message */}
+        {unavailableResources > 0 && (
+          <Container className="px-3">
+            <Alert variant="warning" className="mb-0 mt-3" dismissible>
+              For this query, {unavailableResources} of {resources?.length} resources will not be
+              available! Certain layers are not supported by some resources.
+              {unavailableResourcesByValue && (
+                <ul className="mb-0">
+                  {[...unavailableResourcesByValue.keys()].map((name) => (
+                    <li>
+                      <strong>{name}</strong>: {unavailableResourcesByValue.get(name)?.length}{' '}
+                      unsupported resources
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Alert>
+          </Container>
+        )}
         {/* query builder */}
         <Container className="px-3 pt-3">{renderQueryBuilder()}</Container>
       </Modal.Body>

@@ -48,7 +48,7 @@ import {
   WRAP_EXPRESSION_MAP,
   type WrapExpressionType,
 } from './constants'
-import { FCSParserLexerProvider } from './FCSParserLexerContext'
+import { FCSParserLexerProvider, useFCSParserLexer } from './FCSParserLexerContext'
 import {
   type FCSQueryBuilderConfig,
   FCSQueryBuilderConfigProvider,
@@ -63,6 +63,7 @@ import {
   checkIfContainsRegex,
   escapeQuotes,
   escapeRegexValue,
+  isCursorOnContext,
   parseQuery,
   unescapeQuotes,
   unescapeRegexValue,
@@ -79,8 +80,8 @@ import './styles.css'
 
 interface FCSQueryBuilderProps {
   query?: string
-  /** curso position in query */
-  cursorPos?: number
+  /** cursor position in query */
+  cursorPos?: [number, number] | number
   resources?: Resource[]
   onChange?: (query: string) => void
 }
@@ -706,6 +707,9 @@ function BasicExpressionInput({
     showLayerQualifiers,
     showResourceCountForLayer,
   } = useFCSQueryBuilderConfig()
+  const { cursorPos } = useFCSParserLexer()
+
+  const isCursorOnMe = isCursorOnContext(ctx, cursorPos)
 
   const basicLayer = 'word'
   const advancedLayers = Object.keys(ADVANCED_LAYERS_MAP)
@@ -1045,7 +1049,13 @@ function BasicExpressionInput({
   }
 
   return (
-    <div className="block input-block basic-expression position-relative focus-ring border rounded py-3 ps-2 pe-3 my-2 ms-1 me-2">
+    <div
+      className={[
+        'block input-block basic-expression position-relative focus-ring border rounded py-3 ps-2 pe-3 my-2 ms-1 me-2',
+      ]
+        .concat([isCursorOnMe ? 'cursor-focus' : ''])
+        .join(' ')}
+    >
       {showChangeToExpressionListButton && (
         <ChangeToExpressionListButton
           className="position-absolute top-0 start-50 translate-middle rounded-circle p-1"
@@ -1314,12 +1324,17 @@ function QuantifierInput({ ctx, onChange }: { ctx: QuantifierContext; onChange?:
 function QuerySimple({ ctx, onChange }: { ctx: Query_simpleContext; onChange?: () => void }) {
   const { rewriter } = useFCSQueryUpdater()
   const { enableQuantifiers } = useFCSQueryBuilderConfig()
+  const { cursorPos } = useFCSParserLexer()
 
   const queryImplicitCtx = ctx.query_implicit()
   const querySegmentCtx = ctx.query_segment()
   const quantifierCtx = ctx.quantifier()
 
   const isImplicit = queryImplicitCtx !== null
+
+  const isCursorOnMe = isImplicit
+    ? isCursorOnContext(queryImplicitCtx, cursorPos)
+    : isCursorOnContext(querySegmentCtx, cursorPos)
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -1374,7 +1389,13 @@ function QuerySimple({ ctx, onChange }: { ctx: Query_simpleContext; onChange?: (
   }
 
   return (
-    <div className="block query-simple focus-ring border rounded p-1 pe-2 my-2 position-relative d-flex align-items-center">
+    <div
+      className={[
+        'block query-simple focus-ring border rounded p-1 pe-2 my-2 position-relative d-flex align-items-center',
+      ]
+        .concat(isCursorOnMe ? 'cursor-focus' : '')
+        .join(' ')}
+    >
       {isImplicit ? <code className="delims">"</code> : <code className="delims">[</code>}
       {renderQuery()}
       {isImplicit ? <code className="delims">"</code> : <code className="delims">]</code>}

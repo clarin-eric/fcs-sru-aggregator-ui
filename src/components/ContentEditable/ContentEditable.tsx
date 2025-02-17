@@ -24,6 +24,8 @@ interface NonUsableProps {
   onInput: never
   onPaste: never
   onKeyDown: never
+  onKeyUp: never
+  onClick: never
 }
 
 export interface ContentEditableProps {
@@ -35,6 +37,7 @@ export interface ContentEditableProps {
   delay?: number
   onChange?: (value: string) => void
   onValidationChange?: (isValid: boolean) => void
+  onCursorChange?: (startPos: number | null, endPos?: number) => void
 }
 
 export type Props = Omit<React.ComponentProps<'div'>, NonUsableProps> & ContentEditableProps
@@ -51,28 +54,38 @@ function getAbsoluteTextCursorOffsets(container: Node, range: Range) {
     range.startContainer.nodeType === Node.TEXT_NODE &&
     range.endContainer === range.startContainer
   ) {
-    return [start, start + (range.endOffset - range.startOffset)]
+    return [start, start + (range.endOffset - range.startOffset)] as const
   }
 
   const end = getTextCursorOffset(container, range.endContainer, range.endOffset)
 
-  console.debug('[getAbsoluteTextCursorOffsets]', {
-    container,
-    range,
-    startContainer: range.startContainer,
-    startOffset: range.startOffset,
-    endContainer: range.endContainer,
-    endOffset: range.endOffset,
-    start,
-    end,
-  })
+  // console.debug('[getAbsoluteTextCursorOffsets]', {
+  //   container,
+  //   range,
+  //   startContainer: range.startContainer,
+  //   startOffset: range.startOffset,
+  //   endContainer: range.endContainer,
+  //   endOffset: range.endOffset,
+  //   start,
+  //   end,
+  // })
 
-  return [start, end]
+  return [start, end] as const
 }
 
-function getTextCursorOffset(container: Node, node: Node, offset: number = 0) {
+function getTextCursorOffset(
+  container: Node,
+  node: Node,
+  offset: number = 0,
+  selectionNode: Node = node
+) {
   // TODO: or is this only for the container element?
-  if (node === container && node.nodeType === Node.ELEMENT_NODE && offset === 1) {
+  if (
+    node === container &&
+    node === selectionNode &&
+    node.nodeType === Node.ELEMENT_NODE &&
+    offset === 1
+  ) {
     console.debug('offset=1 on node', {
       container,
       node,
@@ -110,7 +123,8 @@ function getTextCursorOffset(container: Node, node: Node, offset: number = 0) {
   }
 
   // recurse up, until we have found our container
-  return getTextCursorOffset(container, parent, lengthBefore + offset)
+  // console.debug('[getTextCursorOffset]#recurse', { container, selectionNode, node, parent, lengthBefore, offset })
+  return getTextCursorOffset(container, parent, lengthBefore + offset, selectionNode)
 }
 
 function getRangeContainerWithOffsetFromTextOffset(container: Node, offset: number) {
@@ -251,7 +265,10 @@ function highlightSyntax(value: string, queryType?: string) {
 // component
 
 const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
-  ({ value, onChange, disabled, placeholder, queryType, delay = 200, ...props }, ref) => {
+  (
+    { value, onChange, onCursorChange, disabled, placeholder, queryType, delay = 200, ...props },
+    ref
+  ) => {
     // ref to hidden input element (for form stuffs)
     const inputRef = useRef<HTMLInputElement>(null)
     // ref to our contentEditable input
@@ -393,6 +410,44 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
       }
     }
 
+    function handlePossibleCursorChange(isClick: boolean = false) {
+      // if no element or no event handler, then skip everything
+      if (!mRef.current) return
+      if (!onCursorChange) return
+
+      const container = mRef.current
+      const isTargetFocused = document.activeElement === container
+      if (!isTargetFocused) return
+
+      const selection = window.getSelection()
+      if (!selection) return
+      if (selection.rangeCount === 0) return
+
+      const selectionIndices: Array<readonly [number, number]> = []
+      for (let i = 0; i < selection.rangeCount; i++) {
+        const range = selection.getRangeAt(i)
+        const idxRange = getAbsoluteTextCursorOffsets(container, range)
+        if (idxRange) selectionIndices.push(idxRange)
+      }
+      if (selectionIndices.length === 0) return
+
+      // use last selection as most current one
+      const [start, end] = selectionIndices.pop()!
+
+      // only trigger if selection is a single cursor, not for ranges
+      if (isClick) {
+        if (start === end) {
+          setCursorPos(start)
+          onCursorChange?.(start)
+          // } else {
+          // NOTE: this does not work, maybe due to re-rendering
+          // onCursorChange?.(start, end)
+        }
+      } else {
+        onCursorChange?.(start, start !== end ? end : undefined)
+      }
+    }
+
     // ------------------------------------------------------------------------
 
     function doRemove(mode: 'delete' | 'backspace' | 'paste') {
@@ -406,7 +461,7 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
       if (!selection) return null
       if (selection.rangeCount === 0) return null
 
-      const selectionIndices: Array<number[]> = []
+      const selectionIndices: Array<readonly [number, number]> = []
       for (let i = 0; i < selection.rangeCount; i++) {
         const range = selection.getRangeAt(i)
         const idxRange = getAbsoluteTextCursorOffsets(container, range)
@@ -548,6 +603,7 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
         inputRef.current.value = newValueWithInsert
       }
       onChange?.(newValueWithInsert)
+      onCursorChange?.(newCursorPos)
     }
 
     function handleBackspace() {
@@ -568,6 +624,7 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
       //   mRef.current.innerHTML = fancifyValue(sanitizedValue)
       // }
       onChange?.(sanitizedValue)
+      onCursorChange?.(newCursorPos)
     }
 
     function handleDelete() {
@@ -585,6 +642,7 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
         inputRef.current.value = sanitizedValue
       }
       onChange?.(sanitizedValue)
+      onCursorChange?.(newCursorPos)
     }
 
     // ------------------------------------------------------------------------
@@ -604,6 +662,8 @@ const ContentEditable = React.forwardRef<HTMLDivElement, Props>(
           onInput={handleInput}
           onPaste={handlePaste}
           onKeyDown={handleKeyDown}
+          onKeyUp={() => handlePossibleCursorChange()}
+          onClick={() => handlePossibleCursorChange(true)}
           tabIndex={disabled ? -1 : props.tabIndex}
           contentEditable // plaintext-only?
           dangerouslySetInnerHTML={{ __html: htmlValue }}
