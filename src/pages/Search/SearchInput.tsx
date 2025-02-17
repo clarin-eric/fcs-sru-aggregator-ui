@@ -1,5 +1,5 @@
 import { type AxiosInstance } from 'axios'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
@@ -9,8 +9,8 @@ import { useSearchParams } from 'react-router'
 
 import ContentEditable from '@/components/ContentEditable'
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
-import QueryBuilderModal from '@/components/QueryBuilder'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
+import useFlipOnceTrue from '@/hooks/useFlipOnceTrue'
 import { type Resource } from '@/utils/api'
 import {
   DEFAULT_QUERY_TYPE,
@@ -37,6 +37,11 @@ import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
 import magicIcon from 'bootstrap-icons/icons/magic.svg?raw'
 
 import './styles.css'
+
+// --------------------------------------------------------------------------
+// lazy components
+
+const QueryBuilderModal = lazy(() => import('@/components/QueryBuilder'))
 
 // --------------------------------------------------------------------------
 // types
@@ -110,6 +115,7 @@ function SearchInput({
     useState<ResourceSelectionModalViewOptionGrouping>(DEFAULT_RESOURCE_VIEW_GROUPING)
   const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
   const [showQueryBuilderModal, setShowQueryBuilderModal] = useState(false)
+  const [isLoadQueryBuilderModalTriggered, triggerLoadQueryBuilderModal] = useFlipOnceTrue()
 
   // user search input states
   const [language, setLanguage] = useState(MULTIPLE_LANGUAGE_CODE)
@@ -390,7 +396,10 @@ function SearchInput({
               variant="outline-secondary"
               aria-label="Use visual query builder to construct search query"
               className="border-end-0 d-none d-md-block"
-              onClick={() => setShowQueryBuilderModal(true)}
+              onClick={() => {
+                triggerLoadQueryBuilderModal()
+                setShowQueryBuilderModal(true)
+              }}
             >
               <i dangerouslySetInnerHTML={{ __html: magicIcon }} aria-hidden="true" />
             </Button>
@@ -546,15 +555,18 @@ function SearchInput({
         showGrouping={showResourceSelectionModalGrouping}
         onModalClose={handleChangeResourceSelection}
       />
-      {queryType === 'fcs' && (
-        <QueryBuilderModal
-          query={query}
-          queryType={queryType}
-          resources={resources}
-          selectedResources={selectedResourceIDs}
-          show={showQueryBuilderModal}
-          onModalClose={handleChangeQueryBuilderQuery}
-        />
+      {queryType === 'fcs' && isLoadQueryBuilderModalTriggered && (
+        // TODO: some fallback handling
+        <Suspense fallback={<>Failed to load Query Builder extension!</>}>
+          <QueryBuilderModal
+            query={query}
+            queryType={queryType}
+            resources={resources}
+            selectedResources={selectedResourceIDs}
+            show={showQueryBuilderModal}
+            onModalClose={handleChangeQueryBuilderQuery}
+          />
+        </Suspense>
       )}
     </search>
   )

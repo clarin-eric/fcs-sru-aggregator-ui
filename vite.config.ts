@@ -43,13 +43,18 @@ export default defineConfig({
         assetFileNames(chunkInfo) {
           if (chunkInfo.names.length === 1) {
             // DEBUG
-            // console.debug("assetFileNames", {
+            // console.debug('assetFileNames', {
             //   name: chunkInfo.names,
             //   originalFileNames: chunkInfo.originalFileNames,
             //   sourceLen: chunkInfo.source.length,
             // })
-            // main output chunk
+            // main output chunks
             if (chunkInfo.names.includes('index.css')) {
+              // lazy import modules
+              if (chunkInfo.originalFileNames.includes('src/components/QueryBuilder/index.ts')) {
+                return `${outputsLibPath}${pkg.name}-query-builder-${pkg.version}.[ext]`
+              }
+              // main
               return `${outputsLibPath}${name}.[ext]`
             }
             // known output chunks (vendor)
@@ -61,7 +66,6 @@ export default defineConfig({
           // default output chunks (assets)
           return `${outputsLibAssetsPath}[name].[ext]`
         },
-        // entryFileNames: `${outputsLibPath}${name}.js`,
         entryFileNames(chunkInfo) {
           // DEBUG
           // console.debug('entryFileNames', chunkInfo)
@@ -79,12 +83,20 @@ export default defineConfig({
           // }
           return `${outputsLibPath}${name}.js`
         },
-        chunkFileNames: `[name].js`,
-        // DEBUG
-        // chunkFileNames(chunkInfo) {
-        //   console.debug("chunkInfo", chunkInfo)
-        //   return `[name].js`
-        // },
+        chunkFileNames(chunkInfo) {
+          // DEBUG
+          // console.debug('chunkFileNames', {
+          //   name: chunkInfo.name,
+          //   facadeModuleId: chunkInfo.facadeModuleId,
+          //   isDynamicEntry: chunkInfo.isDynamicEntry,
+          // })
+          if (chunkInfo.isDynamicEntry) {
+            if (chunkInfo.facadeModuleId?.endsWith('src/components/QueryBuilder/index.ts')) {
+              return `${outputsLibPath}${pkg.name}-query-builder-${pkg.version}.js`
+            }
+          }
+          return `[name].js`
+        },
         // https://rollupjs.org/configuration-options/#output-manualchunks
         manualChunks: {
           // vendor
