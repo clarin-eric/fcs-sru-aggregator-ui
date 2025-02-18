@@ -41,7 +41,7 @@ import './styles.css'
 // --------------------------------------------------------------------------
 // lazy components
 
-const QueryBuilderModal = lazy(() => import('@/components/QueryBuilder'))
+const QueryBuilderModal = /*#__PURE__*/ lazy(() => import('@/components/QueryBuilder'))
 
 // --------------------------------------------------------------------------
 // types
@@ -390,7 +390,7 @@ function SearchInput({
                   onChange: (event) => handleQueryChange(event.target.value),
                 })}
           />
-          {showQueryBuilderButton && (
+          {import.meta.env.FEATURE_QUERY_BUILDER && showQueryBuilderButton && (
             <Button
               id="fcs-search-input-query-builder-button"
               variant="outline-secondary"
@@ -555,19 +555,21 @@ function SearchInput({
         showGrouping={showResourceSelectionModalGrouping}
         onModalClose={handleChangeResourceSelection}
       />
-      {queryType === 'fcs' && isLoadQueryBuilderModalTriggered && (
-        // TODO: some fallback handling
-        <Suspense fallback={<>Failed to load Query Builder extension!</>}>
-          <QueryBuilderModal
-            query={query}
-            queryType={queryType}
-            resources={resources}
-            selectedResources={selectedResourceIDs}
-            show={showQueryBuilderModal}
-            onModalClose={handleChangeQueryBuilderQuery}
-          />
-        </Suspense>
-      )}
+      {import.meta.env.FEATURE_QUERY_BUILDER &&
+        queryType === 'fcs' &&
+        isLoadQueryBuilderModalTriggered && (
+          // TODO: some fallback handling
+          <Suspense fallback={<>Failed to load Query Builder extension!</>}>
+            <QueryBuilderModal
+              query={query}
+              queryType={queryType}
+              resources={resources}
+              selectedResources={selectedResourceIDs}
+              show={showQueryBuilderModal}
+              onModalClose={handleChangeQueryBuilderQuery}
+            />
+          </Suspense>
+        )}
     </search>
   )
 }

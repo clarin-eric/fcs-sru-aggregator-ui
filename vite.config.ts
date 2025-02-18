@@ -167,6 +167,7 @@ export default defineConfig({
     // features
     'import.meta.env.FEATURE_TRACKING_MATOMO': 'true',
     // 'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': JSON.stringify({ srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }),
+    'import.meta.env.FEATURE_QUERY_BUILDER': 'true',
   },
   resolve: {
     alias: {
