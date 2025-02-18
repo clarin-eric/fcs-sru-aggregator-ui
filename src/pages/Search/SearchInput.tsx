@@ -9,6 +9,7 @@ import { useSearchParams } from 'react-router'
 
 import ContentEditable from '@/components/ContentEditable'
 import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
+import QuerySuggestionsModal from '@/components/QuerySuggestionsModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import useFlipOnceTrue from '@/hooks/useFlipOnceTrue'
 import { type Resource } from '@/utils/api'
@@ -31,10 +32,12 @@ import {
   type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
 
-// TODO: SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
+// SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
+import balloonIcon from 'bootstrap-icons/icons/balloon.svg?raw'
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
 import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
 import magicIcon from 'bootstrap-icons/icons/magic.svg?raw'
+import searchIcon from 'bootstrap-icons/icons/search.svg?raw'
 
 import './styles.css'
 
@@ -114,6 +117,7 @@ function SearchInput({
   const [showResourceSelectionModalGrouping, setShowResourceSelectionModalGrouping] =
     useState<ResourceSelectionModalViewOptionGrouping>(DEFAULT_RESOURCE_VIEW_GROUPING)
   const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
+  const [showQuerySuggestionsModal, setShowQuerySuggestionsModal] = useState(false)
   const [showQueryBuilderModal, setShowQueryBuilderModal] = useState(false)
   const [isLoadQueryBuilderModalTriggered, triggerLoadQueryBuilderModal] = useFlipOnceTrue()
 
@@ -321,6 +325,29 @@ function SearchInput({
     setSelectedResourceIDs(resourceIDs)
   }
 
+  function handleChangeQuerySuggestion({
+    query,
+    queryType,
+    action,
+  }: {
+    query?: string
+    queryType?: QueryTypeID
+    action: string
+  }) {
+    console.debug('onModalClose', { query, queryType, action })
+    // first close the modal
+    setShowQuerySuggestionsModal(false)
+    // if 'abort' do nothing
+    if (action === 'abort') return
+    // if 'close' (ESC / x button) then also do nothing
+    if (action === 'close') return
+    // if query/queryType is empty, do nothing
+    if (!query || !queryType) return
+    // process user inputs
+    setQueryType(queryType)
+    setQuery(query)
+  }
+
   function handleChangeQueryBuilderQuery({ query, action }: { query: string; action: string }) {
     console.debug('onModalClose', { query, action })
     // first close the modal
@@ -370,6 +397,15 @@ function SearchInput({
       {/* search input form */}
       <Form noValidate onSubmit={handleSearchSubmit}>
         <InputGroup size={!hasSearch ? 'lg' : undefined} hasValidation>
+          <Button
+            variant="outline-secondary"
+            type="button"
+            id="fcs-search-query-suggestions-button"
+            aria-label="Open modal with suggestions for search queries"
+            onClick={() => setShowQuerySuggestionsModal(true)}
+          >
+            <i dangerouslySetInnerHTML={{ __html: balloonIcon }} aria-hidden="true" />
+          </Button>
           {/* @ts-expect-error: typing does not work for onChange handler, is correct so */}
           <Form.Control
             placeholder="Elephant"
@@ -394,7 +430,7 @@ function SearchInput({
             <Button
               id="fcs-search-input-query-builder-button"
               variant="outline-secondary"
-              aria-label="Use visual query builder to construct search query"
+              aria-label="Open modal to use the visual query builder to construct a search query"
               className="border-end-0 d-none d-md-block"
               onClick={() => {
                 triggerLoadQueryBuilderModal()
@@ -411,8 +447,8 @@ function SearchInput({
             checked={queryInputEnhanced}
             onChange={() => setQueryInputEnhanced((isChecked) => !isChecked)}
             variant="outline-secondary"
-            aria-label="Enable enhanced visual input support"
-            className="d-flex align-items-center"
+            aria-label="Enable enhanced visual input support with syntax highlighting"
+            className="d-flex align-items-center border-end-0"
           >
             <i dangerouslySetInnerHTML={{ __html: highlightsIcon }} aria-hidden="true" />
           </ToggleButton>
@@ -422,9 +458,15 @@ function SearchInput({
             id="fcs-search-input-button"
             disabled={disabled || query.trim().length === 0}
             aria-disabled={disabled}
+            aria-label="Start the search"
           >
             {/* TODO: visually-hidden span with description? */}
-            Search
+            <i
+              dangerouslySetInnerHTML={{ __html: searchIcon }}
+              aria-hidden="true"
+              className="d-inline d-md-none"
+            />
+            <span className="d-none d-md-inline">Search</span>
           </Button>
           <Form.Control.Feedback type="invalid">{queryError?.msg}</Form.Control.Feedback>
         </InputGroup>
@@ -555,6 +597,13 @@ function SearchInput({
         showGrouping={showResourceSelectionModalGrouping}
         onModalClose={handleChangeResourceSelection}
       />
+      {/* query suggestions modal */}
+      <QuerySuggestionsModal
+        queryTypes={[queryType]} // TODO: or show all always?
+        show={showQuerySuggestionsModal}
+        onModalClose={handleChangeQuerySuggestion}
+      />
+      {/* query builder modal */}
       {import.meta.env.FEATURE_QUERY_BUILDER &&
         queryType === 'fcs' &&
         isLoadQueryBuilderModalTriggered && (
