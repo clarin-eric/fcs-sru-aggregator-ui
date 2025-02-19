@@ -42,3 +42,16 @@
   /* disable, to avoid jumping text for */
   padding-right: unset;
 }
+
+/* *** SearchResults.tsx *** */
+
+#search-results>.progress {
+  --bs-progress-height: 1.4rem;
+  --bs-progress-font-size: 0.9rem;
+}
+
+#search-results>.progress>.progress-bar>span {
+  margin-inline: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

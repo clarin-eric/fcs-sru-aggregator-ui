@@ -1,21 +1,27 @@
 /* *** ResourceSearchResult.tsx *** */
 
-#search .resource-search-result>.card-header small.text-muted::before {
+#search-results .resource-search-result>.card-header>button {
+  background-color: unset;
+  /* var(--bs-card-cap-bg); uses opacity */
+  /* #f9f9f9; hardcoding is bad */
+}
+
+#search-results .resource-search-result>.card-header small.text-muted::before {
   content: '–';
   padding-inline-start: 1ch;
   padding-inline-end: 1ch;
 }
 
 @media (prefers-color-scheme: dark) {
-  #search .resource-search-result .badge.text-bg-light {
+  #search-results .resource-search-result .badge.text-bg-light {
     /* basically .text-bg-dark */
     color: #fff !important;
     background-color: RGBA(var(--bs-dark-rgb), var(--bs-bg-opacity, 1)) !important;
   }
 }
 
-#search .resource-search-result .resource-info i>svg.bi,
-#search .resource-search-result .more-results-button i>svg.bi,
+#search-results .resource-search-result .resource-info i>svg.bi,
+#search-results .resource-search-result .more-results-button i>svg.bi,
 .resource-search-result-modal .resource-info i>svg.bi {
   vertical-align: baseline;
   margin-bottom: -1px;
@@ -26,7 +32,7 @@
 
 /* *** collapse button *** */
 
-#search .resource-search-result .card-header:has(.collapse-toggle-btn.collapsed) {
+#search-results .resource-search-result .card-header:has(.collapse-toggle-btn.collapsed) {
   border-bottom-width: 0;
   /* transition based on .accordion transitions */
   transition: border-bottom-width 0.15s ease-in-out;
@@ -64,12 +70,12 @@
   /* top: calc(-0.5 * var(--bs-accordion-btn-icon-width)); */
 }
 
-.collapse-toggle-btn:not(.collapsed)::after {
+.collapse-toggle-btn:not(.collapsed)::before {
   background-image: var(--bs-accordion-btn-active-icon);
   transform: var(--bs-accordion-btn-icon-transform);
 }
 
-[data-bs-theme="dark"] .collapse-toggle-btn::after {
+[data-bs-theme="dark"] .collapse-toggle-btn::before {
   --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236ea8fe'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
   --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236ea8fe'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
 }
@@ -77,12 +83,12 @@
 /* *********************************************************************** */
 /* *** ViewPlain.tsx / ViewKwic.tsx *** */
 
-#search .resource-search-result .card-body table tr:last-child>td,
+#search-results .resource-search-result .card-body table tr:last-child>td,
 .resource-search-result-modal .modal-body table tr:last-child>td {
   border-bottom-width: 0;
 }
 
-#search .resource-search-result table tr>td.result-refs,
+#search-results .resource-search-result table tr>td.result-refs,
 .resource-search-result-modal table tr>td.result-refs {
   white-space: nowrap;
 }
@@ -90,13 +96,13 @@
 @media (max-width: 576px) {
 
   /* sm-down breakpoint ? (https://getbootstrap.com/docs/5.3/layout/breakpoints/) */
-  #search .resource-search-result table tr>td.result-refs,
+  #search-results .resource-search-result table tr>td.result-refs,
   .resource-search-result-modal table tr>td.result-refs {
     white-space: initial;
   }
 }
 
-#search .resource-search-result .pid-badge,
+#search-results .resource-search-result .pid-badge,
 .resource-search-result-modal .pid-badge {
   --bs-badge-padding-x: 0.5em;
   --bs-badge-padding-y: 0.35em;
@@ -104,7 +110,7 @@
   font-size: 0.6rem;
 }
 
-#search .resource-search-result .tooltip-mounting-point,
+#search-results .resource-search-result .tooltip-mounting-point,
 .resource-search-result-modal .tooltip-mounting-point {
   /* a visible but too small to see element to avoid tooltip mounting flickering */
   height: 0;

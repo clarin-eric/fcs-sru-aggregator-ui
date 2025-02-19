@@ -4,6 +4,8 @@ import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import Form from 'react-bootstrap/Form'
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
+import Popover from 'react-bootstrap/Popover'
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 
@@ -146,37 +148,62 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
       {/* TODO: add visually-hidden title for semantic site structure */}
       {/* TODO: add tooltip with easier to read information */}
       {/* TODO: mobile design: hide labels and maybe add below? */}
-      <ProgressBar className="mb-3">
-        <ProgressBar
-          variant="success"
-          now={numWithResults}
-          max={numRequested}
-          label={`${numWithResults} resources with results`}
-          aria-label="Resources with results"
-        />
-        <ProgressBar
-          variant="secondary"
-          now={numNoResults}
-          max={numRequested}
-          label={`${numNoResults} resources without results`}
-          aria-label="Resources without results but no issues"
-        />
-        <ProgressBar
-          variant="warning"
-          now={numNoResultsWithIssues}
-          max={numRequested}
-          label={`${numNoResultsWithIssues} resources with errors`}
-          aria-label="Resources with issues (warnings/diagnostics or errors)"
-        />
-        <ProgressBar
-          striped
-          animated
-          now={numInProgress}
-          max={numRequested}
-          label={`Search through ${numInProgress} Resources`}
-          aria-label="Resources with pending results"
-        />
-      </ProgressBar>
+      <OverlayTrigger
+        placement="auto"
+        overlay={
+          <Popover id="search-progress-information-popover">
+            <Popover.Header>Search Progress Information</Popover.Header>
+            <Popover.Body style={{ textIndent: '2rem hanging' }}>
+              <div>
+                <code className="">{numRequested.toString().padStart(4, '\u00A0')}</code> resources
+                requested
+              </div>
+              <div>
+                <code className="">{numInProgress.toString().padStart(4, '\u00A0')}</code> resources
+                pending
+              </div>
+              <hr className="mt-2 mb-1" />
+              <div>
+                <code className="">{numWithResults.toString().padStart(4, '\u00A0')}</code>{' '}
+                resources with results
+              </div>
+              <div>
+                <code className="">{numNoResults.toString().padStart(4, '\u00A0')}</code> resources
+                without results
+              </div>
+              <div>
+                <code className="">{numNoResultsWithIssues.toString().padStart(4, '\u00A0')}</code>{' '}
+                resources without results due to issues such as warnings or errors
+              </div>
+            </Popover.Body>
+          </Popover>
+        }
+      >
+        <ProgressBar className="mb-3">
+          <ProgressBar
+            variant="success"
+            now={numWithResults}
+            max={numRequested}
+            label={<span>{numWithResults} resources with results</span>}
+            aria-label="Resources with results"
+          />
+          <ProgressBar
+            variant="secondary"
+            now={numNoResults + numNoResultsWithIssues}
+            max={numRequested}
+            label={<span>{numNoResults + numNoResultsWithIssues} resources without results</span>}
+            aria-label="Resources without results (might be due to issues)"
+          />
+          <ProgressBar
+            striped
+            animated
+            now={numInProgress}
+            max={numRequested}
+            label={<span>Search through {numInProgress} Resources</span>}
+            aria-label="Resources with pending results"
+          />
+        </ProgressBar>
+      </OverlayTrigger>
 
       <Card className="mb-2" role="group" aria-label="Result display and filter options">
         <Card.Body>
