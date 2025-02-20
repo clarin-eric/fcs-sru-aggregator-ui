@@ -12,6 +12,7 @@
     "dev": "vite",
     "preview": "vite preview",
     "build": "tsc -b && vite build",
+    "build:bundle": "tsc -b && vite --mode bundle build",
     "lint": "eslint .",
     "build:antlr4ng": "npm run build:antlr4ng:fcsql && npm run build:antlr4ng:lexcql",
     "build:antlr4ng:fcsql": "antlr4ng -Dlanguage=TypeScript -o src/parsers/ -visitor -listener -Xexact-output-dir src/vendor/fcs-ql/FCSLexer.g4 src/vendor/fcs-ql/FCSParser.g4",
