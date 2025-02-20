@@ -32,6 +32,9 @@ import {
   type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
 
+// optional component (either static or dynamic)
+import QueryBuilderModalStatic from '@/components/QueryBuilder'
+
 // SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import balloonIcon from 'bootstrap-icons/icons/balloon.svg?raw'
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
@@ -44,7 +47,9 @@ import './styles.css'
 // --------------------------------------------------------------------------
 // lazy components
 
-const QueryBuilderModal = /*#__PURE__*/ lazy(() => import('@/components/QueryBuilder'))
+const QueryBuilderModal = import.meta.env.FEATURE_LAZY_LOADING
+  ? /*#__PURE__*/ lazy(() => import('@/components/QueryBuilder'))
+  : QueryBuilderModalStatic
 
 // --------------------------------------------------------------------------
 // types

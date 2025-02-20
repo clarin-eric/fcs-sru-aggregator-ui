@@ -167,7 +167,10 @@ export default defineConfig({
     // features
     'import.meta.env.FEATURE_TRACKING_MATOMO': 'true',
     // 'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': JSON.stringify({ srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }),
+    // enable visual query builder
     'import.meta.env.FEATURE_QUERY_BUILDER': 'true',
+    // enable dynamic imports / lazy loading of certain components (e.g., visual query builder)
+    'import.meta.env.FEATURE_LAZY_LOADING': 'true',
   },
   resolve: {
     alias: {
