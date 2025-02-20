@@ -85,13 +85,10 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
     () => data?.results.filter((result) => result.numberOfRecords > 0).length ?? 0,
     [data]
   )
-  const numNoResultsWithIssues = useMemo(
+  const numWithResultsWithWarnings = useMemo(
     () =>
-      data?.results.filter(
-        (result) =>
-          result.numberOfRecords <= 0 &&
-          (result.diagnostics.length > 0 || result.exception !== null)
-      ).length ?? 0,
+      data?.results.filter((result) => result.numberOfRecords > 0 && result.diagnostics.length > 0)
+        .length ?? 0,
     [data]
   )
   const numNoResults = useMemo(
@@ -102,6 +99,47 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
           result.diagnostics.length === 0 &&
           result.exception === null
       ).length ?? 0,
+    [data]
+  )
+  const numNoResultsWithIssues = useMemo(
+    () =>
+      data?.results.filter(
+        (result) =>
+          result.numberOfRecords <= 0 &&
+          (result.diagnostics.length > 0 || result.exception !== null)
+      ).length ?? 0,
+    [data]
+  )
+  const numNoResultsWithExceptions = useMemo(
+    () =>
+      data?.results.filter((result) => result.numberOfRecords <= 0 && result.exception !== null)
+        .length ?? 0,
+    [data]
+  )
+  const numNoResultsWithWarnings = useMemo(
+    () =>
+      data?.results.filter(
+        (result) =>
+          result.numberOfRecords <= 0 && result.diagnostics.length > 0 && result.exception === null
+      ).length ?? 0,
+    [data]
+  )
+
+  // TODO: this might not yet be completely correct?
+  const numResultsTotalAvailable = useMemo(
+    () =>
+      data?.results
+        .map((result) =>
+          result.numberOfRecords !== -1 ? result.numberOfRecords : result.numberOfRecordsLoaded
+        )
+        .reduce((acc, cur) => acc + cur, 0) ?? 0,
+    [data]
+  )
+  const numResultsTotalLoaded = useMemo(
+    () =>
+      data?.results
+        .map((result) => result.numberOfRecordsLoaded)
+        .reduce((acc, cur) => acc + cur, 0) ?? 0,
     [data]
   )
 
@@ -118,13 +156,10 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
           setSent(true)
 
           // TODO: sum total (not yet requested) or only loaded by user
-          const numResultsTotal = data.results
-            .map((result) => result.numberOfRecordsLoaded)
-            .reduce((acc, cur) => acc + cur, 0)
-          trackSiteSearch(query, queryType, numResultsTotal)
+          trackSiteSearch(query, queryType, numResultsTotalLoaded)
         }
       }
-    }, [data, numInProgress, query, queryType, searchId, sent])
+    }, [data, numInProgress, query, queryType, searchId, sent, numResultsTotalLoaded])
   }
 
   // --------------------------------------------------------------
@@ -155,25 +190,62 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
             <Popover.Header>Search Progress Information</Popover.Header>
             <Popover.Body style={{ textIndent: '2rem hanging' }}>
               <div>
-                <code className="">{numRequested.toString().padStart(4, '\u00A0')}</code> resources
-                requested
+                <code>{numRequested.toString().padStart(4, '\u00A0')}</code> resources requested
               </div>
-              <div>
-                <code className="">{numInProgress.toString().padStart(4, '\u00A0')}</code> resources
-                pending
-              </div>
+              {numInProgress > 0 && (
+                <div>
+                  <code>{numInProgress.toString().padStart(4, '\u00A0')}</code> ↳ resources pending
+                </div>
+              )}
               <hr className="mt-2 mb-1" />
               <div>
-                <code className="">{numWithResults.toString().padStart(4, '\u00A0')}</code>{' '}
-                resources with results
+                <code>
+                  {(numNoResults + numNoResultsWithIssues).toString().padStart(4, '\u00A0')}
+                </code>{' '}
+                resources without results
               </div>
               <div>
-                <code className="">{numNoResults.toString().padStart(4, '\u00A0')}</code> resources
-                without results
+                <code>{numNoResults.toString().padStart(4, '\u00A0')}</code> ↳ OK, without issues
               </div>
+              {/*
               <div>
-                <code className="">{numNoResultsWithIssues.toString().padStart(4, '\u00A0')}</code>{' '}
-                resources without results due to issues such as warnings or errors
+                <code>{numNoResultsWithIssues.toString().padStart(4, '\u00A0')}</code>{' '}
+                ↳ due to warnings or errors
+              </div>
+              */}
+              {numNoResultsWithWarnings > 0 && (
+                <div>
+                  <code>{numNoResultsWithWarnings.toString().padStart(4, '\u00A0')}</code> ↳ with
+                  warnings
+                </div>
+              )}
+              {numNoResultsWithExceptions > 0 && (
+                <div>
+                  <code>{numNoResultsWithExceptions.toString().padStart(4, '\u00A0')}</code> ↳ due
+                  to fatal errors
+                </div>
+              )}
+              <hr className="mt-2 mb-1" />
+              <div>
+                <code>{numWithResults.toString().padStart(4, '\u00A0')}</code> resources with
+                results
+              </div>
+              {numWithResultsWithWarnings > 0 && (
+                <div>
+                  <code>{numWithResultsWithWarnings.toString().padStart(4, '\u00A0')}</code> ↳ with
+                  warnings
+                </div>
+              )}
+              <hr className="mt-2 mb-0" />
+              <hr className="mt-1 mb-1" />
+              <div>
+                <code>
+                  {'\u00A0'}
+                  {numResultsTotalLoaded}
+                  {'\u00A0'}/{'\u00A0'}
+                  {numResultsTotalAvailable}
+                </code>{' '}
+                total hits
               </div>
             </Popover.Body>
           </Popover>
