@@ -15,7 +15,7 @@
     "lint": "eslint .",
     "build:antlr4ng": "npm run build:antlr4ng:fcsql && npm run build:antlr4ng:lexcql",
     "build:antlr4ng:fcsql": "antlr4ng -Dlanguage=TypeScript -o src/parsers/ -visitor -listener -Xexact-output-dir src/vendor/fcs-ql/FCSLexer.g4 src/vendor/fcs-ql/FCSParser.g4",
-    "build:antlr4ng:lexcql": "antlr4ng -Dlanguage=TypeScript -o src/parsers/ -visitor -listener -Xexact-output-dir src/vendor/lexcql/LexLexer.g4 src/vendor/lexcql/LexParser.g4",
+    "build:antlr4ng:lexcql": "antlr4ng -Dlanguage=TypeScript -o src/parsers/ -visitor -listener -Xexact-output-dir src/vendor/lexcql/LexLexer.g4 src/vendor/lexcql/LexParser.g4"
   },
   "dependencies": {
     "@nozbe/microfuzz": "^1.0.0",
