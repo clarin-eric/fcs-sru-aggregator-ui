@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FCS Aggregator – Content Search</title>
+  <link rel="icon" type="image/png" sizes="40x40" href="./lib/assets/icon-services-fcs.png">
+
+  <script type="module" crossorigin src="./lib/fcs-sru-aggregator-ui-0.0.0.js"></script>
+  <link rel="modulepreload" crossorigin href="./lib/vender/react.js">
+  <link rel="modulepreload" crossorigin href="./lib/vender/react-ext.js">
+  <link rel="modulepreload" crossorigin href="./lib/vender/bootstrap.js">
+  <link rel="modulepreload" crossorigin href="./lib/vender/prism.js">
+  <link rel="stylesheet" crossorigin href="./lib/fcs-sru-aggregator-ui-0.0.0.css">
+  <link rel="stylesheet" crossorigin href="./lib/vender/bootstrap.css">
+</head>
+
+<body>
+  <noscript>
+    <p>The FCS Aggregator requires JavaScript to be enabled!</p>
+  </noscript>
+  <div id="root"></div>
+
+  <!-- global configuration -->
+  <script>
+    /* move configuration before main 'fcs-sru-aggregator-ui-0.0.0.js' import! */
+    window.MyAggregator = window.MyAggregator || {};
+    window._paq = window._paq || [];
+
+    // window.MyAggregator.API_URL = "rest/";
+    // window.MyAggregator.DEPLOY_PATH = null; // null for default ("/")
+    // window.MyAggregator.VALIDATOR_URL = "https://www.clarin.eu/fcsvalidator/";
+    // window.MyAggregator.SHOW_SEARCH_RESULT_LINK = false;
+
+    // window.MyAggregator.mode
+    // window.MyAggregator.resources
+    // window.MyAggregator.xAggregationContext
+    window.MyAggregator.isLoggedIn = false;
+  </script>
+
+</body>
+
+</html>
