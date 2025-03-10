@@ -42,7 +42,8 @@ Running the following command will create a fully static bundle that is ready to
 npm run build
 ```
 
-To generate a single bundle build (one script and one style file, with picture assets) use the following command. This will also disable dynamic imports.
+To generate a single bundle build (one script and one style file, with picture assets) use the following command. This will NOT disable dynamic imports and still generate additional chunks for those parts!  
+_To disable dynamic imports, you need to replace the `const Comp = lazy(() => import('@/...'))` statements with static imports, see [`src/pages/Search/SearchInput.tsx`](src/pages/Search/SearchInput.tsx)._
 
 ```bash
 npm run build:bundle
@@ -75,7 +76,6 @@ The bundle can be pre-configured by adjusting the `import.meta.env.` constants f
       - `srcUrl`: URL for JS script source to load Matomo/Piwik script, required, likely something like `<baseUrl>/matomo.js`
       - NOTE: if not set or any required value is likely invalid, then tracking will not be configured!
   - `FEATURE_QUERY_BUILDER`: boolean, whether to include a _Visual Query Builder_ (FCS-QL). If not specified (or explicitely set to `true`) then it will be excluded from the generated build. Enabling it, multiple output files will be generated, a `vendor/antlr.js` chunk as well as `*-query-builder-*.{js,css}` files that will be dynamically loaded when the UI requires them.
-  - `FEATURE_LAZY_LOADING`: boolean, whether to enable lazy loading of some optional component using dynamic imports, if not set to `true` (truthy value) then all optional components will be included statically (might be tree-shaken).
 
 Runtime configuration can be set using the `window.MyAggregator` object and needs to be included before the application script [`fcs-sru-aggregator-ui-X.Y.Z.js`](dist/lib/) is being loaded. They are completely optional but can be used to override bundle configuration.
 

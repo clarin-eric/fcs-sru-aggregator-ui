@@ -22,7 +22,7 @@ export const QUERY_TYPES = [
   {
     id: 'lex',
     name: 'Lexical Resources Contextual Query Language (LexCQL)',
-    searchLabel: 'Lexcial resource search',
+    searchLabel: 'Lexical resource search',
     color: '#e77e00',
     searchPlaceholder: 'banana',
   },

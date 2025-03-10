@@ -39,9 +39,10 @@ function resolve(url: string | URL) {
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
+  // merge local .env* files
   process.env = Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
 
-  const singleChunk = mode === "bundle"
+  const isSingleChunk = mode === 'bundle'
 
   // base configuration
   const baseConfig = {
@@ -57,12 +58,24 @@ export default defineConfig(({ mode }) => {
         output: {
           assetFileNames(chunkInfo) {
             if (chunkInfo.names.includes('index.css')) {
+              // lazy import modules
+              if (chunkInfo.originalFileNames.includes('src/components/QueryBuilder/index.ts')) {
+                return `${pkg.name}-query-builder-${pkg.version}.[ext]`
+              }
+              // main
               return `${name}.[ext]`
             }
             return `assets/[name].[ext]`
           },
           entryFileNames: `${name}.js`,
-          chunkFileNames: `[name].js`,
+          chunkFileNames(chunkInfo) {
+            if (chunkInfo.isDynamicEntry) {
+              if (chunkInfo.facadeModuleId?.endsWith('src/components/QueryBuilder/index.ts')) {
+                return `${pkg.name}-query-builder-${pkg.version}.js`
+              }
+            }
+            return `[name].js`
+          },
         },
       },
       // manifest: true,
@@ -71,7 +84,7 @@ export default defineConfig(({ mode }) => {
       // minify: false,
     },
     css: {
-      // NOTE: only for dev-mode
+      // NOTE: only used in dev-mode
       devSourcemap: true,
     },
     esbuild: {
@@ -109,13 +122,17 @@ export default defineConfig(({ mode }) => {
         ? `"${process.env.VITE_DEPLOY_PATH}"`
         : '"/"',
       // canonical URL for FCS SRU Aggregator
-      'import.meta.env.CANONCIAL_URL': '"https://contentsearch.clarin.eu"',
+      'import.meta.env.CANONCIAL_URL': process.env.VITE_CANONCIAL_URL
+        ? `"${process.env.VITE_CANONCIAL_URL}"`
+        : '"https://contentsearch.clarin.eu"',
       // API base URL for FCS SRU Aggregator
       'import.meta.env.API_URL': process.env.VITE_API_URL
         ? `"${process.env.VITE_API_URL}"`
         : '"https://contentsearch.clarin.eu/rest/"',
       // base URL for FCS Endpoint Validator to build redirect links
-      'import.meta.env.VALIDATOR_URL': '"https://www.clarin.eu/fcsvalidator/"',
+      'import.meta.env.VALIDATOR_URL': process.env.VITE_VALIDATOR_URL
+        ? `"${process.env.VITE_VALIDATOR_URL}"`
+        : '"https://www.clarin.eu/fcsvalidator/"',
 
       // show direct link to search results
       'import.meta.env.SHOW_SEARCH_RESULT_LINK': 'false',
@@ -124,8 +141,6 @@ export default defineConfig(({ mode }) => {
       // 'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': JSON.stringify({ srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }),
       // enable visual query builder
       'import.meta.env.FEATURE_QUERY_BUILDER': 'true',
-      // enable dynamic imports / lazy loading of certain components (e.g., visual query builder)
-      'import.meta.env.FEATURE_LAZY_LOADING': 'true',
     },
     resolve: {
       alias: {
@@ -139,11 +154,9 @@ export default defineConfig(({ mode }) => {
     },
   } satisfies UserConfig
 
-  if (singleChunk) {
+  if (isSingleChunk) {
     // keep a single chunk
-    Object.assign(baseConfig.define, {
-      'import.meta.env.FEATURE_LAZY_LOADING': 'false',
-    } satisfies Record<string, unknown>)
+    // Object.assign(baseConfig.define, {} satisfies Record<string, unknown>)
   } else {
     // split into multiple chunks if not disabled
     Object.assign(baseConfig.build.rollupOptions, {
@@ -224,6 +237,8 @@ export default defineConfig(({ mode }) => {
             '@nozbe/microfuzz/react',
             'react-helmet-async',
           ],
+          // lazy loaded chunk (query-builder)
+          [`${outputsLibVenderPath}antlr4`]: ['antlr4ng'],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },

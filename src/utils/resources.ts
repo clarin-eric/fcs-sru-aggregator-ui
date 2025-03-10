@@ -136,11 +136,12 @@ export function getInstitutions(resources: Resource[], resourceIDs: string[]) {
 
 export function isResourceAvailableForQueryType(resource: Resource, queryTypeId: QueryTypeID) {
   // check search capabilities (ignore version, just check caps)
-  if (
-    queryTypeId === 'fcs' &&
-    resource.endpoint.searchCapabilities.indexOf('ADVANCED_SEARCH') === -1
-  ) {
+  if (queryTypeId === 'fcs' && !resource.endpoint.searchCapabilities.includes('ADVANCED_SEARCH')) {
     // want 'fcs' but does not have 'ADVANCED_SEARCH' capability
+    return false
+  }
+  if (queryTypeId === 'lex' && !resource.endpoint.searchCapabilities.includes('LEX_SEARCH')) {
+    // want 'lex' but does not have 'LEX_SEARCH' capability
     return false
   }
   // 'cql' is required default, so no check
