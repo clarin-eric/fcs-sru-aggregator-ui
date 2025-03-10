@@ -28,6 +28,8 @@ jobs:
         env:
           VITE_DEPLOY_PATH: '/fcs-sru-aggregator-ui'
           VITE_API_URL: 'https://contentsearch.clarin.eu/rest/'
+          VITE_CANONCIAL_URL: 'https://contentsearch.clarin.eu'
+          VITE_VALIDATOR_URL: 'https://www.clarin.eu/fcsvalidator/'
         run: npm run build
 
       - name: Store build artifact
