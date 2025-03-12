@@ -23,9 +23,7 @@ options {
 // simplify and make it flat
 query: boolean_query EOF;
 
-boolean_query:
-	subquery (boolean_modified subquery)*
-	| search_clause;
+boolean_query: subquery (boolean_modified subquery)*;
 
 subquery: L_PAREN boolean_query R_PAREN | search_clause;
 

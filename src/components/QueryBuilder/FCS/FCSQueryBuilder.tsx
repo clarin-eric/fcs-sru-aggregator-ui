@@ -21,6 +21,7 @@ import {
 } from '@/parsers/FCSParser'
 import { type Resource } from '@/utils/api'
 import { type ParseTree, TerminalNode, TokenStreamRewriter } from 'antlr4ng'
+import { isCursorOnContext } from '../utils'
 import {
   ADVANCED_LAYERS,
   ADVANCED_LAYERS_MAP,
@@ -63,7 +64,6 @@ import {
   checkIfContainsRegex,
   escapeQuotes,
   escapeRegexValue,
-  isCursorOnContext,
   parseQuery,
   unescapeQuotes,
   unescapeRegexValue,
@@ -74,6 +74,7 @@ import plusCircleIcon from 'bootstrap-icons/icons/plus-circle.svg?raw'
 import repeatIcon from 'bootstrap-icons/icons/repeat.svg?raw'
 import xCircleIcon from 'bootstrap-icons/icons/x-circle.svg?raw'
 
+// TODO: prefix most rules with ".fcs-query"
 import './styles.css'
 
 // --------------------------------------------------------------------------
@@ -1098,6 +1099,15 @@ function BasicExpressionInput({
                     {renderLayerQualifiers(layerData.id)}
                   </Fragment>
                 ))}
+                {!showBasicLayer && !showAllAdvancedLayers && customLayers.length === 0 && (
+                  // real exception case, probably for resources that specify ADVANCED_SEARCH capability but no supported layers?
+                  // and no other normal resources are selected!
+                  <Dropdown.ItemText style={{ width: 'max-content' }}>
+                    <em className="text-warning-emphasis">No supported layers available?!</em>
+                    <br />
+                    <em className="text-secondary">Maybe select a few more resources.</em>
+                  </Dropdown.ItemText>
+                )}
               </div>
               <div
                 className={([] as string[])

@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
@@ -26,7 +27,7 @@ function QuerySuggestionsModal({
   onModalClose,
 }: QuerySuggestionsModal) {
   const queryTypes: readonly QueryTypeID[] =
-    queryTypesProp && queryTypesProp.length > 0 ? queryTypesProp : ['cql', 'fcs']
+    queryTypesProp && queryTypesProp.length > 0 ? queryTypesProp : ['cql', 'fcs', 'lex']
   const requestedExamples = exampleQueries.filter((example) =>
     queryTypes.includes(example.queryType)
   )
@@ -54,7 +55,7 @@ function QuerySuggestionsModal({
 
   function renderExample(query: string, queryType: QueryTypeID, description?: string, nr?: number) {
     return (
-      <Row>
+      <Row key={query}>
         <Col md={'auto'} className="d-none d-md-block">
           {nr && `${nr}.`}
         </Col>
@@ -94,7 +95,7 @@ function QuerySuggestionsModal({
             if (examples.length === 0) return null
 
             return (
-              <>
+              <Fragment key={queryType}>
                 <Row>
                   <Col>
                     <h4 className="border-bottom pb-2">
@@ -105,7 +106,7 @@ function QuerySuggestionsModal({
                 {examples.map((example, index) =>
                   renderExample(example.query, example.queryType, example.description, index + 1)
                 )}
-              </>
+              </Fragment>
             )
           })}
         </Container>

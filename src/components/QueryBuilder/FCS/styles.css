@@ -1,83 +1,9 @@
-#query-builder {
-  --action-btn-size: 0.9rem;
-  --action-btn-padding: 0.25rem;
-}
-
-/* icons */
-
-#query-builder .action-btn:has(i>svg.bi) {
-  white-space: nowrap;
-
-  display: inline-grid;
-  grid-area: content;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-
-  /* width: calc(var(--action-btn-size) + 0.1rem); */
-  /* height: calc(var(--action-btn-size) + 0.1rem); */
-
-  padding: var(--action-btn-padding);
-}
-
-#query-builder .action-btn>i:has(svg.bi) {
-  font-size: 1em;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  text-align: center;
-
-  height: var(--action-btn-size);
-  width: var(--action-btn-size);
-  min-width: var(--action-btn-size);
-  min-height: var(--action-btn-size);
-  line-height: 1;
-  /* text-indent: 0; */
-
-  /* font-feature-settings: "liga"; */
-  /* letter-spacing: normal; */
-  /* position: relative; */
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-#query-builder .action-btn>i>svg.bi {
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
-}
-
-/* remove dropdown arrow key suffix */
-
-#query-builder .dropdown-toggle.no-arrow::after {
-  display: none;
-}
-
 /* action buttons */
-
-#query-builder .action-btn {
-  --bs-link-color: var(--bs-body-color);
-  --bs-btn-bg: rgba(var(--bs-body-bg-rgb), 0.7);
-  --bs-btn-hover-bg: rgb(var(--bs-body-bg-rgb));
-}
 
 #query-builder .basic-expression>.actions {
   font-size: 0;
   /* transform: translate(-100%, -50%); */
   left: calc(100% + var(--action-btn-size) - var(--action-btn-padding));
-}
-
-/* "fix" action buttons translate-middle for popper.js */
-
-#query-builder .translate-middle:has(>.action-btn) {
-  transform: unset !important;
-}
-
-#query-builder .translate-middle>.action-btn {
-  /* p-1 == 0.25rem */
-  transform: translateX(calc(-50% - 0.25rem)) translateY(calc(-50% - 0.25rem - 0.15rem)) !important;
 }
 
 #query-builder .basic-expression>.actions>div>.action-btn,
@@ -89,13 +15,6 @@
 #query-builder .basic-expression>.actions>.action-btn:only-child {
   /* if wrap button hidden */
   transform: translateX(calc(-100%)) translateY(-50%) !important;
-}
-
-/* initial add button */
-
-#query-builder> :only-child>.action-btn>i {
-  height: 1.5rem !important;
-  width: 1.5rem !important;
 }
 
 /* syntax components */
@@ -114,7 +33,7 @@
 /* background colors to visualize blocks */
 /* TODO: adjust later, maybe only for dark mode? */
 
-#query-builder .block {
+#query-builder.fcs-query .block {
   background-color: var(--bs-body-bg);
 }
 
@@ -150,31 +69,4 @@
   }
 }
 
-/* make dropdown look like select */
 
-#query-builder .dropdown>.form-select {
-  padding-right: 2.25rem;
-  color: var(--bs-body-color);
-  background-color: var(--bs-body-bg);
-  border-color: var(--bs-border-color);
-}
-
-#query-builder .dropdown>.form-select::after {
-  /* remove dropdown icon and use the one from .form-select */
-  content: unset;
-}
-
-/* custom focus ring, de-emphasize others */
-
-#query-builder .cursor-focus:not(:has(.cursor-focus)),
-#query-builder .focus-ring:not(:only-of-type):focus-within {
-  /* show focus ring if not same tag-type siblings */
-  outline: 0;
-  box-shadow: var(--bs-focus-ring-x, 0) var(--bs-focus-ring-y, 0) var(--bs-focus-ring-blur, 0) var(--bs-focus-ring-width) var(--bs-focus-ring-color);
-}
-
-#query-builder .focus-ring:has(~*:focus-within),
-#query-builder *:focus-within~.focus-ring {
-  /* de-emphasize un-focused siblings */
-  opacity: 0.5;
-}

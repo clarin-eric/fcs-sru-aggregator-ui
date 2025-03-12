@@ -29,4 +29,10 @@ export default [
     description:
       'Phrase with three tokens: a word starting with "her", a lemmatized word, and a verb',
   },
+
+  {
+    queryType: 'lex',
+    query: 'apple',
+    description: 'Search for plain string',
+  },
 ] as Example[]

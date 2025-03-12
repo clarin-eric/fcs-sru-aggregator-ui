@@ -1,0 +1,42 @@
+/* syntax components */
+
+#query-builder.lex-query .sub-query>code.delims {
+  font-size: 2.5rem;
+}
+
+#query-builder.lex-query .boolean-query>.boolean code.keyword {
+  font-size: 1rem;
+}
+
+/* background colors to visualize blocks */
+/* TODO: adjust later, maybe only for dark mode? */
+
+#query-builder.lex-query .block {
+  background-color: var(--bs-body-bg);
+}
+
+#query-builder .block.sub-query {
+  background-color: rgba(0, 155, 255, 0.05);
+  background-color: var(--bs-gray-200);
+}
+
+#query-builder.lex-query .block.input-block {
+  background-color: rgba(200, 0, 0, 0.2);
+  background-color: var(--bs-gray-100);
+}
+
+@media (prefers-color-scheme: dark) {
+  #query-builder.lex-query .block.sub-query {
+    background-color: var(--bs-gray-900);
+  }
+
+  #query-builder.lex-query .block {
+    background-color: rgba(0, 155, 255, 0.05);
+    background-color: var(--bs-gray-800);
+  }
+
+  #query-builder.lex-query .block.input-block {
+    background-color: rgba(200, 0, 0, 0.2);
+    /* background-color: var(--bs-gray-900); */
+  }
+}

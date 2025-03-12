@@ -18,8 +18,10 @@ import {
   NUMBER_OF_RESULTS,
   QUERY_TYPE_MAP,
   QUERY_TYPES,
+  QUERY_TYPES_WITH_BUILDER_SUPPORT,
   type NumberOfResults,
   type QueryTypeID,
+  type QueryTypeIDForQueryBuilder,
 } from '@/utils/constants'
 import { getAvailableResourceIDs, getInstitutions } from '@/utils/resources'
 import {
@@ -269,7 +271,7 @@ function SearchInput({
     resources.find((resource) => resource.searchCapabilitiesResolved.includes('LEX_SEARCH')) !==
     undefined
 
-  const showQueryBuilderButton = ['fcs'].includes(queryType)
+  const showQueryBuilderButton = QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(queryType as QueryTypeIDForQueryBuilder)
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -605,13 +607,13 @@ function SearchInput({
       />
       {/* query builder modal */}
       {import.meta.env.FEATURE_QUERY_BUILDER &&
-        queryType === 'fcs' &&
+        QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(queryType as QueryTypeIDForQueryBuilder) &&
         isLoadQueryBuilderModalTriggered && (
           // TODO: some fallback handling
           <Suspense fallback={<>Failed to load Query Builder extension!</>}>
             <QueryBuilderModal
               query={query}
-              queryType={queryType}
+              queryType={queryType as QueryTypeIDForQueryBuilder}
               resources={resources}
               selectedResources={selectedResourceIDs}
               show={showQueryBuilderModal}

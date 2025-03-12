@@ -13,12 +13,14 @@ import ContentEditable from '@/components/ContentEditable'
 import useDebounce from '@/hooks/useDebounce'
 import useDebouncedState from '@/hooks/useDebouncedState'
 import { type Resource } from '@/utils/api'
+import { type QueryTypeIDForQueryBuilder } from '@/utils/constants'
 import {
   FCSQueryBuilder,
   getLayersUsedInQuery,
   getResourcesLayerSupportInfo,
   parseQuery as parseFCSQuery,
 } from './FCS'
+import { LexCQLQueryBuilder, parseQuery as parseLexCQLQuery } from './lex'
 
 import './styles.css'
 
@@ -30,7 +32,7 @@ import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
 interface QueryBuilderModalProps {
   show: boolean
   query?: string
-  queryType: 'fcs'
+  queryType: QueryTypeIDForQueryBuilder
   resources?: Resource[]
   selectedResources?: string[]
   delay?: number
@@ -57,7 +59,7 @@ function QueryBuilderModal({
     setCursorPos(null)
   }, [queryProp])
 
-  const queryDebounded = useDebounce(query, delay)
+  const queryDebounced = useDebounce(query, delay)
   // query input syntax highlighting
   const [queryInputEnhanced, setQueryInputEnhanced] = useState(false)
   // query input validation
@@ -78,7 +80,14 @@ function QueryBuilderModal({
   // queryType conditional parsing
   const parsed = useMemo(() => {
     console.debug('parse query for input validation', { query, queryType })
-    return parseFCSQuery(query)
+    if (queryType === 'fcs') {
+      return parseFCSQuery(query)
+    }
+    if (queryType === 'lex') {
+      return parseLexCQLQuery(query)
+    }
+    console.warn('Unexpected queryType, so will not parse query!', queryType)
+    return null
   }, [query, queryType])
 
   // NOTE: do not wrap in `useEffect` as it causes flickering and hinders debouncing
@@ -164,6 +173,7 @@ function QueryBuilderModal({
   // --------------------------------------------------------------
   // rendering
 
+  // fcs
   const [enableWithin, setEnableWithin] = useState(false)
   const [enableWrapGroup, setEnableWrapGroup] = useState(false)
   const [enableWrapNegation, setEnableWrapNegation] = useState(false)
@@ -176,134 +186,135 @@ function QueryBuilderModal({
   const [showCustomLayers, setShowCustomLayers] = useState(true)
   const [showLayerQualifiers, setShowLayerQualifiers] = useState(true)
   const [showResourceCountForLayer, setShowResourceCountForLayer] = useState(true)
+  // lexcql
+  const [forceSearchTermQuoting, setForceSearchTermQuoting] = useState(false)
+  const [enableRelationModifiers, setEnableRelationModifiers] = useState(true)
 
-  function renderQueryBuilder() {
+  function renderFCSQueryBuilder() {
     // make conditional on query type
     return (
       <>
         {/* TODO: testing */}
-        {queryType === 'fcs' && (
-          <Form className="my-2 p-2 border rounded" style={{ textIndent: '3.6rem hanging' }}>
-            <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
-              Enable
-            </Form.Text>
-            {/* query structures */}
-            <Form.Check
-              inline
-              label="Within"
-              type="checkbox"
-              name="enableWithin"
-              id="enableWithin"
-              checked={enableWithin}
-              onChange={() => setEnableWithin((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="Expression Grouping"
-              type="checkbox"
-              name="enableWrapGroup"
-              id="enableWrapGroup"
-              checked={enableWrapGroup}
-              onChange={() => setEnableWrapGroup((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="Expression Negation"
-              type="checkbox"
-              name="enableWrapNegation"
-              id="enableWrapNegation"
-              checked={enableWrapNegation}
-              onChange={() => setEnableWrapNegation((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="Implicit Query"
-              type="checkbox"
-              name="enableImplicitQuery"
-              id="enableImplicitQuery"
-              checked={enableImplicitQuery}
-              onChange={() => setEnableImplicitQuery((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="Multiple Query Segments"
-              type="checkbox"
-              name="enableMultipleQuerySegments"
-              id="enableMultipleQuerySegments"
-              checked={enableMultipleQuerySegments}
-              onChange={() => setEnableMultipleQuerySegments((checked) => !checked)}
-              disabled
-            />
-            {/* inputs */}
-            <Form.Check
-              inline
-              label="Quantifiers"
-              type="checkbox"
-              name="enableQuantifiers"
-              id="enableQuantifiers"
-              checked={enableQuantifiers}
-              onChange={() => setEnableQuantifiers((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="Regex Flags"
-              type="checkbox"
-              name="enableRegexpFlags"
-              id="enableRegexpFlags"
-              checked={enableRegexpFlags}
-              onChange={() => setEnableRegexpFlags((checked) => !checked)}
-              disabled
-            />
-            {/* layers */}
-            <Form.Check
-              inline
-              label="BASIC Layer"
-              type="checkbox"
-              name="showBasicLayer"
-              id="showBasicLayer"
-              checked={showBasicLayer}
-              onChange={() => setShowBasicLayer((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="All Advanced Layers"
-              type="checkbox"
-              name="showAllAdvancedLayers"
-              id="showAllAdvancedLayers"
-              checked={showAllAdvancedLayers}
-              onChange={() => setShowAllAdvancedLayers((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="Custom Layers"
-              type="checkbox"
-              name="showCustomLayers"
-              id="showCustomLayers"
-              checked={showCustomLayers}
-              onChange={() => setShowCustomLayers((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="Layer Qualifiers"
-              type="checkbox"
-              name="showLayerQualifiers"
-              id="showLayerQualifiers"
-              checked={showLayerQualifiers}
-              onChange={() => setShowLayerQualifiers((checked) => !checked)}
-            />
-            <Form.Check
-              inline
-              label="Resource Count for Layer"
-              type="checkbox"
-              name="showResourceCountForLayer"
-              id="showResourceCountForLayer"
-              checked={showResourceCountForLayer}
-              onChange={() => setShowResourceCountForLayer((checked) => !checked)}
-            />
-          </Form>
-        )}
+        <Form className="my-2 p-2 border rounded" style={{ textIndent: '3.6rem hanging' }}>
+          <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
+            Enable
+          </Form.Text>
+          {/* query structures */}
+          <Form.Check
+            inline
+            label="Within"
+            type="checkbox"
+            name="enableWithin"
+            id="enableWithin"
+            checked={enableWithin}
+            onChange={() => setEnableWithin((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Expression Grouping"
+            type="checkbox"
+            name="enableWrapGroup"
+            id="enableWrapGroup"
+            checked={enableWrapGroup}
+            onChange={() => setEnableWrapGroup((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Expression Negation"
+            type="checkbox"
+            name="enableWrapNegation"
+            id="enableWrapNegation"
+            checked={enableWrapNegation}
+            onChange={() => setEnableWrapNegation((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Implicit Query"
+            type="checkbox"
+            name="enableImplicitQuery"
+            id="enableImplicitQuery"
+            checked={enableImplicitQuery}
+            onChange={() => setEnableImplicitQuery((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Multiple Query Segments"
+            type="checkbox"
+            name="enableMultipleQuerySegments"
+            id="enableMultipleQuerySegments"
+            checked={enableMultipleQuerySegments}
+            onChange={() => setEnableMultipleQuerySegments((checked) => !checked)}
+            disabled
+          />
+          {/* inputs */}
+          <Form.Check
+            inline
+            label="Quantifiers"
+            type="checkbox"
+            name="enableQuantifiers"
+            id="enableQuantifiers"
+            checked={enableQuantifiers}
+            onChange={() => setEnableQuantifiers((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Regex Flags"
+            type="checkbox"
+            name="enableRegexpFlags"
+            id="enableRegexpFlags"
+            checked={enableRegexpFlags}
+            onChange={() => setEnableRegexpFlags((checked) => !checked)}
+            disabled
+          />
+          {/* layers */}
+          <Form.Check
+            inline
+            label="BASIC Layer"
+            type="checkbox"
+            name="showBasicLayer"
+            id="showBasicLayer"
+            checked={showBasicLayer}
+            onChange={() => setShowBasicLayer((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="All Advanced Layers"
+            type="checkbox"
+            name="showAllAdvancedLayers"
+            id="showAllAdvancedLayers"
+            checked={showAllAdvancedLayers}
+            onChange={() => setShowAllAdvancedLayers((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Custom Layers"
+            type="checkbox"
+            name="showCustomLayers"
+            id="showCustomLayers"
+            checked={showCustomLayers}
+            onChange={() => setShowCustomLayers((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Layer Qualifiers"
+            type="checkbox"
+            name="showLayerQualifiers"
+            id="showLayerQualifiers"
+            checked={showLayerQualifiers}
+            onChange={() => setShowLayerQualifiers((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Resource Count for Layer"
+            type="checkbox"
+            name="showResourceCountForLayer"
+            id="showResourceCountForLayer"
+            checked={showResourceCountForLayer}
+            onChange={() => setShowResourceCountForLayer((checked) => !checked)}
+          />
+        </Form>
         <FCSQueryBuilder
-          query={queryDebounded}
+          query={queryDebounced}
           cursorPos={cursorPos ?? undefined}
           onChange={handleQueryBuilderQueryChange}
           resources={resourcesForQueryBuilder}
@@ -323,6 +334,56 @@ function QueryBuilderModal({
         />
       </>
     )
+  }
+
+  function renderLexCQLQueryBuilder() {
+    return (
+      <>
+        {/* TODO: testing */}
+        <Form className="my-2 p-2 border rounded" style={{ textIndent: '3.6rem hanging' }}>
+          <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
+            Enable
+          </Form.Text>
+          <Form.Check
+            inline
+            label="Forced Search Term Quoting"
+            type="checkbox"
+            name="forceSearchTermQuoting"
+            id="forceSearchTermQuoting"
+            checked={forceSearchTermQuoting}
+            onChange={() => setForceSearchTermQuoting((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Relation Modifiers"
+            type="checkbox"
+            name="enableRelationModifiers"
+            id="enableRelationModifiers"
+            checked={enableRelationModifiers}
+            onChange={() => setEnableRelationModifiers((checked) => !checked)}
+          />
+        </Form>
+        <LexCQLQueryBuilder
+          query={queryDebounced}
+          cursorPos={cursorPos ?? undefined}
+          onChange={handleQueryBuilderQueryChange}
+          resources={resourcesForQueryBuilder}
+          // feature flags
+          enableRelationModifiers={enableRelationModifiers}
+          forceSearchTermQuoting={forceSearchTermQuoting}
+        />
+      </>
+    )
+  }
+
+  function renderQueryBuilder() {
+    if (queryType === 'fcs') {
+      return renderFCSQueryBuilder()
+    }
+    if (queryType === 'lex') {
+      return renderLexCQLQueryBuilder()
+    }
+    return null
   }
 
   return (

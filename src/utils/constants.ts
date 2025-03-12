@@ -1,4 +1,5 @@
 export type QueryTypeID = (typeof QUERY_TYPES)[number]['id']
+export type QueryTypeIDForQueryBuilder = (typeof QUERY_TYPES_WITH_BUILDER_SUPPORT)[number]
 export type DownloadFormats = (typeof DOWNLOAD_FORMATS)[number]['id']
 export type NumberOfResults = (typeof NUMBER_OF_RESULTS)[number]
 
@@ -31,6 +32,8 @@ export const QUERY_TYPES = [
 export const QUERY_TYPE_MAP = Object.fromEntries(
   ['cql', 'fcs', 'lex'].map((id) => [id, QUERY_TYPES.find((qt) => qt.id === id)])
 )
+
+export const QUERY_TYPES_WITH_BUILDER_SUPPORT = ['fcs', 'lex'] as const
 
 export const DOWNLOAD_FORMATS = [
   { id: 'text', label: 'Plain Text' },

@@ -182,39 +182,26 @@ export class LexParser extends Parser {
     this.enterRule(localContext, 2, LexParser.RULE_boolean_query)
     let _la: number
     try {
-      this.state = 55
-      this.errorHandler.sync(this)
-      switch (this.interpreter.adaptivePredict(this.tokenStream, 1, this.context)) {
-        case 1:
-          this.enterOuterAlt(localContext, 1)
+      this.enterOuterAlt(localContext, 1)
+      {
+        this.state = 45
+        this.subquery()
+        this.state = 51
+        this.errorHandler.sync(this)
+        _la = this.tokenStream.LA(1)
+        while ((_la & ~0x1f) === 0 && ((1 << _la) & 14336) !== 0) {
           {
-            this.state = 45
-            this.subquery()
-            this.state = 51
-            this.errorHandler.sync(this)
-            _la = this.tokenStream.LA(1)
-            while ((_la & ~0x1f) === 0 && ((1 << _la) & 14336) !== 0) {
-              {
-                {
-                  this.state = 46
-                  this.boolean_modified()
-                  this.state = 47
-                  this.subquery()
-                }
-              }
-              this.state = 53
-              this.errorHandler.sync(this)
-              _la = this.tokenStream.LA(1)
+            {
+              this.state = 46
+              this.boolean_modified()
+              this.state = 47
+              this.subquery()
             }
           }
-          break
-        case 2:
-          this.enterOuterAlt(localContext, 2)
-          {
-            this.state = 54
-            this.search_clause()
-          }
-          break
+          this.state = 53
+          this.errorHandler.sync(this)
+          _la = this.tokenStream.LA(1)
+        }
       }
     } catch (re) {
       if (re instanceof RecognitionException) {
@@ -232,17 +219,17 @@ export class LexParser extends Parser {
     let localContext = new SubqueryContext(this.context, this.state)
     this.enterRule(localContext, 4, LexParser.RULE_subquery)
     try {
-      this.state = 62
+      this.state = 59
       this.errorHandler.sync(this)
       switch (this.tokenStream.LA(1)) {
         case LexParser.L_PAREN:
           this.enterOuterAlt(localContext, 1)
           {
-            this.state = 57
+            this.state = 54
             this.match(LexParser.L_PAREN)
-            this.state = 58
+            this.state = 55
             this.boolean_query()
-            this.state = 59
+            this.state = 56
             this.match(LexParser.R_PAREN)
           }
           break
@@ -250,7 +237,7 @@ export class LexParser extends Parser {
         case LexParser.SIMPLE_STRING:
           this.enterOuterAlt(localContext, 2)
           {
-            this.state = 61
+            this.state = 58
             this.search_clause()
           }
           break
@@ -275,19 +262,19 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 67
+        this.state = 64
         this.errorHandler.sync(this)
-        switch (this.interpreter.adaptivePredict(this.tokenStream, 3, this.context)) {
+        switch (this.interpreter.adaptivePredict(this.tokenStream, 2, this.context)) {
           case 1:
             {
-              this.state = 64
+              this.state = 61
               this.index()
-              this.state = 65
+              this.state = 62
               this.relation_modified()
             }
             break
         }
-        this.state = 69
+        this.state = 66
         this.search_term()
       }
     } catch (re) {
@@ -309,7 +296,7 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 71
+        this.state = 68
         _la = this.tokenStream.LA(1)
         if (!(_la === 15 || _la === 16)) {
           this.errorHandler.recoverInline(this)
@@ -337,14 +324,14 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 73
+        this.state = 70
         this.index()
-        this.state = 75
+        this.state = 72
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         if (_la === 10) {
           {
-            this.state = 74
+            this.state = 71
             this.modifier_list()
           }
         }
@@ -365,20 +352,20 @@ export class LexParser extends Parser {
     let localContext = new IndexContext(this.context, this.state)
     this.enterRule(localContext, 12, LexParser.RULE_index)
     try {
-      this.state = 79
+      this.state = 76
       this.errorHandler.sync(this)
-      switch (this.interpreter.adaptivePredict(this.tokenStream, 5, this.context)) {
+      switch (this.interpreter.adaptivePredict(this.tokenStream, 4, this.context)) {
         case 1:
           this.enterOuterAlt(localContext, 1)
           {
-            this.state = 77
+            this.state = 74
             this.simple_name()
           }
           break
         case 2:
           this.enterOuterAlt(localContext, 2)
           {
-            this.state = 78
+            this.state = 75
             this.prefix_name()
           }
           break
@@ -402,14 +389,14 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 81
+        this.state = 78
         this.relation()
-        this.state = 83
+        this.state = 80
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         if (_la === 10) {
           {
-            this.state = 82
+            this.state = 79
             this.modifier_list()
           }
         }
@@ -430,13 +417,13 @@ export class LexParser extends Parser {
     let localContext = new RelationContext(this.context, this.state)
     this.enterRule(localContext, 16, LexParser.RULE_relation)
     try {
-      this.state = 87
+      this.state = 84
       this.errorHandler.sync(this)
       switch (this.tokenStream.LA(1)) {
         case LexParser.SIMPLE_STRING:
           this.enterOuterAlt(localContext, 1)
           {
-            this.state = 85
+            this.state = 82
             this.relation_name()
           }
           break
@@ -449,7 +436,7 @@ export class LexParser extends Parser {
         case LexParser.EQUAL_EQUAL:
           this.enterOuterAlt(localContext, 2)
           {
-            this.state = 86
+            this.state = 83
             this.relation_symbol()
           }
           break
@@ -472,20 +459,20 @@ export class LexParser extends Parser {
     let localContext = new Relation_nameContext(this.context, this.state)
     this.enterRule(localContext, 18, LexParser.RULE_relation_name)
     try {
-      this.state = 91
+      this.state = 88
       this.errorHandler.sync(this)
-      switch (this.interpreter.adaptivePredict(this.tokenStream, 8, this.context)) {
+      switch (this.interpreter.adaptivePredict(this.tokenStream, 7, this.context)) {
         case 1:
           this.enterOuterAlt(localContext, 1)
           {
-            this.state = 89
+            this.state = 86
             this.simple_name()
           }
           break
         case 2:
           this.enterOuterAlt(localContext, 2)
           {
-            this.state = 90
+            this.state = 87
             this.prefix_name()
           }
           break
@@ -509,7 +496,7 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 93
+        this.state = 90
         _la = this.tokenStream.LA(1)
         if (!((_la & ~0x1f) === 0 && ((1 << _la) & 1016) !== 0)) {
           this.errorHandler.recoverInline(this)
@@ -537,14 +524,14 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 95
+        this.state = 92
         this.boolean_()
-        this.state = 97
+        this.state = 94
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         if (_la === 10) {
           {
-            this.state = 96
+            this.state = 93
             this.modifier_list()
           }
         }
@@ -568,7 +555,7 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 99
+        this.state = 96
         _la = this.tokenStream.LA(1)
         if (!((_la & ~0x1f) === 0 && ((1 << _la) & 14336) !== 0)) {
           this.errorHandler.recoverInline(this)
@@ -596,17 +583,17 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 102
+        this.state = 99
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         do {
           {
             {
-              this.state = 101
+              this.state = 98
               this.modifier()
             }
           }
-          this.state = 104
+          this.state = 101
           this.errorHandler.sync(this)
           _la = this.tokenStream.LA(1)
         } while (_la === 10)
@@ -630,16 +617,16 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 106
+        this.state = 103
         this.match(LexParser.SLASH)
-        this.state = 107
+        this.state = 104
         this.modifier_name()
-        this.state = 109
+        this.state = 106
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         if ((_la & ~0x1f) === 0 && ((1 << _la) & 1016) !== 0) {
           {
-            this.state = 108
+            this.state = 105
             this.modifier_relation()
           }
         }
@@ -662,7 +649,7 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 111
+        this.state = 108
         this.simple_name()
       }
     } catch (re) {
@@ -683,9 +670,9 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 113
+        this.state = 110
         this.relation_symbol()
-        this.state = 114
+        this.state = 111
         this.modifier_value()
       }
     } catch (re) {
@@ -707,7 +694,7 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 116
+        this.state = 113
         _la = this.tokenStream.LA(1)
         if (!(_la === 15 || _la === 16)) {
           this.errorHandler.recoverInline(this)
@@ -734,11 +721,11 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 118
+        this.state = 115
         this.prefix()
-        this.state = 119
+        this.state = 116
         this.match(LexParser.DOT)
-        this.state = 120
+        this.state = 117
         this.simple_name()
       }
     } catch (re) {
@@ -759,7 +746,7 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 122
+        this.state = 119
         this.simple_name()
       }
     } catch (re) {
@@ -780,7 +767,7 @@ export class LexParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 124
+        this.state = 121
         this.match(LexParser.SIMPLE_STRING)
       }
     } catch (re) {
@@ -797,43 +784,42 @@ export class LexParser extends Parser {
   }
 
   public static readonly _serializedATN: number[] = [
-    4, 1, 17, 127, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
+    4, 1, 17, 124, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
     6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13,
     2, 14, 7, 14, 2, 15, 7, 15, 2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 2, 20, 7,
-    20, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 50, 8, 1, 10, 1, 12, 1, 53, 9, 1, 1, 1, 3,
-    1, 56, 8, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 2, 63, 8, 2, 1, 3, 1, 3, 1, 3, 3, 3, 68, 8, 3, 1,
-    3, 1, 3, 1, 4, 1, 4, 1, 5, 1, 5, 3, 5, 76, 8, 5, 1, 6, 1, 6, 3, 6, 80, 8, 6, 1, 7, 1, 7, 3, 7,
-    84, 8, 7, 1, 8, 1, 8, 3, 8, 88, 8, 8, 1, 9, 1, 9, 3, 9, 92, 8, 9, 1, 10, 1, 10, 1, 11, 1, 11, 3,
-    11, 98, 8, 11, 1, 12, 1, 12, 1, 13, 4, 13, 103, 8, 13, 11, 13, 12, 13, 104, 1, 14, 1, 14, 1, 14,
-    3, 14, 110, 8, 14, 1, 15, 1, 15, 1, 16, 1, 16, 1, 16, 1, 17, 1, 17, 1, 18, 1, 18, 1, 18, 1, 18,
-    1, 19, 1, 19, 1, 20, 1, 20, 1, 20, 0, 0, 21, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26,
-    28, 30, 32, 34, 36, 38, 40, 0, 3, 1, 0, 15, 16, 1, 0, 3, 9, 1, 0, 11, 13, 117, 0, 42, 1, 0, 0,
-    0, 2, 55, 1, 0, 0, 0, 4, 62, 1, 0, 0, 0, 6, 67, 1, 0, 0, 0, 8, 71, 1, 0, 0, 0, 10, 73, 1, 0, 0,
-    0, 12, 79, 1, 0, 0, 0, 14, 81, 1, 0, 0, 0, 16, 87, 1, 0, 0, 0, 18, 91, 1, 0, 0, 0, 20, 93, 1, 0,
-    0, 0, 22, 95, 1, 0, 0, 0, 24, 99, 1, 0, 0, 0, 26, 102, 1, 0, 0, 0, 28, 106, 1, 0, 0, 0, 30, 111,
-    1, 0, 0, 0, 32, 113, 1, 0, 0, 0, 34, 116, 1, 0, 0, 0, 36, 118, 1, 0, 0, 0, 38, 122, 1, 0, 0, 0,
-    40, 124, 1, 0, 0, 0, 42, 43, 3, 2, 1, 0, 43, 44, 5, 0, 0, 1, 44, 1, 1, 0, 0, 0, 45, 51, 3, 4, 2,
-    0, 46, 47, 3, 22, 11, 0, 47, 48, 3, 4, 2, 0, 48, 50, 1, 0, 0, 0, 49, 46, 1, 0, 0, 0, 50, 53, 1,
-    0, 0, 0, 51, 49, 1, 0, 0, 0, 51, 52, 1, 0, 0, 0, 52, 56, 1, 0, 0, 0, 53, 51, 1, 0, 0, 0, 54, 56,
-    3, 6, 3, 0, 55, 45, 1, 0, 0, 0, 55, 54, 1, 0, 0, 0, 56, 3, 1, 0, 0, 0, 57, 58, 5, 1, 0, 0, 58,
-    59, 3, 2, 1, 0, 59, 60, 5, 2, 0, 0, 60, 63, 1, 0, 0, 0, 61, 63, 3, 6, 3, 0, 62, 57, 1, 0, 0, 0,
-    62, 61, 1, 0, 0, 0, 63, 5, 1, 0, 0, 0, 64, 65, 3, 12, 6, 0, 65, 66, 3, 14, 7, 0, 66, 68, 1, 0,
-    0, 0, 67, 64, 1, 0, 0, 0, 67, 68, 1, 0, 0, 0, 68, 69, 1, 0, 0, 0, 69, 70, 3, 8, 4, 0, 70, 7, 1,
-    0, 0, 0, 71, 72, 7, 0, 0, 0, 72, 9, 1, 0, 0, 0, 73, 75, 3, 12, 6, 0, 74, 76, 3, 26, 13, 0, 75,
-    74, 1, 0, 0, 0, 75, 76, 1, 0, 0, 0, 76, 11, 1, 0, 0, 0, 77, 80, 3, 40, 20, 0, 78, 80, 3, 36, 18,
-    0, 79, 77, 1, 0, 0, 0, 79, 78, 1, 0, 0, 0, 80, 13, 1, 0, 0, 0, 81, 83, 3, 16, 8, 0, 82, 84, 3,
-    26, 13, 0, 83, 82, 1, 0, 0, 0, 83, 84, 1, 0, 0, 0, 84, 15, 1, 0, 0, 0, 85, 88, 3, 18, 9, 0, 86,
-    88, 3, 20, 10, 0, 87, 85, 1, 0, 0, 0, 87, 86, 1, 0, 0, 0, 88, 17, 1, 0, 0, 0, 89, 92, 3, 40, 20,
-    0, 90, 92, 3, 36, 18, 0, 91, 89, 1, 0, 0, 0, 91, 90, 1, 0, 0, 0, 92, 19, 1, 0, 0, 0, 93, 94, 7,
-    1, 0, 0, 94, 21, 1, 0, 0, 0, 95, 97, 3, 24, 12, 0, 96, 98, 3, 26, 13, 0, 97, 96, 1, 0, 0, 0, 97,
-    98, 1, 0, 0, 0, 98, 23, 1, 0, 0, 0, 99, 100, 7, 2, 0, 0, 100, 25, 1, 0, 0, 0, 101, 103, 3, 28,
-    14, 0, 102, 101, 1, 0, 0, 0, 103, 104, 1, 0, 0, 0, 104, 102, 1, 0, 0, 0, 104, 105, 1, 0, 0, 0,
-    105, 27, 1, 0, 0, 0, 106, 107, 5, 10, 0, 0, 107, 109, 3, 30, 15, 0, 108, 110, 3, 32, 16, 0, 109,
-    108, 1, 0, 0, 0, 109, 110, 1, 0, 0, 0, 110, 29, 1, 0, 0, 0, 111, 112, 3, 40, 20, 0, 112, 31, 1,
-    0, 0, 0, 113, 114, 3, 20, 10, 0, 114, 115, 3, 34, 17, 0, 115, 33, 1, 0, 0, 0, 116, 117, 7, 0, 0,
-    0, 117, 35, 1, 0, 0, 0, 118, 119, 3, 38, 19, 0, 119, 120, 5, 14, 0, 0, 120, 121, 3, 40, 20, 0,
-    121, 37, 1, 0, 0, 0, 122, 123, 3, 40, 20, 0, 123, 39, 1, 0, 0, 0, 124, 125, 5, 16, 0, 0, 125,
-    41, 1, 0, 0, 0, 12, 51, 55, 62, 67, 75, 79, 83, 87, 91, 97, 104, 109,
+    20, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 50, 8, 1, 10, 1, 12, 1, 53, 9, 1, 1, 2, 1,
+    2, 1, 2, 1, 2, 1, 2, 3, 2, 60, 8, 2, 1, 3, 1, 3, 1, 3, 3, 3, 65, 8, 3, 1, 3, 1, 3, 1, 4, 1, 4,
+    1, 5, 1, 5, 3, 5, 73, 8, 5, 1, 6, 1, 6, 3, 6, 77, 8, 6, 1, 7, 1, 7, 3, 7, 81, 8, 7, 1, 8, 1, 8,
+    3, 8, 85, 8, 8, 1, 9, 1, 9, 3, 9, 89, 8, 9, 1, 10, 1, 10, 1, 11, 1, 11, 3, 11, 95, 8, 11, 1, 12,
+    1, 12, 1, 13, 4, 13, 100, 8, 13, 11, 13, 12, 13, 101, 1, 14, 1, 14, 1, 14, 3, 14, 107, 8, 14, 1,
+    15, 1, 15, 1, 16, 1, 16, 1, 16, 1, 17, 1, 17, 1, 18, 1, 18, 1, 18, 1, 18, 1, 19, 1, 19, 1, 20,
+    1, 20, 1, 20, 0, 0, 21, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36,
+    38, 40, 0, 3, 1, 0, 15, 16, 1, 0, 3, 9, 1, 0, 11, 13, 113, 0, 42, 1, 0, 0, 0, 2, 45, 1, 0, 0, 0,
+    4, 59, 1, 0, 0, 0, 6, 64, 1, 0, 0, 0, 8, 68, 1, 0, 0, 0, 10, 70, 1, 0, 0, 0, 12, 76, 1, 0, 0, 0,
+    14, 78, 1, 0, 0, 0, 16, 84, 1, 0, 0, 0, 18, 88, 1, 0, 0, 0, 20, 90, 1, 0, 0, 0, 22, 92, 1, 0, 0,
+    0, 24, 96, 1, 0, 0, 0, 26, 99, 1, 0, 0, 0, 28, 103, 1, 0, 0, 0, 30, 108, 1, 0, 0, 0, 32, 110, 1,
+    0, 0, 0, 34, 113, 1, 0, 0, 0, 36, 115, 1, 0, 0, 0, 38, 119, 1, 0, 0, 0, 40, 121, 1, 0, 0, 0, 42,
+    43, 3, 2, 1, 0, 43, 44, 5, 0, 0, 1, 44, 1, 1, 0, 0, 0, 45, 51, 3, 4, 2, 0, 46, 47, 3, 22, 11, 0,
+    47, 48, 3, 4, 2, 0, 48, 50, 1, 0, 0, 0, 49, 46, 1, 0, 0, 0, 50, 53, 1, 0, 0, 0, 51, 49, 1, 0, 0,
+    0, 51, 52, 1, 0, 0, 0, 52, 3, 1, 0, 0, 0, 53, 51, 1, 0, 0, 0, 54, 55, 5, 1, 0, 0, 55, 56, 3, 2,
+    1, 0, 56, 57, 5, 2, 0, 0, 57, 60, 1, 0, 0, 0, 58, 60, 3, 6, 3, 0, 59, 54, 1, 0, 0, 0, 59, 58, 1,
+    0, 0, 0, 60, 5, 1, 0, 0, 0, 61, 62, 3, 12, 6, 0, 62, 63, 3, 14, 7, 0, 63, 65, 1, 0, 0, 0, 64,
+    61, 1, 0, 0, 0, 64, 65, 1, 0, 0, 0, 65, 66, 1, 0, 0, 0, 66, 67, 3, 8, 4, 0, 67, 7, 1, 0, 0, 0,
+    68, 69, 7, 0, 0, 0, 69, 9, 1, 0, 0, 0, 70, 72, 3, 12, 6, 0, 71, 73, 3, 26, 13, 0, 72, 71, 1, 0,
+    0, 0, 72, 73, 1, 0, 0, 0, 73, 11, 1, 0, 0, 0, 74, 77, 3, 40, 20, 0, 75, 77, 3, 36, 18, 0, 76,
+    74, 1, 0, 0, 0, 76, 75, 1, 0, 0, 0, 77, 13, 1, 0, 0, 0, 78, 80, 3, 16, 8, 0, 79, 81, 3, 26, 13,
+    0, 80, 79, 1, 0, 0, 0, 80, 81, 1, 0, 0, 0, 81, 15, 1, 0, 0, 0, 82, 85, 3, 18, 9, 0, 83, 85, 3,
+    20, 10, 0, 84, 82, 1, 0, 0, 0, 84, 83, 1, 0, 0, 0, 85, 17, 1, 0, 0, 0, 86, 89, 3, 40, 20, 0, 87,
+    89, 3, 36, 18, 0, 88, 86, 1, 0, 0, 0, 88, 87, 1, 0, 0, 0, 89, 19, 1, 0, 0, 0, 90, 91, 7, 1, 0,
+    0, 91, 21, 1, 0, 0, 0, 92, 94, 3, 24, 12, 0, 93, 95, 3, 26, 13, 0, 94, 93, 1, 0, 0, 0, 94, 95,
+    1, 0, 0, 0, 95, 23, 1, 0, 0, 0, 96, 97, 7, 2, 0, 0, 97, 25, 1, 0, 0, 0, 98, 100, 3, 28, 14, 0,
+    99, 98, 1, 0, 0, 0, 100, 101, 1, 0, 0, 0, 101, 99, 1, 0, 0, 0, 101, 102, 1, 0, 0, 0, 102, 27, 1,
+    0, 0, 0, 103, 104, 5, 10, 0, 0, 104, 106, 3, 30, 15, 0, 105, 107, 3, 32, 16, 0, 106, 105, 1, 0,
+    0, 0, 106, 107, 1, 0, 0, 0, 107, 29, 1, 0, 0, 0, 108, 109, 3, 40, 20, 0, 109, 31, 1, 0, 0, 0,
+    110, 111, 3, 20, 10, 0, 111, 112, 3, 34, 17, 0, 112, 33, 1, 0, 0, 0, 113, 114, 7, 0, 0, 0, 114,
+    35, 1, 0, 0, 0, 115, 116, 3, 38, 19, 0, 116, 117, 5, 14, 0, 0, 117, 118, 3, 40, 20, 0, 118, 37,
+    1, 0, 0, 0, 119, 120, 3, 40, 20, 0, 120, 39, 1, 0, 0, 0, 121, 122, 5, 16, 0, 0, 122, 41, 1, 0,
+    0, 0, 11, 51, 59, 64, 72, 76, 80, 84, 88, 94, 101, 106,
   ]
 
   private static __ATN: ATN
@@ -913,9 +899,6 @@ export class Boolean_queryContext extends ParserRuleContext {
     }
 
     return this.getRuleContext(i, Boolean_modifiedContext)
-  }
-  public search_clause(): Search_clauseContext | null {
-    return this.getRuleContext(0, Search_clauseContext)
   }
   public override get ruleIndex(): number {
     return LexParser.RULE_boolean_query
