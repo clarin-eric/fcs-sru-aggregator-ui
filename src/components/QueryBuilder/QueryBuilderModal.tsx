@@ -19,7 +19,7 @@ import {
   getLayersUsedInQuery,
   getResourcesLayerSupportInfo,
   parseQuery as parseFCSQuery,
-} from './FCS'
+} from './fcs'
 import { LexCQLQueryBuilder, parseQuery as parseLexCQLQuery } from './lex'
 
 import './styles.css'
