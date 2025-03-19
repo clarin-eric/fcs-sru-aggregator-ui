@@ -23,14 +23,10 @@
 - license: GPLv3
 - remote: `https://github.com/clarin-eric/fcs-ql.git`
 - tree: `main`
-- commit: `0db4e1eac83a0744cae6d36be001c96862ca7992`
+- commit: `3e29f74207f4e061b8584bdc51820a0fa8c5f6ec`
 - date-added: 2025-01-20
+- date-updated: 2025-03-19
 - note:
   - clean copy with clear provenience
   - whitespaces to HIDDEN channel
-
-## lexcql
-
-- date-added: 2025-02-10
-- note:
-  - not yet in public repo
+  - LexCQL and FCS-QL grammars
