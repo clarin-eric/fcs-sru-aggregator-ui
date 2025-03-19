@@ -1,6 +1,6 @@
 import type { Resource, ResourceSearchResultMetaOnly } from '@/utils/api'
 
-export type ResultsViewMode = 'plain' | 'kwic' | 'annotation-layers'
+export type ResultsViewMode = 'plain' | 'kwic' | 'annotation-layers' | 'lexical-entry'
 export type ResultsSorting =
   | 'default'
   | 'title-up'

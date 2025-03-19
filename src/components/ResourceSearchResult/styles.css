@@ -119,3 +119,32 @@
 }
 
 /* *********************************************************************** */
+/* *** ViewLexPlain.tsx *** */
+
+#search-results .resource-search-result .results-lex-plain span[class^="lex-hitkind"],
+.resource-search-result-modal .results-lex-plain span[class^="lex-hitkind"] {
+  text-decoration: underline wavy;
+  padding-inline: 3px;
+  border-radius: 3px;
+}
+
+#search-results .resource-search-result .results-lex-plain span[class^="lex-hitkind"]:hover,
+.resource-search-result-modal .results-lex-plain span[class^="lex-hitkind"]:hover {
+  background-color: var(--bs-dark-bg-subtle);
+}
+
+/* *********************************************************************** */
+/* *** ViewLex.tsx *** */
+
+#search-results .resource-search-result .results-lexical-entry span.lex-value,
+.resource-search-result-modal .results-lexical-entry span.lex-value {
+  padding-inline: 3px;
+  border-radius: 3px;
+}
+
+#search-results .resource-search-result .results-lexical-entry span.lex-value:hover,
+.resource-search-result-modal .results-lexical-entry span.lex-value:hover {
+  background-color: var(--bs-dark-bg-subtle);
+}
+
+/* *********************************************************************** */

@@ -17,6 +17,8 @@ import { type ResultsViewMode } from '@/utils/results'
 import { languageCodeToName, MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 import LoadMoreResultsButton from './LoadMoreResultsButton'
 import ViewKwic from './ViewKwic'
+import ViewLex from './ViewLex'
+import ViewLexPlain from './ViewLexPlain'
 import ViewPlain from './ViewPlain'
 
 import './styles.css'
@@ -115,8 +117,14 @@ function ResourceResultsModal({
   function renderResults() {
     if (!result) return null // TODO: loading spinner? but should not reach here
 
-    if (viewMode === 'kwic') {
+    if (viewMode === 'kwic' && (queryType !== 'lex' || !result.isLexHits)) {
       return <ViewKwic data={result} />
+    }
+    if (viewMode === 'lexical-entry') {
+      return <ViewLex data={result} />
+    }
+    if (queryType === 'lex' && result.isLexHits) {
+      return <ViewLexPlain data={result} />
     }
     // 'plain' (fallback)
     return <ViewPlain data={result} />
@@ -191,7 +199,9 @@ function ResourceResultsModal({
             <FloatingLabel label="View mode" controlId="results-view-mode">
               <Form.Select value={viewMode} onChange={handleViewModeChange}>
                 <option value="plain">Plain</option>
-                <option value="kwic">Keyword in Context</option>
+                {(queryType !== 'lex' || !result.isLexHits) && (
+                  <option value="kwic">Keyword in Context</option>
+                )}
                 {queryType === 'fcs' && (
                   <option value="annotation-layers">Annotation Layers</option>
                 )}

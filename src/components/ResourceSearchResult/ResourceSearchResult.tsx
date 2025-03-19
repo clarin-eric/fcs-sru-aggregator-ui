@@ -8,6 +8,7 @@ import Collapse from 'react-bootstrap/Collapse'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
+import { useSearchParams } from '@/providers/SearchParamsContext'
 import {
   getSearchResultDetails,
   type ResourceSearchResult,
@@ -18,6 +19,8 @@ import { type ResultsViewMode } from '@/utils/results'
 import { languageCodeToName } from '@/utils/search'
 import ResourceResultsModal from './ResourceResultsModal'
 import ViewKwic from './ViewKwic'
+import ViewLex from './ViewLex'
+import ViewLexPlain from './ViewLexPlain'
 import ViewPlain from './ViewPlain'
 
 import './styles.css'
@@ -52,6 +55,7 @@ function ResourceSearchResult({
 }: ResourceSearchResultProps) {
   const axios = useAxios()
   const { languages } = useAggregatorData()
+  const { queryType } = useSearchParams()
 
   const htmlId = useId()
   const [expanded, setExpanded] = useState(true)
@@ -122,8 +126,14 @@ function ResourceSearchResult({
   function renderResults() {
     if (!data) return null // TODO: loading spinner? but should not reach here
 
-    if (viewMode === 'kwic') {
+    if (viewMode === 'kwic' && (queryType !== 'lex' || !data.isLexHits)) {
       return <ViewKwic data={data} />
+    }
+    if (viewMode === 'lexical-entry') {
+      return <ViewLex data={data} />
+    }
+    if (queryType === 'lex' && data.isLexHits) {
+      return <ViewLexPlain data={data} />
     }
     // 'plain' (fallback)
     return <ViewPlain data={data} />

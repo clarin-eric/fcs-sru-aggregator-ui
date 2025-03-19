@@ -13,19 +13,19 @@ import link45degIcon from 'bootstrap-icons/icons/link-45deg.svg?raw'
 // --------------------------------------------------------------------------
 // types
 
-export interface ViewPlainProps {
+export interface ViewLexPlainProps {
   data: ResourceSearchResult
 }
 
 // --------------------------------------------------------------------------
 // component
 
-function ViewPlain({ data }: ViewPlainProps) {
+function ViewLexPlain({ data }: ViewLexPlainProps) {
   const ref = useRef(null)
 
   return (
     <>
-      <Table hover responsive className="mb-0 results-plain">
+      <Table hover responsive className="mb-0 results-lex-plain">
         <thead className="visually-hidden">
           <tr>
             <th scope="col">#</th>
@@ -65,6 +65,14 @@ function ViewPlain({ data }: ViewPlainProps) {
                     <mark key={index}>
                       <strong>{fragment.text}</strong>
                     </mark>
+                  ) : fragment.hit && fragment.hitKind ? (
+                    <span
+                      key={index}
+                      className={`lex-hitkind-${fragment.hitKind}`}
+                      title={`Annotated as "${fragment.hitKind.split('-').slice(1).join('-')}"`}
+                    >
+                      {fragment.text}
+                    </span>
                   ) : (
                     <span key={index}>{fragment.text}</span>
                   )
@@ -80,4 +88,4 @@ function ViewPlain({ data }: ViewPlainProps) {
   )
 }
 
-export default ViewPlain
+export default ViewLexPlain

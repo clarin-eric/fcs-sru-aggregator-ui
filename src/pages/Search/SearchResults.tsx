@@ -79,6 +79,11 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
 
   const sortedResults = useMemo(() => data?.results.toSorted(sortFn) || [], [data, sortFn])
 
+  // all successful results use the LexHITS data view, and have Hits with hitKind attributes
+  const isAllLexHITS =
+    queryType === 'lex' &&
+    data?.results.every((result) => result.numberOfRecords <= 0 || result.isLexHits === true)
+
   const numRequested = resourceIDs.length
   const numInProgress = data?.inProgress ?? numRequested
   const numWithResults = useMemo(
@@ -284,11 +289,14 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
               <FloatingLabel label="View mode" controlId="results-view-mode">
                 <Form.Select value={viewMode} onChange={handleViewModeChange}>
                   <option value="plain">Plain</option>
-                  <option value="kwic">Keyword in Context</option>
+                  {/* maybe allow kwic for LexCQL if not a LexHITS data view */}
+                  {(queryType !== 'lex' || !isAllLexHITS) && (
+                    <option value="kwic">Keyword in Context</option>
+                  )}
                   {queryType === 'fcs' && (
                     <option value="annotation-layers">Annotation Layers</option>
                   )}
-                  {queryType === 'lex' && <option value="lex-props">Dictionary</option>}
+                  {queryType === 'lex' && <option value="lexical-entry">Dictionary</option>}
                 </Form.Select>
               </FloatingLabel>
             </Col>

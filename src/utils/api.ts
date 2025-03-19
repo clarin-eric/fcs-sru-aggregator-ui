@@ -260,6 +260,7 @@ export interface ResourceSearchResult {
   advancedLayers: Array<AdvancedLayer[]>
   lexEntries: LexEntry[]
   hasAdvResults: boolean
+  isLexHits?: boolean
 }
 
 export interface ResourceSearchResultMetaOnly {
@@ -273,6 +274,7 @@ export interface ResourceSearchResultMetaOnly {
   diagnostics: Diagnostic[]
   id: string
   hasAdvResults: boolean
+  isLexHits?: boolean
 }
 
 export interface BaseResultHit {
@@ -295,6 +297,7 @@ export interface AdvancedLayer extends BaseResultHit {
 export interface Fragment {
   text: string
   hit: boolean
+  hitKind?: string
 }
 
 export interface LexEntry extends BaseResultHit {
