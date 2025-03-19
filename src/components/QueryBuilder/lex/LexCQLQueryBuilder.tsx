@@ -1,5 +1,5 @@
 import { TerminalNode } from 'antlr4ng'
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
@@ -17,7 +17,8 @@ import { isCursorOnContext } from '../utils'
 import {
   BOOLEANS,
   DEFAULT_NEW_RELATION,
-  FIELDS,
+  FIELD_GROUPS,
+  FIELDS_MAP,
   type FieldsType,
   NEW_SEARCH_CLAUSE_CHOICES,
   NEW_SEARCH_CLAUSE_CHOICES_MAP,
@@ -35,6 +36,10 @@ import {
   useLexCQLQueryBuilderConfig,
 } from './LexCQLQueryBuilderConfigContext'
 import { LexCQLQueryUpdaterProvider, useLexCQLQueryUpdater } from './LexCQLQueryUpdaterContext'
+import {
+  LexCQLResourceFieldInfoProvider,
+  useLexCQLResourceFieldInfo,
+} from './LexCQLResourceFieldInfoContext'
 import { maybeQuoteSearchTerm, maybeUnquoteSearchTerm, parseQuery } from './utils'
 
 // import bracesIcon from 'bootstrap-icons/icons/braces.svg?raw'
@@ -63,20 +68,23 @@ export function LexCQLQueryBuilder({
   const [query, setQuery] = useState(queryProp ?? '')
   useEffect(() => setQuery(queryProp ?? ''), [queryProp])
 
-  // let's again filter for resources that have the Lex Data View? or LEX_SEARCH search capability (and at least one field?)
+  // let's again filter for resources that have the Lex Data View or LEX_SEARCH search capability (and at least one field?)
   const resources = useMemo(() => {
     const filtered =
       resourcesProp?.filter(
         (resource) =>
-          resource.availableDataViews?.find(
+          (resource.availableDataViews?.find(
             (dataview) => dataview.mimeType === 'application/x-clarin-fcs-lex+xml'
-          ) !== undefined || resource.searchCapabilitiesResolved.includes('LEX_SEARCH')
+          ) !== undefined ||
+            resource.searchCapabilitiesResolved.includes('LEX_SEARCH')) &&
+          resource.availableLexFields !== null &&
+          resource.availableLexFields.length > 0
       ) ?? []
 
     if (resourcesProp && resourcesProp.length !== filtered.length) {
       const resourcesDiff = resourcesProp.filter((resource) => !filtered.includes(resource))
       console.warn(
-        'Filter out resource(s) that does not correctly declare LexCQL query support',
+        'Filter out resource(s) that do(es) not correctly declare LexCQL query support',
         resourcesDiff
       )
     }
@@ -85,6 +93,32 @@ export function LexCQLQueryBuilder({
   }, [resourcesProp])
 
   // compute list of fields we know and want to make available
+  const fieldInfo = useMemo(() => {
+    return resources
+      .map((resource) => {
+        const fieldTypes = new Set<string>()
+        resource.availableLexFields!.forEach((field) => {
+          if (!fieldTypes.has(field.fieldType)) {
+            fieldTypes.add(field.fieldType)
+          }
+        })
+        return [...fieldTypes.values()].map((fieldType) => ({
+          fieldType,
+          resource,
+        }))
+      })
+      .reduce((map, item) => {
+        item.forEach(({ fieldType, resource }) => {
+          if (!map.has(fieldType)) {
+            map.set(fieldType, [] as Resource[])
+          }
+          const data = map.get(fieldType)!
+          data.push(resource)
+        })
+        return map
+      }, new Map<string, Resource[]>())
+  }, [resources])
+  // console.debug('fieldInfo', { resources, fieldInfo })
 
   // console.debug('Parse query', { query, queryProp })
   const parsed = useMemo(() => parseQuery(query), [query])
@@ -122,20 +156,24 @@ export function LexCQLQueryBuilder({
       <LexCQLQueryBuilderConfigProvider
         enableRelationModifiers={props.enableRelationModifiers ?? true}
         forceSearchTermQuoting={props.forceSearchTermQuoting ?? false}
+        showAllFields={props.showAllFields ?? false}
+        showResourceCountForField={props.showResourceCountForField ?? true}
       >
-        {parsed ? (
-          <LexCQLParserLexerProvider
-            parser={parsed.parser}
-            lexer={parsed.lexer}
-            cursorPos={cursorPos}
-          >
-            <LexCQLQueryUpdaterProvider rewriter={parsed.rewriter}>
-              <Query tree={parsed.tree} onChange={handleQueryChange} />
-            </LexCQLQueryUpdaterProvider>
-          </LexCQLParserLexerProvider>
-        ) : (
-          <AddSearchClauseButton onClick={handleAddSearchClauseClick} />
-        )}
+        <LexCQLResourceFieldInfoProvider resources={resources} fieldInfo={fieldInfo}>
+          {parsed ? (
+            <LexCQLParserLexerProvider
+              parser={parsed.parser}
+              lexer={parsed.lexer}
+              cursorPos={cursorPos}
+            >
+              <LexCQLQueryUpdaterProvider rewriter={parsed.rewriter}>
+                <Query tree={parsed.tree} onChange={handleQueryChange} />
+              </LexCQLQueryUpdaterProvider>
+            </LexCQLParserLexerProvider>
+          ) : (
+            <AddSearchClauseButton onClick={handleAddSearchClauseClick} />
+          )}
+        </LexCQLResourceFieldInfoProvider>
       </LexCQLQueryBuilderConfigProvider>
     </div>
   )
@@ -465,7 +503,15 @@ function SearchClause({
 }) {
   const { rewriter } = useLexCQLQueryUpdater()
   const { cursorPos } = useLexCQLParserLexer()
-  const { forceSearchTermQuoting, enableRelationModifiers } = useLexCQLQueryBuilderConfig()
+  const { fieldInfo } = useLexCQLResourceFieldInfo()
+  const {
+    forceSearchTermQuoting,
+    enableRelationModifiers,
+    showAllFields,
+    showResourceCountForField,
+  } = useLexCQLQueryBuilderConfig()
+
+  const foundFields = [...fieldInfo.keys()] as FieldsType[]
 
   const isCursorOnMe = isCursorOnContext(ctx, cursorPos)
   const shouldShowRemoveButton = ctx.parent?.parent?.getChildCount() !== 1
@@ -670,6 +716,31 @@ function SearchClause({
     )
   }
 
+  function renderFieldItem(fieldType: string, description: string | undefined = undefined) {
+    return (
+      <>
+        <strong>{fieldType}</strong>
+        {description && `: ${description}`}
+        {renderFieldResourceCount(fieldType)}
+      </>
+    )
+  }
+
+  function renderFieldResourceCount(fieldType: string) {
+    if (!showResourceCountForField) return null
+
+    const count = fieldInfo.get(fieldType)?.length ?? 0
+
+    return (
+      <>
+        <br />
+        <small className="text-body-secondary">
+          Supported by {fieldType === 'lang' ? '?' : count} resources.
+        </small>
+      </>
+    )
+  }
+
   return (
     <div
       className={[
@@ -686,11 +757,32 @@ function SearchClause({
             {index ?? <em className="text-muted">(default)</em>}
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            {FIELDS.map((field) => (
-              <Dropdown.Item key={field.id} eventKey={field.id} active={field.id === index}>
-                {field.label}
-              </Dropdown.Item>
-            ))}
+            {FIELD_GROUPS.map((group) =>
+              foundFields.find((fieldType) => (group.fields as FieldsType[]).includes(fieldType)) ||
+              group.id === 'virtual' ||
+              (group.fields as string[]).includes(index!) ? (
+                <Fragment key={group.id}>
+                  {(showAllFields || fieldInfo.size > 5) && (
+                    <Dropdown.Header>{group.label}</Dropdown.Header>
+                  )}
+                  {group.fields.map(
+                    (fieldType) =>
+                      (showAllFields ||
+                        foundFields.includes(fieldType) ||
+                        group.id === 'virtual' ||
+                        fieldType === index) && (
+                        <Dropdown.Item
+                          key={fieldType}
+                          eventKey={fieldType}
+                          active={fieldType === index}
+                        >
+                          {renderFieldItem(fieldType, FIELDS_MAP[fieldType]?.label)}
+                        </Dropdown.Item>
+                      )
+                  )}
+                </Fragment>
+              ) : null
+            )}
           </Dropdown.Menu>
         </Dropdown>
         {/* relation */}
@@ -700,7 +792,7 @@ function SearchClause({
             <Dropdown.Menu>
               <div className="d-flex">
                 <div
-                  className={([] as string[])
+                  className={['flex-grow-1']
                     .concat(showRelationModifiers ? ['border-end pe-1'] : [])
                     .join(' ')}
                 >

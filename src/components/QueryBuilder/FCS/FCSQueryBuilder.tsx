@@ -113,7 +113,7 @@ export function FCSQueryBuilder({
     if (resourcesProp && resourcesProp.length !== filtered.length) {
       const resourcesDiff = resourcesProp.filter((resource) => !filtered.includes(resource))
       console.warn(
-        'Filter out resource(s) that does not correctly declare ADV query support',
+        'Filter out resource(s) that do(es) not correctly declare ADV query support',
         resourcesDiff
       )
     }

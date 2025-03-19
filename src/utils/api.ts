@@ -26,6 +26,7 @@ export interface Resource {
   searchCapabilities: SearchCapability[]
   availableDataViews: AvailableDataView[] | null
   availableLayers: AvailableLayer[] | null
+  availableLexFields: AvailableLexField[] | null
   subResources: Resource[]
   id: string
   searchCapabilitiesResolved: SearchCapability[]
@@ -59,6 +60,11 @@ export interface AvailableLayer {
   altValueInfoURI: null
 }
 
+export interface AvailableLexField {
+  identifier: string
+  fieldType: LexFieldType
+}
+
 export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH' | 'LEX_SEARCH'
 export type ProtocolVersion = 'VERSION_2' | 'VERSION_1' | 'LEGACY'
 
@@ -79,6 +85,33 @@ export type LayerType =
   | 'phonetic'
   | 'word' // TODO: 'word' non-standard/legacy layer type?
   | 'entity'
+export type LexFieldType =
+  | 'entryId'
+  | 'lemma'
+  | 'translation'
+  | 'transcription'
+  | 'phonetic'
+  | 'definition'
+  | 'etymology'
+  | 'case'
+  | 'number'
+  | 'gender'
+  | 'pos'
+  | 'baseform'
+  | 'segmentation'
+  | 'sentiment'
+  | 'frequency'
+  | 'antonym'
+  | 'hyponym'
+  | 'hypernym'
+  | 'meronym'
+  | 'holonym'
+  | 'synonym'
+  | 'related'
+  | 'ref'
+  | 'senseRef'
+  | 'citation'
+export type VirtualLexFieldType = 'language'
 export type AvailableDataViewIdentifier = 'hits' | 'adv' | 'cmdi' | 'kwic' | 'lex' | string
 
 // --------------------------------------------------------------------------
@@ -225,6 +258,7 @@ export interface ResourceSearchResult {
   diagnostics: Diagnostic[]
   kwics: Kwic[]
   advancedLayers: Array<AdvancedLayer[]>
+  lexEntries: LexEntry[]
   hasAdvResults: boolean
 }
 
@@ -261,6 +295,33 @@ export interface AdvancedLayer extends BaseResultHit {
 export interface Fragment {
   text: string
   hit: boolean
+}
+
+export interface LexEntry extends BaseResultHit {
+  // NOTE: no "language" field
+  // TODO: xmlLang/langUri?
+  fields: LexField[]
+}
+
+export interface LexField {
+  type: LexFieldType | VirtualLexFieldType // TODO: test API responses
+  values: LexValue[]
+}
+
+export interface LexValue {
+  value: string | null // ?
+  xmlId?: string
+  xmlLang?: string
+  langUri?: string
+  preferred?: boolean
+  ref?: string
+  idRefs?: string[]
+  vocabRef?: string
+  vocabValueRef?: string
+  type?: string
+  source?: string
+  sourceRef?: string
+  date?: string
 }
 
 // --------------------------------------------------------------------------

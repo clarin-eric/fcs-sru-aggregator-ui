@@ -5,6 +5,8 @@ import { createContext, type ReactNode, useContext } from 'react'
 export interface LexCQLQueryBuilderConfig {
   enableRelationModifiers: boolean
   forceSearchTermQuoting: boolean
+  showAllFields: boolean
+  showResourceCountForField: boolean
 }
 
 type LexCQLQueryBuilderConfigProviderProps = Partial<LexCQLQueryBuilderConfig> & {
@@ -23,11 +25,15 @@ LexCQLQueryBuilderConfigContext.displayName = 'LexCQLQueryBuilderConfigContext'
 function LexCQLQueryBuilderConfigProvider({
   enableRelationModifiers = true,
   forceSearchTermQuoting = false,
+  showAllFields = true,
+  showResourceCountForField = true,
   children,
 }: LexCQLQueryBuilderConfigProviderProps) {
   const data = {
     enableRelationModifiers,
     forceSearchTermQuoting,
+    showAllFields,
+    showResourceCountForField,
   }
 
   return (

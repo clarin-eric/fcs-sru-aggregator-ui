@@ -189,6 +189,8 @@ function QueryBuilderModal({
   // lexcql
   const [forceSearchTermQuoting, setForceSearchTermQuoting] = useState(false)
   const [enableRelationModifiers, setEnableRelationModifiers] = useState(true)
+  const [showAllFields, setShowAllFields] = useState(false)
+  const [showResourceCountForField, setShowResourceCountForField] = useState(true)
 
   function renderFCSQueryBuilder() {
     // make conditional on query type
@@ -362,6 +364,24 @@ function QueryBuilderModal({
             checked={enableRelationModifiers}
             onChange={() => setEnableRelationModifiers((checked) => !checked)}
           />
+          <Form.Check
+            inline
+            label="All Fields"
+            type="checkbox"
+            name="showAllFields"
+            id="showAllFields"
+            checked={showAllFields}
+            onChange={() => setShowAllFields((checked) => !checked)}
+          />
+          <Form.Check
+            inline
+            label="Resource Count for Field"
+            type="checkbox"
+            name="showResourceCountForField"
+            id="showResourceCountForField"
+            checked={showResourceCountForField}
+            onChange={() => setShowResourceCountForField((checked) => !checked)}
+          />
         </Form>
         <LexCQLQueryBuilder
           query={queryDebounced}
@@ -371,6 +391,8 @@ function QueryBuilderModal({
           // feature flags
           enableRelationModifiers={enableRelationModifiers}
           forceSearchTermQuoting={forceSearchTermQuoting}
+          showAllFields={showAllFields}
+          showResourceCountForField={showResourceCountForField}
         />
       </>
     )

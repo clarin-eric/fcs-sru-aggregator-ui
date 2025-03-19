@@ -25,17 +25,9 @@ export const FIELDS = [
   { id: 'gender', label: 'Morphological Gender' },
   { id: 'pos', label: 'Part-of-Speech' },
   { id: 'baseform', label: 'Baseform (or stem …)' },
-  {
-    id: 'segmentation',
-    label: 'Composita segmentation, hyphenation; into phonemes, syllables, subwords',
-  },
+  { id: 'segmentation', label: 'Composita segmentation, hyphenation' },
   { id: 'sentiment', label: 'Sentiment information', unstructured: true },
-  {
-    id: 'frequency',
-    label:
-      'Frequency information like occurrences, relative frequency, word rank or frequency class',
-    unstructured: true,
-  },
+  { id: 'frequency', label: 'Frequency information', unstructured: true },
   // Relation to other Lexical Entries
   { id: 'antonym', label: 'Antonym' },
   { id: 'hyponym', label: 'Hyponym' },
@@ -48,7 +40,58 @@ export const FIELDS = [
   { id: 'ref', label: 'A URI referencing a related resource' },
   { id: 'senseRef', label: 'ID of a sense definition' },
   // Citations / Quotations
-  { id: 'citation', label: "A citation, quotation or example of this entry's lemma" },
+  { id: 'citation', label: 'Citation, quotation or example' },
+] as const
+export const FIELDS_MAP = Object.fromEntries(FIELDS.map((item) => [item.id, item]))
+export const FIELD_GROUPS = [
+  {
+    id: 'virtual',
+    label: 'Virtual fields',
+    fields: ['lang'] satisfies FieldsType[],
+  },
+  {
+    id: 'core',
+    label: 'Basic fields',
+    fields: ['lemma', 'entryId', 'phonetic', 'translation', 'transcription'] satisfies FieldsType[],
+  },
+  {
+    id: 'description',
+    label: 'Description fields',
+    fields: ['definition', 'etymology'] satisfies FieldsType[],
+  },
+  {
+    id: 'grammar',
+    label: 'Grammar and morphology fields',
+    fields: ['case', 'number', 'gender', 'pos', 'baseform', 'segmentation'] satisfies FieldsType[],
+  },
+  {
+    id: 'numeric',
+    label: 'Unstructured numeric fields',
+    fields: ['sentiment', 'frequency'] satisfies FieldsType[],
+  },
+  {
+    id: 'relation',
+    label: 'Semantic relation fields',
+    fields: [
+      'antonym',
+      'hyponym',
+      'hypernym',
+      'meronym',
+      'holonym',
+      'synonym',
+      'related',
+    ] satisfies FieldsType[],
+  },
+  {
+    id: 'reference',
+    label: 'Reference fields',
+    fields: ['ref', 'senseRef'] satisfies FieldsType[],
+  },
+  {
+    id: 'citation',
+    label: 'Citation and quotation fields',
+    fields: ['citation'] satisfies FieldsType[],
+  },
 ] as const
 
 export const RELATIONS = [
