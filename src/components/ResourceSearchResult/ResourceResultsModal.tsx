@@ -205,7 +205,7 @@ function ResourceResultsModal({
                 {queryType === 'fcs' && (
                   <option value="annotation-layers">Annotation Layers</option>
                 )}
-                {queryType === 'lex' && <option value="lex-props">Dictionary</option>}
+                {queryType === 'lex' && <option value="lexical-entry">Dictionary</option>}
               </Form.Select>
             </FloatingLabel>
           </Col>
