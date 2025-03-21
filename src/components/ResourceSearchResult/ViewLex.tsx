@@ -42,6 +42,11 @@ function ViewLex({ data }: ViewLexProps) {
                 ))}
             </Card.Title>
             <ListGroup variant="flush">
+              {(lexEntry.lang || lexEntry.langUri) && (
+                <ListGroup.Item>
+                  <strong>lang</strong>: {lexEntry.lang} {lexEntry.langUri}
+                </ListGroup.Item>
+              )}
               {lexEntry.fields
                 .filter((field) => field.type !== 'lemma')
                 .map((field) => (

@@ -301,9 +301,9 @@ export interface Fragment {
 }
 
 export interface LexEntry extends BaseResultHit {
-  // NOTE: no "language" field
-  // TODO: xmlLang/langUri?
   fields: LexField[]
+  lang: string
+  langUri: string
 }
 
 export interface LexField {
