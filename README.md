@@ -5,8 +5,8 @@
 The frontend uses the following technologies:
 
 - [ReactJS](https://18.react.dev/) 18.3.1
-  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.3.0 for <abbr title="Single Page Application">SPA</abbr> routing
-  - [React Query](https://tanstack.com/query/latest) 5.67.2 with [Axios](https://github.com/axios/axios) 1.8.2 for web requests
+  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.4.0 for <abbr title="Single Page Application">SPA</abbr> routing
+  - [React Query](https://tanstack.com/query/latest) 5.69.0 with [Axios](https://github.com/axios/axios) 1.8.4 for web requests
 - [Bootstrap](https://getbootstrap.com/) 5.3.3 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.11.3, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.9
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
 - [PrismJS](https://github.com/PrismJS/prism) 1.29.0 for syntax highlighting
@@ -16,7 +16,7 @@ The frontend uses the following technologies:
 
 For development and building a few additional dependencies are required:
 
-- [Vite](https://vite.dev/) 6.2.1 with plugins
+- [Vite](https://vite.dev/) 6.2.2 with plugins
 - [TypeScript](https://www.typescriptlang.org/) 5.8.2 with `@types/*` definitions
 - [ESLint](https://eslint.org/) 9.22.0 with plugins
 
@@ -24,7 +24,8 @@ For development and building a few additional dependencies are required:
 
 - Modern, mobile-friendly, dark-mode, accessibility (ARIA) support
 - Single[¹](#footnote-1) <abbr title="Single Page Application">SPA</abbr> bundle for easy integration
-- Various usability features like fuzzy filtering, ...
+- Various usability features like fuzzy filtering, tooltips, ...
+- Input support with query syntax highlighting and visual query builders (FCS-QL, LexCQL)
 
 <a id="footnote-1">¹</a> The build process will generate multiple JS and CSS files to split application code from vendor code but those files only need to be included as scripts/styles in a static `index.html` page without requiring any complicated server setup.
 
