@@ -735,7 +735,7 @@ function SearchClause({
       <>
         <br />
         <small className="text-body-secondary">
-          Supported by {fieldType === 'lang' ? '?' : count} resources.
+          Supported by {count} resources.
         </small>
       </>
     )

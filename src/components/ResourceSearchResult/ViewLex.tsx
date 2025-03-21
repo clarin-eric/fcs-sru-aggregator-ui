@@ -58,9 +58,11 @@ function ViewLex({ data }: ViewLexProps) {
             <Card.Link>
               {lexEntry.reference && (
                 <a href={lexEntry.reference} className="matomo_link" target="_blank">
-                  <i dangerouslySetInnerHTML={{ __html: link45degIcon }} />
+                  <i dangerouslySetInnerHTML={{ __html: link45degIcon }} /> Original results ...
                 </a>
-              )}{' '}
+              )}
+            </Card.Link>
+            <Card.Link>
               {lexEntry.pid && (
                 <OverlayTrigger
                   placement="auto-start"
