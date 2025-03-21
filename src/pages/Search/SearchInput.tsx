@@ -610,7 +610,7 @@ function SearchInput({
         QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(queryType as QueryTypeIDForQueryBuilder) &&
         isLoadQueryBuilderModalTriggered && (
           // TODO: some fallback handling
-          <Suspense fallback={<>Failed to load Query Builder extension!</>}>
+          <Suspense fallback={<>Trying to load Query Builder extension ...</>}>
             <QueryBuilderModal
               query={query}
               queryType={queryType as QueryTypeIDForQueryBuilder}

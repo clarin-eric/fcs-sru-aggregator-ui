@@ -98,8 +98,8 @@ export function LexCQLQueryBuilder({
       .map((resource) => {
         const fieldTypes = new Set<string>()
         resource.availableLexFields!.forEach((field) => {
-          if (!fieldTypes.has(field.fieldType)) {
-            fieldTypes.add(field.fieldType)
+          if (!fieldTypes.has(field.type)) {
+            fieldTypes.add(field.type)
           }
         })
         return [...fieldTypes.values()].map((fieldType) => ({

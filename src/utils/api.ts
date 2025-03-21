@@ -61,8 +61,8 @@ export interface AvailableLayer {
 }
 
 export interface AvailableLexField {
-  identifier: string
-  fieldType: LexFieldType
+  id: string
+  type: LexFieldType
 }
 
 export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH' | 'LEX_SEARCH'
@@ -111,7 +111,7 @@ export type LexFieldType =
   | 'ref'
   | 'senseRef'
   | 'citation'
-export type VirtualLexFieldType = 'language'
+export type VirtualLexFieldType = 'lang'
 export type AvailableDataViewIdentifier = 'hits' | 'adv' | 'cmdi' | 'kwic' | 'lex' | string
 
 // --------------------------------------------------------------------------
