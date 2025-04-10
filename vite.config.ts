@@ -25,7 +25,7 @@ const name = `${pkg.name}-${pkg.version}`
 
 // output paths
 const outputsLibPath = 'lib/'
-const outputsLibVenderPath = `${outputsLibPath}vender/`
+const outputsLibVenderPath = `${outputsLibPath}vendor/`
 const outputsLibAssetsPath = `${outputsLibPath}assets/`
 // NOTE: that single chunk (bundle mode) build will not use the "lib/" prefix
 
