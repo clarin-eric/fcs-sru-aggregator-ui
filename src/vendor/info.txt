@@ -22,10 +22,10 @@
 
 - license: GPLv3
 - remote: `https://github.com/clarin-eric/fcs-ql.git`
-- tree: `main`
-- commit: `3e29f74207f4e061b8584bdc51820a0fa8c5f6ec`
+- tree: `main`, tag: `FCS-QL-2.0.0`
+- commit: `a6916d68f74c1bbeb92bb3dea93c605c6fddcb72`
 - date-added: 2025-01-20
-- date-updated: 2025-03-19
+- date-updated: 2025-04-16
 - note:
   - clean copy with clear provenience
   - whitespaces to HIDDEN channel

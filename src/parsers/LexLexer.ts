@@ -1,4 +1,4 @@
-// Generated from src/vendor/lexcql/LexLexer.g4 by ANTLR 4.13.1
+// Generated from src/vendor/fcs-ql/LexLexer.g4 by ANTLR 4.13.1
 
 import {
   ATN,

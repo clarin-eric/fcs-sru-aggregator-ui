@@ -454,12 +454,12 @@ function Boolean({ ctx, onChange }: { ctx: Boolean_modifiedContext; onChange?: (
     if (!newBoolean) return
     if (newBoolean === value) return
 
-    const token = (ctx.boolean().getChild(0) as TerminalNode).symbol
+    const token = (ctx.r_boolean().getChild(0) as TerminalNode).symbol
     if (!token) {
       console.warn('Unexpected parse tree, expected terminal node as first child!', {
         ctx,
-        boolean: ctx.boolean(),
-        firstChild: ctx.boolean().getChild(0),
+        boolean: ctx.r_boolean(),
+        firstChild: ctx.r_boolean().getChild(0),
       })
       return
     }

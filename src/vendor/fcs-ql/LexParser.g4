@@ -33,8 +33,6 @@ search_term: SIMPLE_STRING | QUOTED_STRING;
 
 /* indexes */
 
-index_modified: index modifier_list?;
-
 index: simple_name | prefix_name;
 
 /* relations */
@@ -56,9 +54,9 @@ relation_symbol:
 
 /* booleans */
 
-boolean_modified: boolean modifier_list?;
+boolean_modified: r_boolean modifier_list?;
 
-boolean: AND | OR | NOT;
+r_boolean: AND | OR | NOT;
 
 /* modifiers */
 

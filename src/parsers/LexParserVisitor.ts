@@ -1,12 +1,10 @@
-// Generated from src/vendor/lexcql/LexParser.g4 by ANTLR 4.13.1
+// Generated from src/vendor/fcs-ql/LexParser.g4 by ANTLR 4.13.1
 
 import { AbstractParseTreeVisitor } from 'antlr4ng'
 
 import {
   Boolean_modifiedContext,
   Boolean_queryContext,
-  BooleanContext,
-  Index_modifiedContext,
   IndexContext,
   Modifier_listContext,
   Modifier_nameContext,
@@ -16,6 +14,7 @@ import {
   Prefix_nameContext,
   PrefixContext,
   QueryContext,
+  R_booleanContext,
   Relation_modifiedContext,
   Relation_nameContext,
   Relation_symbolContext,
@@ -65,12 +64,6 @@ export class LexParserVisitor<Result> extends AbstractParseTreeVisitor<Result> {
    */
   visitSearch_term?: (ctx: Search_termContext) => Result
   /**
-   * Visit a parse tree produced by `LexParser.index_modified`.
-   * @param ctx the parse tree
-   * @return the visitor result
-   */
-  visitIndex_modified?: (ctx: Index_modifiedContext) => Result
-  /**
    * Visit a parse tree produced by `LexParser.index`.
    * @param ctx the parse tree
    * @return the visitor result
@@ -107,11 +100,11 @@ export class LexParserVisitor<Result> extends AbstractParseTreeVisitor<Result> {
    */
   visitBoolean_modified?: (ctx: Boolean_modifiedContext) => Result
   /**
-   * Visit a parse tree produced by `LexParser.boolean`.
+   * Visit a parse tree produced by `LexParser.r_boolean`.
    * @param ctx the parse tree
    * @return the visitor result
    */
-  visitBoolean?: (ctx: BooleanContext) => Result
+  visitR_boolean?: (ctx: R_booleanContext) => Result
   /**
    * Visit a parse tree produced by `LexParser.modifier_list`.
    * @param ctx the parse tree

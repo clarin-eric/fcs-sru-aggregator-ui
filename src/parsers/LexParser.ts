@@ -1,4 +1,4 @@
-// Generated from src/vendor/lexcql/LexParser.g4 by ANTLR 4.13.1
+// Generated from src/vendor/fcs-ql/LexParser.g4 by ANTLR 4.13.1
 
 import {
   ATN,
@@ -43,22 +43,21 @@ export class LexParser extends Parser {
   public static readonly RULE_subquery = 2
   public static readonly RULE_search_clause = 3
   public static readonly RULE_search_term = 4
-  public static readonly RULE_index_modified = 5
-  public static readonly RULE_index = 6
-  public static readonly RULE_relation_modified = 7
-  public static readonly RULE_relation = 8
-  public static readonly RULE_relation_name = 9
-  public static readonly RULE_relation_symbol = 10
-  public static readonly RULE_boolean_modified = 11
-  public static readonly RULE_boolean = 12
-  public static readonly RULE_modifier_list = 13
-  public static readonly RULE_modifier = 14
-  public static readonly RULE_modifier_name = 15
-  public static readonly RULE_modifier_relation = 16
-  public static readonly RULE_modifier_value = 17
-  public static readonly RULE_prefix_name = 18
-  public static readonly RULE_prefix = 19
-  public static readonly RULE_simple_name = 20
+  public static readonly RULE_index = 5
+  public static readonly RULE_relation_modified = 6
+  public static readonly RULE_relation = 7
+  public static readonly RULE_relation_name = 8
+  public static readonly RULE_relation_symbol = 9
+  public static readonly RULE_boolean_modified = 10
+  public static readonly RULE_r_boolean = 11
+  public static readonly RULE_modifier_list = 12
+  public static readonly RULE_modifier = 13
+  public static readonly RULE_modifier_name = 14
+  public static readonly RULE_modifier_relation = 15
+  public static readonly RULE_modifier_value = 16
+  public static readonly RULE_prefix_name = 17
+  public static readonly RULE_prefix = 18
+  public static readonly RULE_simple_name = 19
 
   public static readonly literalNames = [
     null,
@@ -104,14 +103,13 @@ export class LexParser extends Parser {
     'subquery',
     'search_clause',
     'search_term',
-    'index_modified',
     'index',
     'relation_modified',
     'relation',
     'relation_name',
     'relation_symbol',
     'boolean_modified',
-    'boolean',
+    'r_boolean',
     'modifier_list',
     'modifier',
     'modifier_name',
@@ -155,14 +153,14 @@ export class LexParser extends Parser {
     )
   }
   public query(): QueryContext {
-    let localContext = new QueryContext(this.context, this.state)
+    const localContext = new QueryContext(this.context, this.state)
     this.enterRule(localContext, 0, LexParser.RULE_query)
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 42
+        this.state = 40
         this.boolean_query()
-        this.state = 43
+        this.state = 41
         this.match(LexParser.EOF)
       }
     } catch (re) {
@@ -178,27 +176,27 @@ export class LexParser extends Parser {
     return localContext
   }
   public boolean_query(): Boolean_queryContext {
-    let localContext = new Boolean_queryContext(this.context, this.state)
+    const localContext = new Boolean_queryContext(this.context, this.state)
     this.enterRule(localContext, 2, LexParser.RULE_boolean_query)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 45
+        this.state = 43
         this.subquery()
-        this.state = 51
+        this.state = 49
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         while ((_la & ~0x1f) === 0 && ((1 << _la) & 14336) !== 0) {
           {
             {
-              this.state = 46
+              this.state = 44
               this.boolean_modified()
-              this.state = 47
+              this.state = 45
               this.subquery()
             }
           }
-          this.state = 53
+          this.state = 51
           this.errorHandler.sync(this)
           _la = this.tokenStream.LA(1)
         }
@@ -216,20 +214,20 @@ export class LexParser extends Parser {
     return localContext
   }
   public subquery(): SubqueryContext {
-    let localContext = new SubqueryContext(this.context, this.state)
+    const localContext = new SubqueryContext(this.context, this.state)
     this.enterRule(localContext, 4, LexParser.RULE_subquery)
     try {
-      this.state = 59
+      this.state = 57
       this.errorHandler.sync(this)
       switch (this.tokenStream.LA(1)) {
         case LexParser.L_PAREN:
           this.enterOuterAlt(localContext, 1)
           {
-            this.state = 54
+            this.state = 52
             this.match(LexParser.L_PAREN)
-            this.state = 55
+            this.state = 53
             this.boolean_query()
-            this.state = 56
+            this.state = 54
             this.match(LexParser.R_PAREN)
           }
           break
@@ -237,7 +235,7 @@ export class LexParser extends Parser {
         case LexParser.SIMPLE_STRING:
           this.enterOuterAlt(localContext, 2)
           {
-            this.state = 58
+            this.state = 56
             this.search_clause()
           }
           break
@@ -257,24 +255,24 @@ export class LexParser extends Parser {
     return localContext
   }
   public search_clause(): Search_clauseContext {
-    let localContext = new Search_clauseContext(this.context, this.state)
+    const localContext = new Search_clauseContext(this.context, this.state)
     this.enterRule(localContext, 6, LexParser.RULE_search_clause)
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 64
+        this.state = 62
         this.errorHandler.sync(this)
         switch (this.interpreter.adaptivePredict(this.tokenStream, 2, this.context)) {
           case 1:
             {
-              this.state = 61
+              this.state = 59
               this.index()
-              this.state = 62
+              this.state = 60
               this.relation_modified()
             }
             break
         }
-        this.state = 66
+        this.state = 64
         this.search_term()
       }
     } catch (re) {
@@ -290,13 +288,13 @@ export class LexParser extends Parser {
     return localContext
   }
   public search_term(): Search_termContext {
-    let localContext = new Search_termContext(this.context, this.state)
+    const localContext = new Search_termContext(this.context, this.state)
     this.enterRule(localContext, 8, LexParser.RULE_search_term)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 68
+        this.state = 66
         _la = this.tokenStream.LA(1)
         if (!(_la === 15 || _la === 16)) {
           this.errorHandler.recoverInline(this)
@@ -317,55 +315,24 @@ export class LexParser extends Parser {
     }
     return localContext
   }
-  public index_modified(): Index_modifiedContext {
-    let localContext = new Index_modifiedContext(this.context, this.state)
-    this.enterRule(localContext, 10, LexParser.RULE_index_modified)
-    let _la: number
-    try {
-      this.enterOuterAlt(localContext, 1)
-      {
-        this.state = 70
-        this.index()
-        this.state = 72
-        this.errorHandler.sync(this)
-        _la = this.tokenStream.LA(1)
-        if (_la === 10) {
-          {
-            this.state = 71
-            this.modifier_list()
-          }
-        }
-      }
-    } catch (re) {
-      if (re instanceof RecognitionException) {
-        this.errorHandler.reportError(this, re)
-        this.errorHandler.recover(this, re)
-      } else {
-        throw re
-      }
-    } finally {
-      this.exitRule()
-    }
-    return localContext
-  }
   public index(): IndexContext {
-    let localContext = new IndexContext(this.context, this.state)
-    this.enterRule(localContext, 12, LexParser.RULE_index)
+    const localContext = new IndexContext(this.context, this.state)
+    this.enterRule(localContext, 10, LexParser.RULE_index)
     try {
-      this.state = 76
+      this.state = 70
       this.errorHandler.sync(this)
-      switch (this.interpreter.adaptivePredict(this.tokenStream, 4, this.context)) {
+      switch (this.interpreter.adaptivePredict(this.tokenStream, 3, this.context)) {
         case 1:
           this.enterOuterAlt(localContext, 1)
           {
-            this.state = 74
+            this.state = 68
             this.simple_name()
           }
           break
         case 2:
           this.enterOuterAlt(localContext, 2)
           {
-            this.state = 75
+            this.state = 69
             this.prefix_name()
           }
           break
@@ -383,20 +350,20 @@ export class LexParser extends Parser {
     return localContext
   }
   public relation_modified(): Relation_modifiedContext {
-    let localContext = new Relation_modifiedContext(this.context, this.state)
-    this.enterRule(localContext, 14, LexParser.RULE_relation_modified)
+    const localContext = new Relation_modifiedContext(this.context, this.state)
+    this.enterRule(localContext, 12, LexParser.RULE_relation_modified)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 78
+        this.state = 72
         this.relation()
-        this.state = 80
+        this.state = 74
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         if (_la === 10) {
           {
-            this.state = 79
+            this.state = 73
             this.modifier_list()
           }
         }
@@ -414,16 +381,16 @@ export class LexParser extends Parser {
     return localContext
   }
   public relation(): RelationContext {
-    let localContext = new RelationContext(this.context, this.state)
-    this.enterRule(localContext, 16, LexParser.RULE_relation)
+    const localContext = new RelationContext(this.context, this.state)
+    this.enterRule(localContext, 14, LexParser.RULE_relation)
     try {
-      this.state = 84
+      this.state = 78
       this.errorHandler.sync(this)
       switch (this.tokenStream.LA(1)) {
         case LexParser.SIMPLE_STRING:
           this.enterOuterAlt(localContext, 1)
           {
-            this.state = 82
+            this.state = 76
             this.relation_name()
           }
           break
@@ -436,7 +403,7 @@ export class LexParser extends Parser {
         case LexParser.EQUAL_EQUAL:
           this.enterOuterAlt(localContext, 2)
           {
-            this.state = 83
+            this.state = 77
             this.relation_symbol()
           }
           break
@@ -456,23 +423,23 @@ export class LexParser extends Parser {
     return localContext
   }
   public relation_name(): Relation_nameContext {
-    let localContext = new Relation_nameContext(this.context, this.state)
-    this.enterRule(localContext, 18, LexParser.RULE_relation_name)
+    const localContext = new Relation_nameContext(this.context, this.state)
+    this.enterRule(localContext, 16, LexParser.RULE_relation_name)
     try {
-      this.state = 88
+      this.state = 82
       this.errorHandler.sync(this)
-      switch (this.interpreter.adaptivePredict(this.tokenStream, 7, this.context)) {
+      switch (this.interpreter.adaptivePredict(this.tokenStream, 6, this.context)) {
         case 1:
           this.enterOuterAlt(localContext, 1)
           {
-            this.state = 86
+            this.state = 80
             this.simple_name()
           }
           break
         case 2:
           this.enterOuterAlt(localContext, 2)
           {
-            this.state = 87
+            this.state = 81
             this.prefix_name()
           }
           break
@@ -490,13 +457,13 @@ export class LexParser extends Parser {
     return localContext
   }
   public relation_symbol(): Relation_symbolContext {
-    let localContext = new Relation_symbolContext(this.context, this.state)
-    this.enterRule(localContext, 20, LexParser.RULE_relation_symbol)
+    const localContext = new Relation_symbolContext(this.context, this.state)
+    this.enterRule(localContext, 18, LexParser.RULE_relation_symbol)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 90
+        this.state = 84
         _la = this.tokenStream.LA(1)
         if (!((_la & ~0x1f) === 0 && ((1 << _la) & 1016) !== 0)) {
           this.errorHandler.recoverInline(this)
@@ -518,20 +485,20 @@ export class LexParser extends Parser {
     return localContext
   }
   public boolean_modified(): Boolean_modifiedContext {
-    let localContext = new Boolean_modifiedContext(this.context, this.state)
-    this.enterRule(localContext, 22, LexParser.RULE_boolean_modified)
+    const localContext = new Boolean_modifiedContext(this.context, this.state)
+    this.enterRule(localContext, 20, LexParser.RULE_boolean_modified)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 92
-        this.boolean_()
-        this.state = 94
+        this.state = 86
+        this.r_boolean()
+        this.state = 88
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         if (_la === 10) {
           {
-            this.state = 93
+            this.state = 87
             this.modifier_list()
           }
         }
@@ -548,14 +515,14 @@ export class LexParser extends Parser {
     }
     return localContext
   }
-  public boolean_(): BooleanContext {
-    let localContext = new BooleanContext(this.context, this.state)
-    this.enterRule(localContext, 24, LexParser.RULE_boolean)
+  public r_boolean(): R_booleanContext {
+    const localContext = new R_booleanContext(this.context, this.state)
+    this.enterRule(localContext, 22, LexParser.RULE_r_boolean)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 96
+        this.state = 90
         _la = this.tokenStream.LA(1)
         if (!((_la & ~0x1f) === 0 && ((1 << _la) & 14336) !== 0)) {
           this.errorHandler.recoverInline(this)
@@ -577,23 +544,23 @@ export class LexParser extends Parser {
     return localContext
   }
   public modifier_list(): Modifier_listContext {
-    let localContext = new Modifier_listContext(this.context, this.state)
-    this.enterRule(localContext, 26, LexParser.RULE_modifier_list)
+    const localContext = new Modifier_listContext(this.context, this.state)
+    this.enterRule(localContext, 24, LexParser.RULE_modifier_list)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 99
+        this.state = 93
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         do {
           {
             {
-              this.state = 98
+              this.state = 92
               this.modifier()
             }
           }
-          this.state = 101
+          this.state = 95
           this.errorHandler.sync(this)
           _la = this.tokenStream.LA(1)
         } while (_la === 10)
@@ -611,22 +578,22 @@ export class LexParser extends Parser {
     return localContext
   }
   public modifier(): ModifierContext {
-    let localContext = new ModifierContext(this.context, this.state)
-    this.enterRule(localContext, 28, LexParser.RULE_modifier)
+    const localContext = new ModifierContext(this.context, this.state)
+    this.enterRule(localContext, 26, LexParser.RULE_modifier)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 103
+        this.state = 97
         this.match(LexParser.SLASH)
-        this.state = 104
+        this.state = 98
         this.modifier_name()
-        this.state = 106
+        this.state = 100
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         if ((_la & ~0x1f) === 0 && ((1 << _la) & 1016) !== 0) {
           {
-            this.state = 105
+            this.state = 99
             this.modifier_relation()
           }
         }
@@ -644,12 +611,12 @@ export class LexParser extends Parser {
     return localContext
   }
   public modifier_name(): Modifier_nameContext {
-    let localContext = new Modifier_nameContext(this.context, this.state)
-    this.enterRule(localContext, 30, LexParser.RULE_modifier_name)
+    const localContext = new Modifier_nameContext(this.context, this.state)
+    this.enterRule(localContext, 28, LexParser.RULE_modifier_name)
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 108
+        this.state = 102
         this.simple_name()
       }
     } catch (re) {
@@ -665,14 +632,14 @@ export class LexParser extends Parser {
     return localContext
   }
   public modifier_relation(): Modifier_relationContext {
-    let localContext = new Modifier_relationContext(this.context, this.state)
-    this.enterRule(localContext, 32, LexParser.RULE_modifier_relation)
+    const localContext = new Modifier_relationContext(this.context, this.state)
+    this.enterRule(localContext, 30, LexParser.RULE_modifier_relation)
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 110
+        this.state = 104
         this.relation_symbol()
-        this.state = 111
+        this.state = 105
         this.modifier_value()
       }
     } catch (re) {
@@ -688,13 +655,13 @@ export class LexParser extends Parser {
     return localContext
   }
   public modifier_value(): Modifier_valueContext {
-    let localContext = new Modifier_valueContext(this.context, this.state)
-    this.enterRule(localContext, 34, LexParser.RULE_modifier_value)
+    const localContext = new Modifier_valueContext(this.context, this.state)
+    this.enterRule(localContext, 32, LexParser.RULE_modifier_value)
     let _la: number
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 113
+        this.state = 107
         _la = this.tokenStream.LA(1)
         if (!(_la === 15 || _la === 16)) {
           this.errorHandler.recoverInline(this)
@@ -716,16 +683,16 @@ export class LexParser extends Parser {
     return localContext
   }
   public prefix_name(): Prefix_nameContext {
-    let localContext = new Prefix_nameContext(this.context, this.state)
-    this.enterRule(localContext, 36, LexParser.RULE_prefix_name)
+    const localContext = new Prefix_nameContext(this.context, this.state)
+    this.enterRule(localContext, 34, LexParser.RULE_prefix_name)
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 115
+        this.state = 109
         this.prefix()
-        this.state = 116
+        this.state = 110
         this.match(LexParser.DOT)
-        this.state = 117
+        this.state = 111
         this.simple_name()
       }
     } catch (re) {
@@ -741,12 +708,12 @@ export class LexParser extends Parser {
     return localContext
   }
   public prefix(): PrefixContext {
-    let localContext = new PrefixContext(this.context, this.state)
-    this.enterRule(localContext, 38, LexParser.RULE_prefix)
+    const localContext = new PrefixContext(this.context, this.state)
+    this.enterRule(localContext, 36, LexParser.RULE_prefix)
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 119
+        this.state = 113
         this.simple_name()
       }
     } catch (re) {
@@ -762,12 +729,12 @@ export class LexParser extends Parser {
     return localContext
   }
   public simple_name(): Simple_nameContext {
-    let localContext = new Simple_nameContext(this.context, this.state)
-    this.enterRule(localContext, 40, LexParser.RULE_simple_name)
+    const localContext = new Simple_nameContext(this.context, this.state)
+    this.enterRule(localContext, 38, LexParser.RULE_simple_name)
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 121
+        this.state = 115
         this.match(LexParser.SIMPLE_STRING)
       }
     } catch (re) {
@@ -784,42 +751,40 @@ export class LexParser extends Parser {
   }
 
   public static readonly _serializedATN: number[] = [
-    4, 1, 17, 124, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
+    4, 1, 17, 118, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
     6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13,
-    2, 14, 7, 14, 2, 15, 7, 15, 2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 2, 20, 7,
-    20, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 50, 8, 1, 10, 1, 12, 1, 53, 9, 1, 1, 2, 1,
-    2, 1, 2, 1, 2, 1, 2, 3, 2, 60, 8, 2, 1, 3, 1, 3, 1, 3, 3, 3, 65, 8, 3, 1, 3, 1, 3, 1, 4, 1, 4,
-    1, 5, 1, 5, 3, 5, 73, 8, 5, 1, 6, 1, 6, 3, 6, 77, 8, 6, 1, 7, 1, 7, 3, 7, 81, 8, 7, 1, 8, 1, 8,
-    3, 8, 85, 8, 8, 1, 9, 1, 9, 3, 9, 89, 8, 9, 1, 10, 1, 10, 1, 11, 1, 11, 3, 11, 95, 8, 11, 1, 12,
-    1, 12, 1, 13, 4, 13, 100, 8, 13, 11, 13, 12, 13, 101, 1, 14, 1, 14, 1, 14, 3, 14, 107, 8, 14, 1,
-    15, 1, 15, 1, 16, 1, 16, 1, 16, 1, 17, 1, 17, 1, 18, 1, 18, 1, 18, 1, 18, 1, 19, 1, 19, 1, 20,
-    1, 20, 1, 20, 0, 0, 21, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36,
-    38, 40, 0, 3, 1, 0, 15, 16, 1, 0, 3, 9, 1, 0, 11, 13, 113, 0, 42, 1, 0, 0, 0, 2, 45, 1, 0, 0, 0,
-    4, 59, 1, 0, 0, 0, 6, 64, 1, 0, 0, 0, 8, 68, 1, 0, 0, 0, 10, 70, 1, 0, 0, 0, 12, 76, 1, 0, 0, 0,
-    14, 78, 1, 0, 0, 0, 16, 84, 1, 0, 0, 0, 18, 88, 1, 0, 0, 0, 20, 90, 1, 0, 0, 0, 22, 92, 1, 0, 0,
-    0, 24, 96, 1, 0, 0, 0, 26, 99, 1, 0, 0, 0, 28, 103, 1, 0, 0, 0, 30, 108, 1, 0, 0, 0, 32, 110, 1,
-    0, 0, 0, 34, 113, 1, 0, 0, 0, 36, 115, 1, 0, 0, 0, 38, 119, 1, 0, 0, 0, 40, 121, 1, 0, 0, 0, 42,
-    43, 3, 2, 1, 0, 43, 44, 5, 0, 0, 1, 44, 1, 1, 0, 0, 0, 45, 51, 3, 4, 2, 0, 46, 47, 3, 22, 11, 0,
-    47, 48, 3, 4, 2, 0, 48, 50, 1, 0, 0, 0, 49, 46, 1, 0, 0, 0, 50, 53, 1, 0, 0, 0, 51, 49, 1, 0, 0,
-    0, 51, 52, 1, 0, 0, 0, 52, 3, 1, 0, 0, 0, 53, 51, 1, 0, 0, 0, 54, 55, 5, 1, 0, 0, 55, 56, 3, 2,
-    1, 0, 56, 57, 5, 2, 0, 0, 57, 60, 1, 0, 0, 0, 58, 60, 3, 6, 3, 0, 59, 54, 1, 0, 0, 0, 59, 58, 1,
-    0, 0, 0, 60, 5, 1, 0, 0, 0, 61, 62, 3, 12, 6, 0, 62, 63, 3, 14, 7, 0, 63, 65, 1, 0, 0, 0, 64,
-    61, 1, 0, 0, 0, 64, 65, 1, 0, 0, 0, 65, 66, 1, 0, 0, 0, 66, 67, 3, 8, 4, 0, 67, 7, 1, 0, 0, 0,
-    68, 69, 7, 0, 0, 0, 69, 9, 1, 0, 0, 0, 70, 72, 3, 12, 6, 0, 71, 73, 3, 26, 13, 0, 72, 71, 1, 0,
-    0, 0, 72, 73, 1, 0, 0, 0, 73, 11, 1, 0, 0, 0, 74, 77, 3, 40, 20, 0, 75, 77, 3, 36, 18, 0, 76,
-    74, 1, 0, 0, 0, 76, 75, 1, 0, 0, 0, 77, 13, 1, 0, 0, 0, 78, 80, 3, 16, 8, 0, 79, 81, 3, 26, 13,
-    0, 80, 79, 1, 0, 0, 0, 80, 81, 1, 0, 0, 0, 81, 15, 1, 0, 0, 0, 82, 85, 3, 18, 9, 0, 83, 85, 3,
-    20, 10, 0, 84, 82, 1, 0, 0, 0, 84, 83, 1, 0, 0, 0, 85, 17, 1, 0, 0, 0, 86, 89, 3, 40, 20, 0, 87,
-    89, 3, 36, 18, 0, 88, 86, 1, 0, 0, 0, 88, 87, 1, 0, 0, 0, 89, 19, 1, 0, 0, 0, 90, 91, 7, 1, 0,
-    0, 91, 21, 1, 0, 0, 0, 92, 94, 3, 24, 12, 0, 93, 95, 3, 26, 13, 0, 94, 93, 1, 0, 0, 0, 94, 95,
-    1, 0, 0, 0, 95, 23, 1, 0, 0, 0, 96, 97, 7, 2, 0, 0, 97, 25, 1, 0, 0, 0, 98, 100, 3, 28, 14, 0,
-    99, 98, 1, 0, 0, 0, 100, 101, 1, 0, 0, 0, 101, 99, 1, 0, 0, 0, 101, 102, 1, 0, 0, 0, 102, 27, 1,
-    0, 0, 0, 103, 104, 5, 10, 0, 0, 104, 106, 3, 30, 15, 0, 105, 107, 3, 32, 16, 0, 106, 105, 1, 0,
-    0, 0, 106, 107, 1, 0, 0, 0, 107, 29, 1, 0, 0, 0, 108, 109, 3, 40, 20, 0, 109, 31, 1, 0, 0, 0,
-    110, 111, 3, 20, 10, 0, 111, 112, 3, 34, 17, 0, 112, 33, 1, 0, 0, 0, 113, 114, 7, 0, 0, 0, 114,
-    35, 1, 0, 0, 0, 115, 116, 3, 38, 19, 0, 116, 117, 5, 14, 0, 0, 117, 118, 3, 40, 20, 0, 118, 37,
-    1, 0, 0, 0, 119, 120, 3, 40, 20, 0, 120, 39, 1, 0, 0, 0, 121, 122, 5, 16, 0, 0, 122, 41, 1, 0,
-    0, 0, 11, 51, 59, 64, 72, 76, 80, 84, 88, 94, 101, 106,
+    2, 14, 7, 14, 2, 15, 7, 15, 2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 1, 0, 1, 0,
+    1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 48, 8, 1, 10, 1, 12, 1, 51, 9, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1,
+    2, 3, 2, 58, 8, 2, 1, 3, 1, 3, 1, 3, 3, 3, 63, 8, 3, 1, 3, 1, 3, 1, 4, 1, 4, 1, 5, 1, 5, 3, 5,
+    71, 8, 5, 1, 6, 1, 6, 3, 6, 75, 8, 6, 1, 7, 1, 7, 3, 7, 79, 8, 7, 1, 8, 1, 8, 3, 8, 83, 8, 8, 1,
+    9, 1, 9, 1, 10, 1, 10, 3, 10, 89, 8, 10, 1, 11, 1, 11, 1, 12, 4, 12, 94, 8, 12, 11, 12, 12, 12,
+    95, 1, 13, 1, 13, 1, 13, 3, 13, 101, 8, 13, 1, 14, 1, 14, 1, 15, 1, 15, 1, 15, 1, 16, 1, 16, 1,
+    17, 1, 17, 1, 17, 1, 17, 1, 18, 1, 18, 1, 19, 1, 19, 1, 19, 0, 0, 20, 0, 2, 4, 6, 8, 10, 12, 14,
+    16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 0, 3, 1, 0, 15, 16, 1, 0, 3, 9, 1, 0, 11, 13,
+    107, 0, 40, 1, 0, 0, 0, 2, 43, 1, 0, 0, 0, 4, 57, 1, 0, 0, 0, 6, 62, 1, 0, 0, 0, 8, 66, 1, 0, 0,
+    0, 10, 70, 1, 0, 0, 0, 12, 72, 1, 0, 0, 0, 14, 78, 1, 0, 0, 0, 16, 82, 1, 0, 0, 0, 18, 84, 1, 0,
+    0, 0, 20, 86, 1, 0, 0, 0, 22, 90, 1, 0, 0, 0, 24, 93, 1, 0, 0, 0, 26, 97, 1, 0, 0, 0, 28, 102,
+    1, 0, 0, 0, 30, 104, 1, 0, 0, 0, 32, 107, 1, 0, 0, 0, 34, 109, 1, 0, 0, 0, 36, 113, 1, 0, 0, 0,
+    38, 115, 1, 0, 0, 0, 40, 41, 3, 2, 1, 0, 41, 42, 5, 0, 0, 1, 42, 1, 1, 0, 0, 0, 43, 49, 3, 4, 2,
+    0, 44, 45, 3, 20, 10, 0, 45, 46, 3, 4, 2, 0, 46, 48, 1, 0, 0, 0, 47, 44, 1, 0, 0, 0, 48, 51, 1,
+    0, 0, 0, 49, 47, 1, 0, 0, 0, 49, 50, 1, 0, 0, 0, 50, 3, 1, 0, 0, 0, 51, 49, 1, 0, 0, 0, 52, 53,
+    5, 1, 0, 0, 53, 54, 3, 2, 1, 0, 54, 55, 5, 2, 0, 0, 55, 58, 1, 0, 0, 0, 56, 58, 3, 6, 3, 0, 57,
+    52, 1, 0, 0, 0, 57, 56, 1, 0, 0, 0, 58, 5, 1, 0, 0, 0, 59, 60, 3, 10, 5, 0, 60, 61, 3, 12, 6, 0,
+    61, 63, 1, 0, 0, 0, 62, 59, 1, 0, 0, 0, 62, 63, 1, 0, 0, 0, 63, 64, 1, 0, 0, 0, 64, 65, 3, 8, 4,
+    0, 65, 7, 1, 0, 0, 0, 66, 67, 7, 0, 0, 0, 67, 9, 1, 0, 0, 0, 68, 71, 3, 38, 19, 0, 69, 71, 3,
+    34, 17, 0, 70, 68, 1, 0, 0, 0, 70, 69, 1, 0, 0, 0, 71, 11, 1, 0, 0, 0, 72, 74, 3, 14, 7, 0, 73,
+    75, 3, 24, 12, 0, 74, 73, 1, 0, 0, 0, 74, 75, 1, 0, 0, 0, 75, 13, 1, 0, 0, 0, 76, 79, 3, 16, 8,
+    0, 77, 79, 3, 18, 9, 0, 78, 76, 1, 0, 0, 0, 78, 77, 1, 0, 0, 0, 79, 15, 1, 0, 0, 0, 80, 83, 3,
+    38, 19, 0, 81, 83, 3, 34, 17, 0, 82, 80, 1, 0, 0, 0, 82, 81, 1, 0, 0, 0, 83, 17, 1, 0, 0, 0, 84,
+    85, 7, 1, 0, 0, 85, 19, 1, 0, 0, 0, 86, 88, 3, 22, 11, 0, 87, 89, 3, 24, 12, 0, 88, 87, 1, 0, 0,
+    0, 88, 89, 1, 0, 0, 0, 89, 21, 1, 0, 0, 0, 90, 91, 7, 2, 0, 0, 91, 23, 1, 0, 0, 0, 92, 94, 3,
+    26, 13, 0, 93, 92, 1, 0, 0, 0, 94, 95, 1, 0, 0, 0, 95, 93, 1, 0, 0, 0, 95, 96, 1, 0, 0, 0, 96,
+    25, 1, 0, 0, 0, 97, 98, 5, 10, 0, 0, 98, 100, 3, 28, 14, 0, 99, 101, 3, 30, 15, 0, 100, 99, 1,
+    0, 0, 0, 100, 101, 1, 0, 0, 0, 101, 27, 1, 0, 0, 0, 102, 103, 3, 38, 19, 0, 103, 29, 1, 0, 0, 0,
+    104, 105, 3, 18, 9, 0, 105, 106, 3, 32, 16, 0, 106, 31, 1, 0, 0, 0, 107, 108, 7, 0, 0, 0, 108,
+    33, 1, 0, 0, 0, 109, 110, 3, 36, 18, 0, 110, 111, 5, 14, 0, 0, 111, 112, 3, 38, 19, 0, 112, 35,
+    1, 0, 0, 0, 113, 114, 3, 38, 19, 0, 114, 37, 1, 0, 0, 0, 115, 116, 5, 16, 0, 0, 116, 39, 1, 0,
+    0, 0, 10, 49, 57, 62, 70, 74, 78, 82, 88, 95, 100,
   ]
 
   private static __ATN: ATN
@@ -1027,38 +992,6 @@ export class Search_termContext extends ParserRuleContext {
   }
 }
 
-export class Index_modifiedContext extends ParserRuleContext {
-  public constructor(parent: ParserRuleContext | null, invokingState: number) {
-    super(parent, invokingState)
-  }
-  public index(): IndexContext {
-    return this.getRuleContext(0, IndexContext)!
-  }
-  public modifier_list(): Modifier_listContext | null {
-    return this.getRuleContext(0, Modifier_listContext)
-  }
-  public override get ruleIndex(): number {
-    return LexParser.RULE_index_modified
-  }
-  public override enterRule(listener: LexParserListener): void {
-    if (listener.enterIndex_modified) {
-      listener.enterIndex_modified(this)
-    }
-  }
-  public override exitRule(listener: LexParserListener): void {
-    if (listener.exitIndex_modified) {
-      listener.exitIndex_modified(this)
-    }
-  }
-  public override accept<Result>(visitor: LexParserVisitor<Result>): Result | null {
-    if (visitor.visitIndex_modified) {
-      return visitor.visitIndex_modified(this)
-    } else {
-      return visitor.visitChildren(this)
-    }
-  }
-}
-
 export class IndexContext extends ParserRuleContext {
   public constructor(parent: ParserRuleContext | null, invokingState: number) {
     super(parent, invokingState)
@@ -1238,8 +1171,8 @@ export class Boolean_modifiedContext extends ParserRuleContext {
   public constructor(parent: ParserRuleContext | null, invokingState: number) {
     super(parent, invokingState)
   }
-  public boolean(): BooleanContext {
-    return this.getRuleContext(0, BooleanContext)!
+  public r_boolean(): R_booleanContext {
+    return this.getRuleContext(0, R_booleanContext)!
   }
   public modifier_list(): Modifier_listContext | null {
     return this.getRuleContext(0, Modifier_listContext)
@@ -1266,7 +1199,7 @@ export class Boolean_modifiedContext extends ParserRuleContext {
   }
 }
 
-export class BooleanContext extends ParserRuleContext {
+export class R_booleanContext extends ParserRuleContext {
   public constructor(parent: ParserRuleContext | null, invokingState: number) {
     super(parent, invokingState)
   }
@@ -1280,21 +1213,21 @@ export class BooleanContext extends ParserRuleContext {
     return this.getToken(LexParser.NOT, 0)
   }
   public override get ruleIndex(): number {
-    return LexParser.RULE_boolean
+    return LexParser.RULE_r_boolean
   }
   public override enterRule(listener: LexParserListener): void {
-    if (listener.enterBoolean) {
-      listener.enterBoolean(this)
+    if (listener.enterR_boolean) {
+      listener.enterR_boolean(this)
     }
   }
   public override exitRule(listener: LexParserListener): void {
-    if (listener.exitBoolean) {
-      listener.exitBoolean(this)
+    if (listener.exitR_boolean) {
+      listener.exitR_boolean(this)
     }
   }
   public override accept<Result>(visitor: LexParserVisitor<Result>): Result | null {
-    if (visitor.visitBoolean) {
-      return visitor.visitBoolean(this)
+    if (visitor.visitR_boolean) {
+      return visitor.visitR_boolean(this)
     } else {
       return visitor.visitChildren(this)
     }

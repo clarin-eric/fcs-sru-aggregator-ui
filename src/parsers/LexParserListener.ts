@@ -1,16 +1,14 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-// Generated from src/vendor/lexcql/LexParser.g4 by ANTLR 4.13.1
+// Generated from src/vendor/fcs-ql/LexParser.g4 by ANTLR 4.13.1
 
 import { ErrorNode, ParseTreeListener, ParserRuleContext, TerminalNode } from 'antlr4ng'
 
 import {
-  BooleanContext,
   Boolean_modifiedContext,
   Boolean_queryContext,
   IndexContext,
-  Index_modifiedContext,
   ModifierContext,
   Modifier_listContext,
   Modifier_nameContext,
@@ -19,6 +17,7 @@ import {
   PrefixContext,
   Prefix_nameContext,
   QueryContext,
+  R_booleanContext,
   RelationContext,
   Relation_modifiedContext,
   Relation_nameContext,
@@ -85,16 +84,6 @@ export class LexParserListener implements ParseTreeListener {
    */
   exitSearch_term?: (ctx: Search_termContext) => void
   /**
-   * Enter a parse tree produced by `LexParser.index_modified`.
-   * @param ctx the parse tree
-   */
-  enterIndex_modified?: (ctx: Index_modifiedContext) => void
-  /**
-   * Exit a parse tree produced by `LexParser.index_modified`.
-   * @param ctx the parse tree
-   */
-  exitIndex_modified?: (ctx: Index_modifiedContext) => void
-  /**
    * Enter a parse tree produced by `LexParser.index`.
    * @param ctx the parse tree
    */
@@ -155,15 +144,15 @@ export class LexParserListener implements ParseTreeListener {
    */
   exitBoolean_modified?: (ctx: Boolean_modifiedContext) => void
   /**
-   * Enter a parse tree produced by `LexParser.boolean`.
+   * Enter a parse tree produced by `LexParser.r_boolean`.
    * @param ctx the parse tree
    */
-  enterBoolean?: (ctx: BooleanContext) => void
+  enterR_boolean?: (ctx: R_booleanContext) => void
   /**
-   * Exit a parse tree produced by `LexParser.boolean`.
+   * Exit a parse tree produced by `LexParser.r_boolean`.
    * @param ctx the parse tree
    */
-  exitBoolean?: (ctx: BooleanContext) => void
+  exitR_boolean?: (ctx: R_booleanContext) => void
   /**
    * Enter a parse tree produced by `LexParser.modifier_list`.
    * @param ctx the parse tree
