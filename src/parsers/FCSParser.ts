@@ -761,13 +761,13 @@ export class FCSParser extends Parser {
           case 3:
             {
               this.state = 137
-              this.expression_not()
+              this.expression_and()
             }
             break
           case 4:
             {
               this.state = 138
-              this.expression_and()
+              this.expression_not()
             }
             break
         }
@@ -799,13 +799,13 @@ export class FCSParser extends Parser {
                     case 3:
                       {
                         this.state = 144
-                        this.expression_not()
+                        this.expression_and()
                       }
                       break
                     case 4:
                       {
                         this.state = 145
-                        this.expression_and()
+                        this.expression_not()
                       }
                       break
                   }
@@ -894,13 +894,13 @@ export class FCSParser extends Parser {
                     case 3:
                       {
                         this.state = 160
-                        this.expression_not()
+                        this.expression_or()
                       }
                       break
                     case 4:
                       {
                         this.state = 161
-                        this.expression_or()
+                        this.expression_not()
                       }
                       break
                   }
@@ -935,9 +935,41 @@ export class FCSParser extends Parser {
       {
         this.state = 168
         this.match(FCSParser.L_PAREN)
-        this.state = 169
-        this.expression()
-        this.state = 170
+        this.state = 174
+        this.errorHandler.sync(this)
+        switch (this.interpreter.adaptivePredict(this.tokenStream, 23, this.context)) {
+          case 1:
+            {
+              this.state = 169
+              this.expression_basic()
+            }
+            break
+          case 2:
+            {
+              this.state = 170
+              this.expression_group()
+            }
+            break
+          case 3:
+            {
+              this.state = 171
+              this.expression_or()
+            }
+            break
+          case 4:
+            {
+              this.state = 172
+              this.expression_and()
+            }
+            break
+          case 5:
+            {
+              this.state = 173
+              this.expression_not()
+            }
+            break
+        }
+        this.state = 176
         this.match(FCSParser.R_PAREN)
       }
     } catch (re) {
@@ -958,10 +990,42 @@ export class FCSParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 172
+        this.state = 178
         this.match(FCSParser.NOT)
-        this.state = 173
-        this.expression()
+        this.state = 184
+        this.errorHandler.sync(this)
+        switch (this.interpreter.adaptivePredict(this.tokenStream, 24, this.context)) {
+          case 1:
+            {
+              this.state = 179
+              this.expression_basic()
+            }
+            break
+          case 2:
+            {
+              this.state = 180
+              this.expression_group()
+            }
+            break
+          case 3:
+            {
+              this.state = 181
+              this.expression_not()
+            }
+            break
+          case 4:
+            {
+              this.state = 182
+              this.expression_or()
+            }
+            break
+          case 5:
+            {
+              this.state = 183
+              this.expression_and()
+            }
+            break
+        }
       }
     } catch (re) {
       if (re instanceof RecognitionException) {
@@ -982,9 +1046,9 @@ export class FCSParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 175
+        this.state = 186
         this.attribute()
-        this.state = 176
+        this.state = 187
         _la = this.tokenStream.LA(1)
         if (!(_la === 15 || _la === 16)) {
           this.errorHandler.recoverInline(this)
@@ -992,7 +1056,7 @@ export class FCSParser extends Parser {
           this.errorHandler.reportMatch(this)
           this.consume()
         }
-        this.state = 177
+        this.state = 188
         this.regexp()
       }
     } catch (re) {
@@ -1013,19 +1077,19 @@ export class FCSParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 182
+        this.state = 193
         this.errorHandler.sync(this)
-        switch (this.interpreter.adaptivePredict(this.tokenStream, 23, this.context)) {
+        switch (this.interpreter.adaptivePredict(this.tokenStream, 25, this.context)) {
           case 1:
             {
-              this.state = 179
+              this.state = 190
               this.qualifier()
-              this.state = 180
+              this.state = 191
               this.match(FCSParser.COLON)
             }
             break
         }
-        this.state = 184
+        this.state = 195
         this.identifier()
       }
     } catch (re) {
@@ -1047,7 +1111,7 @@ export class FCSParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 186
+        this.state = 197
         _la = this.tokenStream.LA(1)
         if (!((_la & ~0x1f) === 0 && ((1 << _la) & 3932160) !== 0)) {
           this.errorHandler.recoverInline(this)
@@ -1075,7 +1139,7 @@ export class FCSParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 188
+        this.state = 199
         _la = this.tokenStream.LA(1)
         if (!((_la & ~0x1f) === 0 && ((1 << _la) & 3932160) !== 0)) {
           this.errorHandler.recoverInline(this)
@@ -1103,16 +1167,16 @@ export class FCSParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 190
+        this.state = 201
         this.regexp_pattern()
-        this.state = 193
+        this.state = 204
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
         if (_la === 8) {
           {
-            this.state = 191
+            this.state = 202
             this.match(FCSParser.FWD_SLASH)
-            this.state = 192
+            this.state = 203
             this.regexp_flag()
           }
         }
@@ -1135,7 +1199,7 @@ export class FCSParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 195
+        this.state = 206
         this.match(FCSParser.REGEXP)
       }
     } catch (re) {
@@ -1156,7 +1220,7 @@ export class FCSParser extends Parser {
     try {
       this.enterOuterAlt(localContext, 1)
       {
-        this.state = 197
+        this.state = 208
         this.match(FCSParser.REGEXP_FLAGS)
       }
     } catch (re) {
@@ -1173,7 +1237,7 @@ export class FCSParser extends Parser {
   }
 
   public static readonly _serializedATN: number[] = [
-    4, 1, 25, 200, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
+    4, 1, 25, 211, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
     6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13,
     2, 14, 7, 14, 2, 15, 7, 15, 2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 2, 20, 7,
     20, 2, 21, 7, 21, 2, 22, 7, 22, 1, 0, 1, 0, 1, 0, 3, 0, 50, 8, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1,
@@ -1186,60 +1250,66 @@ export class FCSParser extends Parser {
     12, 1, 12, 3, 12, 140, 8, 12, 1, 12, 1, 12, 1, 12, 1, 12, 1, 12, 3, 12, 147, 8, 12, 4, 12, 149,
     8, 12, 11, 12, 12, 12, 150, 1, 13, 1, 13, 1, 13, 3, 13, 156, 8, 13, 1, 13, 1, 13, 1, 13, 1, 13,
     1, 13, 3, 13, 163, 8, 13, 4, 13, 165, 8, 13, 11, 13, 12, 13, 166, 1, 14, 1, 14, 1, 14, 1, 14, 1,
-    15, 1, 15, 1, 15, 1, 16, 1, 16, 1, 16, 1, 16, 1, 17, 1, 17, 1, 17, 3, 17, 183, 8, 17, 1, 17, 1,
-    17, 1, 18, 1, 18, 1, 19, 1, 19, 1, 20, 1, 20, 1, 20, 3, 20, 194, 8, 20, 1, 21, 1, 21, 1, 22, 1,
-    22, 1, 22, 0, 0, 23, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38,
-    40, 42, 44, 0, 2, 1, 0, 15, 16, 1, 0, 18, 21, 218, 0, 46, 1, 0, 0, 0, 2, 57, 1, 0, 0, 0, 4, 62,
-    1, 0, 0, 0, 6, 76, 1, 0, 0, 0, 8, 80, 1, 0, 0, 0, 10, 91, 1, 0, 0, 0, 12, 114, 1, 0, 0, 0, 14,
-    116, 1, 0, 0, 0, 16, 118, 1, 0, 0, 0, 18, 124, 1, 0, 0, 0, 20, 126, 1, 0, 0, 0, 22, 133, 1, 0,
-    0, 0, 24, 139, 1, 0, 0, 0, 26, 155, 1, 0, 0, 0, 28, 168, 1, 0, 0, 0, 30, 172, 1, 0, 0, 0, 32,
-    175, 1, 0, 0, 0, 34, 182, 1, 0, 0, 0, 36, 186, 1, 0, 0, 0, 38, 188, 1, 0, 0, 0, 40, 190, 1, 0,
-    0, 0, 42, 195, 1, 0, 0, 0, 44, 197, 1, 0, 0, 0, 46, 49, 3, 2, 1, 0, 47, 48, 5, 18, 0, 0, 48, 50,
-    3, 18, 9, 0, 49, 47, 1, 0, 0, 0, 49, 50, 1, 0, 0, 0, 50, 51, 1, 0, 0, 0, 51, 52, 5, 0, 0, 1, 52,
-    1, 1, 0, 0, 0, 53, 58, 3, 10, 5, 0, 54, 58, 3, 8, 4, 0, 55, 58, 3, 6, 3, 0, 56, 58, 3, 4, 2, 0,
-    57, 53, 1, 0, 0, 0, 57, 54, 1, 0, 0, 0, 57, 55, 1, 0, 0, 0, 57, 56, 1, 0, 0, 0, 58, 3, 1, 0, 0,
-    0, 59, 63, 3, 10, 5, 0, 60, 63, 3, 6, 3, 0, 61, 63, 3, 8, 4, 0, 62, 59, 1, 0, 0, 0, 62, 60, 1,
-    0, 0, 0, 62, 61, 1, 0, 0, 0, 63, 70, 1, 0, 0, 0, 64, 68, 5, 5, 0, 0, 65, 69, 3, 10, 5, 0, 66,
-    69, 3, 6, 3, 0, 67, 69, 3, 8, 4, 0, 68, 65, 1, 0, 0, 0, 68, 66, 1, 0, 0, 0, 68, 67, 1, 0, 0, 0,
-    69, 71, 1, 0, 0, 0, 70, 64, 1, 0, 0, 0, 71, 72, 1, 0, 0, 0, 72, 70, 1, 0, 0, 0, 72, 73, 1, 0, 0,
-    0, 73, 5, 1, 0, 0, 0, 74, 77, 3, 10, 5, 0, 75, 77, 3, 8, 4, 0, 76, 74, 1, 0, 0, 0, 76, 75, 1, 0,
-    0, 0, 77, 78, 1, 0, 0, 0, 78, 76, 1, 0, 0, 0, 78, 79, 1, 0, 0, 0, 79, 7, 1, 0, 0, 0, 80, 83, 5,
-    1, 0, 0, 81, 84, 3, 4, 2, 0, 82, 84, 3, 6, 3, 0, 83, 81, 1, 0, 0, 0, 83, 82, 1, 0, 0, 0, 84, 85,
-    1, 0, 0, 0, 85, 87, 5, 2, 0, 0, 86, 88, 3, 12, 6, 0, 87, 86, 1, 0, 0, 0, 87, 88, 1, 0, 0, 0, 88,
-    9, 1, 0, 0, 0, 89, 92, 3, 14, 7, 0, 90, 92, 3, 16, 8, 0, 91, 89, 1, 0, 0, 0, 91, 90, 1, 0, 0, 0,
-    92, 94, 1, 0, 0, 0, 93, 95, 3, 12, 6, 0, 94, 93, 1, 0, 0, 0, 94, 95, 1, 0, 0, 0, 95, 11, 1, 0,
-    0, 0, 96, 115, 5, 11, 0, 0, 97, 115, 5, 12, 0, 0, 98, 115, 5, 13, 0, 0, 99, 111, 5, 9, 0, 0,
-    100, 112, 5, 22, 0, 0, 101, 103, 5, 22, 0, 0, 102, 101, 1, 0, 0, 0, 102, 103, 1, 0, 0, 0, 103,
-    104, 1, 0, 0, 0, 104, 105, 5, 14, 0, 0, 105, 112, 5, 22, 0, 0, 106, 107, 5, 22, 0, 0, 107, 109,
-    5, 14, 0, 0, 108, 110, 5, 22, 0, 0, 109, 108, 1, 0, 0, 0, 109, 110, 1, 0, 0, 0, 110, 112, 1, 0,
-    0, 0, 111, 100, 1, 0, 0, 0, 111, 102, 1, 0, 0, 0, 111, 106, 1, 0, 0, 0, 112, 113, 1, 0, 0, 0,
-    113, 115, 5, 10, 0, 0, 114, 96, 1, 0, 0, 0, 114, 97, 1, 0, 0, 0, 114, 98, 1, 0, 0, 0, 114, 99,
-    1, 0, 0, 0, 115, 13, 1, 0, 0, 0, 116, 117, 3, 40, 20, 0, 117, 15, 1, 0, 0, 0, 118, 120, 5, 3, 0,
-    0, 119, 121, 3, 22, 11, 0, 120, 119, 1, 0, 0, 0, 120, 121, 1, 0, 0, 0, 121, 122, 1, 0, 0, 0,
-    122, 123, 5, 4, 0, 0, 123, 17, 1, 0, 0, 0, 124, 125, 3, 20, 10, 0, 125, 19, 1, 0, 0, 0, 126,
-    127, 5, 19, 0, 0, 127, 21, 1, 0, 0, 0, 128, 134, 3, 32, 16, 0, 129, 134, 3, 28, 14, 0, 130, 134,
-    3, 24, 12, 0, 131, 134, 3, 26, 13, 0, 132, 134, 3, 30, 15, 0, 133, 128, 1, 0, 0, 0, 133, 129, 1,
-    0, 0, 0, 133, 130, 1, 0, 0, 0, 133, 131, 1, 0, 0, 0, 133, 132, 1, 0, 0, 0, 134, 23, 1, 0, 0, 0,
-    135, 140, 3, 32, 16, 0, 136, 140, 3, 28, 14, 0, 137, 140, 3, 30, 15, 0, 138, 140, 3, 26, 13, 0,
-    139, 135, 1, 0, 0, 0, 139, 136, 1, 0, 0, 0, 139, 137, 1, 0, 0, 0, 139, 138, 1, 0, 0, 0, 140,
-    148, 1, 0, 0, 0, 141, 146, 5, 5, 0, 0, 142, 147, 3, 32, 16, 0, 143, 147, 3, 28, 14, 0, 144, 147,
-    3, 30, 15, 0, 145, 147, 3, 26, 13, 0, 146, 142, 1, 0, 0, 0, 146, 143, 1, 0, 0, 0, 146, 144, 1,
-    0, 0, 0, 146, 145, 1, 0, 0, 0, 147, 149, 1, 0, 0, 0, 148, 141, 1, 0, 0, 0, 149, 150, 1, 0, 0, 0,
-    150, 148, 1, 0, 0, 0, 150, 151, 1, 0, 0, 0, 151, 25, 1, 0, 0, 0, 152, 156, 3, 32, 16, 0, 153,
-    156, 3, 28, 14, 0, 154, 156, 3, 30, 15, 0, 155, 152, 1, 0, 0, 0, 155, 153, 1, 0, 0, 0, 155, 154,
-    1, 0, 0, 0, 156, 164, 1, 0, 0, 0, 157, 162, 5, 6, 0, 0, 158, 163, 3, 32, 16, 0, 159, 163, 3, 28,
-    14, 0, 160, 163, 3, 30, 15, 0, 161, 163, 3, 24, 12, 0, 162, 158, 1, 0, 0, 0, 162, 159, 1, 0, 0,
-    0, 162, 160, 1, 0, 0, 0, 162, 161, 1, 0, 0, 0, 163, 165, 1, 0, 0, 0, 164, 157, 1, 0, 0, 0, 165,
-    166, 1, 0, 0, 0, 166, 164, 1, 0, 0, 0, 166, 167, 1, 0, 0, 0, 167, 27, 1, 0, 0, 0, 168, 169, 5,
-    1, 0, 0, 169, 170, 3, 22, 11, 0, 170, 171, 5, 2, 0, 0, 171, 29, 1, 0, 0, 0, 172, 173, 5, 7, 0,
-    0, 173, 174, 3, 22, 11, 0, 174, 31, 1, 0, 0, 0, 175, 176, 3, 34, 17, 0, 176, 177, 7, 0, 0, 0,
-    177, 178, 3, 40, 20, 0, 178, 33, 1, 0, 0, 0, 179, 180, 3, 36, 18, 0, 180, 181, 5, 17, 0, 0, 181,
-    183, 1, 0, 0, 0, 182, 179, 1, 0, 0, 0, 182, 183, 1, 0, 0, 0, 183, 184, 1, 0, 0, 0, 184, 185, 3,
-    38, 19, 0, 185, 35, 1, 0, 0, 0, 186, 187, 7, 1, 0, 0, 187, 37, 1, 0, 0, 0, 188, 189, 7, 1, 0, 0,
-    189, 39, 1, 0, 0, 0, 190, 193, 3, 42, 21, 0, 191, 192, 5, 8, 0, 0, 192, 194, 3, 44, 22, 0, 193,
-    191, 1, 0, 0, 0, 193, 194, 1, 0, 0, 0, 194, 41, 1, 0, 0, 0, 195, 196, 5, 23, 0, 0, 196, 43, 1,
-    0, 0, 0, 197, 198, 5, 20, 0, 0, 198, 45, 1, 0, 0, 0, 25, 49, 57, 62, 68, 72, 76, 78, 83, 87, 91,
-    94, 102, 109, 111, 114, 120, 133, 139, 146, 150, 155, 162, 166, 182, 193,
+    14, 1, 14, 3, 14, 175, 8, 14, 1, 14, 1, 14, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 3, 15,
+    185, 8, 15, 1, 16, 1, 16, 1, 16, 1, 16, 1, 17, 1, 17, 1, 17, 3, 17, 194, 8, 17, 1, 17, 1, 17, 1,
+    18, 1, 18, 1, 19, 1, 19, 1, 20, 1, 20, 1, 20, 3, 20, 205, 8, 20, 1, 21, 1, 21, 1, 22, 1, 22, 1,
+    22, 0, 0, 23, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42,
+    44, 0, 2, 1, 0, 15, 16, 1, 0, 18, 21, 237, 0, 46, 1, 0, 0, 0, 2, 57, 1, 0, 0, 0, 4, 62, 1, 0, 0,
+    0, 6, 76, 1, 0, 0, 0, 8, 80, 1, 0, 0, 0, 10, 91, 1, 0, 0, 0, 12, 114, 1, 0, 0, 0, 14, 116, 1, 0,
+    0, 0, 16, 118, 1, 0, 0, 0, 18, 124, 1, 0, 0, 0, 20, 126, 1, 0, 0, 0, 22, 133, 1, 0, 0, 0, 24,
+    139, 1, 0, 0, 0, 26, 155, 1, 0, 0, 0, 28, 168, 1, 0, 0, 0, 30, 178, 1, 0, 0, 0, 32, 186, 1, 0,
+    0, 0, 34, 193, 1, 0, 0, 0, 36, 197, 1, 0, 0, 0, 38, 199, 1, 0, 0, 0, 40, 201, 1, 0, 0, 0, 42,
+    206, 1, 0, 0, 0, 44, 208, 1, 0, 0, 0, 46, 49, 3, 2, 1, 0, 47, 48, 5, 18, 0, 0, 48, 50, 3, 18, 9,
+    0, 49, 47, 1, 0, 0, 0, 49, 50, 1, 0, 0, 0, 50, 51, 1, 0, 0, 0, 51, 52, 5, 0, 0, 1, 52, 1, 1, 0,
+    0, 0, 53, 58, 3, 10, 5, 0, 54, 58, 3, 8, 4, 0, 55, 58, 3, 6, 3, 0, 56, 58, 3, 4, 2, 0, 57, 53,
+    1, 0, 0, 0, 57, 54, 1, 0, 0, 0, 57, 55, 1, 0, 0, 0, 57, 56, 1, 0, 0, 0, 58, 3, 1, 0, 0, 0, 59,
+    63, 3, 10, 5, 0, 60, 63, 3, 6, 3, 0, 61, 63, 3, 8, 4, 0, 62, 59, 1, 0, 0, 0, 62, 60, 1, 0, 0, 0,
+    62, 61, 1, 0, 0, 0, 63, 70, 1, 0, 0, 0, 64, 68, 5, 5, 0, 0, 65, 69, 3, 10, 5, 0, 66, 69, 3, 6,
+    3, 0, 67, 69, 3, 8, 4, 0, 68, 65, 1, 0, 0, 0, 68, 66, 1, 0, 0, 0, 68, 67, 1, 0, 0, 0, 69, 71, 1,
+    0, 0, 0, 70, 64, 1, 0, 0, 0, 71, 72, 1, 0, 0, 0, 72, 70, 1, 0, 0, 0, 72, 73, 1, 0, 0, 0, 73, 5,
+    1, 0, 0, 0, 74, 77, 3, 10, 5, 0, 75, 77, 3, 8, 4, 0, 76, 74, 1, 0, 0, 0, 76, 75, 1, 0, 0, 0, 77,
+    78, 1, 0, 0, 0, 78, 76, 1, 0, 0, 0, 78, 79, 1, 0, 0, 0, 79, 7, 1, 0, 0, 0, 80, 83, 5, 1, 0, 0,
+    81, 84, 3, 4, 2, 0, 82, 84, 3, 6, 3, 0, 83, 81, 1, 0, 0, 0, 83, 82, 1, 0, 0, 0, 84, 85, 1, 0, 0,
+    0, 85, 87, 5, 2, 0, 0, 86, 88, 3, 12, 6, 0, 87, 86, 1, 0, 0, 0, 87, 88, 1, 0, 0, 0, 88, 9, 1, 0,
+    0, 0, 89, 92, 3, 14, 7, 0, 90, 92, 3, 16, 8, 0, 91, 89, 1, 0, 0, 0, 91, 90, 1, 0, 0, 0, 92, 94,
+    1, 0, 0, 0, 93, 95, 3, 12, 6, 0, 94, 93, 1, 0, 0, 0, 94, 95, 1, 0, 0, 0, 95, 11, 1, 0, 0, 0, 96,
+    115, 5, 11, 0, 0, 97, 115, 5, 12, 0, 0, 98, 115, 5, 13, 0, 0, 99, 111, 5, 9, 0, 0, 100, 112, 5,
+    22, 0, 0, 101, 103, 5, 22, 0, 0, 102, 101, 1, 0, 0, 0, 102, 103, 1, 0, 0, 0, 103, 104, 1, 0, 0,
+    0, 104, 105, 5, 14, 0, 0, 105, 112, 5, 22, 0, 0, 106, 107, 5, 22, 0, 0, 107, 109, 5, 14, 0, 0,
+    108, 110, 5, 22, 0, 0, 109, 108, 1, 0, 0, 0, 109, 110, 1, 0, 0, 0, 110, 112, 1, 0, 0, 0, 111,
+    100, 1, 0, 0, 0, 111, 102, 1, 0, 0, 0, 111, 106, 1, 0, 0, 0, 112, 113, 1, 0, 0, 0, 113, 115, 5,
+    10, 0, 0, 114, 96, 1, 0, 0, 0, 114, 97, 1, 0, 0, 0, 114, 98, 1, 0, 0, 0, 114, 99, 1, 0, 0, 0,
+    115, 13, 1, 0, 0, 0, 116, 117, 3, 40, 20, 0, 117, 15, 1, 0, 0, 0, 118, 120, 5, 3, 0, 0, 119,
+    121, 3, 22, 11, 0, 120, 119, 1, 0, 0, 0, 120, 121, 1, 0, 0, 0, 121, 122, 1, 0, 0, 0, 122, 123,
+    5, 4, 0, 0, 123, 17, 1, 0, 0, 0, 124, 125, 3, 20, 10, 0, 125, 19, 1, 0, 0, 0, 126, 127, 5, 19,
+    0, 0, 127, 21, 1, 0, 0, 0, 128, 134, 3, 32, 16, 0, 129, 134, 3, 28, 14, 0, 130, 134, 3, 24, 12,
+    0, 131, 134, 3, 26, 13, 0, 132, 134, 3, 30, 15, 0, 133, 128, 1, 0, 0, 0, 133, 129, 1, 0, 0, 0,
+    133, 130, 1, 0, 0, 0, 133, 131, 1, 0, 0, 0, 133, 132, 1, 0, 0, 0, 134, 23, 1, 0, 0, 0, 135, 140,
+    3, 32, 16, 0, 136, 140, 3, 28, 14, 0, 137, 140, 3, 26, 13, 0, 138, 140, 3, 30, 15, 0, 139, 135,
+    1, 0, 0, 0, 139, 136, 1, 0, 0, 0, 139, 137, 1, 0, 0, 0, 139, 138, 1, 0, 0, 0, 140, 148, 1, 0, 0,
+    0, 141, 146, 5, 5, 0, 0, 142, 147, 3, 32, 16, 0, 143, 147, 3, 28, 14, 0, 144, 147, 3, 26, 13, 0,
+    145, 147, 3, 30, 15, 0, 146, 142, 1, 0, 0, 0, 146, 143, 1, 0, 0, 0, 146, 144, 1, 0, 0, 0, 146,
+    145, 1, 0, 0, 0, 147, 149, 1, 0, 0, 0, 148, 141, 1, 0, 0, 0, 149, 150, 1, 0, 0, 0, 150, 148, 1,
+    0, 0, 0, 150, 151, 1, 0, 0, 0, 151, 25, 1, 0, 0, 0, 152, 156, 3, 32, 16, 0, 153, 156, 3, 28, 14,
+    0, 154, 156, 3, 30, 15, 0, 155, 152, 1, 0, 0, 0, 155, 153, 1, 0, 0, 0, 155, 154, 1, 0, 0, 0,
+    156, 164, 1, 0, 0, 0, 157, 162, 5, 6, 0, 0, 158, 163, 3, 32, 16, 0, 159, 163, 3, 28, 14, 0, 160,
+    163, 3, 24, 12, 0, 161, 163, 3, 30, 15, 0, 162, 158, 1, 0, 0, 0, 162, 159, 1, 0, 0, 0, 162, 160,
+    1, 0, 0, 0, 162, 161, 1, 0, 0, 0, 163, 165, 1, 0, 0, 0, 164, 157, 1, 0, 0, 0, 165, 166, 1, 0, 0,
+    0, 166, 164, 1, 0, 0, 0, 166, 167, 1, 0, 0, 0, 167, 27, 1, 0, 0, 0, 168, 174, 5, 1, 0, 0, 169,
+    175, 3, 32, 16, 0, 170, 175, 3, 28, 14, 0, 171, 175, 3, 24, 12, 0, 172, 175, 3, 26, 13, 0, 173,
+    175, 3, 30, 15, 0, 174, 169, 1, 0, 0, 0, 174, 170, 1, 0, 0, 0, 174, 171, 1, 0, 0, 0, 174, 172,
+    1, 0, 0, 0, 174, 173, 1, 0, 0, 0, 175, 176, 1, 0, 0, 0, 176, 177, 5, 2, 0, 0, 177, 29, 1, 0, 0,
+    0, 178, 184, 5, 7, 0, 0, 179, 185, 3, 32, 16, 0, 180, 185, 3, 28, 14, 0, 181, 185, 3, 30, 15, 0,
+    182, 185, 3, 24, 12, 0, 183, 185, 3, 26, 13, 0, 184, 179, 1, 0, 0, 0, 184, 180, 1, 0, 0, 0, 184,
+    181, 1, 0, 0, 0, 184, 182, 1, 0, 0, 0, 184, 183, 1, 0, 0, 0, 185, 31, 1, 0, 0, 0, 186, 187, 3,
+    34, 17, 0, 187, 188, 7, 0, 0, 0, 188, 189, 3, 40, 20, 0, 189, 33, 1, 0, 0, 0, 190, 191, 3, 36,
+    18, 0, 191, 192, 5, 17, 0, 0, 192, 194, 1, 0, 0, 0, 193, 190, 1, 0, 0, 0, 193, 194, 1, 0, 0, 0,
+    194, 195, 1, 0, 0, 0, 195, 196, 3, 38, 19, 0, 196, 35, 1, 0, 0, 0, 197, 198, 7, 1, 0, 0, 198,
+    37, 1, 0, 0, 0, 199, 200, 7, 1, 0, 0, 200, 39, 1, 0, 0, 0, 201, 204, 3, 42, 21, 0, 202, 203, 5,
+    8, 0, 0, 203, 205, 3, 44, 22, 0, 204, 202, 1, 0, 0, 0, 204, 205, 1, 0, 0, 0, 205, 41, 1, 0, 0,
+    0, 206, 207, 5, 23, 0, 0, 207, 43, 1, 0, 0, 0, 208, 209, 5, 20, 0, 0, 209, 45, 1, 0, 0, 0, 27,
+    49, 57, 62, 68, 72, 76, 78, 83, 87, 91, 94, 102, 109, 111, 114, 120, 133, 139, 146, 150, 155,
+    162, 166, 174, 184, 193, 204,
   ]
 
   private static __ATN: ATN
@@ -1762,15 +1832,6 @@ export class Expression_orContext extends ParserRuleContext {
 
     return this.getRuleContext(i, Expression_groupContext)
   }
-  public expression_not(): Expression_notContext[]
-  public expression_not(i: number): Expression_notContext | null
-  public expression_not(i?: number): Expression_notContext[] | Expression_notContext | null {
-    if (i === undefined) {
-      return this.getRuleContexts(Expression_notContext)
-    }
-
-    return this.getRuleContext(i, Expression_notContext)
-  }
   public expression_and(): Expression_andContext[]
   public expression_and(i: number): Expression_andContext | null
   public expression_and(i?: number): Expression_andContext[] | Expression_andContext | null {
@@ -1779,6 +1840,15 @@ export class Expression_orContext extends ParserRuleContext {
     }
 
     return this.getRuleContext(i, Expression_andContext)
+  }
+  public expression_not(): Expression_notContext[]
+  public expression_not(i: number): Expression_notContext | null
+  public expression_not(i?: number): Expression_notContext[] | Expression_notContext | null {
+    if (i === undefined) {
+      return this.getRuleContexts(Expression_notContext)
+    }
+
+    return this.getRuleContext(i, Expression_notContext)
   }
   public OR(): TerminalNode[]
   public OR(i: number): TerminalNode | null
@@ -1889,11 +1959,23 @@ export class Expression_groupContext extends ParserRuleContext {
   public L_PAREN(): TerminalNode {
     return this.getToken(FCSParser.L_PAREN, 0)!
   }
-  public expression(): ExpressionContext {
-    return this.getRuleContext(0, ExpressionContext)!
-  }
   public R_PAREN(): TerminalNode {
     return this.getToken(FCSParser.R_PAREN, 0)!
+  }
+  public expression_basic(): Expression_basicContext | null {
+    return this.getRuleContext(0, Expression_basicContext)
+  }
+  public expression_group(): Expression_groupContext | null {
+    return this.getRuleContext(0, Expression_groupContext)
+  }
+  public expression_or(): Expression_orContext | null {
+    return this.getRuleContext(0, Expression_orContext)
+  }
+  public expression_and(): Expression_andContext | null {
+    return this.getRuleContext(0, Expression_andContext)
+  }
+  public expression_not(): Expression_notContext | null {
+    return this.getRuleContext(0, Expression_notContext)
   }
   public override get ruleIndex(): number {
     return FCSParser.RULE_expression_group
@@ -1924,8 +2006,20 @@ export class Expression_notContext extends ParserRuleContext {
   public NOT(): TerminalNode {
     return this.getToken(FCSParser.NOT, 0)!
   }
-  public expression(): ExpressionContext {
-    return this.getRuleContext(0, ExpressionContext)!
+  public expression_basic(): Expression_basicContext | null {
+    return this.getRuleContext(0, Expression_basicContext)
+  }
+  public expression_group(): Expression_groupContext | null {
+    return this.getRuleContext(0, Expression_groupContext)
+  }
+  public expression_not(): Expression_notContext | null {
+    return this.getRuleContext(0, Expression_notContext)
+  }
+  public expression_or(): Expression_orContext | null {
+    return this.getRuleContext(0, Expression_orContext)
+  }
+  public expression_and(): Expression_andContext | null {
+    return this.getRuleContext(0, Expression_andContext)
   }
   public override get ruleIndex(): number {
     return FCSParser.RULE_expression_not

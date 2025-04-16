@@ -80,8 +80,8 @@ expression
 
 
 expression_or
-    : (expression_basic | expression_group | expression_not | expression_and) 
-        (OR (expression_basic | expression_group | expression_not | expression_and))+
+    : (expression_basic | expression_group | expression_and | expression_not) 
+        (OR (expression_basic | expression_group | expression_and | expression_not))+
     ;
 
 
@@ -91,17 +91,17 @@ expression_or
 // a="b" & c="d" | e="f"  <==>  (a="b" & c="d") | e="f"
 expression_and
     : (expression_basic | expression_group | expression_not)
-        (AND (expression_basic | expression_group | expression_not | expression_or))+
+        (AND (expression_basic | expression_group | expression_or | expression_not))+
     ;
 
 
 expression_group
-    : L_PAREN expression R_PAREN
+    : L_PAREN (expression_basic | expression_group | expression_or | expression_and | expression_not) R_PAREN
     ;
 
 
 expression_not
-    : NOT expression
+    : NOT (expression_basic | expression_group | expression_not | expression_or | expression_and)
     ;
 
 

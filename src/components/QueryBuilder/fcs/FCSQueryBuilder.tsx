@@ -313,19 +313,6 @@ function removeExpressionChild(ctx: ExpressionChild, rewriter: TokenStreamRewrit
     return
   }
 
-  // check for "expression" wrap (group and not expressions)
-  if (parentCtx instanceof ExpressionContext && parentCtx.children.length === 1) {
-    const parentParentCtx = parentCtx.parent
-    if (
-      parentParentCtx != null &&
-      (parentParentCtx instanceof Expression_groupContext ||
-        parentParentCtx instanceof Expression_notContext)
-    ) {
-      removeExpressionChild(parentParentCtx, rewriter)
-      return
-    }
-  }
-
   console.warn('Unexpected other parent to remove?', { parentCtx, ctx })
 }
 
