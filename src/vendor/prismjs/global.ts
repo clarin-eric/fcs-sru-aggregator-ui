@@ -2,8 +2,9 @@ import { Prism } from './core/prism';
 
 const globalSymbol = Symbol.for('Prism global');
 
+// eslint-disable-next-line no-undef
 const namespace = globalThis as Partial<Record<typeof globalSymbol, Prism>>;
-const globalPrism = namespace[globalSymbol] ??= new Prism();
+const globalPrism = (namespace[globalSymbol] ??= new Prism());
 
 /**
  * The global {@link Prism} instance.

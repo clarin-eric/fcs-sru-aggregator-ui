@@ -5,8 +5,9 @@
 - license: MIT
 - remote: `https://github.com/PrismJS/prism.git`
 - tree: `origin/v2`
-- commit: `ffab2edc5b67d7248fabe75cc5cf26945c6ef190`
+- commit: `c602f6c2b492ed30fab8c358ad5b591582daef77`
 - date-added: 2025-01-17
+- date-updated: 2025-04-16
 - note:
   - removed everything besides 'src/' and some info text files (LICENSE, README.md, ...)
   - removed most languages (except 'plain', 'regex')
