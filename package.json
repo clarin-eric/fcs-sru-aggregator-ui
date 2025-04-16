@@ -14,9 +14,9 @@
     "build": "tsc -b && vite build",
     "build:bundle": "tsc -b && vite --mode bundle build",
     "lint": "eslint .",
-    "build:antlr4ng": "npm run build:antlr4ng:fcsql && npm run build:antlr4ng:lexcql",
-    "build:antlr4ng:fcsql": "antlr4ng -Dlanguage=TypeScript -o src/parsers/ -visitor -listener -Xexact-output-dir src/vendor/fcs-ql/FCSLexer.g4 src/vendor/fcs-ql/FCSParser.g4",
-    "build:antlr4ng:lexcql": "antlr4ng -Dlanguage=TypeScript -o src/parsers/ -visitor -listener -Xexact-output-dir src/vendor/fcs-ql/LexLexer.g4 src/vendor/fcs-ql/LexParser.g4"
+    "build:antlr-ng": "npm run build:antlr-ng:fcs-ql && npm run build:antlr-ng:lexcql",
+    "build:antlr-ng:fcs-ql": "antlr-ng -Dlanguage=TypeScript -v -l --exact-output-dir -o src/parsers/ src/vendor/fcs-ql/FCSLexer.g4 src/vendor/fcs-ql/FCSParser.g4",
+    "build:antlr-ng:lexcql": "antlr-ng -Dlanguage=TypeScript -v -l --exact-output-dir -o src/parsers/ src/vendor/fcs-ql/LexLexer.g4 src/vendor/fcs-ql/LexParser.g4"
   },
   "dependencies": {
     "@nozbe/microfuzz": "^1.0.0",
@@ -39,7 +39,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.4.0",
-    "antlr4ng-cli": "^2.0.0",
+    "antlr-ng": "^1.0.9",
     "eslint": "^9.24.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",

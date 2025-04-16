@@ -1,5 +1,3 @@
-// Generated from src/vendor/fcs-ql/FCSParser.g4 by ANTLR 4.13.1
-
 import {
   ATN,
   ATNDeserializer,
