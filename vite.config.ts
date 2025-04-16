@@ -109,38 +109,58 @@ export default defineConfig(({ mode }) => {
       // TODO: required?
       'process.env': {},
 
-      // head stuffs
-      'import.meta.env.HEAD_TITLE': '"FCS Aggregator – Content Search"',
-      // footer/help: contact address (footer/help page)
-      'import.meta.env.CONTACT_ADDRESS': '"mailto:fcs@clarin.eu"',
-      // footer: imprint, disclaimer, ...
-      'import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS':
-        '"https://www.clarin.eu/content/terms-use-and-disclaimer"',
-
       // deployment on subpath, default is "/" for root
       'import.meta.env.DEPLOY_PATH': process.env.VITE_DEPLOY_PATH
         ? `"${process.env.VITE_DEPLOY_PATH}"`
-        : '"/"',
+        : JSON.stringify('/'),
       // canonical URL for FCS SRU Aggregator
       'import.meta.env.CANONCIAL_URL': process.env.VITE_CANONCIAL_URL
         ? `"${process.env.VITE_CANONCIAL_URL}"`
-        : '"https://contentsearch.clarin.eu"',
+        : JSON.stringify('https://contentsearch.clarin.eu'),
       // API base URL for FCS SRU Aggregator
       'import.meta.env.API_URL': process.env.VITE_API_URL
         ? `"${process.env.VITE_API_URL}"`
-        : '"https://contentsearch.clarin.eu/rest/"',
+        : JSON.stringify('https://contentsearch.clarin.eu/rest/'),
       // base URL for FCS Endpoint Validator to build redirect links
       'import.meta.env.VALIDATOR_URL': process.env.VITE_VALIDATOR_URL
         ? `"${process.env.VITE_VALIDATOR_URL}"`
-        : '"https://www.clarin.eu/fcsvalidator/"',
+        : JSON.stringify('https://www.clarin.eu/fcsvalidator/'),
+
+      // application title
+      'import.meta.env.APP_TITLE': process.env.VITE_APP_TITLE
+        ? `"${process.env.VITE_APP_TITLE}"`
+        : JSON.stringify('Content Search'),
+      // HTML head page title
+      'import.meta.env.APP_TITLE_HEAD': process.env.VITE_APP_TITLE_HEAD
+        ? `"${process.env.VITE_APP_TITLE_HEAD}"`
+        : JSON.stringify('FCS Aggregator – Content Search'),
+      // footer: imprint, disclaimer, ...
+      'import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS': process.env.VITE_TERMS_AND_DISCLAIMER_ADDRESS
+        ? `"${process.env.VITE_TERMS_AND_DISCLAIMER_ADDRESS}"`
+        : JSON.stringify('https://www.clarin.eu/content/terms-use-and-disclaimer'),
+      // footer/help: contact address (footer/help page)
+      'import.meta.env.CONTACT_ADDRESS': process.env.VITE_CONTACT_ADDRESS
+        ? `"${process.env.VITE_CONTACT_ADDRESS}"`
+        : JSON.stringify('mailto:fcs@clarin.eu'),
 
       // show direct link to search results
-      'import.meta.env.SHOW_SEARCH_RESULT_LINK': 'false',
+      'import.meta.env.SHOW_SEARCH_RESULT_LINK': process.env.VITE_SHOW_SEARCH_RESULT_LINK
+        ? `"${process.env.VITE_SHOW_SEARCH_RESULT_LINK}"`
+        : JSON.stringify(false),
       // features
-      'import.meta.env.FEATURE_TRACKING_MATOMO': 'true',
-      // 'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': JSON.stringify({ srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }),
+      'import.meta.env.FEATURE_TRACKING_MATOMO': process.env.VITE_FEATURE_TRACKING_MATOMO
+        ? `"${process.env.VITE_FEATURE_TRACKING_MATOMO}"`
+        : JSON.stringify(true),
+      // params = { srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }
+      'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': process.env
+        .VITE_FEATURE_TRACKING_MATOMO_PARAMS
+        ? `"${process.env.VITE_FEATURE_TRACKING_MATOMO_PARAMS}"`
+        : JSON.stringify(null),
+
       // enable visual query builder
-      'import.meta.env.FEATURE_QUERY_BUILDER': 'true',
+      'import.meta.env.FEATURE_QUERY_BUILDER': process.env.VITE_FEATURE_QUERY_BUILDER
+        ? `"${process.env.VITE_FEATURE_QUERY_BUILDER}"`
+        : JSON.stringify(true),
     },
     resolve: {
       alias: {

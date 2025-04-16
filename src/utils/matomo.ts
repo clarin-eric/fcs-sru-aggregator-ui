@@ -13,7 +13,7 @@ declare const window: Window &
     _paq: unknown[] | { push: (params: unknown[]) => void }
   }
 
-interface SetupParams {
+export interface SetupParams {
   siteId: number
   trackerUrl: string
   enableLinkTracking?: boolean
@@ -72,16 +72,21 @@ export function installScript({ srcUrl }: InstallScriptParams) {
   }
 }
 
-export function setupAndInstallFromConfigString(configString?: string) {
+export function setupAndInstallFromConfigString(configString?: string | SetupParams | null) {
   if (!configString) return false
 
   let params = null
-  try {
-    params = JSON.parse(configString)
-    console.debug('tracking params', params)
-  } catch (error) {
-    console.error('Error trying to parse tracking params!', error)
-    return false
+  if (typeof configString === 'string') {
+    try {
+      params = JSON.parse(configString)
+      console.debug('tracking params', params)
+    } catch (error) {
+      console.error('Error trying to parse tracking params!', error)
+      return false
+    }
+  } else if (typeof configString === 'object') {
+    params = configString
+    console.debug('tracking params (object)', params)
   }
 
   const siteId = params['siteId']

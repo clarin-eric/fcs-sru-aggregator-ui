@@ -1,17 +1,23 @@
 import AppStore from '@/stores/app'
+import { SetupParams as MatomoSetupParams } from './utils/matomo'
 
 // --------------------------------------------------------------------------
 
 type MyAggregatorConfiguration = {
   DEPLOY_PATH: string
   API_URL: string
-  VALIDATOR_URL: string
+  VALIDATOR_URL: string | null
   SHOW_SEARCH_RESULT_LINK: boolean
+  APP_TITLE: string
+  APP_TITLE_HEAD: string
+  TERMS_AND_DISCLAIMER_ADDRESS: string
+  CONTACT_ADDRESS: string | null
+  MATOMO_TRACKING_PARAMS: string | MatomoSetupParams | null
 }
 
 declare const window: Window &
   typeof globalThis & {
-    MyAggregator: MyAggregatorConfiguration & { [key: string]: unknown }
+    MyAggregator: Partial<MyAggregatorConfiguration> & { [key: string]: unknown }
     _paq: unknown[] | { push: (params: unknown[]) => void }
   }
 
@@ -22,6 +28,16 @@ window.MyAggregator = window['MyAggregator'] || {}
 window._paq = window['_paq'] || []
 
 // --------------------------------------------------------------------------
+
+export const CONFIG_NAMES_ONLY_ON_INITIALIZATION = [
+  'DEPLOY_PATH',
+  'API_URL',
+  'APP_TITLE',
+  'APP_TITLE_HEAD',
+  'TERMS_AND_DISCLAIMER_ADDRESS',
+  'CONTACT_ADDRESS',
+  'MATOMO_TRACKING_PARAMS',
+]
 
 /**
  * Configure AppStore with `MyAggregatorConfiguration`.
@@ -40,6 +56,21 @@ export function configure() {
   if (window.MyAggregator.SHOW_SEARCH_RESULT_LINK !== undefined) {
     AppStore.getState().setShowSearchResultLink(window.MyAggregator.SHOW_SEARCH_RESULT_LINK)
   }
+  if (window.MyAggregator.APP_TITLE !== undefined) {
+    AppStore.getState().setAppTitle(window.MyAggregator.APP_TITLE)
+  }
+  if (window.MyAggregator.APP_TITLE_HEAD !== undefined) {
+    AppStore.getState().setAppTitleHead(window.MyAggregator.APP_TITLE_HEAD)
+  }
+  if (window.MyAggregator.TERMS_AND_DISCLAIMER_ADDRESS !== undefined) {
+    AppStore.getState().setTermsAndDisclaimerUrl(window.MyAggregator.TERMS_AND_DISCLAIMER_ADDRESS)
+  }
+  if (window.MyAggregator.CONTACT_ADDRESS !== undefined) {
+    AppStore.getState().setContactAddress(window.MyAggregator.CONTACT_ADDRESS)
+  }
+  if (window.MyAggregator.MATOMO_TRACKING_PARAMS !== undefined) {
+    AppStore.getState().setMatomoTrackingParams(window.MyAggregator.MATOMO_TRACKING_PARAMS)
+  }
 
   // observe and notify about invalid configuration changes
   window.MyAggregator = new Proxy(window.MyAggregator, {
@@ -47,14 +78,11 @@ export function configure() {
       return target[prop]
     },
     set(target, prop: string, val: unknown) {
-      if (prop === 'DEPLOY_PATH') {
-        console.error('Configuration DEPLOY_PATH can only be set on initialization!')
+      if (CONFIG_NAMES_ONLY_ON_INITIALIZATION.includes(prop)) {
+        console.error(`Configuration ${prop} can only be set on initialization!`)
         return false
       }
-      if (prop === 'API_URL') {
-        console.error('Configuration API_URL can only be set on initialization!')
-        return false
-      }
+
       if (prop === 'VALIDATOR_URL') {
         if (val === null || typeof val === 'string') {
           console.log('Updating VALIDATOR_URL ...')
@@ -71,6 +99,7 @@ export function configure() {
         }
         return false
       }
+
       target[prop] = val
       return true
     },

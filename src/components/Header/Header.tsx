@@ -3,9 +3,13 @@ import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 import { Link, NavLink } from 'react-router'
 
+import AppStore from '@/stores/app'
+
 import logoUrl from '@images/icon-services-fcs.png'
 
 function Header() {
+  const appTitle = AppStore.getState().appTitle
+
   const authed = true
   const authName = 'XYZ'
 
@@ -19,9 +23,9 @@ function Header() {
               width="30"
               height="30"
               className="d-inline-block align-top"
-              alt="CLARIN Content Search logo"
+              alt={`${appTitle} logo`}
             />{' '}
-            Content Search
+            {appTitle}
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="header-navbar-nav" />
           <Navbar.Collapse id="header-navbar-nav">

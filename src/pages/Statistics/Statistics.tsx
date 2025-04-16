@@ -35,6 +35,8 @@ function Statistics() {
   const [validatorUrl, setValidatorUrl] = useState(AppStore.getState().validatorURL)
   AppStore.subscribe((state) => setValidatorUrl(state.validatorURL))
 
+  const appTitleHead = AppStore.getState().appTitleHead
+
   function refreshData() {
     console.debug('Invalidate data and refresh ...')
     queryClient.invalidateQueries({ queryKey: ['statistics'] })
@@ -43,7 +45,7 @@ function Statistics() {
   return (
     <>
       <Helmet>
-        <title>FCS Aggregator – Content Search – Statistics</title>
+        <title>{appTitleHead} – Statistics</title>
       </Helmet>
       <Container id="statistics" className="my-3">
         <h1 className="h1">Statistics</h1>

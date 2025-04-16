@@ -2,11 +2,15 @@ import Container from 'react-bootstrap/Container'
 import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router'
 
+import AppStore from '@/stores/app'
+
 function About() {
+  const appTitleHead = AppStore.getState().appTitleHead
+
   return (
     <>
       <Helmet>
-        <title>FCS Aggregator – Content Search – About</title>
+        <title>{appTitleHead} – About</title>
       </Helmet>
       <Container>
         <h1 className="h1">About the Federated Content Search (FCS) Aggregator</h1>

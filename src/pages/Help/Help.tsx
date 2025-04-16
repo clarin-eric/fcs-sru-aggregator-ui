@@ -1,11 +1,15 @@
 import Container from 'react-bootstrap/Container'
 import { Helmet } from 'react-helmet-async'
 
+import AppStore from '@/stores/app'
+
 function Help() {
+  const appTitleHead = AppStore.getState().appTitleHead
+
   return (
     <>
       <Helmet>
-        <title>FCS Aggregator – Content Search – Help</title>
+        <title>{appTitleHead} – Help</title>
       </Helmet>
       <Container>
         <h1 className="h1">Help</h1>

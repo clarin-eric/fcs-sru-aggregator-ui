@@ -9,11 +9,14 @@ import About from '@/pages/About'
 import Help from '@/pages/Help'
 import Search from '@/pages/Search'
 import Statistics from '@/pages/Statistics'
+import AppStore from '@/stores/app'
 import { trackPageView } from '@/utils/matomo'
 
 // --------------------------------------------------------------------------
 
 function App() {
+  const appTitleHead = AppStore.getState().appTitleHead
+
   // initial setup
   console.debug('[App] set color mode and watch for changes ...')
   useColorMode() // TODO: or move to index.tsx?
@@ -41,7 +44,7 @@ function App() {
       <Helmet>
         {/* fallback/reset when not overridden in children (pages) */}
         {/* NOTE: will not "fire" before matomo tracking update, so better to override ourselves explicitely */}
-        <title>{import.meta.env.HEAD_TITLE}</title>
+        <title>{appTitleHead}</title>
 
         {/* TODO: socials ? --> static index.html might be better */}
       </Helmet>

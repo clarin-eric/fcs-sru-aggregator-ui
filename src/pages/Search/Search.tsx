@@ -12,6 +12,7 @@ import { useSearchParams } from 'react-router'
 import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { SearchParamsProvider } from '@/providers/SearchParamsContext'
+import AppStore from '@/stores/app'
 import { getInitData, postSearch, type Resource } from '@/utils/api'
 import { trackSiteSearch } from '@/utils/matomo'
 import { evaluateAggregationContext, fromApi, getResourceIDs } from '@/utils/resources'
@@ -61,6 +62,8 @@ function Search() {
   const [searchParams, setSearchParams] = useState<SearchData | null>(null)
 
   const [toasts, setToasts] = useState<ToastMessage[]>([])
+
+  const appTitleHead = AppStore.getState().appTitleHead
 
   // ------------------------------------------------------------------------
   // initialization
@@ -232,7 +235,7 @@ function Search() {
   return (
     <>
       <Helmet>
-        <title>{import.meta.env.HEAD_TITLE}</title>
+        <title>{appTitleHead}</title>
       </Helmet>
       <Container id="search">
         {/* toasters */}

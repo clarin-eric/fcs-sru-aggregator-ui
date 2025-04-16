@@ -84,6 +84,11 @@ Runtime configuration can be set using the `window.MyAggregator` object and need
 - `API_URL`: the base URL to the FCS SRU Aggregator REST API, e.g. `https://contentsearch.clarin.eu/rest/`
 - `VALIDATOR_URL`: the base URL to the FCS Endpoint Validator, e.g. `https://www.clarin.eu/fcsvalidator/`
 - `SHOW_SEARCH_RESULT_LINK`: boolean (`true`/`false`) for whether to display a semi-permanent link to search results using the internal searchID
+- `APP_TITLE`: application title, by default `Content Search`
+- `APP_TITLE_HEAD`: application title, will be used for HTML HEAD title tag, by default `FCS Aggregator – Content Search`
+- `TERMS_AND_DISCLAIMER_ADDRESS`: by default `https://www.clarin.eu/content/terms-use-and-disclaimer`
+- `CONTACT_ADDRESS`: help and contact address, url or email, by default `mailto:fcs@clarin.eu`
+- `MATOMO_TRACKING_PARAMS`: matomo tracking parameters, see section about `FEATURE_TRACKING_MATOMO` above
 
 ## Development
 

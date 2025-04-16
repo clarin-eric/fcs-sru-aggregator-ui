@@ -3,9 +3,14 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import { Link } from 'react-router'
 
+import AppStore from '@/stores/app'
+
 import './styles.css'
 
 function Footer() {
+  const termsAndDisclaimerUrl = AppStore.getState().termsAndDisclaimerUrl
+  const contactAddress = AppStore.getState().contactAddress
+
   return (
     <footer className="text-muted">
       <Container>
@@ -35,12 +40,8 @@ function Footer() {
           </Col>
           <Col className="hidden-xs text-end d-flex flex-sm-row flex-column justify-content-sm-end column-gap-3 row-gap-2">
             {/* Contact link in right column on larger screens */}
-            {import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS && (
-              <a href={import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS}>Terms & Disclaimer</a>
-            )}
-            {import.meta.env.CONTACT_ADDRESS && (
-              <a href={import.meta.env.CONTACT_ADDRESS}>Contact</a>
-            )}
+            {termsAndDisclaimerUrl && <a href={termsAndDisclaimerUrl}>Terms & Disclaimer</a>}
+            {contactAddress && <a href={contactAddress}>Contact</a>}
           </Col>
         </Row>
       </Container>

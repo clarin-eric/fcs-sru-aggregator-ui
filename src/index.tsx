@@ -50,7 +50,8 @@ const axiosClient = axios.create({
 // --------------------------------------------------------------------------
 
 if (import.meta.env.FEATURE_TRACKING_MATOMO) {
-  const successful = setupAndInstallFromConfigString(import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS)
+  const matomoParams = AppStore.getState().matomoTrackingParams
+  const successful = setupAndInstallFromConfigString(matomoParams)
   if (!successful) console.warn('Unable to setup tracking ...')
 }
 
