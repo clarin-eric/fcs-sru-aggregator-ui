@@ -13,6 +13,7 @@ type MyAggregatorConfiguration = {
   TERMS_AND_DISCLAIMER_ADDRESS: string
   CONTACT_ADDRESS: string | null
   MATOMO_TRACKING_PARAMS: string | MatomoSetupParams | null
+  AUTH_USERNAME: string | null
 }
 
 declare const window: Window &
@@ -71,6 +72,9 @@ export function configure() {
   if (window.MyAggregator.MATOMO_TRACKING_PARAMS !== undefined) {
     AppStore.getState().setMatomoTrackingParams(window.MyAggregator.MATOMO_TRACKING_PARAMS)
   }
+  if (window.MyAggregator.AUTH_USERNAME !== undefined) {
+    AppStore.getState().setAuthUsername(window.MyAggregator.AUTH_USERNAME)
+  }
 
   // observe and notify about invalid configuration changes
   window.MyAggregator = new Proxy(window.MyAggregator, {
@@ -95,6 +99,15 @@ export function configure() {
         if (typeof val === 'boolean') {
           console.log('Updating SHOW_SEARCH_RESULT_LINK ...')
           AppStore.getState().setShowSearchResultLink(val)
+          return true
+        }
+        return false
+      }
+
+      if (prop === 'AUTH_USERNAME') {
+        if (val === null || typeof val === 'string') {
+          console.log('Updating AUTH_USERNAME ...')
+          AppStore.getState().setAuthUsername(val)
           return true
         }
         return false

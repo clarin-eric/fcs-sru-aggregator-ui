@@ -2,6 +2,7 @@ import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 import { Link, NavLink } from 'react-router'
+// import { useStore } from 'zustand'
 
 import AppStore from '@/stores/app'
 
@@ -10,8 +11,10 @@ import logoUrl from '@images/icon-services-fcs.png'
 function Header() {
   const appTitle = AppStore.getState().appTitle
 
-  const authed = true
-  const authName = 'XYZ'
+  // const AppStoreReactive = useStore(AppStore)
+  // const authName = AppStoreReactive.authUsername
+  const authName = AppStore.getState().authUsername
+  const authed = authName !== null && authName !== 'anonymous' // anonymous
 
   return (
     <header>

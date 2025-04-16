@@ -20,6 +20,8 @@ type AppStoreState = {
 
   matomoTrackingEnabled: boolean
   matomoTrackingParams: string | MatomoSetupParams | null
+
+  authUsername: string | null
 }
 type AppStoreActions = {
   setDeployPath: (
@@ -74,6 +76,12 @@ type AppStoreActions = {
           oldParams: AppStoreState['matomoTrackingParams']
         ) => AppStoreState['matomoTrackingParams'])
   ) => void
+
+  setAuthUsername: (
+    user:
+      | AppStoreState['authUsername']
+      | ((oldUser: AppStoreState['authUsername']) => AppStoreState['authUsername'])
+  ) => void
 }
 type AppStore = AppStoreState & AppStoreActions
 
@@ -91,6 +99,7 @@ const appStore = createStore<AppStore>((set) => ({
   contactAddress: import.meta.env.CONTACT_ADDRESS,
   matomoTrackingEnabled: import.meta.env.FEATURE_TRACKING_MATOMO, // read-only
   matomoTrackingParams: import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS,
+  authUsername: null,
 
   // actions
   setDeployPath: (path) =>
@@ -121,6 +130,10 @@ const appStore = createStore<AppStore>((set) => ({
     set((state) => ({
       matomoTrackingParams:
         typeof params === 'function' ? params(state.matomoTrackingParams) : params,
+    })),
+  setAuthUsername: (user) =>
+    set((state) => ({
+      authUsername: typeof user === 'function' ? user(state.authUsername) : user,
     })),
 }))
 

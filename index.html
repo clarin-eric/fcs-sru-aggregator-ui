@@ -21,11 +21,15 @@
     window.MyAggregator = window.MyAggregator || {};
     window._paq = window._paq || [];
 
+    // API stuff
     // window.MyAggregator.API_URL = "rest/";
     // window.MyAggregator.DEPLOY_PATH = null; // null for default ("/")
+
+    // UI (updatable)
     // window.MyAggregator.VALIDATOR_URL = "https://www.clarin.eu/fcsvalidator/";
     // window.MyAggregator.SHOW_SEARCH_RESULT_LINK = false;
 
+    // UI
     // window.MyAggregator.APP_TITLE = "Content Search"
     // window.MyAggregator.APP_TITLE_HEAD = "FCS Aggregator – Content Search"
     // window.MyAggregator.TERMS_AND_DISCLAIMER_ADDRESS = "https://www.clarin.eu/content/terms-use-and-disclaimer"
@@ -34,10 +38,8 @@
     // matomo, set to null to disable
     // window.MyAggregator.MATOMO_TRACKING_PARAMS = { srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }
 
-    // window.MyAggregator.mode
-    // window.MyAggregator.resources
-    // window.MyAggregator.xAggregationContext
-    window.MyAggregator.isLoggedIn = false;
+    // user authentication status
+    // window.MyAggregator.AUTH_USERNAME = "<XYZ @ University>"
   </script>
 
   <script type="module" src="/src/index.tsx"></script>
