@@ -9,6 +9,7 @@ The frontend uses the following technologies:
   - [React Query](https://tanstack.com/query/latest) 5.74.3 with [Axios](https://github.com/axios/axios) 1.8.4 for web requests
 - [Bootstrap](https://getbootstrap.com/) 5.3.5 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.11.3, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.9
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
+- [react-slugify](https://github.com/martpie/react-slugify) 4.0.1 for generating hash urls
 - [PrismJS](https://github.com/PrismJS/prism) 1.29.0 for syntax highlighting
 - [ANTLR4ng](https://github.com/mike-lischke/antlr4ng) 3.0.16 for syntax parsing (visual query builder, syntax validation)
 - [Zustand](https://github.com/pmndrs/zustand) 5.0.3 for state management of external bundle configuration

@@ -256,6 +256,7 @@ export default defineConfig(({ mode }) => {
             'zustand',
             '@nozbe/microfuzz/react',
             'react-helmet-async',
+            'react-slugify',
           ],
           // lazy loaded chunk (query-builder)
           [`${outputsLibVenderPath}antlr4`]: ['antlr4ng'],

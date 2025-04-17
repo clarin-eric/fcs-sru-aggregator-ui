@@ -2,6 +2,7 @@ import type { HighlightRanges } from '@nozbe/microfuzz'
 import { Highlight } from '@nozbe/microfuzz/react'
 import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
+import slugify from 'react-slugify'
 import { Fragment } from 'react/jsx-runtime'
 
 import type { InstitutionEndpointInfo } from '@/utils/api'
@@ -27,7 +28,7 @@ function EndpointStatistics({
 }) {
   return (
     <div className="ps-sm-4 mt-sm-0 mt-2 pt-sm-0 pt-1" key={url}>
-      <h4 className="h5">
+      <h4 className="h5" id={slugify(url)}>
         <Highlight text={url} ranges={statistics.matchEndpoint} />
         {validatorUrl && (
           <>

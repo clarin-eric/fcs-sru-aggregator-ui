@@ -7,6 +7,7 @@ import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
+import slugify from 'react-slugify'
 
 import type { InstitutionEndpointInfo, StatisticsSection } from '@/utils/api'
 import EndpointStatistics from './EndpointStatistics'
@@ -215,7 +216,7 @@ function SectionStatistics({
       {Object.entries(institutionData).map(
         ([institutionName, { match: institutionMatch, endpoints: institutionEndpoints }]) => (
           <Card className="p-2" key={institutionName}>
-            <h3 className="h4 pb-1 border-bottom">
+            <h3 className="h4 pb-1 border-bottom" id={slugify(institutionName)}>
               <Highlight text={institutionName} ranges={institutionMatch} />
             </h3>
             {Object.entries(institutionEndpoints)
