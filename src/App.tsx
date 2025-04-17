@@ -54,7 +54,7 @@ function App() {
           <Route index element={<Search />} />
           <Route path="about" element={<About />} />
           <Route path="help" element={<Help />} />
-          <Route path="stats" element={<Statistics />} />
+          <Route path="stats/:categoryId?" element={<Statistics />} />
         </Routes>
       </main>
       <Footer />
