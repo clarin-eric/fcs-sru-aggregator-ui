@@ -69,8 +69,10 @@ export function configure() {
   if (window.MyAggregator.CONTACT_ADDRESS !== undefined) {
     AppStore.getState().setContactAddress(window.MyAggregator.CONTACT_ADDRESS)
   }
-  if (window.MyAggregator.MATOMO_TRACKING_PARAMS !== undefined) {
-    AppStore.getState().setMatomoTrackingParams(window.MyAggregator.MATOMO_TRACKING_PARAMS)
+  if (import.meta.env.FEATURE_TRACKING_MATOMO) {
+    if (window.MyAggregator.MATOMO_TRACKING_PARAMS !== undefined) {
+      AppStore.getState().setMatomoTrackingParams(window.MyAggregator.MATOMO_TRACKING_PARAMS)
+    }
   }
   if (window.MyAggregator.AUTH_USERNAME !== undefined) {
     AppStore.getState().setAuthUsername(window.MyAggregator.AUTH_USERNAME)

@@ -98,7 +98,9 @@ const appStore = createStore<AppStore>((set) => ({
   termsAndDisclaimerUrl: import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS,
   contactAddress: import.meta.env.CONTACT_ADDRESS,
   matomoTrackingEnabled: import.meta.env.FEATURE_TRACKING_MATOMO, // read-only
-  matomoTrackingParams: import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS,
+  matomoTrackingParams: import.meta.env.FEATURE_TRACKING_MATOMO
+    ? import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS
+    : null,
   authUsername: null,
 
   // actions
