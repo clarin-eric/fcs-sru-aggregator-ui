@@ -15,6 +15,7 @@ import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { getSearchResultsMetaOnly, type SearchResultsMetaOnly } from '@/utils/api'
+import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import { trackSiteSearch } from '@/utils/matomo'
 import {
   DEFAULT_SORTING,
@@ -87,21 +88,37 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
   const numRequested = resourceIDs.length
   const numInProgress = data?.inProgress ?? numRequested
   const numWithResults = useMemo(
-    () => data?.results.filter((result) => result.numberOfRecords > 0).length ?? 0,
+    () =>
+      data?.results.filter(
+        (result) =>
+          (result.numberOfRecords !== -1 ? result.numberOfRecords : result.numberOfRecordsLoaded) >
+          0
+      ).length ?? 0,
     [data]
   )
   const numWithResultsWithWarnings = useMemo(
     () =>
-      data?.results.filter((result) => result.numberOfRecords > 0 && result.diagnostics.length > 0)
-        .length ?? 0,
+      data?.results.filter(
+        (result) =>
+          !result.inProgress &&
+          (result.numberOfRecords !== -1 ? result.numberOfRecords : result.numberOfRecordsLoaded) >
+            0 &&
+          result.diagnostics.filter(
+            (diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI
+          ).length > 0
+      ).length ?? 0,
     [data]
   )
   const numNoResults = useMemo(
     () =>
       data?.results.filter(
         (result) =>
-          result.numberOfRecords <= 0 &&
-          result.diagnostics.length === 0 &&
+          !result.inProgress &&
+          (result.numberOfRecords !== -1 ? result.numberOfRecords : result.numberOfRecordsLoaded) <=
+            0 &&
+          result.diagnostics.filter(
+            (diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI
+          ).length === 0 &&
           result.exception === null
       ).length ?? 0,
     [data]
@@ -110,22 +127,34 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
     () =>
       data?.results.filter(
         (result) =>
-          result.numberOfRecords <= 0 &&
-          (result.diagnostics.length > 0 || result.exception !== null)
+          !result.inProgress &&
+          (result.numberOfRecords !== -1 ? result.numberOfRecords : result.numberOfRecordsLoaded) <=
+            0 &&
+          (result.diagnostics.filter(
+            (diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI
+          ).length > 0 ||
+            result.exception !== null)
       ).length ?? 0,
     [data]
   )
   const numNoResultsWithExceptions = useMemo(
     () =>
-      data?.results.filter((result) => result.numberOfRecords <= 0 && result.exception !== null)
-        .length ?? 0,
+      data?.results.filter(
+        (result) => !result.inProgress && result.numberOfRecords <= 0 && result.exception !== null
+      ).length ?? 0,
     [data]
   )
   const numNoResultsWithWarnings = useMemo(
     () =>
       data?.results.filter(
         (result) =>
-          result.numberOfRecords <= 0 && result.diagnostics.length > 0 && result.exception === null
+          !result.inProgress &&
+          (result.numberOfRecords !== -1 ? result.numberOfRecords : result.numberOfRecordsLoaded) <=
+            0 &&
+          result.diagnostics.filter(
+            (diagnostic) => diagnostic.uri !== NO_MORE_RECORDS_DIAGNOSTIC_URI
+          ).length > 0 &&
+          result.exception === null
       ).length ?? 0,
     [data]
   )
