@@ -37,6 +37,8 @@ function SectionStatistics({
   ])
   const [showIssuesOnly, setShowIssuesOnly] = useState(false)
 
+  const idSuffix = `-${data.isScan ? 'scan' : 'search'}`
+
   // make it flat
   const flatData = useMemo(
     () =>
@@ -174,27 +176,27 @@ function SectionStatistics({
               onChange={(event) => setFilter(event.target.value)}
             />
           </Col>
-          <Col id="filter-checkboxes" lg={6} md={12}>
+          <Col className="filter-checkboxes" lg={6} md={12}>
             <Form.Text className="me-2">Apply filter to:</Form.Text>
             <Form.Check
               type="checkbox"
               checked={filterFields.includes('institution')}
               onChange={() => handleFilterOptionToggleChange('institution')}
-              id="filter-institution-name"
+              id={`filter-institution-name${idSuffix}`}
               label="Institution"
             />
             <Form.Check
               type="checkbox"
               checked={filterFields.includes('endpoint')}
               onChange={() => handleFilterOptionToggleChange('endpoint')}
-              id="filter-endpoint-url"
+              id={`filter-endpoint-url${idSuffix}`}
               label="Endpoint"
             />
             <Form.Check
               type="checkbox"
               checked={filterFields.includes('resources')}
               onChange={() => handleFilterOptionToggleChange('resources')}
-              id="filter-resource-names"
+              id={`filter-resource-names${idSuffix}`}
               label="Resources"
             />
           </Col>
@@ -206,7 +208,7 @@ function SectionStatistics({
             type="checkbox"
             checked={showIssuesOnly}
             onChange={() => setShowIssuesOnly(!showIssuesOnly)}
-            id="filter-show-issues-only"
+            id={`filter-show-issues-only${idSuffix}`}
             label={`Only show endpoints with issues (errors or warnings, currently affects ${
               endpointsWithIssues.length
             } endpoint${endpointsWithIssues.length !== 1 ? 's' : ''})`}
@@ -216,10 +218,7 @@ function SectionStatistics({
       {Object.entries(institutionData).map(
         ([institutionName, { match: institutionMatch, endpoints: institutionEndpoints }]) => (
           <Card className="p-2" key={institutionName}>
-            <h3
-              className="h4 pb-1 border-bottom"
-              id={`${slugify(institutionName)}-${data.isScan ? 'scan' : 'search'}`}
-            >
+            <h3 className="h4 pb-1 border-bottom" id={`${slugify(institutionName)}${idSuffix}`}>
               <Highlight text={institutionName} ranges={institutionMatch} />
             </h3>
             {Object.entries(institutionEndpoints)

@@ -8,14 +8,14 @@
 
 /* fuzzy filter checkbox styling */
 
-#filter-checkboxes {
+#statistics form .filter-checkboxes {
   align-content: center;
 }
 
-#filter-checkboxes .form-check {
+#statistics form .filter-checkboxes .form-check {
   display: inline-block;
 }
 
-#filter-checkboxes .form-check+.form-check {
+#statistics form .filter-checkboxes .form-check+.form-check {
   margin-left: 1rem;
 }
