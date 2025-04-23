@@ -5,8 +5,8 @@
 The frontend uses the following technologies:
 
 - [ReactJS](https://18.react.dev/) 18.3.1
-  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.5.0 for <abbr title="Single Page Application">SPA</abbr> routing
-  - [React Query](https://tanstack.com/query/latest) 5.74.3 with [Axios](https://github.com/axios/axios) 1.8.4 for web requests
+  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.5.1 for <abbr title="Single Page Application">SPA</abbr> routing
+  - [React Query](https://tanstack.com/query/latest) 5.74.4 with [Axios](https://github.com/axios/axios) 1.8.4 for web requests
 - [Bootstrap](https://getbootstrap.com/) 5.3.5 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.11.3, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.9
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
 - [react-slugify](https://github.com/martpie/react-slugify) 4.0.1 for generating hash urls
@@ -17,9 +17,9 @@ The frontend uses the following technologies:
 
 For development and building a few additional dependencies are required:
 
-- [Vite](https://vite.dev/) 6.3.0 with plugins
+- [Vite](https://vite.dev/) 6.3.2 with plugins
 - [TypeScript](https://www.typescriptlang.org/) 5.8.3 with `@types/*` definitions
-- [ESLint](https://eslint.org/) 9.24.0 with plugins
+- [ESLint](https://eslint.org/) 9.25.1 with plugins
 
 ## Features
 
