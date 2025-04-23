@@ -8,8 +8,8 @@ import Tab from 'react-bootstrap/Tab'
 import { Helmet } from 'react-helmet-async'
 import { useParams } from 'react-router'
 
-import useRouteGoTo from '@/hooks/useRouteGoTo'
 import useRouteMatch from '@/hooks/useRouteMatch'
+import useUpdateRouteLocation from '@/hooks/useUpdateRouteLocation'
 import { useAxios } from '@/providers/AxiosContext'
 import AppStore from '@/stores/app'
 import type { StatisticsSection } from '@/utils/api'
@@ -41,7 +41,7 @@ function Statistics() {
 
   const { categoryId } = useParams()
   const routeMatch = useRouteMatch()
-  const doNavigation = useRouteGoTo()
+  const updateLocation = useUpdateRouteLocation()
   console.debug('route', { routeMatch, categoryId })
 
   const { isPending, isError, data, error } = useQuery({
@@ -63,21 +63,25 @@ function Statistics() {
       ? categoryKeys[0]
       : undefined
 
+  // --------------------------------------------------------------
+
   function refreshData() {
     console.debug('Invalidate data and refresh ...')
     queryClient.invalidateQueries({ queryKey: ['statistics'] })
   }
 
-  function handleTabChange(activeKey: string) {
-    console.log('activeKey', { activeKey, routeMatch, categoryId: routeMatch?.params.categoryId })
+  function handleTabChange(eventKey: string | null) {
+    console.debug('eventKey', { eventKey, routeMatch, categoryId: routeMatch?.params.categoryId })
     if (routeMatch) {
-      if (routeMatch.params.categoryId !== activeKey) {
+      if (routeMatch.params.categoryId !== eventKey) {
         if (routeMatch.route.path) {
-          doNavigation(routeMatch.route.path, { categoryId: activeKey })
+          updateLocation(routeMatch.route.path, { categoryId: eventKey })
         }
       }
     }
   }
+
+  // --------------------------------------------------------------
 
   return (
     <>
