@@ -18,6 +18,7 @@ function EndpointStatistics({
   url,
   statistics,
   validatorUrl,
+  isScan,
 }: {
   url: string
   statistics: InstitutionEndpointInfo & {
@@ -25,10 +26,11 @@ function EndpointStatistics({
     matchResources: (HighlightRanges | null)[]
   }
   validatorUrl: string | null
+  isScan: boolean
 }) {
   return (
     <div className="ps-sm-4 mt-sm-0 mt-2 pt-sm-0 pt-1" key={url}>
-      <h4 className="h5" id={slugify(url)}>
+      <h4 className="h5" id={`${slugify(url)}-${isScan ? 'scan' : 'search'}`}>
         <Highlight text={url} ranges={statistics.matchEndpoint} />
         {validatorUrl && (
           <>

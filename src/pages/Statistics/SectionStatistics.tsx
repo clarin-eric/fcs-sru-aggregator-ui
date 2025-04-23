@@ -216,7 +216,10 @@ function SectionStatistics({
       {Object.entries(institutionData).map(
         ([institutionName, { match: institutionMatch, endpoints: institutionEndpoints }]) => (
           <Card className="p-2" key={institutionName}>
-            <h3 className="h4 pb-1 border-bottom" id={slugify(institutionName)}>
+            <h3
+              className="h4 pb-1 border-bottom"
+              id={`${slugify(institutionName)}-${data.isScan ? 'scan' : 'search'}`}
+            >
               <Highlight text={institutionName} ranges={institutionMatch} />
             </h3>
             {Object.entries(institutionEndpoints)
@@ -227,6 +230,7 @@ function SectionStatistics({
                   statistics={endpointInfo}
                   validatorUrl={validatorUrl}
                   key={endpointUrl}
+                  isScan={data.isScan}
                 />
               ))}
           </Card>
