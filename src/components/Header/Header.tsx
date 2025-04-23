@@ -8,6 +8,10 @@ import AppStore from '@/stores/app'
 
 import logoUrl from '@images/icon-services-fcs.png'
 
+import './styles.css'
+
+import personIcon from 'bootstrap-icons/icons/person.svg?raw'
+
 function Header() {
   const appTitle = AppStore.getState().appTitle
 
@@ -15,6 +19,9 @@ function Header() {
   // const authName = AppStoreReactive.authUsername
   const authName = AppStore.getState().authUsername
   const authed = authName !== null && authName !== 'anonymous' // anonymous
+
+  const deployPath = AppStore.getState().deployPath ?? ''
+  const loginPath = deployPath + (deployPath.endsWith('/') ? '' : '/') + 'login'
 
   return (
     <header>
@@ -41,12 +48,12 @@ function Header() {
               </Nav.Link>
               {authed ? (
                 <Navbar.Text className="ms-auto">
-                  Signed in as <span className="fw-bold">{authName}</span>
+                  <i dangerouslySetInnerHTML={{ __html: personIcon }} /> Signed in as{' '}
+                  <span className="fw-bold">{authName}</span>
                 </Navbar.Text>
               ) : (
-                <Nav.Link as={Link} to="/login" className="ms-auto">
-                  {/* TODO: some fancy login handling */}
-                  Login/Logout
+                <Nav.Link href={loginPath} className="ms-auto">
+                  <i dangerouslySetInnerHTML={{ __html: personIcon }} /> Login
                 </Nav.Link>
               )}
             </Nav>
