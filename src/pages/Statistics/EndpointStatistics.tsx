@@ -66,16 +66,33 @@ function EndpointStatistics({
             <dd>{statistics.rootResources.length} root resources</dd>
             <dd>
               <ul>
-                {statistics.rootResources.map((nameOrResInfo, idx) => (
-                  <li
-                    key={typeof nameOrResInfo === 'string' ? nameOrResInfo : nameOrResInfo.handle}
-                  >
-                    <Highlight
-                      text={typeof nameOrResInfo === 'string' ? nameOrResInfo : nameOrResInfo.title}
-                      ranges={statistics.matchResources?.[idx] ?? null}
-                    />
-                  </li>
-                ))}
+                {statistics.rootResources.map((nameOrResInfo, idx) =>
+                  typeof nameOrResInfo === 'string' ? (
+                    <li key={nameOrResInfo}>
+                      <Highlight
+                        text={nameOrResInfo}
+                        ranges={statistics.matchResources?.[idx] ?? null}
+                      />
+                    </li>
+                  ) : (
+                    <li key={nameOrResInfo.handle}>
+                      {!nameOrResInfo.valid ? (
+                        <s>
+                          <Highlight
+                            text={nameOrResInfo.title}
+                            ranges={statistics.matchResources?.[idx] ?? null}
+                          />
+                          {/* TODO: maybe add exclamation icon, why invalid */}
+                        </s>
+                      ) : (
+                        <Highlight
+                          text={nameOrResInfo.title}
+                          ranges={statistics.matchResources?.[idx] ?? null}
+                        />
+                      )}
+                    </li>
+                  )
+                )}
               </ul>
             </dd>
           </>
