@@ -9,11 +9,11 @@ import Row from 'react-bootstrap/Row'
 
 import { type Resource } from '@/utils/api'
 
-import './styles.css'
-
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 

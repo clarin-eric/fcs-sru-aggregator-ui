@@ -7,9 +7,9 @@ import Tooltip from 'react-bootstrap/Tooltip'
 
 import { type ResourceSearchResult } from '@/utils/api'
 
-import './styles.css'
-
 import link45degIcon from 'bootstrap-icons/icons/link-45deg.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types

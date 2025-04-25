@@ -8,9 +8,11 @@ import AppStore from '@/stores/app'
 
 import logoUrl from '@images/icon-services-fcs.png'
 
+import personIcon from 'bootstrap-icons/icons/person.svg?raw'
+
 import './styles.css'
 
-import personIcon from 'bootstrap-icons/icons/person.svg?raw'
+// --------------------------------------------------------------------------
 
 function Header() {
   const appTitle = AppStore.getState().appTitle

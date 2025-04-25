@@ -21,14 +21,14 @@ import ViewLex from './ViewLex'
 import ViewLexPlain from './ViewLexPlain'
 import ViewPlain from './ViewPlain'
 
-import './styles.css'
-
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import downloadIcon from 'bootstrap-icons/icons/download.svg?raw'
 import envelopeArrowUpIcon from 'bootstrap-icons/icons/envelope-arrow-up.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 import infoCircleIcon from 'bootstrap-icons/icons/info-circle.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types

@@ -7,9 +7,9 @@ import { Fragment } from 'react/jsx-runtime'
 
 import type { InstitutionEndpointInfo } from '@/utils/api'
 
-import './styles.css'
-
 import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // component

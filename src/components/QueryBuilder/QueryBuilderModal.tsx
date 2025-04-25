@@ -22,9 +22,9 @@ import {
 } from './fcs'
 import { LexCQLQueryBuilder, parseQuery as parseLexCQLQuery } from './lex'
 
-import './styles.css'
-
 import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types

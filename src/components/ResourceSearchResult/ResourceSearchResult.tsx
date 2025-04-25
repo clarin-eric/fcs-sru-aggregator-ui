@@ -23,12 +23,12 @@ import ViewLex from './ViewLex'
 import ViewLexPlain from './ViewLexPlain'
 import ViewPlain from './ViewPlain'
 
-import './styles.css'
-
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import eyeIcon from 'bootstrap-icons/icons/eye.svg?raw'
 import infoCircleIcon from 'bootstrap-icons/icons/info-circle.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types

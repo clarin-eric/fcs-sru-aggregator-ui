@@ -7,6 +7,8 @@ import AppStore from '@/stores/app'
 
 import './styles.css'
 
+// --------------------------------------------------------------------------
+
 function Footer() {
   const termsAndDisclaimerUrl = AppStore.getState().termsAndDisclaimerUrl
   const contactAddress = AppStore.getState().contactAddress

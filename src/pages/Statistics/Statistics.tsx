@@ -16,9 +16,9 @@ import type { StatisticsSection } from '@/utils/api'
 import { getStatisticsData } from '@/utils/api'
 import SectionStatistics from './SectionStatistics'
 
-import './styles.css'
-
 import arrowClockwiseIcon from 'bootstrap-icons/icons/arrow-clockwise.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types

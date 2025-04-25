@@ -12,9 +12,9 @@ import {
 } from '@/utils/api'
 // import { trackSiteSearch } from '@/utils/matomo'
 
-import './styles.css'
-
 import threeDotsIcon from 'bootstrap-icons/icons/three-dots.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types

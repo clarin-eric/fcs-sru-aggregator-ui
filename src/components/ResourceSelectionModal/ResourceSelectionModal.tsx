@@ -24,10 +24,10 @@ import {
 import GroupedResources from './GroupedResources'
 import ResourceSelector from './ResourceSelector'
 
-import './styles.css'
-
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 // types
