@@ -58,7 +58,7 @@ function Statistics() {
 
   const appTitleHead = AppStore.getState().appTitleHead
 
-  const categoryKeys = data !== undefined ? Object.keys(data) : []
+  const categoryKeys = data !== undefined ? Object.keys(data).toSorted() : []
   // check if path param of to-be-selected statistics category exists and is valid otherwise default
   const defaultCategoryTab =
     categoryId != undefined && categoryKeys.includes(categoryId)

@@ -2,11 +2,14 @@ import type { HighlightRanges } from '@nozbe/microfuzz'
 import { Highlight } from '@nozbe/microfuzz/react'
 import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
+import Tooltip from 'react-bootstrap/Tooltip'
 import slugify from 'react-slugify'
 import { Fragment } from 'react/jsx-runtime'
 
-import type { InstitutionEndpointInfo } from '@/utils/api'
+import type { InstitutionEndpointInfo, StatisticsResourceInfo } from '@/utils/api'
 
+import exclamationTriangleIcon from 'bootstrap-icons/icons/exclamation-triangle.svg?raw'
 import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
 
 import './styles.css'
@@ -28,6 +31,47 @@ function EndpointStatistics({
   validatorUrl: string | null
   isScan: boolean
 }) {
+  function renderResourceWithInfos(resInfo: StatisticsResourceInfo, idx: number) {
+    const resourceInner = (
+      <Highlight text={resInfo.title} ranges={statistics.matchResources?.[idx] ?? null} />
+    )
+
+    if (resInfo.valid && resInfo.notes.length === 0) {
+      return resourceInner
+    }
+
+    return (
+      <OverlayTrigger
+        placement="auto-start"
+        delay={{ show: 250, hide: 400 }}
+        overlay={
+          <Tooltip id={`resource-info-warning-${resInfo.handle}`}>
+            {!resInfo.valid && 'This resource is not available in the Aggregator!'}
+            {!resInfo.valid && resInfo.notes.length >= 1 && <hr className="mt-2 mb-1" />}
+            {resInfo.notes.length === 1 ? (
+              resInfo.notes[0]
+            ) : resInfo.notes.length >= 1 ? (
+              <ul className="text-start m-0 my-1 ps-3">
+                {resInfo.notes.map((note, idx) => (
+                  <li key={idx}>{note}</li>
+                ))}
+              </ul>
+            ) : null}
+          </Tooltip>
+        }
+      >
+        <span>
+          <i
+            dangerouslySetInnerHTML={{ __html: exclamationTriangleIcon }}
+            className="align-baseline me-2"
+          />
+
+          {!resInfo.valid ? <s>{resourceInner}</s> : resourceInner}
+        </span>
+      </OverlayTrigger>
+    )
+  }
+
   return (
     <div className="ps-sm-4 mt-sm-0 mt-2 pt-sm-0 pt-1" key={url}>
       <h4 className="h5" id={`${slugify(url)}-${isScan ? 'scan' : 'search'}`}>
@@ -76,20 +120,7 @@ function EndpointStatistics({
                     </li>
                   ) : (
                     <li key={nameOrResInfo.handle}>
-                      {!nameOrResInfo.valid ? (
-                        <s>
-                          <Highlight
-                            text={nameOrResInfo.title}
-                            ranges={statistics.matchResources?.[idx] ?? null}
-                          />
-                          {/* TODO: maybe add exclamation icon, why invalid */}
-                        </s>
-                      ) : (
-                        <Highlight
-                          text={nameOrResInfo.title}
-                          ranges={statistics.matchResources?.[idx] ?? null}
-                        />
-                      )}
+                      {renderResourceWithInfos(nameOrResInfo, idx)}
                     </li>
                   )
                 )}
