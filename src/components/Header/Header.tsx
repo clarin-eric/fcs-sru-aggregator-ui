@@ -4,6 +4,7 @@ import Navbar from 'react-bootstrap/Navbar'
 import { Link, NavLink } from 'react-router'
 // import { useStore } from 'zustand'
 
+import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import AppStore from '@/stores/app'
 
 import logoUrl from '@images/icon-services-fcs.png'
@@ -25,11 +26,15 @@ function Header() {
   const deployPath = AppStore.getState().deployPath ?? ''
   const loginPath = deployPath + (deployPath.endsWith('/') ? '' : '/') + 'login'
 
+  const linkSearch = useKeepSearchParams()
+
+  // ------------------------------------------------------------------------
+
   return (
     <header>
       <Navbar expand="md" className="bg-body-tertiary">
         <Container>
-          <Navbar.Brand as={Link} to="/">
+          <Navbar.Brand as={Link} to={{ pathname: '/', search: linkSearch }}>
             <img
               src={logoUrl}
               width="30"
@@ -42,10 +47,10 @@ function Header() {
           <Navbar.Toggle aria-controls="header-navbar-nav" />
           <Navbar.Collapse id="header-navbar-nav">
             <Nav className="w-100 d-flex">
-              <Nav.Link as={NavLink} to="/">
+              <Nav.Link as={NavLink} to={{ pathname: '/', search: linkSearch }}>
                 Home
               </Nav.Link>
-              <Nav.Link as={NavLink} to="/help">
+              <Nav.Link as={NavLink} to={{ pathname: '/help', search: linkSearch }}>
                 Help
               </Nav.Link>
               {authed ? (
@@ -54,7 +59,7 @@ function Header() {
                   <span className="fw-bold">{authName}</span>
                 </Navbar.Text>
               ) : (
-                <Nav.Link href={loginPath} className="ms-auto">
+                <Nav.Link href={`${loginPath}${linkSearch ?? ''}`} className="ms-auto">
                   <i dangerouslySetInnerHTML={{ __html: personIcon }} /> Login
                 </Nav.Link>
               )}

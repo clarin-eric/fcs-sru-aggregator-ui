@@ -52,9 +52,9 @@ function App() {
       <main>
         <Routes>
           <Route index element={<Search />} />
-          <Route path="about" element={<About />} />
-          <Route path="help" element={<Help />} />
-          <Route path="stats/:categoryId?" element={<Statistics />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/stats/:categoryId?" element={<Statistics />} />
         </Routes>
       </main>
       <Footer />

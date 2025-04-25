@@ -3,6 +3,7 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import { Link } from 'react-router'
 
+import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import AppStore from '@/stores/app'
 
 import './styles.css'
@@ -13,6 +14,10 @@ function Footer() {
   const termsAndDisclaimerUrl = AppStore.getState().termsAndDisclaimerUrl
   const contactAddress = AppStore.getState().contactAddress
 
+  const linkSearch = useKeepSearchParams()
+
+  // ------------------------------------------------------------------------
+
   return (
     <footer className="text-muted">
       <Container>
@@ -20,7 +25,7 @@ function Footer() {
           <Col className="text-start d-flex flex-sm-row flex-column column-gap-3 row-gap-2">
             {/* On smaller screen, show about link with contact link */}
             <div>
-              <Link to="/about" className="hidden-xs">
+              <Link to={{ pathname: '/about', search: linkSearch }} className="hidden-xs">
                 About
               </Link>
               {/* Center version on mobile */}
@@ -28,7 +33,7 @@ function Footer() {
                 v{import.meta.env.PACKAGE_VERSION}
               </div>
             </div>
-            <Link to="/stats">Statistics</Link>
+            <Link to={{ pathname: '/stats', search: linkSearch }}>Statistics</Link>
           </Col>
           <Col className="text-center">
             {/* CLARIN logo and copyright (center column on larger screens) */}

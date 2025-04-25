@@ -8,8 +8,8 @@ import Tab from 'react-bootstrap/Tab'
 import { Helmet } from 'react-helmet-async'
 import { useParams } from 'react-router'
 
+import useNavigate from '@/hooks/useNavigate'
 import useRouteMatch from '@/hooks/useRouteMatch'
-import useUpdateRouteLocation from '@/hooks/useUpdateRouteLocation'
 import { useAxios } from '@/providers/AxiosContext'
 import AppStore from '@/stores/app'
 import type { StatisticsSection } from '@/utils/api'
@@ -41,7 +41,7 @@ function Statistics() {
 
   const { categoryId } = useParams()
   const routeMatch = useRouteMatch()
-  const updateLocation = useUpdateRouteLocation()
+  const navigate = useNavigate()
   console.debug('route', { routeMatch, categoryId })
 
   const { isPending, isError, data, error } = useQuery({
@@ -75,7 +75,7 @@ function Statistics() {
     if (routeMatch) {
       if (routeMatch.params.categoryId !== eventKey) {
         if (routeMatch.route.path) {
-          updateLocation(routeMatch.route.path, { categoryId: eventKey })
+          navigate(routeMatch.route.path, { categoryId: eventKey })
         }
       }
     }

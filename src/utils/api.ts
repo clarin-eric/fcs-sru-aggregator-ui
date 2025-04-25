@@ -7,6 +7,14 @@ import { type DownloadFormats } from './constants'
 
 // --------------------------------------------------------------------------
 
+export interface ExtraScopingParams {
+  consortia?: string | null
+}
+
+export const REQ_PARAM_CONSORTIA = 'x-consortia'
+
+// --------------------------------------------------------------------------
+
 export interface InitData {
   languages: LanguageCode2NameMap
   resources: Resource[]
@@ -116,8 +124,14 @@ export type AvailableDataViewIdentifier = 'hits' | 'adv' | 'cmdi' | 'kwic' | 'le
 
 // --------------------------------------------------------------------------
 
-export async function getInitData(axios: AxiosInstance) {
-  const response = await axios.get('init')
+export async function getInitData(axios: AxiosInstance, params?: ExtraScopingParams) {
+  const urlParams = new URLSearchParams()
+  if (params?.consortia !== undefined && params?.consortia !== null) {
+    urlParams.set(REQ_PARAM_CONSORTIA, params.consortia)
+  }
+  const url = 'init' + (urlParams.entries().next().done ? '' : `?${urlParams}`)
+
+  const response = await axios.get(url)
   console.debug('[getInitData]', response)
   return response.data as InitData
 
@@ -125,8 +139,14 @@ export async function getInitData(axios: AxiosInstance) {
   // return { languages: [], resources: [], weblichtLanguages: [] }
 }
 
-export async function getResources(axios: AxiosInstance) {
-  const response = await axios.get('resources')
+export async function getResources(axios: AxiosInstance, params?: ExtraScopingParams) {
+  const urlParams = new URLSearchParams()
+  if (params?.consortia !== undefined && params?.consortia !== null) {
+    urlParams.set(REQ_PARAM_CONSORTIA, params.consortia)
+  }
+  const url = 'resources' + (urlParams.entries().next().done ? '' : `?${urlParams}`)
+
+  const response = await axios.get(url)
   console.debug('[getResources]', response)
   return response.data as Resource[]
 
@@ -134,8 +154,14 @@ export async function getResources(axios: AxiosInstance) {
   // return [] satisfies Resource[]
 }
 
-export async function getLanguages(axios: AxiosInstance) {
-  const response = await axios.get('languages')
+export async function getLanguages(axios: AxiosInstance, params?: ExtraScopingParams) {
+  const urlParams = new URLSearchParams()
+  if (params?.consortia !== undefined && params?.consortia !== null) {
+    urlParams.set(REQ_PARAM_CONSORTIA, params.consortia)
+  }
+  const url = 'languages' + (urlParams.entries().next().done ? '' : `?${urlParams}`)
+
+  const response = await axios.get(url)
   console.debug('[getLanguages]', response)
   return response.data as LanguageCode2NameMap
 

@@ -3,9 +3,16 @@ import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router'
 
 import AppStore from '@/stores/app'
+import useKeepSearchParams from '@/hooks/useKeepSearchParams'
+
+// --------------------------------------------------------------------------
 
 function About() {
   const appTitleHead = AppStore.getState().appTitleHead
+
+  const linkSearch = useKeepSearchParams()
+
+  // ------------------------------------------------------------------------
 
   return (
     <>
@@ -32,8 +39,8 @@ function About() {
         <div>
           <h2 className="h2">Statistics</h2>
           <p>
-            View <Link to="/stats">endpoint statistics</Link> to see details about scanned
-            resources, performed searches, warnings and errors.
+            View <Link to={{ pathname: '/stats', search: linkSearch }}>endpoint statistics</Link> to
+            see details about scanned resources, performed searches, warnings and errors.
           </p>
         </div>
 

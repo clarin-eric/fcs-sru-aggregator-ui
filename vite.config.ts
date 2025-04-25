@@ -110,6 +110,7 @@ export default defineConfig(({ mode }) => {
       'process.env': {},
 
       // deployment on subpath, default is "/" for root
+      // see also the "base" configuration on top
       'import.meta.env.DEPLOY_PATH': process.env.VITE_DEPLOY_PATH
         ? `"${process.env.VITE_DEPLOY_PATH}"`
         : JSON.stringify('/'),

@@ -13,7 +13,13 @@ import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { SearchParamsProvider } from '@/providers/SearchParamsContext'
 import AppStore from '@/stores/app'
-import { getInitData, postSearch, type Resource } from '@/utils/api'
+import {
+  type ExtraScopingParams,
+  getInitData,
+  postSearch,
+  REQ_PARAM_CONSORTIA,
+  type Resource,
+} from '@/utils/api'
 import { trackSiteSearch } from '@/utils/matomo'
 import { evaluateAggregationContext, fromApi, getResourceIDs } from '@/utils/resources'
 import { type LanguageCode2NameMap } from '@/utils/search'
@@ -68,9 +74,12 @@ function Search() {
   // ------------------------------------------------------------------------
   // initialization
 
+  const extraParams = {
+    consortia: urlSearchParams.get(REQ_PARAM_CONSORTIA),
+  } satisfies ExtraScopingParams
   const { data, isLoading, isError } = useQuery({
     queryKey: ['init'],
-    queryFn: getInitData.bind(null, axios),
+    queryFn: getInitData.bind(null, axios, extraParams),
   })
 
   useEffect(() => {
