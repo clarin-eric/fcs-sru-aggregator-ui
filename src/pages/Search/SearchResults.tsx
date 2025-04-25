@@ -31,6 +31,8 @@ import './styles.css'
 // --------------------------------------------------------------------------
 // types
 
+export const DEFAULT_POLL_DELAY = 1500
+
 export interface SearchResultsProps {
   searchId: string
   pollDelay?: number
@@ -40,7 +42,7 @@ export interface SearchResultsProps {
 // component
 
 // TODO: make it (search?) cancelable! (useEffect?)
-function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
+function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResultsProps) {
   const axios = useAxios()
   const { resources } = useAggregatorData()
   const { query, queryType, resourceIDs } = useSearchParams()
@@ -64,7 +66,7 @@ function SearchResults({ searchId, pollDelay = 1500 }: SearchResultsProps) {
   }, [sorting, resources])
 
   // polling of meta results, dependant on searchId
-  pollDelay ??= 1500
+  pollDelay ??= DEFAULT_POLL_DELAY
   const {
     data,
     // isLoading: isLoadingSearchResults,

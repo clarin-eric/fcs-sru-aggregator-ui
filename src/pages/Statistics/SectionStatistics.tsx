@@ -81,12 +81,23 @@ function SectionStatistics({
       const strings = []
       if (filterFields.length === 0) {
         strings.push(
-          ...[item.institutionName, item.endpointUrl, ...item.endpointInfo.rootResources]
+          ...[
+            item.institutionName,
+            item.endpointUrl,
+            ...item.endpointInfo.rootResources.map((strOrObj) =>
+              typeof strOrObj === 'string' ? strOrObj : strOrObj.title
+            ),
+          ]
         )
       } else {
         if (filterFields.includes('institution')) strings.push(item.institutionName)
         if (filterFields.includes('endpoint')) strings.push(item.endpointUrl)
-        if (filterFields.includes('resources')) strings.push(...item.endpointInfo.rootResources)
+        if (filterFields.includes('resources'))
+          strings.push(
+            ...item.endpointInfo.rootResources.map((strOrObj) =>
+              typeof strOrObj === 'string' ? strOrObj : strOrObj.title
+            )
+          )
       }
       return strings
     },

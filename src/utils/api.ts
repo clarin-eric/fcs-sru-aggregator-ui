@@ -125,6 +125,24 @@ export async function getInitData(axios: AxiosInstance) {
   // return { languages: [], resources: [], weblichtLanguages: [] }
 }
 
+export async function getResources(axios: AxiosInstance) {
+  const response = await axios.get('resources')
+  console.debug('[getResources]', response)
+  return response.data as Resource[]
+
+  // TODO: mock
+  // return [] satisfies Resource[]
+}
+
+export async function getLanguages(axios: AxiosInstance) {
+  const response = await axios.get('languages')
+  console.debug('[getLanguages]', response)
+  return response.data as LanguageCode2NameMap
+
+  // TODO: mock
+  // return {} satisfies LanguageCode2NameMap
+}
+
 // --------------------------------------------------------------------------
 
 export interface Statistics {
@@ -142,7 +160,7 @@ export interface StatisticsSection {
 export interface InstitutionEndpointInfo {
   version: ProtocolVersion
   searchCapabilities: SearchCapability[]
-  rootResources: string[]
+  rootResources: string[] | StatisticsResourceInfo[]
   maxConcurrentRequests: number
   diagnostics: Diagnostics
   errors: Errors
@@ -180,6 +198,13 @@ export interface Exception {
   klass: string
   message: string
   cause: null | string
+}
+
+export interface StatisticsResourceInfo {
+  handle: string
+  title: string
+  valid: boolean
+  notes: string[]
 }
 
 // --------------------------------------------------------------------------

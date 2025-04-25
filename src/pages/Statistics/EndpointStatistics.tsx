@@ -66,9 +66,14 @@ function EndpointStatistics({
             <dd>{statistics.rootResources.length} root resources</dd>
             <dd>
               <ul>
-                {statistics.rootResources.map((name, idx) => (
-                  <li key={name}>
-                    <Highlight text={name} ranges={statistics.matchResources?.[idx] ?? null} />
+                {statistics.rootResources.map((nameOrResInfo, idx) => (
+                  <li
+                    key={typeof nameOrResInfo === 'string' ? nameOrResInfo : nameOrResInfo.handle}
+                  >
+                    <Highlight
+                      text={typeof nameOrResInfo === 'string' ? nameOrResInfo : nameOrResInfo.title}
+                      ranges={statistics.matchResources?.[idx] ?? null}
+                    />
                   </li>
                 ))}
               </ul>
