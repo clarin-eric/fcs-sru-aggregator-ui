@@ -6,14 +6,14 @@ import Nav from 'react-bootstrap/Nav'
 import Row from 'react-bootstrap/Row'
 import Tab from 'react-bootstrap/Tab'
 import { Helmet } from 'react-helmet-async'
-import { useParams } from 'react-router'
+import { useParams, useSearchParams } from 'react-router'
 
 import useNavigate from '@/hooks/useNavigate'
 import useRouteMatch from '@/hooks/useRouteMatch'
 import { useAxios } from '@/providers/AxiosContext'
 import AppStore from '@/stores/app'
-import type { StatisticsSection } from '@/utils/api'
-import { getStatisticsData } from '@/utils/api'
+import type { ExtraScopingParams, StatisticsSection } from '@/utils/api'
+import { getStatisticsData, REQ_PARAM_CONSORTIA } from '@/utils/api'
 import SectionStatistics from './SectionStatistics'
 
 import arrowClockwiseIcon from 'bootstrap-icons/icons/arrow-clockwise.svg?raw'
@@ -38,15 +38,19 @@ const CATEGORY_LABELS_MAP = Object.fromEntries(CATEGORY_LABELS.map((item) => [it
 function Statistics() {
   const axios = useAxios()
   const queryClient = useQueryClient()
+  const [urlSearchParams] = useSearchParams()
 
   const { categoryId } = useParams()
   const routeMatch = useRouteMatch()
   const navigate = useNavigate()
   console.debug('route', { routeMatch, categoryId })
 
+  const extraParams = {
+    consortia: urlSearchParams.get(REQ_PARAM_CONSORTIA),
+  } satisfies ExtraScopingParams
   const { isPending, isError, data, error } = useQuery({
     queryKey: ['statistics'],
-    queryFn: getStatisticsData.bind(null, axios),
+    queryFn: getStatisticsData.bind(null, axios, extraParams),
   })
 
   const [validatorUrl, setValidatorUrl] = useState(AppStore.getState().validatorURL)

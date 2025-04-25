@@ -235,14 +235,20 @@ export interface StatisticsResourceInfo {
 
 // --------------------------------------------------------------------------
 
-export async function getStatisticsData(axios: AxiosInstance) {
-  const response = await axios.get('statistics')
+export async function getStatisticsData(axios: AxiosInstance, params?: ExtraScopingParams) {
+  const urlParams = new URLSearchParams()
+  if (params?.consortia !== undefined && params?.consortia !== null) {
+    urlParams.set(REQ_PARAM_CONSORTIA, params.consortia)
+  }
+  const url = 'statistics' + (urlParams.entries().next().done ? '' : `?${urlParams}`)
+
+  const response = await axios.get(url)
   console.debug('[getStatisticsData]', response)
   return response.data as Statistics
 
   // TODO: mock
   // return {
-  //   'Last Scan': { institutions: {}, date: 0, timeout: 0, isScan: true },
+  //   'last-scan': { institutions: {}, date: 0, timeout: 0, isScan: true },
   //   'Recent Searches': { institutions: {}, date: 0, timeout: 0, isScan: false },
   // }
 }
