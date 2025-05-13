@@ -72,7 +72,9 @@ export function installScript({ srcUrl }: InstallScriptParams) {
   }
 }
 
-export function setupAndInstallFromConfigString(configString?: string | SetupParams | null) {
+export function setupAndInstallFromConfigString(
+  configString?: string | (SetupParams & InstallScriptParams) | null
+) {
   if (!configString) return false
 
   let params = null
