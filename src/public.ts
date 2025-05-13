@@ -1,5 +1,5 @@
 import AppStore from '@/stores/app'
-import { SetupParams as MatomoSetupParams } from './utils/matomo'
+import { SetupAndInstallScriptParams as MatomoSetupParams } from './utils/matomo'
 
 // --------------------------------------------------------------------------
 

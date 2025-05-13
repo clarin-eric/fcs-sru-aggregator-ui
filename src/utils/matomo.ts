@@ -25,6 +25,8 @@ interface InstallScriptParams {
   srcUrl: string
 }
 
+export type SetupAndInstallScriptParams = SetupParams & InstallScriptParams
+
 // --------------------------------------------------------------------------
 
 window._paq = window['_paq'] || []
@@ -73,7 +75,7 @@ export function installScript({ srcUrl }: InstallScriptParams) {
 }
 
 export function setupAndInstallFromConfigString(
-  configString?: string | (SetupParams & InstallScriptParams) | null
+  configString?: string | SetupAndInstallScriptParams | null
 ) {
   if (!configString) return false
 

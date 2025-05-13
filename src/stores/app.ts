@@ -1,6 +1,6 @@
 import { createStore } from 'zustand/vanilla'
 
-import { SetupParams as MatomoSetupParams } from '@/utils/matomo'
+import { SetupAndInstallScriptParams as MatomoSetupParams } from '@/utils/matomo'
 
 // see: https://zustand.docs.pmnd.rs/apis/create-store#updating-state-based-on-previous-state
 
