@@ -63,9 +63,11 @@ function ViewKwic({ data }: ViewKwicProps) {
               </td>
               <td>{kwic.left}</td>
               <td>
-                <mark>
-                  <strong>{kwic.keyword}</strong>
-                </mark>
+                {kwic.keyword && (
+                  <mark>
+                    <strong>{kwic.keyword}</strong>
+                  </mark>
+                )}
               </td>
               <td>{kwic.right}</td>
             </tr>
