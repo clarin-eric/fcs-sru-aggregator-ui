@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
+import './utils.css'
 
 import App from '@/App.tsx'
 import { AxiosProvider } from '@/providers/AxiosContext'

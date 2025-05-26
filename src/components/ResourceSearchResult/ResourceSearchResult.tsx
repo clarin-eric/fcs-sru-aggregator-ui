@@ -158,13 +158,15 @@ function ResourceSearchResult({
           >
             <Badge
               bg=""
-              className="text-bg-light border me-2"
+              className="text-bg-light border me-2 user-select-text"
               aria-label="Number of results (total amount, or currently loaded amount with total available)"
             >
               {renderResultsCounter()}
             </Badge>
-            <span aria-label="Resource title">{data.resource.title}</span>
-            <small className="text-muted" aria-label="Institution name">
+            <span aria-label="Resource title" className="user-select-text">
+              {data.resource.title}
+            </span>
+            <small className="text-muted user-select-text" aria-label="Institution name">
               {data.resource.institution}
             </small>
           </button>

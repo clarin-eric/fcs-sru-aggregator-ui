@@ -1,0 +1,9 @@
+.user-select-text {
+  /* see https://getbootstrap.com/docs/5.3/utilities/interactions/ */
+  /* default text selection with dragging */
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  user-select: text !important;
+  /* show a text cursor */
+  cursor: text;
+}
