@@ -145,7 +145,8 @@ export function _formatTreeItems(items: _TreeItem[]) {
     // if (['identifier', 'qualifier', 'regexp_pattern', 'regexp_flag'].includes(item.name)) continue
     // if (['regexp', 'attribute', 'within_part_simple'].includes(item.name)) continue
     // lex
-    // ...
+    // if (['simple_name', 'relation_symbol', 'relation'].includes(item.name)) continue
+    // if (['index', 'search_term', 'relation_modified'].includes(item.name)) continue
 
     // NOTE: indexes are inclusive
     const ruleTree = `${' '.repeat(item.depth)}(${item.depth
