@@ -81,6 +81,13 @@
 }
 
 /* *********************************************************************** */
+/* *** ViewPlain.tsx / ViewKwic.tsx / ViewLexPlain.tsx *** */
+
+#search-results .resource-search-result .card-body table td.result-idx {
+  width: 6ch;
+}
+
+/* *********************************************************************** */
 /* *** ViewPlain.tsx / ViewKwic.tsx *** */
 
 #search-results .resource-search-result .card-body table tr:last-child>td,

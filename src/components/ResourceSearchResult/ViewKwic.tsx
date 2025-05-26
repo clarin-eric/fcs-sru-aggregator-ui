@@ -38,7 +38,7 @@ function ViewKwic({ data }: ViewKwicProps) {
         <tbody>
           {data.kwics.map((kwic, index) => (
             <tr key={`${kwic.pid ?? kwic.reference ?? data.resource.id}-${index}`}>
-              <td scope="row" className="text-end text-muted d-none d-sm-table-cell">
+              <td scope="row" className="result-idx text-end text-muted d-none d-sm-table-cell">
                 {index + 1}
               </td>
               <td scope="row" className="result-refs">
