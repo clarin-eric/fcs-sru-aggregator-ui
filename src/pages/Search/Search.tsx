@@ -304,12 +304,19 @@ function Search() {
           <Row className="mt-3">
             <Col>
               <p>
-                To enable researchers to search for specific patterns across collections of data,
-                CLARIN offers a search engine that connects to the local data collections that are
-                available in the centres. The data itself stays at the centre where it is hosted –
-                which is why the underlying technique is called <em>federated content search</em>.
+                The Federated Content Search (FCS) is a search engine by CLARIN that enables
+                researchers to search for specific patterns across collections of data. The search
+                engine connects to the local data collections that are available in the centres. The
+                data itself stays at the centre where it is hosted – which is why the underlying
+                technique is called <em>federated content search</em>.
               </p>
-              <p>TODO: some more brief intro text and maybe links for further information ...</p>
+              <p>
+                To learn more about the FCS, please visit the{' '}
+                <a href="https://www.clarin.eu/content/content-search">
+                  page <em>Content Search</em> at CLARIN.eu
+                </a>
+                .
+              </p>
             </Col>
           </Row>
         )}
