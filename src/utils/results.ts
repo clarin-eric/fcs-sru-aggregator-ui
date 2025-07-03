@@ -1,4 +1,6 @@
+import LocaleStore from '@/stores/locale'
 import type { Resource, ResourceSearchResultMetaOnly } from '@/utils/api'
+import { getBestFromMultilingualValuesTryByLanguage } from './resources'
 
 export type ResultsViewMode = 'plain' | 'kwic' | 'annotation-layers' | 'lexical-entry'
 export type ResultsSorting =
@@ -23,13 +25,23 @@ export const SORT_FNS: {
 } = {
   default: () => () => 0,
   'title-up': (lookup) => (a, b) => {
-    const titleA = lookup.get(a.id)?.title || ''
-    const titleB = lookup.get(b.id)?.title || ''
+    const locale = LocaleStore.getState().locale
+
+    const titleA =
+      getBestFromMultilingualValuesTryByLanguage(lookup.get(a.id)?.title ?? null, locale) ?? ''
+    const titleB =
+      getBestFromMultilingualValuesTryByLanguage(lookup.get(b.id)?.title ?? null, locale) ?? ''
+
     return titleA.localeCompare(titleB)
   },
   'title-down': (lookup) => (a, b) => {
-    const titleA = lookup.get(a.id)?.title || ''
-    const titleB = lookup.get(b.id)?.title || ''
+    const locale = LocaleStore.getState().locale
+
+    const titleA =
+      getBestFromMultilingualValuesTryByLanguage(lookup.get(a.id)?.title ?? null, locale) ?? ''
+    const titleB =
+      getBestFromMultilingualValuesTryByLanguage(lookup.get(b.id)?.title ?? null, locale) ?? ''
+
     return -titleA.localeCompare(titleB)
   },
   'result-count-total-up': () => (a, b) => {
