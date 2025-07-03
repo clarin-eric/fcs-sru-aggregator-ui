@@ -11,8 +11,10 @@ import Row from 'react-bootstrap/Row'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
+import { useLocaleStore } from '@/stores/locale'
 import { getURLForDownload, getURLForWeblicht, type ResourceSearchResult } from '@/utils/api'
 import { DOWNLOAD_FORMATS, NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
+import { getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
 import { type ResultsViewMode } from '@/utils/results'
 import { languageCodeToName, MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 import LoadMoreResultsButton from './LoadMoreResultsButton'
@@ -56,6 +58,7 @@ function ResourceResultsModal({
   onModalClose,
 }: ResourceResultsModalProps) {
   const axios = useAxios()
+  const locale = useLocaleStore((state) => state.locale)
   const { languages, weblichtLanguages } = useAggregatorData()
   const { numberOfResults, queryType, language, languageFilter } = useSearchParams()
 
@@ -157,7 +160,9 @@ function ResourceResultsModal({
       className="resource-search-result-modal"
     >
       <Modal.Header closeButton>
-        <Modal.Title>{result.resource.title}</Modal.Title>
+        <Modal.Title>
+          {getBestFromMultilingualValuesTryByLanguage(result.resource.title, locale)}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body className="resource-info">
         <dl className="mb-0" aria-label="Resource information">
@@ -165,14 +170,18 @@ function ResourceResultsModal({
             <i dangerouslySetInnerHTML={{ __html: bankIcon }} />
             <span> Institution</span>
           </dt>
-          <dd className="mb-0">{result.resource.institution}</dd>
+          <dd className="mb-0">
+            {getBestFromMultilingualValuesTryByLanguage(result.resource.institution, locale)}
+          </dd>
           <dt>
             <i dangerouslySetInnerHTML={{ __html: infoCircleIcon }} />
             <span> Description</span>
           </dt>
-          {result.resource.description && (
+          {getBestFromMultilingualValuesTryByLanguage(result.resource.description, locale) && (
             <>
-              <dd className="mb-0">{result.resource.description}</dd>
+              <dd className="mb-0">
+                {getBestFromMultilingualValuesTryByLanguage(result.resource.description, locale)}
+              </dd>
               <dt>
                 <i dangerouslySetInnerHTML={{ __html: translateIcon }} />
                 <span> Languages</span>

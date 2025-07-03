@@ -9,8 +9,14 @@ import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
+import { useLocaleStore } from '@/stores/locale'
 import { type Resource } from '@/utils/api'
-import { getResourceIDs, isResourceAvailableDueToSubResource, SORT_FNS } from '@/utils/resources'
+import {
+  getBestFromMultilingualValuesTryByLanguage,
+  getResourceIDs,
+  isResourceAvailableDueToSubResource,
+  SORT_FNS,
+} from '@/utils/resources'
 import {
   DEFAULT_RESOURCE_VIEW_GROUPING,
   DEFAULT_RESOURCE_VIEW_SORTING,
@@ -61,6 +67,8 @@ function ResourceSelectionModal({
   selectedResources,
   onModalClose,
 }: ResourceSelectionModalProps) {
+  const locale = useLocaleStore((state) => state.locale)
+
   // resources
   const [selectedResourceIDs, setSelectedResourceIDs] = useState(
     selectedResources || availableResources
@@ -102,9 +110,9 @@ function ResourceSelectionModal({
     // TODO: only search in "resource" mode for now
     queryText: viewResourcesGrouping === 'resource' ? filter : '',
     getText: (item) => [
-      item.title,
-      item.institution,
-      item.description,
+      getBestFromMultilingualValuesTryByLanguage(item.title, locale),
+      getBestFromMultilingualValuesTryByLanguage(item.institution, locale),
+      getBestFromMultilingualValuesTryByLanguage(item.description, locale),
       // ...item.languages.map((code) => languageCodeToNameHelper(code, languages)).toSorted(),
     ],
     // TODO: structure matches for better access?
@@ -120,7 +128,8 @@ function ResourceSelectionModal({
     const instituteToLanguagesMap: ResourcesGroupedByKeyMap = {}
     // resources.recurse((resource: Resource) => {}) // TODO: subresources with different grouping-key than parent?
     resources.forEach((resource: Resource) => {
-      const institution = resource.institution
+      const institution =
+        getBestFromMultilingualValuesTryByLanguage(resource.institution, locale) ?? ''
       if (!Object.getOwnPropertyNames(instituteToResourcesMap).includes(institution)) {
         instituteToResourcesMap[institution] = {
           // expanded: resourcesGroupedByInstitute?.[institution]?.expanded ?? true,
@@ -146,7 +155,7 @@ function ResourceSelectionModal({
 
     setResourcesGroupedByInstitute(instituteToResourcesMap)
     setResourcesGroupedByLanguage(instituteToLanguagesMap)
-  }, [resources])
+  }, [resources, locale])
 
   // --------------------------------------------------------------
 

@@ -1,4 +1,5 @@
 import AppStore from '@/stores/app'
+import LocaleStore from '@/stores/locale'
 import { SetupAndInstallScriptParams as MatomoSetupParams } from './utils/matomo'
 
 // --------------------------------------------------------------------------
@@ -123,5 +124,47 @@ export function configure() {
   // TODO: for debugging
   Object.assign(window.MyAggregator, {
     getAppStore: () => AppStore,
+  })
+}
+
+export function updateLocale() {
+  // update locale stuff
+  // - get browser languages
+  // - check against available languages
+  // - use match or fall back to default
+  const localeStore = LocaleStore.getState()
+  const userLanguages: string[] = [
+    navigator.language || navigator.userLanguage,
+    ...navigator.languages,
+  ]
+  let foundLocale = false
+  for (const userLanguage of userLanguages) {
+    // match, ok
+    if (userLanguage === localeStore.locale) {
+      // TODO: notify if not first match?
+      console.debug('User locale matches default locale:', userLanguage)
+      foundLocale = true
+      break
+    }
+    // check if found in alternatives
+    if (localeStore.locales.includes(userLanguage)) {
+      console.log('Switching locale to:', userLanguage)
+      localeStore.setLocale(userLanguage)
+      foundLocale = true
+      break
+    }
+  }
+  if (!foundLocale) {
+    console.warn(
+      'User locale',
+      userLanguages,
+      'was not found in available languages',
+      localeStore.locales
+    )
+  }
+
+  // TODO: for debugging
+  Object.assign(window.MyAggregator, {
+    getLocaleStore: () => LocaleStore,
   })
 }

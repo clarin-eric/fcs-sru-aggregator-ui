@@ -11,8 +11,9 @@ import './utils.css'
 
 import App from '@/App.tsx'
 import { AxiosProvider } from '@/providers/AxiosContext'
-import { configure } from '@/public'
+import { configure, updateLocale } from '@/public'
 import AppStore from '@/stores/app'
+import LocaleStore from '@/stores/locale'
 import { setupAndInstallFromConfigString } from '@/utils/matomo'
 
 // --------------------------------------------------------------------------
@@ -20,8 +21,11 @@ import { setupAndInstallFromConfigString } from '@/utils/matomo'
 // configure AppStore and fetch runtime configuration to override build configuration
 // will guard against invalid/unexpected changes and notify about valid ones
 configure()
+// update locale languages based on browser/navigator and available languages
+updateLocale()
 
 console.debug('AppStore.getState()', AppStore.getInitialState(), AppStore.getState())
+console.debug('LocaleStore.getState()', LocaleStore.getInitialState(), LocaleStore.getState())
 
 // BrowserRouter#basename for subpath deployment
 const basename = AppStore.getState().deployPath

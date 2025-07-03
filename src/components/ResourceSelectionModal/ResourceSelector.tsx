@@ -7,7 +7,9 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 
+import { useLocaleStore } from '@/stores/locale'
 import { type Resource } from '@/utils/api'
+import { getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
 
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
@@ -32,6 +34,8 @@ function ResourceSelector({
   onSelectClick: (resource: Resource, selected: boolean) => void
   languageCodeToName: (code: string) => string
 }) {
+  const locale = useLocaleStore((state) => state.locale)
+
   const [expanded, setExpanded] = useState(false)
   const [showSubResources, setShowSubResources] = useState(false)
 
@@ -89,7 +93,10 @@ function ResourceSelector({
           onClick={handleToggleExpansionClick}
         >
           <h4 className={`h5 ${expanded ? '' : 'text-truncate'}`}>
-            <Highlight text={resource.title} ranges={highlighting[0]} />{' '}
+            <Highlight
+              text={getBestFromMultilingualValuesTryByLanguage(resource.title, locale) ?? ''}
+              ranges={highlighting[0]}
+            />{' '}
             {resource.landingPage && (
               <small>
                 <a href={resource.landingPage} className="matomo_link" target="_blank">
@@ -99,8 +106,13 @@ function ResourceSelector({
             )}
           </h4>
           <p className={`mb-0 ${expanded ? '' : 'text-truncate'}`}>
-            {resource.description && (
-              <Highlight text={resource.description} ranges={highlighting[2]} />
+            {getBestFromMultilingualValuesTryByLanguage(resource.description, locale) && (
+              <Highlight
+                text={
+                  getBestFromMultilingualValuesTryByLanguage(resource.description, locale) ?? ''
+                }
+                ranges={highlighting[2]}
+              />
             )}
           </p>
         </Col>
@@ -111,7 +123,10 @@ function ResourceSelector({
           onClick={handleToggleExpansionClick}
         >
           <i dangerouslySetInnerHTML={{ __html: bankIcon }} />{' '}
-          <Highlight text={resource.institution} ranges={highlighting[1]} />
+          <Highlight
+            text={getBestFromMultilingualValuesTryByLanguage(resource.institution, locale) ?? ''}
+            ranges={highlighting[1]}
+          />
           <br />
           <i dangerouslySetInnerHTML={{ __html: translateIcon }} />{' '}
           {resource.languages.map(languageCodeToName).sort().join(', ')}

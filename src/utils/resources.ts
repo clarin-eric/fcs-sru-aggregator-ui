@@ -1,3 +1,4 @@
+import LocaleStore from '@/stores/locale'
 import { type Resource } from '@/utils/api'
 import { QueryTypeID } from '@/utils/constants'
 import {
@@ -8,6 +9,8 @@ import {
 // --------------------------------------------------------------------------
 
 export function fromApi(resources: Resource[]) {
+  const locale = LocaleStore.getState().locale
+
   const prepareFn = (resource: Resource): Resource => {
     return {
       // copy original
@@ -19,11 +22,16 @@ export function fromApi(resources: Resource[]) {
   const convertedResources = resources.map(prepareFn)
 
   const sortFn = function (x: Resource, y: Resource) {
-    const r = x.institution.localeCompare(y.institution)
+    const xInstitution = getBestFromMultilingualValuesTryByLanguage(x.institution, locale) ?? ''
+    const yInstitution = getBestFromMultilingualValuesTryByLanguage(y.institution, locale) ?? ''
+    const r = xInstitution.localeCompare(yInstitution)
     if (r !== 0) {
       return r
     }
-    return x.title.toLowerCase().localeCompare(y.title.toLowerCase())
+
+    const xTitle = getBestFromMultilingualValuesTryByLanguage(x.title, locale) ?? ''
+    const yTitle = getBestFromMultilingualValuesTryByLanguage(y.title, locale) ?? ''
+    return xTitle.toLowerCase().localeCompare(yTitle.toLowerCase())
   }
   recurseResources(convertedResources, (resource: Resource) => {
     resource.subResources.sort(sortFn)
@@ -118,11 +126,14 @@ export function getAvailableResourceIDs(
 }
 
 export function getInstitutions(resources: Resource[], resourceIDs: string[]) {
+  const locale = LocaleStore.getState().locale
   const institutions = new Set<string>()
 
   recurseResources(resources, (resource: Resource) => {
     if (resourceIDs.includes(resource.id)) {
-      institutions.add(resource.institution)
+      const institution =
+        getBestFromMultilingualValuesTryByLanguage(resource.institution, locale) ?? ''
+      institutions.add(institution)
       // return false // top-most resource in tree, don't delve deeper
     }
     return true
@@ -130,6 +141,77 @@ export function getInstitutions(resources: Resource[], resourceIDs: string[]) {
 
   // console.debug('institutions: ', institutions.size, { institutions: institutions })
   return Array.from(institutions)
+}
+
+// --------------------------------------------------------------------------
+
+export const MULTILINGUAL_VALUE_CHECK_LANGUAGES = ['en', 'eng', 'de', 'deu'] as const
+
+export function getBestFromMultilingualValues(
+  values: null | string | { [language: string]: string }
+) {
+  // checks: if null, return
+  if (values === null) {
+    return null
+  }
+  // if not a mapping, then we only have one choice
+  if (typeof values === 'string') {
+    return values
+  }
+
+  // check from list of languages
+  for (const language of MULTILINGUAL_VALUE_CHECK_LANGUAGES) {
+    if (Object.hasOwn(values, language)) {
+      return values[language]
+    }
+  }
+
+  // otherwise try to use first
+  const ownLanguages = Object.getOwnPropertyNames(values)
+  if (ownLanguages.length > 0) {
+    return values[ownLanguages[0]]
+  }
+
+  // if not, it is empty? then null
+  return null
+}
+
+export function getFromMultilingualValuesByLanguage(
+  values: null | string | { [language: string]: string },
+  language?: string
+) {
+  // checks: if null, return
+  if (values === null) {
+    return null
+  }
+  // if not a mapping, then we only have one choice
+  if (typeof values === 'string') {
+    return values
+  }
+
+  // otherwise, try to find value for language
+  if (language && Object.hasOwn(values, language)) {
+    return values[language]
+  }
+
+  // if not, return null
+  return null
+}
+
+export function getBestFromMultilingualValuesTryByLanguage(
+  values: null | string | { [language: string]: string },
+  language?: string
+) {
+  // try to guess browser/user language (if not provided)
+  if (language === undefined) {
+    language = LocaleStore.getState().locale
+  }
+
+  const valueByLanguage = getFromMultilingualValuesByLanguage(values, language)
+  if (valueByLanguage !== null) return valueByLanguage
+
+  // if not found by language, then try to guess something
+  return getBestFromMultilingualValues(values)
 }
 
 // --------------------------------------------------------------------------
@@ -214,15 +296,43 @@ export function isResourceAvailable(
 export const SORT_FNS: {
   [key in ResourceSelectionModalViewOptionSorting]: (a: Resource, b: Resource) => number
 } = {
-  'title-up': (a, b) => a.title.localeCompare(b.title),
-  'title-down': (a, b) => -a.title.localeCompare(b.title),
+  'title-up': (a, b) => {
+    const locale = LocaleStore.getState().locale
+
+    const aTitle = getBestFromMultilingualValuesTryByLanguage(a.title, locale) ?? ''
+    const bTitle = getBestFromMultilingualValuesTryByLanguage(b.title, locale) ?? ''
+
+    return aTitle.localeCompare(bTitle)
+  },
+  'title-down': (a, b) => {
+    const locale = LocaleStore.getState().locale
+
+    const aTitle = getBestFromMultilingualValuesTryByLanguage(a.title, locale) ?? ''
+    const bTitle = getBestFromMultilingualValuesTryByLanguage(b.title, locale) ?? ''
+
+    return -aTitle.localeCompare(bTitle)
+  },
   'institution-up': (a, b) => {
-    const ret = a.institution.localeCompare(b.institution)
-    return ret !== 0 ? ret : a.title.localeCompare(b.title)
+    const locale = LocaleStore.getState().locale
+
+    const aInstitution = getBestFromMultilingualValuesTryByLanguage(a.institution, locale) ?? ''
+    const bInstitution = getBestFromMultilingualValuesTryByLanguage(b.institution, locale) ?? ''
+    const aTitle = getBestFromMultilingualValuesTryByLanguage(a.title, locale) ?? ''
+    const bTitle = getBestFromMultilingualValuesTryByLanguage(b.title, locale) ?? ''
+
+    const ret = aInstitution.localeCompare(bInstitution)
+    return ret !== 0 ? ret : aTitle.localeCompare(bTitle)
   },
   'institution-down': (a, b) => {
-    const ret = -a.institution.localeCompare(b.institution)
-    return ret !== 0 ? ret : a.title.localeCompare(b.title)
+    const locale = LocaleStore.getState().locale
+
+    const aInstitution = getBestFromMultilingualValuesTryByLanguage(a.institution, locale) ?? ''
+    const bInstitution = getBestFromMultilingualValuesTryByLanguage(b.institution, locale) ?? ''
+    const aTitle = getBestFromMultilingualValuesTryByLanguage(a.title, locale) ?? ''
+    const bTitle = getBestFromMultilingualValuesTryByLanguage(b.title, locale) ?? ''
+
+    const ret = -aInstitution.localeCompare(bInstitution)
+    return ret !== 0 ? ret : aTitle.localeCompare(bTitle)
   },
 }
 

@@ -9,12 +9,14 @@ import Collapse from 'react-bootstrap/Collapse'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
+import { useLocaleStore } from '@/stores/locale'
 import {
   getSearchResultDetails,
   type ResourceSearchResult,
   type ResourceSearchResultMetaOnly,
 } from '@/utils/api'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
+import { getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
 import { type ResultsViewMode } from '@/utils/results'
 import { languageCodeToName } from '@/utils/search'
 import ResourceResultsModal from './ResourceResultsModal'
@@ -54,6 +56,7 @@ function ResourceSearchResult({
   showDiagnostics,
 }: ResourceSearchResultProps) {
   const axios = useAxios()
+  const locale = useLocaleStore((state) => state.locale)
   const { languages } = useAggregatorData()
   const { queryType } = useSearchParams()
 
@@ -164,10 +167,10 @@ function ResourceSearchResult({
               {renderResultsCounter()}
             </Badge>
             <span aria-label="Resource title" className="user-select-text">
-              {data.resource.title}
+              {getBestFromMultilingualValuesTryByLanguage(data.resource.title, locale)}
             </span>
             <small className="text-muted user-select-text" aria-label="Institution name">
-              {data.resource.institution}
+              {getBestFromMultilingualValuesTryByLanguage(data.resource.institution, locale)}
             </small>
           </button>
           <div className="d-inline-block ms-auto">
@@ -187,14 +190,24 @@ function ResourceSearchResult({
                     <i dangerouslySetInnerHTML={{ __html: bankIcon }} />
                     <span> Institution</span>
                   </dt>
-                  <dd className="mb-0">{data.resource.institution}</dd>
+                  <dd className="mb-0">
+                    {getBestFromMultilingualValuesTryByLanguage(data.resource.institution, locale)}
+                  </dd>
                   <dt>
                     <i dangerouslySetInnerHTML={{ __html: infoCircleIcon }} />
                     <span> Description</span>
                   </dt>
-                  {data.resource.description && (
+                  {getBestFromMultilingualValuesTryByLanguage(
+                    data.resource.description,
+                    locale
+                  ) && (
                     <>
-                      <dd className="mb-0">{data.resource.description}</dd>
+                      <dd className="mb-0">
+                        {getBestFromMultilingualValuesTryByLanguage(
+                          data.resource.description,
+                          locale
+                        )}
+                      </dd>
                       <dt>
                         <i dangerouslySetInnerHTML={{ __html: translateIcon }} />
                         <span> Languages</span>

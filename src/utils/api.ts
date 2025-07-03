@@ -28,9 +28,9 @@ export interface Resource {
   numberOfRecords: null
   languages: string[]
   landingPage: null | string
-  title: string
-  description: null | string
-  institution: string
+  title: string | { [language: string]: string }
+  description: null | string | { [language: string]: string }
+  institution: string | { [language: string]: string }
   searchCapabilities: SearchCapability[]
   availableDataViews: AvailableDataView[] | null
   availableLayers: AvailableLayer[] | null
