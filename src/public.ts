@@ -134,7 +134,7 @@ export function updateLocale() {
   // - use match or fall back to default
   const localeStore = LocaleStore.getState()
   const userLanguages: string[] = [
-    navigator.language || navigator.userLanguage,
+    navigator.language,
     ...navigator.languages,
   ]
   let foundLocale = false
