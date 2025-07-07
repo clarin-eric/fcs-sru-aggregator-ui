@@ -448,35 +448,37 @@ function ResourceSelectionModal({
                 <Button onClick={handleDeselectAllClick}>Deselect all</Button>
               </Col>
             </Row>
-            <Form.Group as={Row} controlId="resource-info-language" className="mt-2">
-              <Form.Label column sm="auto" style={{ fontSize: '0.875rem' }}>
-                Change language of resource information:
-              </Form.Label>
-              <Col sm="auto">
-                <ToggleButtonGroup
-                  type="radio"
-                  name="resource-info-languages"
-                  defaultValue={locale}
-                  onChange={(language) => setLocale(language)}
-                >
-                  {Array.from(resourceInfoLanguagesGrouped.entries())
-                    .toSorted()
-                    .map(([language, amount]) => (
-                      <ToggleButton
-                        size="sm"
-                        key={language}
-                        id={`resource-info-languages-${language}`}
-                        value={language}
-                        variant="secondary"
-                        title={`Found ${amount} resources with information fields in ${language} language`}
-                      >
-                        {language}
-                        {/* ({amount}x) */}
-                      </ToggleButton>
-                    ))}
-                </ToggleButtonGroup>
-              </Col>
-            </Form.Group>
+            {resourceInfoLanguagesGrouped.size > 0 && (
+              <Form.Group as={Row} controlId="resource-info-language" className="mt-2">
+                <Form.Label column sm="auto" style={{ fontSize: '0.875rem' }}>
+                  Change language of resource information:
+                </Form.Label>
+                <Col sm="auto">
+                  <ToggleButtonGroup
+                    type="radio"
+                    name="resource-info-languages"
+                    defaultValue={locale}
+                    onChange={(language) => setLocale(language)}
+                  >
+                    {Array.from(resourceInfoLanguagesGrouped.entries())
+                      .toSorted()
+                      .map(([language, amount]) => (
+                        <ToggleButton
+                          size="sm"
+                          key={language}
+                          id={`resource-info-languages-${language}`}
+                          value={language}
+                          variant="secondary"
+                          title={`Found ${amount} resources with information fields in ${language} language`}
+                        >
+                          {language}
+                          {/* ({amount}x) */}
+                        </ToggleButton>
+                      ))}
+                  </ToggleButtonGroup>
+                </Col>
+              </Form.Group>
+            )}
           </Container>
         </Form>
         {/* info */}
