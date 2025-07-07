@@ -210,7 +210,7 @@ function ResourceResultsModal({
           {languageForResource && languageForResource.length > 1 && (
             <ToggleButtonGroup
               type="radio"
-              name={`${result.resource.id}-result-info-languages`}
+              name={`${result.resource.id}-result-modal-info-languages`}
               defaultValue={locale}
               onChange={(language) => setLocale(language)}
               className="mt-2 mb-3"
@@ -220,7 +220,7 @@ function ResourceResultsModal({
                   variant="outline-secondary"
                   size="sm"
                   key={language}
-                  id={`${result.resource.id}-result-info-languages-${language}`}
+                  id={`${result.resource.id}-result-modal-info-languages-${language}`}
                   value={language}
                 >
                   {language}
