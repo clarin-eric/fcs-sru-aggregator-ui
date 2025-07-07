@@ -7,6 +7,8 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
+import ToggleButton from 'react-bootstrap/ToggleButton'
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
@@ -14,7 +16,10 @@ import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
 import { getURLForDownload, getURLForWeblicht, type ResourceSearchResult } from '@/utils/api'
 import { DOWNLOAD_FORMATS, NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
-import { getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
+import {
+  getBestFromMultilingualValuesTryByLanguage,
+  getLanguagesFromResourceInfo,
+} from '@/utils/resources'
 import { type ResultsViewMode } from '@/utils/results'
 import { languageCodeToName, MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 import LoadMoreResultsButton from './LoadMoreResultsButton'
@@ -58,14 +63,21 @@ function ResourceResultsModal({
   onModalClose,
 }: ResourceResultsModalProps) {
   const axios = useAxios()
-  const locale = useLocaleStore((state) => state.locale)
+  const userLocale = useLocaleStore((state) => state.locale)
   const { languages, weblichtLanguages } = useAggregatorData()
   const { numberOfResults, queryType, language, languageFilter } = useSearchParams()
+
+  const [locale, setLocale] = useState(userLocale)
+  useEffect(() => {
+    if (userLocale) setLocale(userLocale)
+  }, [userLocale])
 
   const [showDiagnostics, setShowDiagnostics] = useState(showDiagnosticsProps)
   useEffect(() => setShowDiagnostics(showDiagnosticsProps), [showDiagnosticsProps])
   const [viewMode, setViewMode] = useState(viewModeProps)
   useEffect(() => setViewMode(viewModeProps), [viewModeProps])
+
+  const languageForResource = getLanguagesFromResourceInfo(result.resource)
 
   const hasDiagnostics =
     result.exception ||
@@ -194,9 +206,33 @@ function ResourceResultsModal({
               .toSorted()
               .join(', ')}
           </dd>
+
+          {languageForResource && languageForResource.length > 1 && (
+            <ToggleButtonGroup
+              type="radio"
+              name={`${result.resource.id}-result-info-languages`}
+              defaultValue={locale}
+              onChange={(language) => setLocale(language)}
+              className="mt-2 mb-3"
+            >
+              {languageForResource.toSorted().map((language) => (
+                <ToggleButton
+                  variant="outline-secondary"
+                  size="sm"
+                  key={language}
+                  id={`${result.resource.id}-result-info-languages-${language}`}
+                  value={language}
+                >
+                  {language}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          )}
+
           <dt>Persistent Identifier</dt>
           <dd>{result.resource.handle}</dd>
         </dl>
+
         {result.resource.landingPage && (
           <a href={result.resource.landingPage} className="matomo_link" target="_blank">
             <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} /> More Information ...

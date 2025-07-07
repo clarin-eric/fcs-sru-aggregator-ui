@@ -7,12 +7,15 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
+import ToggleButton from 'react-bootstrap/ToggleButton'
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import { useLocaleStore } from '@/stores/locale'
 import { type Resource } from '@/utils/api'
 import {
   getBestFromMultilingualValuesTryByLanguage,
+  getLanguagesFromResourceInfo,
   getResourceIDs,
   isResourceAvailableDueToSubResource,
   SORT_FNS,
@@ -67,7 +70,12 @@ function ResourceSelectionModal({
   selectedResources,
   onModalClose,
 }: ResourceSelectionModalProps) {
-  const locale = useLocaleStore((state) => state.locale)
+  // locale/language information
+  const userLocale = useLocaleStore((state) => state.locale)
+  const [locale, setLocale] = useState(userLocale)
+  useEffect(() => {
+    if (userLocale) setLocale(userLocale)
+  }, [userLocale])
 
   // resources
   const [selectedResourceIDs, setSelectedResourceIDs] = useState(
@@ -103,6 +111,15 @@ function ResourceSelectionModal({
   const sortedResources = resources
     .filter((resource) => availableResources.includes(resource.id))
     .toSorted(SORT_FNS[viewResourcesSorting])
+
+  // languages for resource infos (title/description/institution)
+  const resourceInfoLanguages = sortedResources
+    .map((resource) => getLanguagesFromResourceInfo(resource))
+    .flat()
+  const resourceInfoLanguagesGrouped = resourceInfoLanguages.reduce(
+    (acc, cur) => acc.set(cur, (acc.get(cur) ?? 0) + 1),
+    new Map()
+  )
 
   // TODO: what happens with nested resources?, we will only use root resources for now
   const filteredResources = useFuzzySearchList({
@@ -298,6 +315,7 @@ function ResourceSelectionModal({
               onDeselectAllClick={handleGroupedResourcesOnDeselectAllClick}
               onSelectClick={handleResourceOnSelectClick}
               languageCodeToName={languageCodeToName}
+              localeForInfos={locale}
               key={institution}
             />
           )
@@ -329,6 +347,7 @@ function ResourceSelectionModal({
               onDeselectAllClick={handleGroupedResourcesOnDeselectAllClick}
               onSelectClick={handleResourceOnSelectClick}
               languageCodeToName={languageCodeToName}
+              localeForInfos={locale}
               key={language}
             />
           )
@@ -342,6 +361,7 @@ function ResourceSelectionModal({
         shouldBeShown={shouldResourceBeShown}
         onSelectClick={handleResourceOnSelectClick}
         languageCodeToName={languageCodeToName}
+        localeForInfos={locale}
         key={resource.id}
       />
     ))
@@ -428,6 +448,35 @@ function ResourceSelectionModal({
                 <Button onClick={handleDeselectAllClick}>Deselect all</Button>
               </Col>
             </Row>
+            <Form.Group as={Row} controlId="resource-info-language" className="mt-2">
+              <Form.Label column sm="auto" style={{ fontSize: '0.875rem' }}>
+                Change language of resource information:
+              </Form.Label>
+              <Col sm="auto">
+                <ToggleButtonGroup
+                  type="radio"
+                  name="resource-info-languages"
+                  defaultValue={locale}
+                  onChange={(language) => setLocale(language)}
+                >
+                  {Array.from(resourceInfoLanguagesGrouped.entries())
+                    .toSorted()
+                    .map(([language, amount]) => (
+                      <ToggleButton
+                        size="sm"
+                        key={language}
+                        id={`resource-info-languages-${language}`}
+                        value={language}
+                        variant="secondary"
+                        title={`Found ${amount} resources with information fields in ${language} language`}
+                      >
+                        {language}
+                        {/* ({amount}x) */}
+                      </ToggleButton>
+                    ))}
+                </ToggleButtonGroup>
+              </Col>
+            </Form.Group>
           </Container>
         </Form>
         {/* info */}

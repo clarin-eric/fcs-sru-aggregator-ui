@@ -13,6 +13,11 @@ type LocaleStoreActions = {
       | LocaleStoreState['locale']
       | ((currentLocale: LocaleStoreState['locale']) => LocaleStoreState['locale'])
   ) => void
+  setLocales: (
+    locales:
+      | LocaleStoreState['locales']
+      | ((currentLocales: LocaleStoreState['locales']) => LocaleStoreState['locales'])
+  ) => void
 }
 export type LocaleStore = LocaleStoreState & LocaleStoreActions
 
@@ -28,6 +33,10 @@ const localeStore = createStore<LocaleStore>((set) => ({
     // TODO: we could add validation here to not call set() if locale is unknown...
     set((state) => ({
       locale: typeof nextLocale === 'function' ? nextLocale(state.locale) : nextLocale,
+    })),
+  setLocales: (nextLocales) =>
+    set((state) => ({
+      locales: typeof nextLocales === 'function' ? nextLocales(state.locales) : nextLocales,
     })),
 }))
 

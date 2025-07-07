@@ -1,15 +1,20 @@
 import type { FuzzyMatches } from '@nozbe/microfuzz'
 import { Highlight } from '@nozbe/microfuzz/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
+import ToggleButton from 'react-bootstrap/ToggleButton'
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 
 import { useLocaleStore } from '@/stores/locale'
 import { type Resource } from '@/utils/api'
-import { getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
+import {
+  getBestFromMultilingualValuesTryByLanguage,
+  getLanguagesFromResourceInfo,
+} from '@/utils/resources'
 
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
@@ -24,6 +29,7 @@ function ResourceSelector({
   selectedResourceIDs,
   highlighting,
   shouldBeShown,
+  localeForInfos,
   onSelectClick,
   languageCodeToName,
 }: {
@@ -31,17 +37,31 @@ function ResourceSelector({
   selectedResourceIDs: string[]
   highlighting?: FuzzyMatches
   shouldBeShown: ((resource: Resource) => boolean) | boolean
+  localeForInfos?: string | null
   onSelectClick: (resource: Resource, selected: boolean) => void
   languageCodeToName: (code: string) => string
 }) {
-  const locale = useLocaleStore((state) => state.locale)
-
   const [expanded, setExpanded] = useState(false)
   const [showSubResources, setShowSubResources] = useState(false)
 
   if (highlighting === undefined) highlighting = [null, null, null]
 
   const isSelected = selectedResourceIDs.includes(resource.id)
+
+  // --------------------------------------------------------------
+
+  const languageForResource = getLanguagesFromResourceInfo(resource)
+
+  const userLocale = useLocaleStore((state) => state.locale)
+
+  const [locale, setLocale] = useState(userLocale)
+  // update from outside
+  useEffect(() => {
+    if (userLocale) setLocale(userLocale)
+  }, [userLocale])
+  useEffect(() => {
+    if (localeForInfos) setLocale(localeForInfos)
+  }, [localeForInfos])
 
   // --------------------------------------------------------------
 
@@ -130,6 +150,32 @@ function ResourceSelector({
           <br />
           <i dangerouslySetInnerHTML={{ __html: translateIcon }} />{' '}
           {resource.languages.map(languageCodeToName).sort().join(', ')}
+          {expanded && languageForResource.length > 1 && (
+            <>
+              <br />
+              <ToggleButtonGroup
+                type="radio"
+                name={`resources-${resource.id}-info-languages`}
+                defaultValue={locale}
+                onChange={(language) => setLocale(language)}
+                onClick={(e) => e.stopPropagation()}
+                className="mt-2"
+              >
+                {languageForResource.toSorted().map((language) => (
+                  <ToggleButton
+                    variant="outline-secondary"
+                    size="sm"
+                    key={language}
+                    id={`resources-${resource.id}-info-languages-${language}`}
+                    value={language}
+                    type="radio"
+                  >
+                    {language}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </>
+          )}
         </Col>
         {/* sub resources view button */}
         {resource.subResources.length > 0 && (

@@ -17,6 +17,7 @@ function GroupedResources({
   selectedResourceIDs,
   expanded: expandedProp,
   shouldBeShown,
+  localeForInfos,
   onSelectClick,
   onExpandToggleClick,
   onSelectAllClick,
@@ -28,6 +29,7 @@ function GroupedResources({
   selectedResourceIDs: string[]
   expanded: boolean
   shouldBeShown: ((resource: Resource) => boolean) | boolean
+  localeForInfos?: string | null
   onSelectClick: (resource: Resource, selected: boolean) => void
   onExpandToggleClick: (expanded: boolean) => void
   onSelectAllClick: (resources: Resource[]) => void
@@ -115,6 +117,7 @@ function GroupedResources({
               shouldBeShown={shouldBeShown}
               onSelectClick={onSelectClick}
               languageCodeToName={languageCodeToName}
+              localeForInfos={localeForInfos}
               key={resource.id}
             />
           ))}

@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import Collapse from 'react-bootstrap/Collapse'
+import ToggleButton from 'react-bootstrap/ToggleButton'
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
@@ -16,7 +18,10 @@ import {
   type ResourceSearchResultMetaOnly,
 } from '@/utils/api'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
-import { getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
+import {
+  getBestFromMultilingualValuesTryByLanguage,
+  getLanguagesFromResourceInfo,
+} from '@/utils/resources'
 import { type ResultsViewMode } from '@/utils/results'
 import { languageCodeToName } from '@/utils/search'
 import ResourceResultsModal from './ResourceResultsModal'
@@ -56,9 +61,14 @@ function ResourceSearchResult({
   showDiagnostics,
 }: ResourceSearchResultProps) {
   const axios = useAxios()
-  const locale = useLocaleStore((state) => state.locale)
+  const userLocale = useLocaleStore((state) => state.locale)
   const { languages } = useAggregatorData()
   const { queryType } = useSearchParams()
+
+  const [locale, setLocale] = useState(userLocale)
+  useEffect(() => {
+    if (userLocale) setLocale(userLocale)
+  }, [userLocale])
 
   const htmlId = useId()
   const [expanded, setExpanded] = useState(true)
@@ -82,6 +92,8 @@ function ResourceSearchResult({
     { searchId, resourceId, inProgress, hasResults, hasDiagnostics },
     { data, isLoading, isError }
   )
+
+  const languageForResource = data ? getLanguagesFromResourceInfo(data.resource) : []
 
   // TODO: filter for language "byGuess" mode
 
@@ -221,6 +233,28 @@ function ResourceSearchResult({
                       .join(', ')}
                   </dd>
                 </dl>
+
+                {languageForResource && languageForResource.length > 1 && (
+                  <ToggleButtonGroup
+                    type="radio"
+                    name={`${data.resource.id}-result-info-languages`}
+                    defaultValue={locale}
+                    onChange={(language) => setLocale(language)}
+                    className="mt-2"
+                  >
+                    {languageForResource.toSorted().map((language) => (
+                      <ToggleButton
+                        variant="outline-secondary"
+                        size="sm"
+                        key={language}
+                        id={`${data.resource.id}-result-info-languages-${language}`}
+                        value={language}
+                      >
+                        {language}
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+                )}
               </Card.Body>
             )}
             {/* results */}

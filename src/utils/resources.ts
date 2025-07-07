@@ -214,6 +214,40 @@ export function getBestFromMultilingualValuesTryByLanguage(
   return getBestFromMultilingualValues(values)
 }
 
+/**
+ * Get languages/locales used in resource meta information.
+ * @param resource Resource with meta information (title, description, institution, ...)
+ * @param defaultLanguage fallback language if not multilingual information set
+ * @returns unique list of languages found for title/description/institution or fallback if no multilingual options
+ */
+export function getLanguagesFromResourceInfo(resource: Resource, defaultLanguage = 'en') {
+  const languagesForTitle =
+    typeof resource.title === 'string' || resource.title === null
+      ? [defaultLanguage]
+      : Object.getOwnPropertyNames(resource.title)
+  const languagesForDescription =
+    typeof resource.description === 'string' || resource.description === null
+      ? [defaultLanguage]
+      : Object.getOwnPropertyNames(resource.description)
+  const languagesForInstitution =
+    typeof resource.institution === 'string' || resource.institution === null
+      ? [defaultLanguage]
+      : Object.getOwnPropertyNames(resource.institution)
+
+  // TODO: only collect languages if values differ, else fallback to default?
+
+  const languageForResource = [
+    ...languagesForTitle,
+    ...languagesForDescription,
+    ...languagesForInstitution,
+  ]
+
+  // TODO: order by count?
+  const languageForResourceUniq = Array.from(new Set(languageForResource))
+
+  return languageForResourceUniq
+}
+
 // --------------------------------------------------------------------------
 
 export function isResourceAvailableForQueryType(resource: Resource, queryTypeId: QueryTypeID) {
