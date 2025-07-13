@@ -1,18 +1,27 @@
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
-import AppStore from '@/stores/app'
 
 import './styles.css'
 
 // --------------------------------------------------------------------------
 
 function Footer() {
-  const termsAndDisclaimerUrl = AppStore.getState().termsAndDisclaimerUrl
-  const contactAddress = AppStore.getState().contactAddress
+  const { t } = useTranslation()
+
+  const i18nKeyTerms = 'urls.terms-use-and-disclaimer'
+  const urlTerms = t(i18nKeyTerms, { ns: 'common' })
+  const hasTerms = urlTerms !== i18nKeyTerms
+  const i18nKeyContact = 'urls.contact'
+  const urlContact = t(i18nKeyContact, { ns: 'common' })
+  const hasContact = urlContact !== i18nKeyContact
+  const i18nKeyServiceInfo = 'footer.service-info.text'
+  const transServiceInfo = t(i18nKeyServiceInfo)
+  const hasServiceInfo = transServiceInfo !== i18nKeyServiceInfo
 
   const linkSearch = useKeepSearchParams()
 
@@ -26,29 +35,35 @@ function Footer() {
             {/* On smaller screen, show about link with contact link */}
             <div>
               <Link to={{ pathname: '/about', search: linkSearch }} className="hidden-xs">
-                About
+                {t('footer.links.about')}
               </Link>
               {/* Center version on mobile */}
               <div className="version-info text-muted text-center-xs">
                 v{import.meta.env.PACKAGE_VERSION}
               </div>
             </div>
-            <Link to={{ pathname: '/stats', search: linkSearch }}>Statistics</Link>
+            <Link to={{ pathname: '/stats', search: linkSearch }}>
+              {t('footer.links.statistics')}
+            </Link>
           </Col>
           <Col className="text-center">
             {/* CLARIN logo and copyright (center column on larger screens) */}
-            <span className="footer-fineprint">
-              Service provided by <a href="https://www.clarin.eu">CLARIN</a>
-            </span>
-            <span>
-              <br />
-              Hosted by CLARIN ERIC
-            </span>
+            {hasServiceInfo && (
+              <Trans i18nKey={i18nKeyServiceInfo}>
+                <span className="footer-fineprint">
+                  Service provided by <a href={t('footer.service-info.url')}>CLARIN</a>
+                </span>
+                <span>
+                  <br />
+                  Hosted by CLARIN ERIC
+                </span>
+              </Trans>
+            )}
           </Col>
           <Col className="hidden-xs text-end d-flex flex-sm-row flex-column justify-content-sm-end column-gap-3 row-gap-2">
             {/* Contact link in right column on larger screens */}
-            {termsAndDisclaimerUrl && <a href={termsAndDisclaimerUrl}>Terms & Disclaimer</a>}
-            {contactAddress && <a href={contactAddress}>Contact</a>}
+            {hasTerms && <a href={urlTerms}>{t('footer.links.terms-use-and-disclaimer')}</a>}
+            {hasContact && <a href={urlContact}>{t('footer.links.contact')}</a>}
           </Col>
         </Row>
       </Container>

@@ -26,7 +26,7 @@ export type LocaleStore = LocaleStoreState & LocaleStoreActions
 const localeStore = createStore<LocaleStore>((set) => ({
   // state
   locale: import.meta.env.LOCALE ?? 'en',
-  locales: import.meta.env.LOCALES ?? import.meta.env.LOCALE ? [import.meta.env.LOCALE] : ['en'],
+  locales: import.meta.env.LOCALES ?? (import.meta.env.LOCALE ? [import.meta.env.LOCALE] : ['en']),
 
   // actions
   setLocale: (nextLocale) =>

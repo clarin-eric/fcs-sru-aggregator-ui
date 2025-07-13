@@ -1,0 +1,17 @@
+{
+  "header": {
+    "title": "Inhaltssuche",
+    "menu": {
+      "home": "Start",
+      "help": "Hilfe"
+    }
+  },
+  "footer": {
+    "links": {
+      "about": "Über uns",
+      "statistics": "Statistiken",
+      "terms-use-and-disclaimer": "Datenschutzerklärung",
+      "contact": "Kontakt"
+    }
+  }
+}

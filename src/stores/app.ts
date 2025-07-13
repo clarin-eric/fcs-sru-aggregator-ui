@@ -15,8 +15,6 @@ type AppStoreState = {
 
   appTitle: string
   appTitleHead: string
-  termsAndDisclaimerUrl: string
-  contactAddress: string | null
 
   matomoTrackingEnabled: boolean
   matomoTrackingParams: string | MatomoSetupParams | null
@@ -56,18 +54,6 @@ type AppStoreActions = {
       | AppStoreState['appTitleHead']
       | ((currentTitle: AppStoreState['appTitleHead']) => AppStoreState['appTitleHead'])
   ) => void
-  setTermsAndDisclaimerUrl: (
-    url:
-      | AppStoreState['termsAndDisclaimerUrl']
-      | ((
-          currentUrl: AppStoreState['termsAndDisclaimerUrl']
-        ) => AppStoreState['termsAndDisclaimerUrl'])
-  ) => void
-  setContactAddress: (
-    address:
-      | AppStoreState['contactAddress']
-      | ((currentAddress: AppStoreState['contactAddress']) => AppStoreState['contactAddress'])
-  ) => void
 
   setMatomoTrackingParams: (
     params:
@@ -95,8 +81,6 @@ const appStore = createStore<AppStore>((set) => ({
   showSearchResultLink: import.meta.env.SHOW_SEARCH_RESULT_LINK,
   appTitle: import.meta.env.APP_TITLE,
   appTitleHead: import.meta.env.APP_TITLE_HEAD,
-  termsAndDisclaimerUrl: import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS,
-  contactAddress: import.meta.env.CONTACT_ADDRESS,
   matomoTrackingEnabled: import.meta.env.FEATURE_TRACKING_MATOMO, // read-only
   matomoTrackingParams: import.meta.env.FEATURE_TRACKING_MATOMO
     ? import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS
@@ -119,14 +103,6 @@ const appStore = createStore<AppStore>((set) => ({
   setAppTitleHead: (title) =>
     set((state) => ({
       appTitleHead: typeof title === 'function' ? title(state.appTitleHead) : title,
-    })),
-  setTermsAndDisclaimerUrl: (url) =>
-    set((state) => ({
-      termsAndDisclaimerUrl: typeof url === 'function' ? url(state.termsAndDisclaimerUrl) : url,
-    })),
-  setContactAddress: (address) =>
-    set((state) => ({
-      contactAddress: typeof address === 'function' ? address(state.contactAddress) : address,
     })),
   setMatomoTrackingParams: (params) =>
     set((state) => ({

@@ -3,6 +3,8 @@ import {
   type InputOption,
   type LogHandlerWithDefault,
   type OutputOptions,
+  type PreRenderedAsset,
+  type PreRenderedChunk,
   type RollupOptions,
 } from 'rollup'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -15,8 +17,11 @@ import {
 } from 'vite'
 import version from 'vite-plugin-package-version'
 
+import { existsSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 // import path from 'node:path'
+
+import transformDynamicToStaticImportsPlugin from './build/transform-dynamic-to-static-imports'
 
 import pkg from './package.json'
 
@@ -27,7 +32,13 @@ const name = `${pkg.name}-${pkg.version}`
 const outputsLibPath = 'lib/'
 const outputsLibVenderPath = `${outputsLibPath}vendor/`
 const outputsLibAssetsPath = `${outputsLibPath}assets/`
+const outputsLibLocalesPath = `${outputsLibPath}locales/`
 // NOTE: that single chunk (bundle mode) build will not use the "lib/" prefix
+
+// locale stuff
+const inputSrcLocales = 'src/locales'
+const I18n_LANGUAGES = ['en', 'de'] // languages we support
+const I18N_PREFIXES = ['clarin', 'textplus'] // locale variants/overrides, active prefix will contain base namespaces, too
 
 // flags
 const debug = false
@@ -56,7 +67,7 @@ export default defineConfig(({ mode }) => {
           resolve('./index.html'),
         ],
         output: {
-          assetFileNames(chunkInfo) {
+          assetFileNames(chunkInfo: PreRenderedAsset) {
             if (chunkInfo.names.includes('index.css')) {
               // lazy import modules
               if (chunkInfo.originalFileNames.includes('src/components/QueryBuilder/index.ts')) {
@@ -68,7 +79,7 @@ export default defineConfig(({ mode }) => {
             return `assets/[name].[ext]`
           },
           entryFileNames: `${name}.js`,
-          chunkFileNames(chunkInfo) {
+          chunkFileNames(chunkInfo: PreRenderedChunk) {
             if (chunkInfo.isDynamicEntry) {
               if (chunkInfo.facadeModuleId?.endsWith('src/components/QueryBuilder/index.ts')) {
                 return `${pkg.name}-query-builder-${pkg.version}.js`
@@ -135,14 +146,6 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.APP_TITLE_HEAD': process.env.VITE_APP_TITLE_HEAD
         ? `"${process.env.VITE_APP_TITLE_HEAD}"`
         : JSON.stringify('FCS Aggregator – Content Search'),
-      // footer: imprint, disclaimer, ...
-      'import.meta.env.TERMS_AND_DISCLAIMER_ADDRESS': process.env.VITE_TERMS_AND_DISCLAIMER_ADDRESS
-        ? `"${process.env.VITE_TERMS_AND_DISCLAIMER_ADDRESS}"`
-        : JSON.stringify('https://www.clarin.eu/content/terms-use-and-disclaimer'),
-      // footer/help: contact address (footer/help page)
-      'import.meta.env.CONTACT_ADDRESS': process.env.VITE_CONTACT_ADDRESS
-        ? `"${process.env.VITE_CONTACT_ADDRESS}"`
-        : JSON.stringify('mailto:fcs@clarin.eu'),
 
       // show direct link to search results
       'import.meta.env.SHOW_SEARCH_RESULT_LINK': process.env.VITE_SHOW_SEARCH_RESULT_LINK
@@ -162,6 +165,18 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.FEATURE_QUERY_BUILDER': process.env.VITE_FEATURE_QUERY_BUILDER
         ? `"${process.env.VITE_FEATURE_QUERY_BUILDER}"`
         : JSON.stringify(true),
+
+      'import.meta.env.LOCALE': process.env.VITE_LOCALE
+        ? `"${process.env.VITE_LOCALE}"`
+        : JSON.stringify(I18n_LANGUAGES[0]),
+      'import.meta.env.LOCALES': process.env.VITE_LOCALES
+        ? `${process.env.VITE_LOCALES}`
+        : JSON.stringify(I18n_LANGUAGES),
+
+      // i18n context prefix, e.g., CLARIN
+      'import.meta.env.I18N_NS_CONTEXT_PREFIX': process.env.VITE_I18N_NS_CONTEXT_PREFIX
+        ? `"${process.env.VITE_I18N_NS_CONTEXT_PREFIX}"`
+        : JSON.stringify(I18N_PREFIXES[0]),
     },
     resolve: {
       alias: {
@@ -170,6 +185,7 @@ export default defineConfig(({ mode }) => {
         '@images': resolve('./src/assets/images'),
         '@fonts': resolve('./src/assets/fonts'),
         '@vendor': resolve('./src/vendor'),
+        '@locales': resolve('./src/locales'),
       },
       // extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.yaml'],
     },
@@ -178,6 +194,10 @@ export default defineConfig(({ mode }) => {
   if (isSingleChunk) {
     // keep a single chunk
     // Object.assign(baseConfig.define, {} satisfies Record<string, unknown>)
+
+    // rewrite dynamic imports into static import
+    baseConfig.plugins.push(transformDynamicToStaticImportsPlugin())
+    // include locale dynamic import into default chunk
   } else {
     // split into multiple chunks if not disabled
     Object.assign(baseConfig.build.rollupOptions, {
@@ -189,7 +209,7 @@ export default defineConfig(({ mode }) => {
         resolve('./src/vendor/prismjs'),
       ] satisfies InputOption,
       output: {
-        assetFileNames(chunkInfo) {
+        assetFileNames(chunkInfo: PreRenderedAsset) {
           if (chunkInfo.names.length === 1) {
             // DEBUG
             // console.debug('assetFileNames', {
@@ -215,7 +235,7 @@ export default defineConfig(({ mode }) => {
           // default output chunks (assets)
           return `${outputsLibAssetsPath}[name].[ext]`
         },
-        entryFileNames(chunkInfo) {
+        entryFileNames(chunkInfo: PreRenderedChunk) {
           // DEBUG
           // console.debug('entryFileNames', chunkInfo)
           if (
@@ -232,16 +252,29 @@ export default defineConfig(({ mode }) => {
           // }
           return `${outputsLibPath}${name}.js`
         },
-        chunkFileNames(chunkInfo) {
+        chunkFileNames(chunkInfo: PreRenderedChunk) {
           // DEBUG
           // console.debug('chunkFileNames', {
           //   name: chunkInfo.name,
           //   facadeModuleId: chunkInfo.facadeModuleId,
           //   isDynamicEntry: chunkInfo.isDynamicEntry,
+          //   // moduleIds: chunkInfo.moduleIds,
           // })
           if (chunkInfo.isDynamicEntry) {
             if (chunkInfo.facadeModuleId?.endsWith('src/components/QueryBuilder/index.ts')) {
               return `${outputsLibPath}${pkg.name}-query-builder-${pkg.version}.js`
+            }
+
+            const locales_pat = `/${inputSrcLocales}/`
+            if (
+              !chunkInfo.name.startsWith(outputsLibLocalesPath) &&
+              chunkInfo.facadeModuleId?.includes(locales_pat)
+            ) {
+              const filename = chunkInfo.facadeModuleId
+              const language = filename
+                .substring(filename.indexOf(locales_pat) + locales_pat.length)
+                .split('/', 1)[0]
+              return `${outputsLibLocalesPath}${language}/${chunkInfo.name}.js`
             }
           }
           return `[name].js`
@@ -266,6 +299,53 @@ export default defineConfig(({ mode }) => {
         },
       } satisfies OutputOptions,
     })
+
+    // create i18n locale chunks
+    const i18nBaseNamespaces = ['app', 'common'] // bundle together
+    const i18nLazyLoadNamespaces = ['querybuilder'] // each its own chunk
+    const localePrefix = JSON.parse(baseConfig.define['import.meta.env.I18N_NS_CONTEXT_PREFIX'])
+    const manualChunks = (baseConfig.build.rollupOptions.output as OutputOptions).manualChunks!
+    for (const language of I18n_LANGUAGES) {
+      for (const prefix of I18N_PREFIXES) {
+        const isActivePrefix = prefix === localePrefix
+        const chunkName = isActivePrefix ? 'default' : prefix
+        const modules: string[] = []
+        const pushIfExists = (modules: string[], fn: string) => {
+          if (!existsSync(resolve(fn))) return
+          modules.push(fn)
+        }
+
+        // standard locale chunks
+        for (const namespace of i18nBaseNamespaces) {
+          pushIfExists(modules, `${inputSrcLocales}/${language}/${prefix}.${namespace}.json`)
+          // merge shared language stuff into active prefix chunks
+          if (isActivePrefix) {
+            pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
+          }
+        }
+        if (modules.length > 0) {
+          Object.assign(manualChunks, {
+            [`${outputsLibLocalesPath}${language}/${chunkName}`]: modules,
+          })
+        }
+
+        // lazy load / async import modules
+        for (const namespace of i18nLazyLoadNamespaces) {
+          const chunkName = isActivePrefix ? namespace : `${prefix}.${namespace}`
+          const modules: string[] = []
+          pushIfExists(modules, `${inputSrcLocales}/${language}/${prefix}.${namespace}.json`)
+          if (isActivePrefix)
+            pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
+          if (modules.length > 0) {
+            Object.assign(manualChunks, {
+              [`${outputsLibLocalesPath}${language}/${chunkName}`]: modules,
+            })
+          }
+        }
+      }
+    }
+    // TODO: create a shared chunk for impossible locales? (i.e., other locale prefixes)
+    // see also https://rollupjs.org/configuration-options/#output-manualchunks for ideas?
   }
 
   // debug options to print more logging messages (development stuff)

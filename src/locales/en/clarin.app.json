@@ -1,0 +1,8 @@
+{
+  "footer": {
+    "service-info": {
+      "text": "<0>Service provided by <1>CLARIN</1></0><1><br/>Hosted by CLARIN ERIC</1>",
+      "url": "https://www.clarin.eu"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "header": {
+    "title": "Content Search",
+    "menu": {
+      "home": "Home",
+      "help": "Help"
+    },
+    "login": {
+      "login": "Login"
+    }
+  },
+  "footer": {
+    "links": {
+      "about": "About",
+      "statistics": "Statistics",
+      "terms-use-and-disclaimer": "Terms & Disclaimer",
+      "contact": "Contact"
+    }
+  },
+  "search": {
+    "intro": {
+      "text": "<0>The Federated Content Search (FCS) is a search engine by CLARIN that enables researchers to search for specific patterns across collections of data. The search engine connects to the local data collections that are available in the centres. The data itself stays at the centre where it is hosted – which is why the underlying technique is called <1>federated content search</1>.</0><1>To learn more about the FCS, please visit the page <2><1>Content Search</1> at CLARIN.eu</2>.</1>",
+      "url": "https://www.clarin.eu/content/content-search"
+    }
+  },
+  "about": {},
+  "statistics": {},
+  "help": {}
+}

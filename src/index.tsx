@@ -10,6 +10,7 @@ import './index.css'
 import './utils.css'
 
 import App from '@/App.tsx'
+import { i18n } from '@/i18n'
 import { AxiosProvider } from '@/providers/AxiosContext'
 import { configure, updateLocale } from '@/public'
 import AppStore from '@/stores/app'
@@ -30,6 +31,9 @@ console.debug('LocaleStore.getState()', LocaleStore.getInitialState(), LocaleSto
 // BrowserRouter#basename for subpath deployment
 const basename = AppStore.getState().deployPath
 const apiURL = AppStore.getState().apiURL
+
+const language = LocaleStore.getState().locale
+i18n.changeLanguage(language)
 
 // --------------------------------------------------------------------------
 

@@ -1,0 +1,26 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+
+  "antlr4.referencesCodeLens.enabled": true,
+  "antlr4.generation": {
+    "mode": "internal",
+    "listeners": true,
+    "visitors": true,
+    "language": "TypeScript"
+  },
+  //   "antlr4.debug": {
+  //     "visualParseTreeHorizontal": false,
+  //     "visualParseTreeClustered": false
+  //   }
+
+  // https://github.com/lokalise/i18n-ally/blob/main/examples/by-frameworks/react-i18next/.vscode/settings.json
+  "i18n-ally.localesPaths": "src/locales",
+  "i18n-ally.enabledFrameworks": [
+    "react-i18next"
+  ],
+  "i18n-ally.namespace": true,
+  "i18n-ally.pathMatcher": "{locale}/{namespaces}.json",
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.defaultNamespace": "app",
+}

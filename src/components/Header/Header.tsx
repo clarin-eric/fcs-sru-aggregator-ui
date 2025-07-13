@@ -2,6 +2,7 @@ import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 import NavDropdown from 'react-bootstrap/NavDropdown'
+import { useTranslation } from 'react-i18next'
 import { Link, NavLink } from 'react-router'
 // import { useStore } from 'zustand'
 
@@ -19,11 +20,11 @@ import './styles.css'
 // --------------------------------------------------------------------------
 
 function Header() {
+  const { t } = useTranslation()
+
   const locale: string = useLocaleStore((state) => state.locale)
   const locales: string[] = useLocaleStore((state) => state.locales)
   const setLocale: (locale: string) => void = useLocaleStore((state) => state.setLocale)
-
-  const appTitle = AppStore.getState().appTitle
 
   // const AppStoreReactive = useStore(AppStore)
   // const authName = AppStoreReactive.authUsername
@@ -61,7 +62,7 @@ function Header() {
     // unauthorized
     return (
       <Nav.Link href={`${loginPath}${linkSearch ?? ''}`} className="ms-auto">
-        <i dangerouslySetInnerHTML={{ __html: personIcon }} /> Login
+        <i dangerouslySetInnerHTML={{ __html: personIcon }} /> {t('header.login.login')}
       </Nav.Link>
     )
   }
@@ -111,18 +112,18 @@ function Header() {
               width="30"
               height="30"
               className="d-inline-block align-top"
-              alt={`${appTitle} logo`}
+              alt={`${t('header.title')} logo`}
             />{' '}
-            {appTitle}
+            {t('header.title')}
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="header-navbar-nav" />
           <Navbar.Collapse id="header-navbar-nav">
             <Nav className="w-100 d-flex">
               <Nav.Link as={NavLink} to={{ pathname: '/', search: linkSearch }}>
-                Home
+                {t('header.menu.home')}
               </Nav.Link>
               <Nav.Link as={NavLink} to={{ pathname: '/help', search: linkSearch }}>
-                Help
+                {t('header.menu.help')}
               </Nav.Link>
               {renderAuth()}
               {renderLocales()}

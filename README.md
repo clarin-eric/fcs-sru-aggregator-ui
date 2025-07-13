@@ -59,8 +59,6 @@ The bundle can be pre-configured by adjusting the `import.meta.env.` constants f
 
 - "branding" related configs:
   - `HEAD_TITLE`: the base application title for the browser
-  - `CONTACT_ADDRESS`: the contact email address for users to get in contact with
-  - `TERMS_AND_DISCLAIMER_ADDRESS`: the webpage with information about the website like disclaimer, imprint, GDPR, ...
   - `CANONCIAL_URL`: the canonical URL to the application (head meta information), _unused for now?_
 - deployment base configuration
   - `DEPLOY_PATH`: the (sub-)path the application is served from, by default `/` for the root
@@ -87,8 +85,6 @@ Runtime configuration can be set using the `window.MyAggregator` object and need
 - `SHOW_SEARCH_RESULT_LINK`: boolean (`true`/`false`) for whether to display a semi-permanent link to search results using the internal searchID
 - `APP_TITLE`: application title, by default `Content Search`
 - `APP_TITLE_HEAD`: application title, will be used for HTML HEAD title tag, by default `FCS Aggregator – Content Search`
-- `TERMS_AND_DISCLAIMER_ADDRESS`: by default `https://www.clarin.eu/content/terms-use-and-disclaimer`
-- `CONTACT_ADDRESS`: help and contact address, url or email, by default `mailto:fcs@clarin.eu`
 - `MATOMO_TRACKING_PARAMS`: matomo tracking parameters, see section about `FEATURE_TRACKING_MATOMO` above
 
 ## Development

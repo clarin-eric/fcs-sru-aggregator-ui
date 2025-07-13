@@ -11,8 +11,6 @@ type MyAggregatorConfiguration = {
   SHOW_SEARCH_RESULT_LINK: boolean
   APP_TITLE: string
   APP_TITLE_HEAD: string
-  TERMS_AND_DISCLAIMER_ADDRESS: string
-  CONTACT_ADDRESS: string | null
   MATOMO_TRACKING_PARAMS: string | MatomoSetupParams | null
   AUTH_USERNAME: string | null
 }
@@ -22,6 +20,11 @@ declare const window: Window &
     MyAggregator: Partial<MyAggregatorConfiguration> & { [key: string]: unknown }
     _paq: unknown[] | { push: (params: unknown[]) => void }
   }
+
+// declare const navigator: Navigator &
+//   NavigatorLanguage & {
+//     userLanguage?: string
+//   }
 
 // --------------------------------------------------------------------------
 
@@ -36,8 +39,6 @@ export const CONFIG_NAMES_ONLY_ON_INITIALIZATION = [
   'API_URL',
   'APP_TITLE',
   'APP_TITLE_HEAD',
-  'TERMS_AND_DISCLAIMER_ADDRESS',
-  'CONTACT_ADDRESS',
   'MATOMO_TRACKING_PARAMS',
 ]
 
@@ -63,12 +64,6 @@ export function configure() {
   }
   if (window.MyAggregator.APP_TITLE_HEAD !== undefined) {
     AppStore.getState().setAppTitleHead(window.MyAggregator.APP_TITLE_HEAD)
-  }
-  if (window.MyAggregator.TERMS_AND_DISCLAIMER_ADDRESS !== undefined) {
-    AppStore.getState().setTermsAndDisclaimerUrl(window.MyAggregator.TERMS_AND_DISCLAIMER_ADDRESS)
-  }
-  if (window.MyAggregator.CONTACT_ADDRESS !== undefined) {
-    AppStore.getState().setContactAddress(window.MyAggregator.CONTACT_ADDRESS)
   }
   if (import.meta.env.FEATURE_TRACKING_MATOMO) {
     if (window.MyAggregator.MATOMO_TRACKING_PARAMS !== undefined) {
@@ -134,6 +129,7 @@ export function updateLocale() {
   // - use match or fall back to default
   const localeStore = LocaleStore.getState()
   const userLanguages: string[] = [
+    // ...((navigator.language || navigator.userLanguage) ? [navigator.language || navigator.userLanguage!] : []),
     navigator.language,
     ...navigator.languages,
   ]
