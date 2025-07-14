@@ -5,21 +5,23 @@
 The frontend uses the following technologies:
 
 - [ReactJS](https://18.react.dev/) 18.3.1
-  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.6.1 for <abbr title="Single Page Application">SPA</abbr> routing
-  - [React Query](https://tanstack.com/query/latest) 5.77.2 with [Axios](https://github.com/axios/axios) 1.9.0 for web requests
-- [Bootstrap](https://getbootstrap.com/) 5.3.6 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.13.1, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.10
+  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.6.3 for <abbr title="Single Page Application">SPA</abbr> routing
+  - [React Query](https://tanstack.com/query/latest) 5.83.0 with [Axios](https://github.com/axios/axios) 1.10.0 for web requests
+- [Bootstrap](https://getbootstrap.com/) 5.3.7 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.13.1, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.10
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
 - [react-slugify](https://github.com/martpie/react-slugify) 4.0.1 for generating hash urls
 - [PrismJS](https://github.com/PrismJS/prism) 1.29.0 for syntax highlighting
 - [ANTLR4ng](https://github.com/mike-lischke/antlr4ng) 3.0.16 for syntax parsing (visual query builder, syntax validation)
-- [Zustand](https://github.com/pmndrs/zustand) 5.0.5 for state management of external bundle configuration
+- [Zustand](https://github.com/pmndrs/zustand) 5.0.6 for state management of external bundle configuration
 - [React Helmet (Async Fork)](https://github.com/staylor/react-helmet-async) 2.0.5 for webpage meta information
 
 For development and building a few additional dependencies are required:
 
-- [Vite](https://vite.dev/) 6.3.5 with plugins
+- [Vite](https://vite.dev/) 7.0.4 with plugins
+  - [estree-walker](https://github.com/Rich-Harris/estree-walker) and [magic-string](https://github.com/rich-harris/magic-string) for custom source code transformation (import rewriting, bundle building)
+  - [picomatch](https://github.com/micromatch/picomatch#globbing-features) for filename filters in output control
 - [TypeScript](https://www.typescriptlang.org/) 5.8.3 with `@types/*` definitions
-- [ESLint](https://eslint.org/) 9.27.0 with plugins
+- [ESLint](https://eslint.org/) 9.31.0 with plugins
 
 ## Features
 

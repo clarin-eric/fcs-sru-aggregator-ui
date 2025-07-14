@@ -26,6 +26,7 @@ import { basename } from 'node:path'
 // build customization
 import transformDynamicToStaticImportsPlugin from './build/transform-dynamic-to-static-imports'
 import transformEmbedLocalesResourcesPlugin from './build/transform-embed-locales-resources'
+import deleteGeneratedFilesPlugin from './build/delete-generated-files'
 
 import pkg from './package.json'
 
@@ -349,6 +350,15 @@ export default defineConfig(({ mode }) => {
         ),
       })
     )
+    // delete generated output files we don't want
+    baseConfig.plugins.push(
+      deleteGeneratedFilesPlugin({
+        pattern: I18N_PREFIXES.filter((prefix) => prefix !== paramLocalePrefix).map(
+          (prefix) => `${outputsLibLocalesPath}*/${prefix}*`
+        ),
+        debug: debug,
+      })
+    )
 
     // create bundled i18n locale chunks
     const manualChunks = (baseConfig.build.rollupOptions.output as OutputOptions).manualChunks!
@@ -390,6 +400,27 @@ export default defineConfig(({ mode }) => {
     }
     // NOTE: create a shared chunk for impossible locales? (i.e., other locale prefixes) -- external option
     // see also https://rollupjs.org/configuration-options/#output-manualchunks for ideas?
+    // const toBeIgnoredModules: string[] = []
+    // for (const language of I18n_LANGUAGES) {
+    //   for (const prefix of I18N_PREFIXES) {
+    //     if (prefix === paramLocalePrefix) continue
+    //     const pushIfExists = (fn: string) => {
+    //       if (!existsSync(resolve(fn))) return
+    //       toBeIgnoredModules.push(fn)
+    //     }
+    //     for (const namespace of I18N_BASE_NS) {
+    //       pushIfExists(`${inputSrcLocales}/${language}/${prefix}.${namespace}.json`)
+    //     }
+    //     for (const namespace of I18N_LAZY_LOAD_NS) {
+    //       pushIfExists(`${inputSrcLocales}/${language}/${prefix}.${namespace}.json`)
+    //     }
+    //   }
+    //   if (toBeIgnoredModules.length > 0) {
+    //     Object.assign(manualChunks, {
+    //       [`${outputsLibLocalesPath}_ignoreme`]: toBeIgnoredModules,
+    //     })
+    //   }
+    // }
   }
 
   // debug options to print more logging messages (development stuff)
