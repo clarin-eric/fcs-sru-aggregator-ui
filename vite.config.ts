@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react'
 import {
+  type ExternalOption,
   type InputOption,
   type LogHandlerWithDefault,
   type OutputOptions,
@@ -17,11 +18,14 @@ import {
 } from 'vite'
 import version from 'vite-plugin-package-version'
 
-import { existsSync } from 'node:fs'
+import { existsSync, globSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
+import { basename } from 'node:path'
 // import path from 'node:path'
 
+// build customization
 import transformDynamicToStaticImportsPlugin from './build/transform-dynamic-to-static-imports'
+import transformEmbedLocalesResourcesPlugin from './build/transform-embed-locales-resources'
 
 import pkg from './package.json'
 
@@ -39,6 +43,8 @@ const outputsLibLocalesPath = `${outputsLibPath}locales/`
 const inputSrcLocales = 'src/locales'
 const I18n_LANGUAGES = ['en', 'de'] // languages we support
 const I18N_PREFIXES = ['clarin', 'textplus'] // locale variants/overrides, active prefix will contain base namespaces, too
+const I18N_BASE_NS = ['app', 'common'] // bundle together
+const I18N_LAZY_LOAD_NS = ['querybuilder'] // each its own chunk
 
 // flags
 const debug = false
@@ -191,6 +197,9 @@ export default defineConfig(({ mode }) => {
     },
   } satisfies UserConfig
 
+  const paramLocalePrefix = JSON.parse(baseConfig.define['import.meta.env.I18N_NS_CONTEXT_PREFIX'])
+  const paramLocale = JSON.parse(baseConfig.define['import.meta.env.LOCALE'])
+
   if (isSingleChunk) {
     // keep a single chunk
     // Object.assign(baseConfig.define, {} satisfies Record<string, unknown>)
@@ -198,6 +207,23 @@ export default defineConfig(({ mode }) => {
     // rewrite dynamic imports into static import
     baseConfig.plugins.push(transformDynamicToStaticImportsPlugin())
     // include locale dynamic import into default chunk
+    baseConfig.plugins.push(
+      transformEmbedLocalesResourcesPlugin({
+        removeResourcesToBackend: true,
+        localesImportPrefix: '@locales/',
+        localesWithNamespaces: Object.assign(
+          {},
+          ...I18n_LANGUAGES.map((locale) => ({
+            [locale]: [
+              ...I18N_BASE_NS.map((ns) => `${paramLocalePrefix}.${ns}`),
+              ...I18N_BASE_NS,
+              ...I18N_LAZY_LOAD_NS.map((ns) => `${paramLocalePrefix}.${ns}`),
+              ...I18N_LAZY_LOAD_NS,
+            ].filter((ns) => existsSync(resolve(`${inputSrcLocales}/${locale}/${ns}.json`))),
+          }))
+        ),
+      })
+    )
   } else {
     // split into multiple chunks if not disabled
     Object.assign(baseConfig.build.rollupOptions, {
@@ -298,53 +324,71 @@ export default defineConfig(({ mode }) => {
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
       } satisfies OutputOptions,
+      // filter out locales from dynamic import detection
+      // see: https://vite.dev/config/build-options.html#build-dynamicimportvarsoptions
+      external: [
+        ...globSync(`${inputSrcLocales}/*/*.*.json`).filter(
+          (fn) => !basename(fn, '.json').startsWith(paramLocalePrefix)
+        ),
+      ] satisfies ExternalOption,
     })
 
-    // create i18n locale chunks
-    const i18nBaseNamespaces = ['app', 'common'] // bundle together
-    const i18nLazyLoadNamespaces = ['querybuilder'] // each its own chunk
-    const localePrefix = JSON.parse(baseConfig.define['import.meta.env.I18N_NS_CONTEXT_PREFIX'])
+    // embed locale dynamic import into default chunk
+    baseConfig.plugins.push(
+      transformEmbedLocalesResourcesPlugin({
+        removeResourcesToBackend: false,
+        localesImportPrefix: '@locales/',
+        localesWithNamespaces: Object.assign(
+          {},
+          ...I18n_LANGUAGES.filter((locale) => locale === paramLocale).map((locale) => ({
+            [locale]: [
+              ...I18N_BASE_NS.map((ns) => `${paramLocalePrefix}.${ns}`),
+              ...I18N_BASE_NS,
+            ].filter((ns) => existsSync(resolve(`${inputSrcLocales}/${locale}/${ns}.json`))),
+          }))
+        ),
+      })
+    )
+
+    // create bundled i18n locale chunks
     const manualChunks = (baseConfig.build.rollupOptions.output as OutputOptions).manualChunks!
     for (const language of I18n_LANGUAGES) {
-      for (const prefix of I18N_PREFIXES) {
-        const isActivePrefix = prefix === localePrefix
-        const chunkName = isActivePrefix ? 'default' : prefix
-        const modules: string[] = []
-        const pushIfExists = (modules: string[], fn: string) => {
-          if (!existsSync(resolve(fn))) return
-          modules.push(fn)
-        }
+      const modules: string[] = []
+      const pushIfExists = (modules: string[], fn: string) => {
+        if (!existsSync(resolve(fn))) return
+        modules.push(fn)
+      }
 
-        // standard locale chunks
-        for (const namespace of i18nBaseNamespaces) {
-          pushIfExists(modules, `${inputSrcLocales}/${language}/${prefix}.${namespace}.json`)
-          // merge shared language stuff into active prefix chunks
-          if (isActivePrefix) {
-            pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
-          }
-        }
+      // standard locale chunks for active prefix and shared base stuff
+      for (const namespace of I18N_BASE_NS) {
+        pushIfExists(
+          modules,
+          `${inputSrcLocales}/${language}/${paramLocalePrefix}.${namespace}.json`
+        )
+        pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
+      }
+      if (modules.length > 0) {
+        Object.assign(manualChunks, {
+          [`${outputsLibLocalesPath}${language}/default`]: modules,
+        })
+      }
+
+      // lazy load / async import modules
+      for (const namespace of I18N_LAZY_LOAD_NS) {
+        const modules: string[] = []
+        pushIfExists(
+          modules,
+          `${inputSrcLocales}/${language}/${paramLocalePrefix}.${namespace}.json`
+        )
+        pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
         if (modules.length > 0) {
           Object.assign(manualChunks, {
-            [`${outputsLibLocalesPath}${language}/${chunkName}`]: modules,
+            [`${outputsLibLocalesPath}${language}/${namespace}`]: modules,
           })
-        }
-
-        // lazy load / async import modules
-        for (const namespace of i18nLazyLoadNamespaces) {
-          const chunkName = isActivePrefix ? namespace : `${prefix}.${namespace}`
-          const modules: string[] = []
-          pushIfExists(modules, `${inputSrcLocales}/${language}/${prefix}.${namespace}.json`)
-          if (isActivePrefix)
-            pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
-          if (modules.length > 0) {
-            Object.assign(manualChunks, {
-              [`${outputsLibLocalesPath}${language}/${chunkName}`]: modules,
-            })
-          }
         }
       }
     }
-    // TODO: create a shared chunk for impossible locales? (i.e., other locale prefixes)
+    // NOTE: create a shared chunk for impossible locales? (i.e., other locale prefixes) -- external option
     // see also https://rollupjs.org/configuration-options/#output-manualchunks for ideas?
   }
 

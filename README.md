@@ -44,8 +44,7 @@ Running the following command will create a fully static bundle that is ready to
 npm run build
 ```
 
-To generate a single bundle build (one script and one style file, with picture assets) use the following command. This will NOT disable dynamic imports and still generate additional chunks for those parts!  
-_To disable dynamic imports, you need to replace the `const Comp = lazy(() => import('@/...'))` statements with static imports, see [`src/pages/Search/SearchInput.tsx`](src/pages/Search/SearchInput.tsx)._
+To generate a single bundle build (one script and one style file, with picture assets) use the following command. This will transform dynamic imports into static imports and bundle everything into the main bundle!
 
 ```bash
 npm run build:bundle

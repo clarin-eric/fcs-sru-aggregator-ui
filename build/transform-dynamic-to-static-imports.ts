@@ -17,17 +17,26 @@ export default function transformDynamicToStaticImportsPlugin() {
   return {
     name: 'clarin:transform-dynamic-to-static-imports',
 
-    // options(options) {
-    //   console.debug('[options]', options)
-    // },
+    // https://rollupjs.org/plugin-development/#buildstart
+
     // buildStart(options) {
     //   console.debug('[buildStart]', options)
     // },
-    // resolveId(id) {
-    //   console.debug('[resoleId]', { id })
+
+    // resolveDynamicImport(specifier, importer, options) {
+    //   if (typeof specifier !== 'string') return
+    //   console.debug('[resolveDynamicImport]', specifier, importer, options)
+
+    //   // if (specifier.includes('unwanted')) {
+    //   //   // mark those external, no further processing
+    //   //   return false
+    //   // }
+    //   // } else if (specifier.includes('/locales/')) {
+    //   //   return specifier
+    //   // }
     // },
-    // load(id) {
-    //   console.debug('[load]', { id })
+    // resolveId(source, importer, options) {
+    //   console.debug('[resolveId]', source, importer, options)
     // },
 
     transform: {
@@ -36,7 +45,8 @@ export default function transformDynamicToStaticImportsPlugin() {
           exclude: '**/node_modules/**',
           include: '**/*.ts?(x)',
         },
-        code: 'import(',
+        // see: vite: dynamicImportVars.ts
+        code: /\bimport\s*[(/]/,
       },
       handler(code, id) {
         // const info = this.getModuleInfo(id)!
@@ -96,6 +106,7 @@ export default function transformDynamicToStaticImportsPlugin() {
         // nothing found, exit early
         if (imports.length === 0) return
 
+        // find end of import statements (start of code) to append all transformed new imports after
         const idxNodeForInsert = ast.body.findIndex((node) => node.type !== 'ImportDeclaration')
         const idxForInsert = (ast.body[idxNodeForInsert] as unknown as AstNode).start
         // console.debug('insert at:', ast.body[idxNodeForInsert], idxForInsert)
@@ -107,7 +118,7 @@ export default function transformDynamicToStaticImportsPlugin() {
         }
 
         // vite: transformStableResult()?
-        return { code: s.toString(), map: s.generateMap({ source: id }) }
+        return { code: s.toString(), map: s.generateMap({ hires: 'boundary', source: id }) }
 
         // const mapGen = new SourceMapGenerator({ file: id })
         // mapGen.setSourceContent(id, code)

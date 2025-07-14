@@ -145,8 +145,8 @@ i18n
 
     react: {
       // useTranslation() is able to to multiple namespaces!
-      nsMode: "fallback"
-    }
+      nsMode: 'fallback',
+    },
   })
 
 // DEBUG
