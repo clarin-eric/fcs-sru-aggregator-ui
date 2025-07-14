@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
@@ -30,6 +30,9 @@ jobs:
           VITE_API_URL: 'https://contentsearch.clarin.eu/rest/'
           VITE_CANONCIAL_URL: 'https://contentsearch.clarin.eu'
           VITE_VALIDATOR_URL: 'https://www.clarin.eu/fcsvalidator/'
+          VITE_I18N_NS_CONTEXT_PREFIX: 'clarin'
+          VITE_LOCALES: '["en", "de"]'
+          VITE_LOCALE: 'en'
         run: npm run build
 
       - name: Store build artifact

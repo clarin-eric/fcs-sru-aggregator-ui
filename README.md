@@ -34,7 +34,7 @@ For development and building a few additional dependencies are required:
 
 ## Requirements
 
-- Node 20+ (?)
+- Node 22+ (due to `node:fs -> globSync`)
 
 ## How to deploy
 
