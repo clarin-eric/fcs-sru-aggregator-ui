@@ -71,9 +71,11 @@ function Header() {
     // if only one locale available, then do not show anything...
     if (!locales || locales.length === 1) return null
 
+    const langNames = new Intl.DisplayNames([locale, 'en'], { type: 'language' })
+
     const currentSelectedLanguage = (
       <>
-        <i dangerouslySetInnerHTML={{ __html: translateIcon }} /> {locale.toUpperCase()}
+        <i dangerouslySetInnerHTML={{ __html: translateIcon }} /> {locale.toUpperCase()}{' '}
       </>
     )
 
@@ -85,16 +87,26 @@ function Header() {
         className="ms-2"
         onSelect={handleLocaleChangeClick}
       >
-        {locales.map((localeOption) => (
-          <NavDropdown.Item
-            key={localeOption}
-            disabled={localeOption === locale}
-            aria-disabled={localeOption === locale}
-            eventKey={localeOption}
-          >
-            {localeOption.toUpperCase()}
-          </NavDropdown.Item>
-        ))}
+        {locales.map((localeOption) => {
+          const langNamesLocalized = new Intl.DisplayNames([localeOption, 'en'], {
+            type: 'language',
+          })
+          return (
+            <NavDropdown.Item
+              key={localeOption}
+              disabled={localeOption === locale}
+              aria-disabled={localeOption === locale}
+              eventKey={localeOption}
+              title={
+                `Switch to locale '${localeOption}' for language '${langNamesLocalized.of(
+                  localeOption
+                )}'` + (localeOption !== locale ? ` (${langNames.of(localeOption)})` : '')
+              }
+            >
+              {localeOption.toUpperCase()} – {langNamesLocalized.of(localeOption)}
+            </NavDropdown.Item>
+          )
+        })}
       </NavDropdown>
     )
   }
