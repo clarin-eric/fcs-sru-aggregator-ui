@@ -3,7 +3,7 @@
     "title": "Federated Content Search"
   },
   "footer": {
-    "service-info": {
+    "serviceInfo": {
       "text": "<0>Service provided by <1>Text+</1></0><1><br/>Hosted by SAW Leipzig</1>",
       "url": "https://text-plus.org"
     }

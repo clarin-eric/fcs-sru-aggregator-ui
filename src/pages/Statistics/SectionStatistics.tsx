@@ -7,6 +7,7 @@ import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
+import { useTranslation } from 'react-i18next'
 import slugify from 'react-slugify'
 
 import type { InstitutionEndpointInfo, StatisticsSection } from '@/utils/api'
@@ -29,6 +30,8 @@ function SectionStatistics({
   data: StatisticsSection
   validatorUrl: string | null
 }) {
+  const { t, i18n } = useTranslation()
+
   const [filter, setFilter] = useState('')
   const [filterFields, setFilterFields] = useState<FilterField[]>([
     'institution',
@@ -172,43 +175,49 @@ function SectionStatistics({
     <Container className="d-grid gap-2 mt-3">
       <Alert variant="info" className="mb-0">
         <dl className="mb-0">
-          <dt>Start date</dt>
-          <dd className="mb-0">{new Date(data.date).toLocaleString()}</dd>
-          <dt>Timeout (in seconds)</dt>
-          <dd className="mb-0">{data.timeout}</dd>
+          <dt>{t('statistics.labels.startDate')}</dt>
+          <dd className="mb-0">{new Date(data.date).toLocaleString(i18n.language)}</dd>
+          <dt>{t('statistics.labels.timeout')}</dt>
+          <dd className="mb-0">
+            {new Intl.NumberFormat(i18n.language, {
+              style: 'unit',
+              unit: 'second',
+              unitDisplay: 'short',
+            }).format(data.timeout)}
+          </dd>
         </dl>
       </Alert>
       <Form onSubmit={(event) => event.preventDefault()}>
         <Row className="gy-2">
           <Col lg={6} md={12}>
             <Form.Control
-              placeholder="Type to filter statistics ..."
+              placeholder={t('statistics.filter.inputPlaceholder')}
               value={filter}
               onChange={(event) => setFilter(event.target.value)}
             />
           </Col>
           <Col className="filter-checkboxes" lg={6} md={12}>
-            <Form.Text className="me-2">Apply filter to:</Form.Text>
+            <Form.Text className="me-2">{t('statistics.filter.labelForCheckboxes')}</Form.Text>
             <Form.Check
               type="checkbox"
               checked={filterFields.includes('institution')}
               onChange={() => handleFilterOptionToggleChange('institution')}
               id={`filter-institution-name${idSuffix}`}
-              label="Institution"
+              label={t('statistics.filter.checkboxInstitution')}
             />
             <Form.Check
               type="checkbox"
               checked={filterFields.includes('endpoint')}
               onChange={() => handleFilterOptionToggleChange('endpoint')}
               id={`filter-endpoint-url${idSuffix}`}
-              label="Endpoint"
+              label={t('statistics.filter.checkboxEndpoint')}
             />
             <Form.Check
               type="checkbox"
               checked={filterFields.includes('resources')}
               onChange={() => handleFilterOptionToggleChange('resources')}
               id={`filter-resource-names${idSuffix}`}
-              label="Resources"
+              label={t('statistics.filter.checkboxResources')}
             />
           </Col>
         </Row>
@@ -220,9 +229,9 @@ function SectionStatistics({
             checked={showIssuesOnly}
             onChange={() => setShowIssuesOnly(!showIssuesOnly)}
             id={`filter-show-issues-only${idSuffix}`}
-            label={`Only show endpoints with issues (errors or warnings, currently affects ${
-              endpointsWithIssues.length
-            } endpoint${endpointsWithIssues.length !== 1 ? 's' : ''})`}
+            label={t('statistics.filter.checkboxShowWithIssues', {
+              count: endpointsWithIssues.length,
+            })}
           />
         </Col>
       </Row>

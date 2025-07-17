@@ -13,13 +13,13 @@ import './styles.css'
 function Footer() {
   const { t } = useTranslation()
 
-  const i18nKeyTerms = 'urls.terms-use-and-disclaimer'
+  const i18nKeyTerms = 'urls.termsUseAndDisclaimer'
   const urlTerms = t(i18nKeyTerms, { ns: 'common' })
   const hasTerms = urlTerms !== i18nKeyTerms
   const i18nKeyContact = 'urls.contact'
   const urlContact = t(i18nKeyContact, { ns: 'common' })
   const hasContact = urlContact !== i18nKeyContact
-  const i18nKeyServiceInfo = 'footer.service-info.text'
+  const i18nKeyServiceInfo = 'footer.serviceInfo.text'
   const transServiceInfo = t(i18nKeyServiceInfo)
   const hasServiceInfo = transServiceInfo !== i18nKeyServiceInfo
 
@@ -51,7 +51,7 @@ function Footer() {
             {hasServiceInfo && (
               <Trans i18nKey={i18nKeyServiceInfo}>
                 <span className="footer-fineprint">
-                  Service provided by <a href={t('footer.service-info.url')}>CLARIN</a>
+                  Service provided by <a href={t('footer.serviceInfo.url')}>CLARIN</a>
                 </span>
                 <span>
                   <br />
@@ -62,7 +62,7 @@ function Footer() {
           </Col>
           <Col className="hidden-xs text-end d-flex flex-sm-row flex-column justify-content-sm-end column-gap-3 row-gap-2">
             {/* Contact link in right column on larger screens */}
-            {hasTerms && <a href={urlTerms}>{t('footer.links.terms-use-and-disclaimer')}</a>}
+            {hasTerms && <a href={urlTerms}>{t('footer.links.termsUseAndDisclaimer')}</a>}
             {hasContact && <a href={urlContact}>{t('footer.links.contact')}</a>}
           </Col>
         </Row>

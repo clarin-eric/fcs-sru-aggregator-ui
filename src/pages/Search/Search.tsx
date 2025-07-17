@@ -305,22 +305,19 @@ function Search() {
         {!hasSearch && (
           <Row className="mt-3">
             <Col>
-              <Trans i18nKey="search.intro.text">
-                <p>
-                  The Federated Content Search (FCS) is a search engine by CLARIN that enables
-                  researchers to search for specific patterns across collections of data. The search
-                  engine connects to the local data collections that are available in the centres.
-                  The data itself stays at the centre where it is hosted – which is why the
-                  underlying technique is called <em>federated content search</em>.
-                </p>
-                <p>
-                  To learn more about the FCS, please visit the{' '}
-                  <a href={t('search.intro.url')}>
-                    page <em>Content Search</em> at CLARIN.eu
-                  </a>
-                  .
-                </p>
-              </Trans>
+              <p>
+                <Trans i18nKey="search.intro.textGeneral" />
+              </p>
+              <p>
+                <Trans
+                  i18nKey="search.intro.textLearnMore"
+                  components={[
+                    <a href={t('search.intro.url')}>
+                      page <em>Content Search</em> at CLARIN.eu
+                    </a>,
+                  ]}
+                />
+              </p>
             </Col>
           </Row>
         )}

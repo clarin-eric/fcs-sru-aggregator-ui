@@ -4,6 +4,7 @@ import Alert from 'react-bootstrap/Alert'
 import Badge from 'react-bootstrap/Badge'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Tooltip from 'react-bootstrap/Tooltip'
+import { useTranslation } from 'react-i18next'
 import slugify from 'react-slugify'
 import { Fragment } from 'react/jsx-runtime'
 
@@ -31,6 +32,14 @@ function EndpointStatistics({
   validatorUrl: string | null
   isScan: boolean
 }) {
+  const { t, i18n } = useTranslation()
+
+  const secondsFormatter = new Intl.NumberFormat(i18n.language, {
+    style: 'unit',
+    unit: 'second',
+    unitDisplay: 'short',
+  })
+
   function renderResourceWithInfos(resInfo: StatisticsResourceInfo, idx: number) {
     const resourceInner = (
       <Highlight text={resInfo.title} ranges={statistics.matchResources?.[idx] ?? null} />
@@ -46,7 +55,7 @@ function EndpointStatistics({
         delay={{ show: 250, hide: 400 }}
         overlay={
           <Tooltip id={`resource-info-warning-${resInfo.handle}`}>
-            {!resInfo.valid && 'This resource is not available in the Aggregator!'}
+            {!resInfo.valid && t('statistics.errors.notAvailableInAggregator')}
             {!resInfo.valid && resInfo.notes.length >= 1 && <hr className="mt-2 mb-1" />}
             {resInfo.notes.length === 1 ? (
               resInfo.notes[0]
@@ -86,28 +95,38 @@ function EndpointStatistics({
         )}
       </h4>
       <dl className="ps-sm-4">
-        <dt>FCS Version</dt>
+        <dt>{t('statistics.labels.fcsVersion')}</dt>
         <dd>{statistics.version}</dd>
-        <dt>Search capabilities</dt>
+        <dt>{t('statistics.labels.searchCapabilities')}</dt>
         <dd>{statistics.searchCapabilities.join(', ')}</dd>
-        <dt>Max concurrent scan requests</dt>
+        <dt>{t('statistics.labels.maxConcurrentScanRequests')}</dt>
         <dd>{statistics.maxConcurrentRequests}</dd>
-        <dt>Request statistics</dt>
-        <dd className="mb-0">{statistics.numberOfRequests} request(s)</dd>
+        <dt>{t('statistics.labels.requestStatistics')}</dt>
+        <dd className="mb-0">
+          {t('statistics.labels.numberOfRequests', { count: statistics.numberOfRequests })}
+        </dd>
         {statistics.avgQueueTime !== 0 && (
           <dd className="mb-0">
-            Queue time (in seconds): average: {statistics.avgQueueTime}, max:{' '}
-            {statistics.maxQueueTime}
+            {t('statistics.labels.queueTime', {
+              avg: secondsFormatter.format(statistics.avgQueueTime),
+              max: secondsFormatter.format(statistics.maxQueueTime),
+            })}
           </dd>
         )}
         <dd>
-          Execution time (in seconds): average: {statistics.avgExecutionTime}, max:{' '}
-          {statistics.maxExecutionTime}
+          {t('statistics.labels.executionTime', {
+            avg: secondsFormatter.format(statistics.avgExecutionTime),
+            max: secondsFormatter.format(statistics.maxExecutionTime),
+          })}
         </dd>
         {statistics.rootResources?.length > 0 && (
           <>
-            <dt>Resources</dt>
-            <dd>{statistics.rootResources.length} root resources</dd>
+            <dt>{t('statistics.labels.resources')}</dt>
+            <dd>
+              {t('statistics.labels.numberOfRootResources', {
+                count: statistics.rootResources.length,
+              })}
+            </dd>
             <dd>
               <ul>
                 {statistics.rootResources.map((nameOrResInfo, idx) =>
@@ -133,7 +152,8 @@ function EndpointStatistics({
             <Alert variant="warning" key={reason} style={{ fontSize: '0.85rem' }}>
               <Alert.Heading style={{ fontSize: '1rem' }}>
                 <Badge bg="warning">{info.counter}x</Badge>{' '}
-                <span className="text-uppercase">Diagnostic:</span> {info.diagnostic.message}
+                <span className="text-uppercase">{t('statistics.diagnostic.diagnostic')}</span>{' '}
+                {info.diagnostic.message}
                 {info.diagnostic.diagnostic && (
                   <>
                     {' - '}
@@ -142,7 +162,7 @@ function EndpointStatistics({
                 )}
               </Alert.Heading>
               <p className="mb-0">
-                Context: <a href={info.context}>{info.context}</a>
+                {t('statistics.diagnostic.context')} <a href={info.context}>{info.context}</a>
               </p>
             </Alert>
           ))}
@@ -150,12 +170,17 @@ function EndpointStatistics({
             <Alert variant="danger" key={reason} style={{ fontSize: '0.85rem' }}>
               <Alert.Heading style={{ fontSize: '1rem' }}>
                 <Badge bg="danger">{info.counter}x</Badge>{' '}
-                <span className="text-uppercase">Exception:</span> {info.exception.message}
+                <span className="text-uppercase">{t('statistics.diagnostic.exception')}</span>{' '}
+                {info.exception.message}
               </Alert.Heading>
               <p className="mb-0">
-                Context: <a href={info.context}>{info.context}</a>
+                {t('statistics.diagnostic.context')} <a href={info.context}>{info.context}</a>
               </p>
-              {info.exception.cause && <p className="mb-0">Caused by: {info.exception.cause}</p>}
+              {info.exception.cause && (
+                <p className="mb-0">
+                  {t('statistics.diagnostic.causedBy')} {info.exception.cause}
+                </p>
+              )}
             </Alert>
           ))}
         </Fragment>

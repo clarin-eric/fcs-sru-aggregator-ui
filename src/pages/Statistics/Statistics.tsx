@@ -6,6 +6,7 @@ import Nav from 'react-bootstrap/Nav'
 import Row from 'react-bootstrap/Row'
 import Tab from 'react-bootstrap/Tab'
 import { Helmet } from 'react-helmet-async'
+import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router'
 
 import useNavigate from '@/hooks/useNavigate'
@@ -39,6 +40,7 @@ function Statistics() {
   const axios = useAxios()
   const queryClient = useQueryClient()
   const [urlSearchParams] = useSearchParams()
+  const { t } = useTranslation()
 
   const { categoryId } = useParams()
   const routeMatch = useRouteMatch()
@@ -92,12 +94,12 @@ function Statistics() {
       <Helmet>
         <title>{appTitleHead} – Statistics</title>
       </Helmet>
-      <Container id="statistics" className="my-3">
-        <h1 className="h1">Statistics</h1>
+      <Container id="statistics" className="my-4">
+        <h1 className="h1">{t('statistics.title')}</h1>
         {(isPending || isError) && (
           <Row>
             <Col>
-              {isPending ? 'Loading ...' : null}
+              {isPending ? t('statistics.loading') : null}
               <br />
               {isError ? error.message : null}
             </Col>
@@ -110,14 +112,17 @@ function Statistics() {
               {Object.keys(data).map((section: string) => (
                 <Nav.Item as="li" role="presentation" key={section}>
                   <Nav.Link as="button" eventKey={section}>
-                    {CATEGORY_LABELS_MAP[section]?.label ?? section}
+                    {t(`statistics.tabs.${section}`, {
+                      defaultValue: CATEGORY_LABELS_MAP[section]?.label ?? section,
+                    })}
                   </Nav.Link>
                 </Nav.Item>
               ))}
               {/* custom right aligned "refresh" tab button */}
               <Nav.Item as="li" role="presentation" className="ms-auto">
                 <Nav.Link as="button" onClick={refreshData}>
-                  <i dangerouslySetInnerHTML={{ __html: arrowClockwiseIcon }} /> Refresh
+                  <i dangerouslySetInnerHTML={{ __html: arrowClockwiseIcon }} />{' '}
+                  {t('statistics.tabs.btnRefresh')}
                 </Nav.Link>
               </Nav.Item>
             </Nav>

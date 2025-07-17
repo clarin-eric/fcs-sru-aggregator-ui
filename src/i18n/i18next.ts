@@ -73,7 +73,10 @@ function postProcessTryPrefixedNamespacesFirst(
   // we found a translation, only check namespace where key was found (and if options.ns argument)
   // if no translation, check all namespaces
   const namespacesToCheck =
-    resolved?.res !== undefined ? [...toArray(options.ns || []), resolved.usedNS] : namespaces
+    resolved?.res !== undefined
+      ? [...toArray(options.ns || []), resolved.usedNS]
+      : [...toArray(options.ns || []), ...namespaces]
+  // TODO: or just namespaces?
 
   // prefix namespaces
   const namespacesPrefixed = namespacesToCheck.map((ns: string) =>
@@ -88,7 +91,7 @@ function postProcessTryPrefixedNamespacesFirst(
   })
 
   // const resolvedPrefixed = translator.resolve(keys, { ...options, ns: namespacesPrefixed })
-  // console.debug('[postProcessor:try-prefixed-namespaces-first]', { resolved, resolvedPrefixed, keys, namespaces, namespacesToCheck, namespacesPrefixed, result,})
+  // console.debug('[postProcessor:try-prefixed-namespaces-first]', { resolved, resolvedPrefixed, keys, namespaces, namespacesToCheck, namespacesPrefixed, result })
 
   // return "new" result if not a key (not found) otherwise return default value
   return !keys.includes(result) ? result : value
@@ -136,6 +139,7 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    // allow null to "skip" certain translations
     // returnNull: true,
 
     postProcess: ['try-prefixed-namespaces-first'],
@@ -146,6 +150,8 @@ i18n
     react: {
       // useTranslation() is able to to multiple namespaces!
       nsMode: 'fallback',
+
+      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p', 'em', 'kbd'],
     },
   })
 

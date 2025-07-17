@@ -13,17 +13,119 @@
     "links": {
       "about": "About",
       "statistics": "Statistics",
-      "terms-use-and-disclaimer": "Terms & Disclaimer",
+      "termsUseAndDisclaimer": "Terms & Disclaimer",
       "contact": "Contact"
+    },
+    "serviceInfo": {
+      "text": null,
+      "url": null
     }
   },
   "search": {
     "intro": {
-      "text": "<0>The Federated Content Search (FCS) is a search engine by CLARIN that enables researchers to search for specific patterns across collections of data. The search engine connects to the local data collections that are available in the centres. The data itself stays at the centre where it is hosted – which is why the underlying technique is called <1>federated content search</1>.</0><1>To learn more about the FCS, please visit the page <2><1>Content Search</1> at CLARIN.eu</2>.</1>",
+      "textGeneral": "The Federated Content Search (FCS) is a search engine by CLARIN that enables researchers to search for specific patterns across collections of data. The search engine connects to the local data collections that are available in the centres. The data itself stays at the centre where it is hosted – which is why the underlying technique is called <em>federated content search</em>.",
+      "textLearnMore": "To learn more about the FCS, please visit the page <0><em>Content Search</em> at CLARIN.eu</0>.",
       "url": "https://www.clarin.eu/content/content-search"
+    },
+    "searchInput": {}
+  },
+  "about": {
+    "title": "About the Federated Content Search (FCS) Aggregator",
+    "people": {
+      "title": "People",
+      "developedBy": "The Aggregator was developed by:"
+    },
+    "statistics": {
+      "title": "Statistics",
+      "text": "View <0>endpoint statistics</0> to see details about scanned resources, performed searches, warnings and errors."
+    },
+    "privacyPolicy": {
+      "title": "Privacy Policy",
+      "termsInfo": "General information about data collection and terms of use can be found at <0>clarin.eu</0>.",
+      "matomoInfo": "We collect anonymous user statistics with <0>Matomo</0> to continuously improve our website. You will automatically opt-out of tracking by using most script or ad blockers as well as enabling the Do-Not-Track option in your browser."
+    },
+    "sourceCode": {
+      "title": "Source Code",
+      "sourceInfo": {
+        "text": "The Aggregator source code and documentation are published on <0>GitHub</0> and are madeavailable under the <1>GPL 3.0 license</1>.",
+        "repoUrl": "https://github.com/clarin-eric/fcs-sru-aggregator",
+        "licenseUrl": "https://github.com/clarin-eric/fcs-sru-aggregator/blob/master/LICENSE"
+      },
+      "licenseInfo": "The full license can be found in the source code repository and in the packaged sources and binaries."
+    },
+    "technology": {
+      "title": "Technology Used",
+      "backendUses": "The Aggregator uses the following software components:",
+      "frontendUses": "The web frontend uses the following software components:",
+      "iconLicenseInfo": "The federated content search icon is made by <0>Freepik</0> from <1>www.flaticon.com</1> and licensed under <2>CC BY 3.0</2>."
+    },
+    "funding": {
+      "title": "Funding"
     }
   },
-  "about": {},
-  "statistics": {},
-  "help": {}
+  "statistics": {
+    "title": "Statistics",
+    "loading": "Loading ...",
+    "tabs": {
+      "Last Scan": "Last Scan",
+      "Recent Searches": "Recent Searches",
+      "last-scan": "Last Scan",
+      "recent-searches": "Recent Searches",
+      "btnRefresh": "Refresh"
+    },
+    "labels": {
+      "startDate": "Start date",
+      "timeout": "Timeout",
+      "fcsVersion": "FCS Version",
+      "searchCapabilities": "Search capabilities",
+      "maxConcurrentScanRequests": "Max concurrent scan requests",
+      "requestStatistics": "Request statistics",
+      "resources": "Resources",
+      "numberOfRequests_one": "{{count}} request",
+      "numberOfRequests_other": "{{count}} requests",
+      "queueTime": "Queue time: average: {{avg}}, max: {{max}}",
+      "executionTime": "Execution time: average: {{avg}}, max: {{max}}",
+      "numberOfRootResources_one": "1 root resource",
+      "numberOfRootResources_other": "{{count}} root resources"
+    },
+    "filter": {
+      "inputPlaceholder": "Type to filter statistics ...",
+      "labelForCheckboxes": "Apply filter to:",
+      "checkboxInstitution": "Institution",
+      "checkboxEndpoint": "Endpoint",
+      "checkboxResources": "Resources",
+      "checkboxShowWithIssues_zero": "Only show endpoints with issues (errors or warnings, currently affects no endpoints)",
+      "checkboxShowWithIssues_one": "Only show endpoints with issues (errors or warnings, currently affects one endpoint)",
+      "checkboxShowWithIssues_other": "Only show endpoints with issues (errors or warnings, currently affects {{count}} endpoints)"
+    },
+    "diagnostic": {
+      "diagnostic": "Diagnostic",
+      "exception": "Exception",
+      "context": "Context:",
+      "causedBy": "Caused by:"
+    },
+    "errors": {
+      "notAvailableInAggregator": "This resource is not available in the Aggregator!"
+    }
+  },
+  "help": {
+    "title": "Help",
+    "performSearch": {
+      "title": "Performing a Federated Content Search in resources",
+      "textBasicSearch": "To perform a <strong>simple keyword search</strong> in all CLARIN Federated Content Search centres and their resources, go to the search field at the top of the page or switch to <em>Text Layer Contextual Query Language (CQL)</em> in the dropdown list, enter your query, and click the <em>Search</em> button or press the <kbd>Enter</kbd> key.",
+      "textAdvancedSearch": "To perform an <strong>advanced search on multiple annotation layers</strong> in CLARIN Federated Content Search centres that support this, switch to <em>Multi-layer Federated Content Search (FCS-QL)</em> in the dropdown list, enter your query or create a query in the Graphical Query Builder by clicking the button with the magic wand <iconMagicWand/>, and then click the <em>Search</em> button or press the <kbd>Enter</kbd> key.",
+      "textLexicalSearch": "To perform an <strong>lexical search on field of lexical entries</strong> in CLARIN Federated Content Search centres that support this, switch to <em>Lexical Resources Contextual Query Language (LexCQL)</em> in the dropdown list, enter your query or create a query in the Graphical Query Builder by clicking the button with the magic wand <iconMagicWand/>, and then click the <em>Search</em> button or press the <kbd>Enter</kbd> key.",
+      "textSearchProgress": "When the search starts, the page will start filling in with the resource responses. After the entire search process has ended you have the option to download the results in various formats.",
+      "textViewResource": "If you are particularly interested in the results returned by a resource, you have the option to focus only on the results of that resource, by clicking on the <iconEye/> <em>View</em> button. In this view mode you can also download the results in various formats or use the WebLicht processing services to further analyse the results."
+    },
+    "adjustSearchCriteria": {
+      "title": "Adjusting search criteria",
+      "text": "The FCS Aggregator allows to select specific resources based on their title or language and to specify the number of search results (hits) per resource per page. The user interface controls that allows to change these options are located right below the search fiels on the main page. The current options are to filter resources based on their language, to select specific resources, and to set the maximum number of hits.",
+      "textOtherSearchTypes": "In the multi-layer FCS search the supported layers and in the lexical search the supported fields filter on the supported features like, e. g. part of speech or lemma in addition to the other filter options."
+    },
+    "moreHelp": {
+      "title": "More help",
+      "text": "More detailed information on using FCS Aggregator is available at the <0>Content Search: Tutorial at CLARIN.eu</0>. If you still cannot find an answer to your question, or if want to send a feedback, youcan write to the <1>CLARIN FCS Helpdesk</1>."
+    }
+  }
 }

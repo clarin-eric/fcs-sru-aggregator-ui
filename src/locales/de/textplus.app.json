@@ -3,7 +3,7 @@
     "title": "Föderierte Inhaltssuche"
   },
   "footer": {
-    "service-info": {
+    "serviceInfo": {
       "text": "<0>Ein Service von <1>Text+</1></0><1><br/>Betrieben von der SAW Leipzig</1>",
       "url": "https://text-plus.org"
     }
