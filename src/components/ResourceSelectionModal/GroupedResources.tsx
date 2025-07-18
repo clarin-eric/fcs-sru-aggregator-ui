@@ -4,6 +4,7 @@ import Col from 'react-bootstrap/Col'
 import Collapse from 'react-bootstrap/Collapse'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
+import { useTranslation } from 'react-i18next'
 
 import { type Resource } from '@/utils/api'
 import { getResourceIDs } from '@/utils/resources'
@@ -15,6 +16,7 @@ function GroupedResources({
   title,
   resources,
   selectedResourceIDs,
+  isResourceRoot,
   expanded: expandedProp,
   shouldBeShown,
   localeForInfos,
@@ -27,6 +29,7 @@ function GroupedResources({
   title: React.ReactNode
   resources: Resource[]
   selectedResourceIDs: string[]
+  isResourceRoot?: (resource: Resource) => boolean
   expanded: boolean
   shouldBeShown: ((resource: Resource) => boolean) | boolean
   localeForInfos?: string | null
@@ -36,6 +39,7 @@ function GroupedResources({
   onDeselectAllClick: (resources: Resource[]) => void
   languageCodeToName: (code: string) => string
 }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(expandedProp)
 
   useEffect(() => {
@@ -57,23 +61,22 @@ function GroupedResources({
   // rendering
 
   function renderResourceCounts() {
-    const numResources = getResourceIDs(resources).length
-    const numResourcesRoot = resources.length
-    const numResourcesSelected = getResourceIDs(resources).filter((rid) =>
+    const rootResources = resources.filter(isResourceRoot ?? (() => true))
+    const numResources = getResourceIDs(rootResources).length
+    const numResourcesRoot = rootResources.length
+    const numResourcesSelected = getResourceIDs(rootResources).filter((rid) =>
       selectedResourceIDs.includes(rid)
     ).length
 
     return (
-      <>
-        {numResourcesRoot}{' '}
-        {numResources !== numResourcesRoot && <>(+ {numResources - numResourcesRoot} nested)</>}{' '}
-        Resource{numResources !== 1 ? 's' : ''}
-        {numResourcesSelected !== numResources && (
-          <>
-            , {numResourcesSelected} Resource{numResourcesSelected !== 1 ? 's' : ''} selected
-          </>
-        )}
-      </>
+      t('search.resourcesModal.grouped.msgResources', {
+        count: numResourcesRoot,
+        nested: numResources - numResourcesRoot,
+        context: numResources - numResourcesRoot ? 'nested' : null,
+      }) +
+      (numResourcesSelected !== numResources
+        ? t('search.resourcesModal.grouped.msgResourcesSelected', { count: numResourcesSelected })
+        : '')
     )
   }
 
@@ -95,13 +98,15 @@ function GroupedResources({
             onClick={handleToggleExpandButton}
             aria-expanded={expanded}
           >
-            {expanded ? 'Hide' : 'Show'} Resources
+            {t('search.resourcesModal.grouped.buttonExpand', {
+              context: expanded ? 'hide' : 'show',
+            })}
           </Button>
           <Button size="sm" onClick={() => onSelectAllClick(resources)}>
-            Select All
+            {t('search.resourcesModal.grouped.buttonSelectAll')}
           </Button>
           <Button size="sm" onClick={() => onDeselectAllClick(resources)}>
-            Deselect All
+            {t('search.resourcesModal.grouped.buttonDeselectAll')}
           </Button>
         </Col>
       </Row>
@@ -110,7 +115,7 @@ function GroupedResources({
       </Row>
       <Collapse in={expanded}>
         <Container>
-          {resources.map((resource: Resource) => (
+          {resources.filter(isResourceRoot ?? (() => true)).map((resource: Resource) => (
             <ResourceSelector
               resource={resource}
               selectedResourceIDs={selectedResourceIDs}

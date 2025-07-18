@@ -9,6 +9,7 @@ import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
+import { useTranslation } from 'react-i18next'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
@@ -63,6 +64,7 @@ function ResourceResultsModal({
   onModalClose,
 }: ResourceResultsModalProps) {
   const axios = useAxios()
+  const { t } = useTranslation()
   const userLocale = useLocaleStore((state) => state.locale)
   const { languages, weblichtLanguages } = useAggregatorData()
   const { numberOfResults, queryType, language, languageFilter } = useSearchParams()
@@ -202,7 +204,15 @@ function ResourceResultsModal({
           )}
           <dd className="mb-0">
             {result.resource.languages
-              .map(languages ? (code) => languageCodeToName(code, languages) : (x) => x)
+              .map(
+                languages
+                  ? (code) =>
+                      languageCodeToName(code, languages, {
+                        defaultAnyLanguage: t('languageCodeToName.any', { ns: 'common' }),
+                        defaultUnknownLanguage: t('languageCodeToName.unknown', { ns: 'common' }),
+                      })
+                  : (x) => x
+              )
               .toSorted()
               .join(', ')}
           </dd>

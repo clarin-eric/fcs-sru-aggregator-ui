@@ -5,6 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import ToggleButton from 'react-bootstrap/ToggleButton'
+import { Trans, useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import ContentEditable from '@/components/ContentEditable'
@@ -112,6 +113,7 @@ function SearchInput({
   hasSearch = false,
   disabled = false,
 }: SearchInputProps) {
+  const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
 
   // input modals (trigger)
@@ -271,7 +273,9 @@ function SearchInput({
     resources.find((resource) => resource.searchCapabilitiesResolved.includes('LEX_SEARCH')) !==
     undefined
 
-  const showQueryBuilderButton = QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(queryType as QueryTypeIDForQueryBuilder)
+  const showQueryBuilderButton = QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(
+    queryType as QueryTypeIDForQueryBuilder
+  )
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -385,13 +389,9 @@ function SearchInput({
 
   function renderSelectedResourcesMsg() {
     const selected = (selectedResourceIDs ?? []).length
-    if (selected === 1) {
-      return '1 selected resource'
-    }
-    if (resources.length === selected || validResourceIDs.length === selected) {
-      return `All available resources (${selected})`
-    }
-    return `${selected} selected resources`
+    const context =
+      resources.length === selected || validResourceIDs.length === selected ? 'all' : null
+    return t('search.searchInput.buttonSelectedResources', { count: selected, context })
   }
 
   return (
@@ -403,7 +403,7 @@ function SearchInput({
             variant="outline-secondary"
             type="button"
             id="fcs-search-query-suggestions-button"
-            aria-label="Open modal with suggestions for search queries"
+            aria-label={t('search.searchInput.buttonOpenQuerySuggestions')}
             onClick={() => setShowQuerySuggestionsModal(true)}
           >
             <i dangerouslySetInnerHTML={{ __html: balloonIcon }} aria-hidden="true" />
@@ -411,7 +411,7 @@ function SearchInput({
           {/* @ts-expect-error: typing does not work for onChange handler, is correct so */}
           <Form.Control
             placeholder="Elephant"
-            aria-label="search query input"
+            aria-label={t('search.searchInput.inputQueryAriaLabel')}
             aria-describedby="fcs-search-input-button"
             className="text-center search-query-input"
             disabled={disabled}
@@ -432,7 +432,7 @@ function SearchInput({
             <Button
               id="fcs-search-input-query-builder-button"
               variant="outline-secondary"
-              aria-label="Open modal to use the visual query builder to construct a search query"
+              aria-label={t('search.searchInput.buttonOpenQueryBuilderAriaLabel')}
               className="border-end-0 d-none d-md-block"
               onClick={() => {
                 triggerLoadQueryBuilderModal()
@@ -449,7 +449,7 @@ function SearchInput({
             checked={queryInputEnhanced}
             onChange={() => setQueryInputEnhanced((isChecked) => !isChecked)}
             variant="outline-secondary"
-            aria-label="Enable enhanced visual input support with syntax highlighting"
+            aria-label={t('search.searchInput.buttonEnhanceQueryAriaLabel')}
             className="d-flex align-items-center border-end-0"
           >
             <i dangerouslySetInnerHTML={{ __html: highlightsIcon }} aria-hidden="true" />
@@ -460,7 +460,7 @@ function SearchInput({
             id="fcs-search-input-button"
             disabled={disabled || query.trim().length === 0}
             aria-disabled={disabled}
-            aria-label="Start the search"
+            aria-label={t('search.searchInput.buttonSearchAriaLabel')}
           >
             {/* TODO: visually-hidden span with description? */}
             <i
@@ -468,117 +468,126 @@ function SearchInput({
               aria-hidden="true"
               className="d-inline d-md-none"
             />
-            <span className="d-none d-md-inline">Search</span>
+            <span className="d-none d-md-inline">{t('search.searchInput.buttonSearch')}</span>
           </Button>
           <Form.Control.Feedback type="invalid">{queryError?.msg}</Form.Control.Feedback>
         </InputGroup>
         <div id="fcs-query-filters" className="mt-2 mb-3 lh-lg text-center">
-          Perform a{' '}
-          <Dropdown
-            className="d-inline-block"
-            onSelect={handleChangeQueryType}
-            aria-disabled={disabled}
-            aria-label="Search query type"
-          >
-            <Dropdown.Toggle
-              size="sm"
-              variant="outline-dark"
-              className="mx-1 pe-2 no-arrow"
-              disabled={disabled}
-              aria-disabled={disabled}
-              style={
-                QUERY_TYPE_MAP[queryType]
-                  ? {
-                      '--color': QUERY_TYPE_MAP[queryType].color,
-                    }
-                  : {}
-              }
-            >
-              {QUERY_TYPE_MAP[queryType]?.searchLabel || '???'}{' '}
-              <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {QUERY_TYPES.filter(
-                (info) =>
-                  info.id === 'cql' ||
-                  (info.id === 'fcs' && hasResourcesForQueryFCS) ||
-                  (info.id === 'lex' && hasResourcesForQueryLex)
-              ).map((info) => (
-                <Dropdown.Item
-                  as="button"
-                  eventKey={info.id}
-                  key={info.id}
-                  onClick={(event) => event.preventDefault()}
-                  style={{
-                    '--color': info.color,
-                    background: 'color-mix(in srgb, var(--color) 50%, transparent)',
-                  }}
+          <Trans
+            i18nKey="search.searchInput.filtersSummary"
+            components={[
+              <Dropdown
+                className="d-inline-block"
+                onSelect={handleChangeQueryType}
+                aria-disabled={disabled}
+                aria-label={t('search.searchInput.dropdownQueryTypeAriaLabel')}
+              >
+                <Dropdown.Toggle
+                  size="sm"
+                  variant="outline-dark"
+                  className="mx-1 pe-2 no-arrow"
+                  disabled={disabled}
+                  aria-disabled={disabled}
+                  style={
+                    QUERY_TYPE_MAP[queryType]
+                      ? {
+                          '--color': QUERY_TYPE_MAP[queryType].color,
+                        }
+                      : {}
+                  }
                 >
-                  {info.name}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>{' '}
-          in{' '}
-          <Button
-            size="sm"
-            variant="outline-dark"
-            className="mx-1 pe-2"
-            disabled={disabled}
-            aria-disabled={disabled}
-            onClick={() => {
-              setShowResourceSelectionModalGrouping('resource')
-              setShowResourceSelectionModal(true)
-            }}
-          >
-            {renderSelectedResourcesMsg()}{' '}
-            <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
-          </Button>{' '}
-          from{' '}
-          <Button
-            size="sm"
-            variant="outline-dark"
-            className="mx-1 pe-2"
-            disabled={disabled}
-            aria-disabled={disabled}
-            onClick={() => {
-              setShowResourceSelectionModalGrouping('institution')
-              setShowResourceSelectionModal(true)
-            }}
-          >
-            {numberOfSelectedInstitutions} Institution
-            {numberOfSelectedInstitutions !== 1 ? 's' : ''}{' '}
-            <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
-          </Button>{' '}
-          in{' '}
-          <Button
-            size="sm"
-            variant="outline-dark"
-            className="mx-1 pe-2"
-            onClick={() => setShowLanguageSelectionModal(true)}
-            disabled={disabled}
-            aria-disabled={disabled}
-          >
-            {languageCodeToName(language, languages ?? {})}{' '}
-            <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
-          </Button>{' '}
-          with up to{' '}
-          <Form.Select
-            size="sm"
-            className="d-inline-block w-auto mx-1"
-            onChange={handleChangeNumberOfResults}
-            value={numberOfResults}
-            aria-label="Number of search results per endpoint"
-            disabled={disabled}
-            aria-disabled={disabled}
-          >
-            {NUMBER_OF_RESULTS.map((value) => (
-              <option value={value} key={value}>
-                {value}
-              </option>
-            ))}
-          </Form.Select>{' '}
-          results per endpoint.
+                  {t(`queryTypes.${queryType}.nameShort`, {
+                    ns: 'common',
+                    defaultValue: QUERY_TYPE_MAP[queryType]?.searchLabel || '???',
+                  })}{' '}
+                  <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {QUERY_TYPES.filter(
+                    (info) =>
+                      info.id === 'cql' ||
+                      (info.id === 'fcs' && hasResourcesForQueryFCS) ||
+                      (info.id === 'lex' && hasResourcesForQueryLex)
+                  ).map((info) => (
+                    <Dropdown.Item
+                      as="button"
+                      eventKey={info.id}
+                      key={info.id}
+                      onClick={(event) => event.preventDefault()}
+                      style={{
+                        '--color': info.color,
+                        background: 'color-mix(in srgb, var(--color) 50%, transparent)',
+                      }}
+                    >
+                      {t(`queryTypes.${info.id}.nameLong`, {
+                        ns: 'common',
+                        defaultValue: info.name,
+                      })}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>,
+              <Button
+                size="sm"
+                variant="outline-dark"
+                className="mx-1 pe-2"
+                disabled={disabled}
+                aria-disabled={disabled}
+                onClick={() => {
+                  setShowResourceSelectionModalGrouping('resource')
+                  setShowResourceSelectionModal(true)
+                }}
+              >
+                {renderSelectedResourcesMsg()}{' '}
+                <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
+              </Button>,
+              <Button
+                size="sm"
+                variant="outline-dark"
+                className="mx-1 pe-2"
+                disabled={disabled}
+                aria-disabled={disabled}
+                onClick={() => {
+                  setShowResourceSelectionModalGrouping('institution')
+                  setShowResourceSelectionModal(true)
+                }}
+              >
+                {t('search.searchInput.buttonSelectedInstitutions', {
+                  count: numberOfSelectedInstitutions,
+                })}{' '}
+                <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
+              </Button>,
+              <Button
+                size="sm"
+                variant="outline-dark"
+                className="mx-1 pe-2"
+                onClick={() => setShowLanguageSelectionModal(true)}
+                disabled={disabled}
+                aria-disabled={disabled}
+              >
+                {languageCodeToName(language, languages ?? {}, {
+                  defaultAnyLanguage: t('languageCodeToName.any', { ns: 'common' }),
+                  defaultUnknownLanguage: t('languageCodeToName.unknown', { ns: 'common' }),
+                })}{' '}
+                <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
+              </Button>,
+              <Form.Select
+                size="sm"
+                className="d-inline-block w-auto mx-1"
+                onChange={handleChangeNumberOfResults}
+                value={numberOfResults}
+                aria-label={t('search.searchInput.selectNumberOfSearchResultsAriaLabel')}
+                disabled={disabled}
+                aria-disabled={disabled}
+              >
+                {NUMBER_OF_RESULTS.map((value) => (
+                  <option value={value} key={value}>
+                    {value}
+                  </option>
+                ))}
+              </Form.Select>,
+            ]}
+          />
         </div>
       </Form>
 
@@ -610,7 +619,7 @@ function SearchInput({
         QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(queryType as QueryTypeIDForQueryBuilder) &&
         isLoadQueryBuilderModalTriggered && (
           // TODO: some fallback handling
-          <Suspense fallback={<>Trying to load Query Builder extension ...</>}>
+          <Suspense fallback={<>{t('loading', { ns: 'querybuilder' })}</>}>
             <QueryBuilderModal
               query={query}
               queryType={queryType as QueryTypeIDForQueryBuilder}

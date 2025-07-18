@@ -7,6 +7,7 @@ import Card from 'react-bootstrap/Card'
 import Collapse from 'react-bootstrap/Collapse'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
+import { useTranslation } from 'react-i18next'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
@@ -61,6 +62,7 @@ function ResourceSearchResult({
   showDiagnostics,
 }: ResourceSearchResultProps) {
   const axios = useAxios()
+  const { t } = useTranslation()
   const userLocale = useLocaleStore((state) => state.locale)
   const { languages } = useAggregatorData()
   const { queryType } = useSearchParams()
@@ -228,7 +230,17 @@ function ResourceSearchResult({
                   )}
                   <dd className="mb-0">
                     {data.resource.languages
-                      .map(languages ? (code) => languageCodeToName(code, languages) : (x) => x)
+                      .map(
+                        languages
+                          ? (code) =>
+                              languageCodeToName(code, languages, {
+                                defaultAnyLanguage: t('languageCodeToName.any', { ns: 'common' }),
+                                defaultUnknownLanguage: t('languageCodeToName.unknown', {
+                                  ns: 'common',
+                                }),
+                              })
+                          : (x) => x
+                      )
                       .toSorted()
                       .join(', ')}
                   </dd>

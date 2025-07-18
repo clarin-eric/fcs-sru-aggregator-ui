@@ -9,6 +9,7 @@ import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
+import { useTranslation } from 'react-i18next'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import { useLocaleStore } from '@/stores/locale'
@@ -70,12 +71,15 @@ function ResourceSelectionModal({
   selectedResources,
   onModalClose,
 }: ResourceSelectionModalProps) {
+  const { t } = useTranslation()
   // locale/language information
   const userLocale = useLocaleStore((state) => state.locale)
   const [locale, setLocale] = useState(userLocale)
   useEffect(() => {
     if (userLocale) setLocale(userLocale)
   }, [userLocale])
+
+  const langNames = new Intl.DisplayNames([userLocale, 'en'], { type: 'language' })
 
   // resources
   const [selectedResourceIDs, setSelectedResourceIDs] = useState(
@@ -106,6 +110,11 @@ function ResourceSelectionModal({
 
   // to update modal on open
   useEffect(() => setSelectedResourceIDs(selectedResources), [selectedResources])
+
+  // list of nested resources (IDs)
+  const resourceChildrenIDs = resources
+    .map((resource) => resource.subResources.map((resource) => resource.id))
+    .flat()
 
   // sort resources
   const sortedResources = resources
@@ -193,7 +202,10 @@ function ResourceSelectionModal({
   // helper
 
   function languageCodeToName(code: string) {
-    return languageCodeToNameHelper(code, languages)
+    return languageCodeToNameHelper(code, languages, {
+      defaultAnyLanguage: t('languageCodeToName.any', { ns: 'common' }),
+      defaultUnknownLanguage: t('languageCodeToName.unknown', { ns: 'common' }),
+    })
   }
 
   function changeSelectedResourceIDs(resourceIDs: string[], isSelected: boolean) {
@@ -260,6 +272,10 @@ function ResourceSelectionModal({
   // --------------------------------------------------------------
   // rendering
 
+  function isResourceRoot(resource: Resource) {
+    return !resourceChildrenIDs.includes(resource.id)
+  }
+
   function shouldResourceBeShown(resource: Resource) {
     // invisibile resources should not be shown
     if (!availableResources.includes(resource.id)) return false
@@ -299,6 +315,7 @@ function ResourceSelectionModal({
               }
               resources={resources}
               selectedResourceIDs={selectedResourceIDs}
+              isResourceRoot={isResourceRoot}
               expanded={expanded}
               shouldBeShown={shouldResourceBeShown}
               onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
@@ -338,6 +355,7 @@ function ResourceSelectionModal({
               }
               resources={resources}
               selectedResourceIDs={selectedResourceIDs}
+              isResourceRoot={isResourceRoot}
               expanded={expanded}
               shouldBeShown={shouldResourceBeShown}
               onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
@@ -353,18 +371,37 @@ function ResourceSelectionModal({
           )
         )
     }
-    return filteredResources.map(({ item: resource, matches }) => (
-      <ResourceSelector
-        resource={resource}
-        selectedResourceIDs={selectedResourceIDs}
-        highlighting={matches}
-        shouldBeShown={shouldResourceBeShown}
-        onSelectClick={handleResourceOnSelectClick}
-        languageCodeToName={languageCodeToName}
-        localeForInfos={locale}
-        key={resource.id}
-      />
-    ))
+    // TODO: filter out resources that appear as sub-resource?
+    return (
+      filteredResources
+        // TODO: do we want to restore the hierarchy? -- we need to forward the highlighting ...
+        // .concat(filteredResourcesParents)
+        // .toSorted((a, b) => a.score - b.score)
+        // .filter(({ item }) => {
+        //   if (isResourceRoot !== undefined && isResourceRoot(item)) return true
+        //   // return shouldResourceBeShown(item)
+        //   // return true
+        //   return false
+        // })
+        .filter(({ item }) => {
+          if (filter === '') {
+            return isResourceRoot !== undefined && isResourceRoot(item)
+          }
+          return true
+        })
+        .map(({ item: resource, matches }) => (
+          <ResourceSelector
+            resource={resource}
+            selectedResourceIDs={selectedResourceIDs}
+            highlighting={matches}
+            shouldBeShown={shouldResourceBeShown}
+            onSelectClick={handleResourceOnSelectClick}
+            languageCodeToName={languageCodeToName}
+            localeForInfos={locale}
+            key={resource.id}
+          />
+        ))
+    )
   }
 
   return (
@@ -377,7 +414,7 @@ function ResourceSelectionModal({
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title>Resources</Modal.Title>
+        <Modal.Title>{t('search.resourcesModal.title')}</Modal.Title>
       </Modal.Header>
       <Modal.Body className="px-0">
         {/* resource viewing options */}
@@ -448,10 +485,10 @@ function ResourceSelectionModal({
                 <Button onClick={handleDeselectAllClick}>Deselect all</Button>
               </Col>
             </Row>
-            {resourceInfoLanguagesGrouped.size > 0 && (
+            {resourceInfoLanguagesGrouped.size > 1 && (
               <Form.Group as={Row} controlId="resource-info-language" className="mt-2">
                 <Form.Label column sm="auto" style={{ fontSize: '0.875rem' }}>
-                  Change language of resource information:
+                  {t('search.resourcesModal.labelChangeResourceInfoLanguage')}
                 </Form.Label>
                 <Col sm="auto">
                   <ToggleButtonGroup
@@ -469,10 +506,13 @@ function ResourceSelectionModal({
                           id={`resource-info-languages-${language}`}
                           value={language}
                           variant="secondary"
-                          title={`Found ${amount} resources with information fields in ${language} language`}
+                          title={t('search.resourcesModal.buttonChangeResourceInfoLanguageTitle', {
+                            count: amount,
+                            language,
+                            languageName: langNames.of(language),
+                          })}
                         >
-                          {language}
-                          {/* ({amount}x) */}
+                          {langNames.of(language)} <sup>{language}</sup>
                         </ToggleButton>
                       ))}
                   </ToggleButtonGroup>
@@ -483,17 +523,19 @@ function ResourceSelectionModal({
         </Form>
         {/* info */}
         <p className="m-4 mb-0">
-          {resourcesInfo.selected} / {resourcesInfo.visible}{' '}
-          {resourcesInfo.available !== resourcesInfo.visible && <>({resourcesInfo.available})</>}{' '}
-          resources selected.
-          {/* {JSON.stringify(resourcesInfo, undefined, 2)} */}
+          {t('search.resourcesModal.msgResourcesSelected', {
+            count: resourcesInfo.selected,
+            total: resourcesInfo.visible,
+            available: resourcesInfo.available,
+            context: resourcesInfo.available !== resourcesInfo.visible ? 'available' : null,
+          })}
         </p>
         {/* resources */}
         <Container className="px-3 pt-3">{renderResources()}</Container>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={() => handleClose('confirm')}>
-          Confirm and Close
+          {t('search.resourcesModal.buttonConfirm')}
         </Button>
       </Modal.Footer>
     </Modal>

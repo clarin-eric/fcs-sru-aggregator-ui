@@ -143,6 +143,30 @@ export function getInstitutions(resources: Resource[], resourceIDs: string[]) {
   return Array.from(institutions)
 }
 
+export function getResourceParentIDs(
+  resources: Resource[],
+  filter: (resource: Resource) => boolean
+) {
+  const parentIDs: string[] = []
+
+  const recursivelyFind = (resource: Resource): boolean => {
+    // check recursively for all children
+    const anyChild = resource.subResources.map(recursivelyFind)
+    // if for any it is true
+    if (anyChild.some(Boolean)) {
+      // then add current resource ID as parent for some nested children
+      parentIDs.push(resource.id)
+      // and return true to get parents of current resource, too
+      return true
+    }
+    // if self is true, then parent should add its ID
+    return filter(resource) === true
+  }
+  resources.forEach(recursivelyFind)
+
+  return parentIDs
+}
+
 // --------------------------------------------------------------------------
 
 export const MULTILINGUAL_VALUE_CHECK_LANGUAGES = ['en', 'eng', 'de', 'deu'] as const

@@ -27,7 +27,61 @@
       "textLearnMore": "To learn more about the FCS, please visit the page <0><em>Content Search</em> at CLARIN.eu</0>.",
       "url": "https://www.clarin.eu/content/content-search"
     },
-    "searchInput": {}
+    "searchInput": {
+      "buttonSearch": "Search",
+      "buttonSearchAriaLabel": "Start the search",
+      "buttonEnhanceQueryAriaLabel": "Enable enhanced visual input support with syntax highlighting",
+      "buttonOpenQueryBuilderAriaLabel": "Open modal to use the visual query builder to construct a search query",
+      "buttonOpenQuerySuggestions": "Open modal with suggestions for search queries",
+      "inputQueryAriaLabel": "Search query input",
+      "filtersSummary": "Perform a <0/> in <1/> from <2/> in <3/> with up to <4/> results per endpoint.",
+      "dropdownQueryTypeAriaLabel": "Search query type",
+      "buttonSelectedResources_one": "1 selected resource",
+      "buttonSelectedResources_other": "{{count}} selected resources",
+      "buttonSelectedResources_all": "All available resources ({{count}})",
+      "buttonSelectedInstitutions_one": "1 institution",
+      "buttonSelectedInstitutions_other": "{{count}} institutions",
+      "selectNumberOfSearchResultsAriaLabel": "Number of search results per endpoint"
+    },
+    "languagesModal": {
+      "title": "Languages",
+      "filterInputPlaceholder": "Filter languages ...",
+      "checkboxShowNumberOfResources": "Show number of resources per language",
+      "optionLanguagebyMeta": "Use the resources' specified language to filter results",
+      "optionLanguagebyGuess": "Filter results by using a language detector",
+      "optionLanguagebyMetaAndGuess": "First use the resources' specified language then also use a language detector",
+      "buttonReset": "Revert Selection",
+      "buttonAbort": "Abort",
+      "buttonConfirm": "Confirm and Close"
+    },
+    "resourcesModal": {
+      "title": "Resources",
+      "msgResourcesSelected": "{{count}} / {{total}} resources selected.",
+      "msgResourcesSelected_available": "{{count}} / {{total}} ({{available}}) resources selected.",
+      "buttonConfirm": "Confirm and Close",
+      "labelChangeResourceInfoLanguage": "Change language of resource information:",
+      "buttonChangeResourceInfoLanguageTitle_one": "Found 1 resource with information fields in {{language}} language",
+      "buttonChangeResourceInfoLanguageTitle_other": "Found {{count}} resources with information fields in '{{language}}' ({{languageName}}) language",
+      "resource": {
+        "moreInformation": "More information",
+        "toggleExpand_collapse_one": "Collapse (1 subresource)",
+        "toggleExpand_collapse_other": "Collapse ({{count}} subresources)",
+        "toggleExpand_expand_one": "Expand (1 subresource)",
+        "toggleExpand_expand_other": "Expand ({{count}} subresources)"
+      },
+      "grouped": {
+        "msgResources_one": "1 resource",
+        "msgResources_other": "{{count}} resources",
+        "msgResources_nested": "{{count}} (+ {{nested}} nested) resources",
+        "msgResourcesSelected_one": ", 1 resource selected",
+        "msgResourcesSelected_other": ", {{count}} resources selected",
+        "buttonSelectAll": "Select All",
+        "buttonDeselectAll": "Deselect All",
+        "buttonExpand_hide": "Hide Resources",
+        "buttonExpand_show": "Show Resources"
+      }
+    },
+    "suggestionsModal": {}
   },
   "about": {
     "title": "About the Federated Content Search (FCS) Aggregator",

@@ -2,5 +2,40 @@
   "urls": {
     "contact": null,
     "termsUseAndDisclaimer": null
+  },
+  "queryTypes": {
+    "cql": {
+      "nameShort": "Full-text search",
+      "nameLong": "Text layer Contextual Query Language (CQL)"
+    },
+    "fcs": {
+      "nameShort": "Multi-layer annotation search",
+      "nameLong": "Multi-layer Federated Content Search Query Language (FCS-QL)"
+    },
+    "lex": {
+      "nameShort": "Lexical resource search",
+      "nameLong": "Lexical Resources Contextual Query Language (LexCQL)"
+    }
+  },
+  "downloadFormats": {
+    "text": {
+      "name": "Plain Text"
+    },
+    "csv": {
+      "name": "CSV"
+    },
+    "tcf": {
+      "name": "TCF"
+    },
+    "ods": {
+      "name": "ODS"
+    },
+    "excel": {
+      "name": "Excel"
+    }
+  },
+  "languageCodeToName": {
+    "any": "Any Language",
+    "unknown": "Unknown Language"
   }
 }

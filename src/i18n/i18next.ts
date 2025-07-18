@@ -123,7 +123,7 @@ i18n
   // initialization
   .init({
     lng: LANGUAGE,
-    fallbackLng: LANGUAGE,
+    fallbackLng: "en", // TODO: this should always be "en" or a language with most translations!
     supportedLngs: LANGUAGES,
 
     // i18n all namespaces to load

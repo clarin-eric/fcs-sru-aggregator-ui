@@ -24,8 +24,9 @@ export const MULTIPLE_LANGUAGE_CODE = 'mul' // see ISO-693-3
 
 export function languageCodeToName(
   code: string,
-  codeToLanguageMapping: LanguageCode2NameMap = undefined as unknown as LanguageCode2NameMap
+  codeToLanguageMapping: LanguageCode2NameMap = undefined as unknown as LanguageCode2NameMap,
+  options: { defaultAnyLanguage?: string; defaultUnknownLanguage?: string } = {}
 ) {
-  if (code === MULTIPLE_LANGUAGE_CODE) return 'Any Language'
-  return codeToLanguageMapping?.[code] || 'Unknown Language'
+  if (code === MULTIPLE_LANGUAGE_CODE) return options?.defaultAnyLanguage ?? 'Any Language'
+  return codeToLanguageMapping?.[code] || (options?.defaultUnknownLanguage ?? 'Unknown Language')
 }

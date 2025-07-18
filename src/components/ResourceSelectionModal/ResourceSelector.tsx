@@ -8,6 +8,7 @@ import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
+import { useTranslation } from 'react-i18next'
 
 import { useLocaleStore } from '@/stores/locale'
 import { type Resource } from '@/utils/api'
@@ -41,6 +42,7 @@ function ResourceSelector({
   onSelectClick: (resource: Resource, selected: boolean) => void
   languageCodeToName: (code: string) => string
 }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [showSubResources, setShowSubResources] = useState(false)
 
@@ -71,6 +73,13 @@ function ResourceSelector({
   } else if (shouldBeShown === false) {
     return null
   }
+
+  // whether the expand/collapse button should be shown
+  // also, whether the sub-resources div should be shown
+  const shouldExpandToggleBeShown =
+    typeof shouldBeShown === 'function'
+      ? resource.subResources.some((subresource) => shouldBeShown(subresource))
+      : true
 
   // --------------------------------------------------------------
 
@@ -120,7 +129,8 @@ function ResourceSelector({
             {resource.landingPage && (
               <small>
                 <a href={resource.landingPage} className="matomo_link" target="_blank">
-                  More information <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />
+                  {t('search.resourcesModal.resource.moreInformation')}{' '}
+                  <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />
                 </a>
               </small>
             )}
@@ -178,7 +188,7 @@ function ResourceSelector({
           )}
         </Col>
         {/* sub resources view button */}
-        {resource.subResources.length > 0 && (
+        {shouldExpandToggleBeShown && resource.subResources.length > 0 && (
           <>
             <div className="w-100"></div>
             <Col md="auto" sm={1} style={{ width: '2.8rem' }}></Col>
@@ -190,15 +200,17 @@ function ResourceSelector({
                 onClick={handleToggleShowSubResourcesClick}
               >
                 {/* TODO: hint if view-selected-only and no children are selected --> empty */}
-                {showSubResources ? 'Collapse' : 'Expand'} ({resource.subResources.length}{' '}
-                subresources)
+                {t('search.resourcesModal.resource.toggleExpand', {
+                  context: showSubResources ? 'collapse' : 'expand',
+                  count: resource.subResources.length,
+                })}
               </Button>
             </Col>
           </>
         )}
       </Row>
       {/* sub resources */}
-      {showSubResources && (
+      {shouldExpandToggleBeShown && showSubResources && (
         <Card className="ms-md-5 ms-sm-2 border-end-0 border-top-0 rounded-end-0 rounded-top-0">
           {resource.subResources.map((subResource: Resource) => (
             <ResourceSelector

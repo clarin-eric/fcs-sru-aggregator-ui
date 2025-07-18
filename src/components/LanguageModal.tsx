@@ -7,12 +7,12 @@ import Container from 'react-bootstrap/Container'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
+import { useTranslation } from 'react-i18next'
 
 import { type Resource } from '@/utils/api'
 import {
   DEFAULT_SEARCH_LANGUAGE_FILTER,
   MULTIPLE_LANGUAGE_CODE,
-  languageCodeToName,
   type LanguageCode2NameMap,
   type LanguageFilterOptions,
 } from '@/utils/search'
@@ -46,6 +46,8 @@ function LanguageModal({
   searchLanguageFilter,
   onModalClose,
 }: LanguageModalProps) {
+  const { t } = useTranslation()
+
   //  = { languages: {}, searchLanguage: MULTIPLE_LANGUAGE_CODE, searchLanguageFilter: DEFAULT_SEARCH_LANGUAGE_FILTER }
   const [selectedLanguage, setSelectedLanguage] = useState(searchLanguage || MULTIPLE_LANGUAGE_CODE)
   const [selectedFilterOption, setSelectedFilterOption] = useState(
@@ -144,7 +146,7 @@ function LanguageModal({
   return (
     <Modal show={show} onHide={() => handleClose('close')} size="xl" fullscreen="lg-down" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Languages</Modal.Title>
+        <Modal.Title>{t('search.languagesModal.title')}</Modal.Title>
       </Modal.Header>
       <Modal.Body className="px-0">
         <Container className="px-4 pb-3 border-bottom">
@@ -153,13 +155,13 @@ function LanguageModal({
             <Col sm className="mb-3 mb-sm-2 align-content-end">
               {renderLanguageOption(
                 MULTIPLE_LANGUAGE_CODE,
-                languageCodeToName(MULTIPLE_LANGUAGE_CODE)
+                t('languageCodeToName.any', { ns: 'common' })
               )}
             </Col>
             <Col sm>
               <Form.Control
                 size="sm"
-                placeholder="Filter languages ..."
+                placeholder={t('search.languagesModal.filterInputPlaceholder')}
                 name="languages-filter"
                 value={languageFilter}
                 onChange={(event) => setLanguageFilter(event.target.value)}
@@ -171,7 +173,7 @@ function LanguageModal({
                   checked={showResourceCounts}
                   onChange={handleToggleShowResourceCountsChange}
                   type="checkbox"
-                  label="Show number of resources per language"
+                  label={t('search.languagesModal.checkboxShowNumberOfResources')}
                   className="mt-1"
                 />
               )}
@@ -203,45 +205,30 @@ function LanguageModal({
         </Container>
         <Form>
           <Container className="px-4 pt-3">
-            <Form.Check
-              type="radio"
-              name="filterOpts"
-              value="byMeta"
-              id="filterOpts-byMeta"
-              checked={selectedFilterOption === 'byMeta'}
-              onChange={() => setSelectedFilterOption('byMeta')}
-              label="Use the resources' specified language to filter results"
-            />
-            <Form.Check
-              type="radio"
-              name="filterOpts"
-              value="byGuess"
-              id="filterOpts-byGuess"
-              checked={selectedFilterOption === 'byGuess'}
-              onChange={() => setSelectedFilterOption('byGuess')}
-              label="Filter results by using a language detector"
-            />
-            <Form.Check
-              type="radio"
-              name="filterOpts"
-              value="byMetaAndGuess"
-              id="filterOpts-byMetaAndGuess"
-              checked={selectedFilterOption === 'byMetaAndGuess'}
-              onChange={() => setSelectedFilterOption('byMetaAndGuess')}
-              label="First use the resources' specified language then also use a language detector"
-            />
+            {(['byMeta', 'byGuess', 'byMetaAndGuess'] as LanguageFilterOptions[]).map((type) => (
+              <Form.Check
+                key={type}
+                type="radio"
+                name="filterOpts"
+                value={type}
+                id={`filterOpts-${type}`}
+                checked={selectedFilterOption === type}
+                onChange={() => setSelectedFilterOption(type)}
+                label={t(`search.languagesModal.optionLanguage${type}`)}
+              />
+            ))}
           </Container>
         </Form>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleReset}>
-          Revert Selection
+          {t('search.languagesModal.buttonReset')}
         </Button>
         <Button variant="secondary" onClick={() => handleClose('abort')}>
-          Abort
+          {t('search.languagesModal.buttonAbort')}
         </Button>
         <Button variant="primary" onClick={() => handleClose('confirm')}>
-          Confirm and Close
+          {t('search.languagesModal.buttonConfirm')}
         </Button>
       </Modal.Footer>
     </Modal>
