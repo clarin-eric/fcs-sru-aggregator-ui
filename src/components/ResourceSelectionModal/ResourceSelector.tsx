@@ -29,6 +29,7 @@ function ResourceSelector({
   resource,
   selectedResourceIDs,
   highlighting,
+  highlightings,
   shouldBeShown,
   localeForInfos,
   onSelectClick,
@@ -37,6 +38,7 @@ function ResourceSelector({
   resource: Resource
   selectedResourceIDs: string[]
   highlighting?: FuzzyMatches
+  highlightings?: Map<string, FuzzyMatches>
   shouldBeShown: ((resource: Resource) => boolean) | boolean
   localeForInfos?: string | null
   onSelectClick: (resource: Resource, selected: boolean) => void
@@ -46,7 +48,7 @@ function ResourceSelector({
   const [expanded, setExpanded] = useState(false)
   const [showSubResources, setShowSubResources] = useState(false)
 
-  if (highlighting === undefined) highlighting = [null, null, null]
+  highlighting ??= highlightings?.get(resource.id) ?? [null, null, null]
 
   const isSelected = selectedResourceIDs.includes(resource.id)
 
@@ -215,6 +217,7 @@ function ResourceSelector({
           {resource.subResources.map((subResource: Resource) => (
             <ResourceSelector
               resource={subResource}
+              highlightings={highlightings}
               selectedResourceIDs={selectedResourceIDs}
               shouldBeShown={shouldBeShown}
               onSelectClick={onSelectClick}

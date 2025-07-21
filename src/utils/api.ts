@@ -38,6 +38,8 @@ export interface Resource {
   subResources: Resource[]
   id: string
   searchCapabilitiesResolved: SearchCapability[]
+  // field will be set in resources.ts#fromApi
+  rootResourceId: string | null
 }
 
 export interface Endpoint {

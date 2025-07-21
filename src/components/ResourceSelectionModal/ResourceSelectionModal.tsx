@@ -1,4 +1,3 @@
-import { useFuzzySearchList } from '@nozbe/microfuzz/react'
 import { useEffect, useMemo, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
@@ -33,6 +32,7 @@ import {
 } from '@/utils/search'
 import GroupedResources from './GroupedResources'
 import ResourceSelector from './ResourceSelector'
+import useFuzzySearchListWithHierarchy from './useFuzzySearchListWithHierarchy'
 
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
@@ -111,11 +111,6 @@ function ResourceSelectionModal({
   // to update modal on open
   useEffect(() => setSelectedResourceIDs(selectedResources), [selectedResources])
 
-  // list of nested resources (IDs)
-  const resourceChildrenIDs = resources
-    .map((resource) => resource.subResources.map((resource) => resource.id))
-    .flat()
-
   // sort resources
   const sortedResources = resources
     .filter((resource) => availableResources.includes(resource.id))
@@ -130,21 +125,48 @@ function ResourceSelectionModal({
     new Map()
   )
 
-  // TODO: what happens with nested resources?, we will only use root resources for now
-  const filteredResources = useFuzzySearchList({
-    list: sortedResources,
-    // TODO: only search in "resource" mode for now
-    queryText: viewResourcesGrouping === 'resource' ? filter : '',
-    getText: (item) => [
-      getBestFromMultilingualValuesTryByLanguage(item.title, locale),
-      getBestFromMultilingualValuesTryByLanguage(item.institution, locale),
-      getBestFromMultilingualValuesTryByLanguage(item.description, locale),
-      // ...item.languages.map((code) => languageCodeToNameHelper(code, languages)).toSorted(),
-    ],
-    // TODO: structure matches for better access?
-    mapResultItem: ({ item, score, matches }) => ({ item, matches, score }),
-  })
-  // console.debug('filtered resources', filter, filteredResources)
+  const {
+    resources: filteredResources,
+    matches: filteredResourcesHighlights,
+    scores: filteredResourceScores,
+  } = useFuzzySearchListWithHierarchy(filter, sortedResources, locale)
+
+  // TODO: memo required or simply compute as is?
+  // compute sorting of groups
+  const groupScore = useMemo(() => {
+    const groupScore: Map<string, number> = new Map()
+    if (viewResourcesGrouping === 'institution') {
+      Object.entries(resourcesGroupedByInstitute).forEach(([institute, resources]) => {
+        groupScore.set(
+          institute,
+          resources.resources.reduce((score, resource) => {
+            const rScore = filteredResourceScores.get(resource.id)
+            if (rScore === undefined) return score
+            if (score === undefined) return rScore
+            return score < rScore ? score : rScore
+          }, undefined as unknown as number)
+        )
+      })
+    } else if (viewResourcesGrouping === 'language') {
+      Object.entries(resourcesGroupedByLanguage).forEach(([institute, resources]) => {
+        groupScore.set(
+          institute,
+          resources.resources.reduce((score, resource) => {
+            const rScore = filteredResourceScores.get(resource.id)
+            if (rScore === undefined) return score
+            if (score === undefined) return rScore
+            return score < rScore ? score : rScore
+          }, undefined as unknown as number)
+        )
+      })
+    }
+    return groupScore
+  }, [
+    viewResourcesGrouping,
+    filteredResourceScores,
+    resourcesGroupedByInstitute,
+    resourcesGroupedByLanguage,
+  ])
 
   // TODO: memo with state required?
   useMemo(() => {
@@ -194,7 +216,7 @@ function ResourceSelectionModal({
     totalRoot: resources.length, // how many resources from API (root only)
     available: availableResources.length, // how many selectable due to other filters
     selected: selectedResourceIDs.length, // how many selected
-    visible: getResourceIDs(filteredResources.map((annotResource) => annotResource.item)).length, // how many visible (due to fuzzy filtering)
+    visible: getResourceIDs(filteredResources.map((resource) => resource)).length, // how many visible (due to fuzzy filtering)
     visibleRoot: filteredResources.length, // how many visible (due to fuzzy filtering), root only
   }
 
@@ -254,7 +276,7 @@ function ResourceSelectionModal({
 
   function handleSelectVisibleClick() {
     // select only visible resources (i.e. resources left after fuzzy filtering)
-    setSelectedResourceIDs(filteredResources.map((annotResource) => annotResource.item.id))
+    setSelectedResourceIDs(filteredResources.map((resource) => resource.id))
   }
 
   function handleResourceOnSelectClick(resource: Resource, selected: boolean) {
@@ -271,10 +293,6 @@ function ResourceSelectionModal({
 
   // --------------------------------------------------------------
   // rendering
-
-  function isResourceRoot(resource: Resource) {
-    return !resourceChildrenIDs.includes(resource.id)
-  }
 
   function shouldResourceBeShown(resource: Resource) {
     // invisibile resources should not be shown
@@ -301,7 +319,14 @@ function ResourceSelectionModal({
   function renderResources() {
     if (viewResourcesGrouping === 'institution') {
       return Object.entries(resourcesGroupedByInstitute)
-        .toSorted()
+        .toSorted(([a], [b]) => {
+          const aScore = groupScore.get(a)
+          const bScore = groupScore.get(b)
+          if (aScore === bScore) return 0
+          if (aScore === undefined) return 1
+          if (bScore === undefined) return -1
+          return aScore - bScore
+        })
         .map(
           ([institution, { expanded, resources }]: [
             string,
@@ -315,7 +340,8 @@ function ResourceSelectionModal({
               }
               resources={resources}
               selectedResourceIDs={selectedResourceIDs}
-              isResourceRoot={isResourceRoot}
+              resourceScores={filteredResourceScores}
+              highlightings={filteredResourcesHighlights}
               expanded={expanded}
               shouldBeShown={shouldResourceBeShown}
               onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
@@ -340,7 +366,14 @@ function ResourceSelectionModal({
     }
     if (viewResourcesGrouping === 'language') {
       return Object.entries(resourcesGroupedByLanguage)
-        .toSorted()
+        .toSorted(([a], [b]) => {
+          const aScore = groupScore.get(a)
+          const bScore = groupScore.get(b)
+          if (aScore === bScore) return 0
+          if (aScore === undefined) return 1
+          if (bScore === undefined) return -1
+          return aScore - bScore
+        })
         .map(
           ([language, { expanded, resources }]: [
             string,
@@ -355,7 +388,8 @@ function ResourceSelectionModal({
               }
               resources={resources}
               selectedResourceIDs={selectedResourceIDs}
-              isResourceRoot={isResourceRoot}
+              resourceScores={filteredResourceScores}
+              highlightings={filteredResourcesHighlights}
               expanded={expanded}
               shouldBeShown={shouldResourceBeShown}
               onSelectAllClick={handleGroupedResourcesOnSelectAllClick}
@@ -371,37 +405,21 @@ function ResourceSelectionModal({
           )
         )
     }
-    // TODO: filter out resources that appear as sub-resource?
-    return (
-      filteredResources
-        // TODO: do we want to restore the hierarchy? -- we need to forward the highlighting ...
-        // .concat(filteredResourcesParents)
-        // .toSorted((a, b) => a.score - b.score)
-        // .filter(({ item }) => {
-        //   if (isResourceRoot !== undefined && isResourceRoot(item)) return true
-        //   // return shouldResourceBeShown(item)
-        //   // return true
-        //   return false
-        // })
-        .filter(({ item }) => {
-          if (filter === '') {
-            return isResourceRoot !== undefined && isResourceRoot(item)
-          }
-          return true
-        })
-        .map(({ item: resource, matches }) => (
-          <ResourceSelector
-            resource={resource}
-            selectedResourceIDs={selectedResourceIDs}
-            highlighting={matches}
-            shouldBeShown={shouldResourceBeShown}
-            onSelectClick={handleResourceOnSelectClick}
-            languageCodeToName={languageCodeToName}
-            localeForInfos={locale}
-            key={resource.id}
-          />
-        ))
-    )
+    return filteredResources
+      .filter((resource) => !resource.rootResourceId)
+      .map((resource) => (
+        <ResourceSelector
+          resource={resource}
+          selectedResourceIDs={selectedResourceIDs}
+          highlighting={filteredResourcesHighlights.get(resource.id)}
+          highlightings={filteredResourcesHighlights}
+          shouldBeShown={shouldResourceBeShown}
+          onSelectClick={handleResourceOnSelectClick}
+          languageCodeToName={languageCodeToName}
+          localeForInfos={locale}
+          key={resource.id}
+        />
+      ))
   }
 
   return (
@@ -464,7 +482,6 @@ function ResourceSelectionModal({
                   controlId="resource-view-options-filter"
                 >
                   <DebouncedFuzzySearchInput
-                    disabled={viewResourcesGrouping !== 'resource'}
                     value={filter}
                     onChange={(value) => setFilter(value)}
                   />

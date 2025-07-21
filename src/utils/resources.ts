@@ -11,15 +11,19 @@ import {
 export function fromApi(resources: Resource[]) {
   const locale = LocaleStore.getState().locale
 
-  const prepareFn = (resource: Resource): Resource => {
+  const prepareFn = (resource: Resource, rootResource: Resource | null = null): Resource => {
     return {
       // copy original
       ...resource,
       // override and apply to sub-resources
-      subResources: resource.subResources.map(prepareFn),
+      subResources: resource.subResources.map((subResource) =>
+        prepareFn(subResource, rootResource ?? resource)
+      ),
+      // apply a rootResourceId (pointing to the root element of any nested child)
+      rootResourceId: rootResource?.id ?? null,
     }
   }
-  const convertedResources = resources.map(prepareFn)
+  const convertedResources = resources.map((resource) => prepareFn(resource, null))
 
   const sortFn = function (x: Resource, y: Resource) {
     const xInstitution = getBestFromMultilingualValuesTryByLanguage(x.institution, locale) ?? ''

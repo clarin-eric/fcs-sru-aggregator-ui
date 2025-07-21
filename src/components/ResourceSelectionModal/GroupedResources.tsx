@@ -1,3 +1,4 @@
+import type { FuzzyMatches } from '@nozbe/microfuzz'
 import { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
@@ -16,7 +17,8 @@ function GroupedResources({
   title,
   resources,
   selectedResourceIDs,
-  isResourceRoot,
+  resourceScores,
+  highlightings,
   expanded: expandedProp,
   shouldBeShown,
   localeForInfos,
@@ -29,7 +31,8 @@ function GroupedResources({
   title: React.ReactNode
   resources: Resource[]
   selectedResourceIDs: string[]
-  isResourceRoot?: (resource: Resource) => boolean
+  resourceScores?: Map<string, number>
+  highlightings?: Map<string, FuzzyMatches>
   expanded: boolean
   shouldBeShown: ((resource: Resource) => boolean) | boolean
   localeForInfos?: string | null
@@ -47,7 +50,24 @@ function GroupedResources({
     setExpanded(expandedProp)
   }, [expandedProp])
 
-  // TODO: hide if no visible resources?
+  // resources we show
+  // NOTE: buttons to "(de)select all" will affect all resources regardless of visibility
+  const visibleResources =
+    resourceScores !== undefined
+      ? resources
+          .filter((resource) => resourceScores.has(resource.id))
+          .toSorted((a, b) => {
+            const aScore = resourceScores.get(a.id)
+            const bScore = resourceScores.get(b.id)
+            if (aScore === bScore) return 0
+            if (aScore === undefined) return 1
+            if (bScore === undefined) return -1
+            return aScore - bScore
+          })
+      : resources
+
+  // hide if no visible resources?
+  if (visibleResources.length === 0) return null
 
   // --------------------------------------------------------------
   // event handlers
@@ -61,7 +81,7 @@ function GroupedResources({
   // rendering
 
   function renderResourceCounts() {
-    const rootResources = resources.filter(isResourceRoot ?? (() => true))
+    const rootResources = resources.filter((resource) => !resource.rootResourceId)
     const numResources = getResourceIDs(rootResources).length
     const numResourcesRoot = rootResources.length
     const numResourcesSelected = getResourceIDs(rootResources).filter((rid) =>
@@ -115,9 +135,10 @@ function GroupedResources({
       </Row>
       <Collapse in={expanded}>
         <Container>
-          {resources.filter(isResourceRoot ?? (() => true)).map((resource: Resource) => (
+          {visibleResources.map((resource: Resource) => (
             <ResourceSelector
               resource={resource}
+              highlightings={highlightings}
               selectedResourceIDs={selectedResourceIDs}
               shouldBeShown={shouldBeShown}
               onSelectClick={onSelectClick}

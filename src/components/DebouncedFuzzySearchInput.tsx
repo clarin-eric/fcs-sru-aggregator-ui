@@ -11,7 +11,7 @@ function DebouncedFuzzySearchInput({
   onChange,
   delay = 300,
 }: {
-  disabled: boolean
+  disabled?: boolean
   value?: string
   onChange: (filter: string) => void
   delay?: number
