@@ -124,10 +124,12 @@ function Search() {
           setToasts((toasts) => [
             ...toasts,
             {
-              title: 'Resource Selection',
+              title: t('search.toasts.resourceSelection.title'),
               body: (
                 <>
-                  Preselected <strong>{selected.length}</strong> resources:
+                  {t('search.toasts.resourceSelection.msgPreselectedResources', {
+                    count: selected.length,
+                  })}
                   <br />
                   <ul className="ps-3">
                     {selected.map((rid) => (
@@ -144,10 +146,12 @@ function Search() {
           setToasts((toasts) => [
             ...toasts,
             {
-              title: 'Resource Selection',
+              title: t('search.toasts.resourceSelection.title'),
               body: (
                 <>
-                  Unable to select <strong>{unavailable.length}</strong> resources:
+                  {t('search.toasts.resourceSelection.msgUnableToSelectResources', {
+                    count: unavailable.length,
+                  })}
                   <br />
                   <ul className="ps-3">
                     {unavailable.map((rid) => (
@@ -172,10 +176,12 @@ function Search() {
           setToasts((toasts) => [
             ...toasts,
             {
-              title: 'Resource Selection',
+              title: t('search.toasts.resourceSelection.title'),
               body: (
                 <>
-                  Unable to preselect resources: {error.name}
+                  {t('search.toasts.resourceSelection.msgErrorUnableToSelectResources', {
+                    error: error.name,
+                  })}
                   <br />
                   <small>{error.message}</small>
                 </>
@@ -190,7 +196,7 @@ function Search() {
       urlSearchParams.delete('x-aggregation-context')
       setUrlSearchParams(urlSearchParams)
     }
-  }, [resources, urlSearchParams, setUrlSearchParams])
+  }, [resources, urlSearchParams, setUrlSearchParams, t])
 
   // ------------------------------------------------------------------------
 

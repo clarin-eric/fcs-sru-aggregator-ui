@@ -37,5 +37,8 @@
   "languageCodeToName": {
     "any": "Any Language",
     "unknown": "Unknown Language"
+  },
+  "generic": {
+    "loadingComponent": "Loading component ..."
   }
 }

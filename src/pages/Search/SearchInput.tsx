@@ -504,7 +504,7 @@ function SearchInput({
                 >
                   {t(`queryTypes.${queryType}.nameShort`, {
                     ns: 'common',
-                    defaultValue: QUERY_TYPE_MAP[queryType]?.searchLabel || '???',
+                    defaultValue: QUERY_TYPE_MAP[queryType]?.searchLabel ?? queryType.toUpperCase(),
                   })}{' '}
                   <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
                 </Dropdown.Toggle>
@@ -625,7 +625,17 @@ function SearchInput({
         QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(queryType as QueryTypeIDForQueryBuilder) &&
         isLoadQueryBuilderModalTriggered && (
           // TODO: some fallback handling
-          <Suspense fallback={<>{t('loading', { ns: 'querybuilder' })}</>}>
+          // NOTE: that translation rsources might also be loading ...
+          <Suspense
+            fallback={
+              <>
+                {t('loading', {
+                  ns: 'querybuilder',
+                  defaultValue: t('generic.loadingComponent', { ns: 'common' }),
+                })}
+              </>
+            }
+          >
             <QueryBuilderModal
               query={query}
               queryType={queryType as QueryTypeIDForQueryBuilder}

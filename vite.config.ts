@@ -44,7 +44,7 @@ const outputsLibLocalesPath = `${outputsLibPath}locales/`
 const inputSrcLocales = 'src/locales'
 const I18n_LANGUAGES = ['en', 'de'] // languages we support
 const I18N_PREFIXES = ['clarin', 'textplus'] // locale variants/overrides, active prefix will contain base namespaces, too
-const I18N_BASE_NS = ['app', 'common'] // bundle together
+const I18N_BASE_NS = ['app', 'querysuggestions', 'common'] // bundle together
 const I18N_LAZY_LOAD_NS = ['querybuilder'] // each its own chunk
 
 // flags

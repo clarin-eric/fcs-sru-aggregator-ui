@@ -123,7 +123,7 @@ i18n
   // initialization
   .init({
     lng: LANGUAGE,
-    fallbackLng: "en", // TODO: this should always be "en" or a language with most translations!
+    fallbackLng: 'en', // TODO: this should always be "en" or a language with most translations!
     supportedLngs: LANGUAGES,
 
     // i18n all namespaces to load
@@ -142,6 +142,9 @@ i18n
     // allow null to "skip" certain translations
     // returnNull: true,
 
+    // TODO: for query suggestions?
+    // returnObjects: true,
+
     postProcess: ['try-prefixed-namespaces-first'],
 
     resources,
@@ -151,7 +154,7 @@ i18n
       // useTranslation() is able to to multiple namespaces!
       nsMode: 'fallback',
 
-      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p', 'em', 'kbd'],
+      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p', 'em', 'kbd', 'code'],
     },
   })
 

@@ -9,7 +9,7 @@ import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
@@ -73,6 +73,8 @@ function ResourceResultsModal({
   useEffect(() => {
     if (userLocale) setLocale(userLocale)
   }, [userLocale])
+
+  const langNames = new Intl.DisplayNames([userLocale, 'en'], { type: 'language' })
 
   const [showDiagnostics, setShowDiagnostics] = useState(showDiagnosticsProps)
   useEffect(() => setShowDiagnostics(showDiagnosticsProps), [showDiagnosticsProps])
@@ -147,23 +149,6 @@ function ResourceResultsModal({
     return <ViewPlain data={result} />
   }
 
-  function renderResultsCountMessage() {
-    return (
-      <>
-        Showing <strong>{result.kwics.length}</strong>
-        {hasMoreResults() ? (
-          <>
-            {' / '}
-            <strong>{result.numberOfRecords}</strong>
-          </>
-        ) : (
-          ''
-        )}{' '}
-        results.
-      </>
-    )
-  }
-
   return (
     <Modal
       show={show}
@@ -179,17 +164,17 @@ function ResourceResultsModal({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="resource-info">
-        <dl className="mb-0" aria-label="Resource information">
+        <dl className="mb-0" aria-label={t('search.results.resourceInfo.infoTableAriaLabel')}>
           <dt>
-            <i dangerouslySetInnerHTML={{ __html: bankIcon }} />
-            <span> Institution</span>
+            <i dangerouslySetInnerHTML={{ __html: bankIcon }} />{' '}
+            {t('search.results.resourceInfo.labelInstitution')}
           </dt>
           <dd className="mb-0">
             {getBestFromMultilingualValuesTryByLanguage(result.resource.institution, locale)}
           </dd>
           <dt>
-            <i dangerouslySetInnerHTML={{ __html: infoCircleIcon }} />
-            <span> Description</span>
+            <i dangerouslySetInnerHTML={{ __html: infoCircleIcon }} />{' '}
+            {t('search.results.resourceInfo.labelDescription')}
           </dt>
           {getBestFromMultilingualValuesTryByLanguage(result.resource.description, locale) && (
             <>
@@ -197,8 +182,8 @@ function ResourceResultsModal({
                 {getBestFromMultilingualValuesTryByLanguage(result.resource.description, locale)}
               </dd>
               <dt>
-                <i dangerouslySetInnerHTML={{ __html: translateIcon }} />
-                <span> Languages</span>
+                <i dangerouslySetInnerHTML={{ __html: translateIcon }} />{' '}
+                {t('search.results.resourceInfo.labelLanguages')}
               </dt>
             </>
           )}
@@ -233,34 +218,48 @@ function ResourceResultsModal({
                   id={`${result.resource.id}-result-modal-info-languages-${language}`}
                   value={language}
                 >
-                  {language}
+                  {langNames.of(language)} <sup>{language}</sup>
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
           )}
 
-          <dt>Persistent Identifier</dt>
+          <dt>{t('search.results.resourceInfo.labelPID')}</dt>
           <dd>{result.resource.handle}</dd>
         </dl>
 
         {result.resource.landingPage && (
           <a href={result.resource.landingPage} className="matomo_link" target="_blank">
-            <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} /> More Information ...
+            <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />{' '}
+            {t('search.results.resourceInfo.moreInformation')}
           </a>
         )}
         <hr />
         <Row className="row-gap-2">
           <Col lg={'auto'} md={3} sm={6}>
-            <FloatingLabel label="View mode" controlId="results-view-mode">
+            <FloatingLabel
+              label={t('search.results.displayOptions.viewModeLabel')}
+              controlId="results-view-mode"
+            >
               <Form.Select value={viewMode} onChange={handleViewModeChange}>
-                <option value="plain">Plain</option>
+                <option value="plain">
+                  {t('search.results.displayOptions.viewModeOptions.plain')}
+                </option>
                 {(queryType !== 'lex' || !result.isLexHits) && (
-                  <option value="kwic">Keyword in Context</option>
+                  <option value="kwic">
+                    {t('search.results.displayOptions.viewModeOptions.kwic')}
+                  </option>
                 )}
                 {queryType === 'fcs' && (
-                  <option value="annotation-layers">Annotation Layers</option>
+                  <option value="annotation-layers">
+                    {t('search.results.displayOptions.viewModeOptions.annotation-layers')}
+                  </option>
                 )}
-                {queryType === 'lex' && <option value="lexical-entry">Dictionary</option>}
+                {queryType === 'lex' && (
+                  <option value="lexical-entry">
+                    {t('search.results.displayOptions.viewModeOptions.lexical-entry')}
+                  </option>
+                )}
               </Form.Select>
             </FloatingLabel>
           </Col>
@@ -270,7 +269,7 @@ function ResourceResultsModal({
               checked={showDiagnostics}
               onChange={() => setShowDiagnostics((show) => !show)}
               id="results-modal-view-warnings-errors"
-              label="Show warning and error messages"
+              label={t('search.results.displayOptions.optionShowWarningsErrors')}
             />
           </Col>
           <Col
@@ -281,7 +280,8 @@ function ResourceResultsModal({
           >
             <Dropdown>
               <Dropdown.Toggle>
-                <i dangerouslySetInnerHTML={{ __html: downloadIcon }} /> Download
+                <i dangerouslySetInnerHTML={{ __html: downloadIcon }} />{' '}
+                {t('search.results.buttonDownload')}
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 {DOWNLOAD_FORMATS.map(({ id: format, label }) => (
@@ -297,7 +297,15 @@ function ResourceResultsModal({
                     className="matomo_download"
                     key={format}
                   >
-                    As <strong>{label}</strong> file
+                    <Trans
+                      i18nKey="search.results.msgButtonDownloadOption"
+                      values={{
+                        label: t(`downloadFormats.${format}.name`, {
+                          ns: 'common',
+                          defaultValue: label,
+                        }),
+                      }}
+                    />
                   </Dropdown.Item>
                 ))}
               </Dropdown.Menu>
@@ -317,13 +325,23 @@ function ResourceResultsModal({
               className="matomo_link"
               target="_blank"
             >
-              <i dangerouslySetInnerHTML={{ __html: envelopeArrowUpIcon }} /> Send to Weblicht
+              <i dangerouslySetInnerHTML={{ __html: envelopeArrowUpIcon }} />{' '}
+              {t('search.results.buttonSendToWeblicht')}
             </Button>
           </Col>
         </Row>
         <hr />
         {/* results */}
-        <p>{renderResultsCountMessage()}</p>
+        <p>
+          <Trans
+            i18nKey="search.results.msgShowingXresults"
+            values={{
+              count: result.kwics.length,
+              context: hasMoreResults() ? 'hasmore' : null,
+              total: result.numberOfRecords,
+            }}
+          />
+        </p>
         {renderResults()}
       </Modal.Body>
       {/* diagnostics */}
@@ -332,15 +350,24 @@ function ResourceResultsModal({
           {result.exception && (
             <Alert variant="danger" aria-label="Error information">
               <Alert.Heading style={{ fontSize: '1rem' }}>
-                <span className="text-uppercase">Exception:</span>{' '}
-                <span aria-label="Error message">{result.exception.message}</span>
+                <span className="text-uppercase">
+                  {t('search.results.diagnostics.titleException')}
+                </span>{' '}
+                <span aria-label={t('search.results.diagnostics.msgAriaLabel')}>
+                  {result.exception.message}
+                </span>
               </Alert.Heading>
               {result.exception.cause && (
-                <p className="mb-0 small">Cause: {result.exception.cause}</p>
+                <p className="mb-0 small">
+                  {t('search.results.diagnostics.msgCause', { cause: result.exception.cause })}
+                </p>
               )}
               {result.exception.klass && (
                 <p className="mb-0 small">
-                  Caused by: <code>{result.exception.klass}</code>
+                  <Trans
+                    i18nKey="search.results.diagnostics.msgCausedBy"
+                    values={{ class: result.exception.klass }}
+                  />
                 </p>
               )}
             </Alert>
@@ -354,10 +381,17 @@ function ResourceResultsModal({
               >
                 <Alert.Heading style={{ fontSize: '1rem' }}>{diagnostic.message}</Alert.Heading>
                 {diagnostic.diagnostic && (
-                  <p className="mb-0 small">Details: {diagnostic.diagnostic}</p>
+                  <p className="mb-0 small">
+                    {t('search.results.diagnostics.msgDiagnosticDetails', {
+                      details: diagnostic.diagnostic,
+                    })}
+                  </p>
                 )}
                 <p className="mb-0 small">
-                  Diagnostic type: <code>{diagnostic.uri}</code>
+                  <Trans
+                    i18nKey="search.results.diagnostics.msgDiagnosticType"
+                    values={{ uri: diagnostic.uri }}
+                  />
                   {/* add link to list? */}
                 </p>
               </Alert>

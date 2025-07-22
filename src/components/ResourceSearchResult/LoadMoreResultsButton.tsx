@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
+import { useTranslation } from 'react-i18next'
 
 import { useAxios } from '@/providers/AxiosContext'
 // import { useSearchParams } from '@/providers/SearchParamsContext'
@@ -35,6 +36,7 @@ function LoadMoreResultsButton({
   numberOfResults,
   pollDelay = 1500,
 }: LoadMoreResultsButtonProps) {
+  const { t } = useTranslation()
   const axios = useAxios()
   const queryClient = useQueryClient()
 
@@ -122,7 +124,8 @@ function LoadMoreResultsButton({
         <Spinner animation="border" className="d-block" />
       ) : (
         <>
-          <i dangerouslySetInnerHTML={{ __html: threeDotsIcon }} /> Load more results
+          <i dangerouslySetInnerHTML={{ __html: threeDotsIcon }} />{' '}
+          {t('search.results.buttonLoadMore')}
         </>
       )}
     </Button>

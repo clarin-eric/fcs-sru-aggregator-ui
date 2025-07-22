@@ -4,6 +4,7 @@ import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
+import { useTranslation } from 'react-i18next'
 
 import { QUERY_TYPE_MAP, QueryTypeID } from '@/utils/constants'
 import { highlightSyntax } from '@/utils/prism'
@@ -26,6 +27,8 @@ function QuerySuggestionsModal({
   queryTypes: queryTypesProp,
   onModalClose,
 }: QuerySuggestionsModal) {
+  const { t } = useTranslation()
+
   const queryTypes: readonly QueryTypeID[] =
     queryTypesProp && queryTypesProp.length > 0 ? queryTypesProp : ['cql', 'fcs', 'lex']
   const requestedExamples = exampleQueries.filter((example) =>
@@ -54,6 +57,7 @@ function QuerySuggestionsModal({
   // rendering
 
   function renderExample(query: string, queryType: QueryTypeID, description?: string, nr?: number) {
+    // TODO: get description from translation resource?
     return (
       <Row key={query}>
         <Col md={'auto'} className="d-none d-md-block">
@@ -65,7 +69,7 @@ function QuerySuggestionsModal({
         </Col>
         <Col md={'auto'} className="d-flex justify-content-end align-items-baseline">
           <Button size="sm" onClick={() => handleUseQueryClose(query, queryType)}>
-            Use Query
+            {t('search.suggestionsModal.buttonUseQuery')}
           </Button>
         </Col>
       </Row>
@@ -82,7 +86,7 @@ function QuerySuggestionsModal({
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title>Search Query Suggestions</Modal.Title>
+        <Modal.Title>{t('search.suggestionsModal.title')}</Modal.Title>
       </Modal.Header>
       <Modal.Body className="px-0">
         {/* grouped by querytype or other category; each item with label/description, query, button to use */}
@@ -99,7 +103,10 @@ function QuerySuggestionsModal({
                 <Row>
                   <Col>
                     <h4 className="border-bottom pb-2">
-                      {QUERY_TYPE_MAP[queryType]?.name ?? queryType.toUpperCase()}
+                      {t(`queryTypes.${queryType}.nameLong`, {
+                        ns: 'common',
+                        defaultValue: QUERY_TYPE_MAP[queryType]?.name ?? queryType.toUpperCase(),
+                      })}
                     </h4>
                   </Col>
                 </Row>
@@ -113,7 +120,7 @@ function QuerySuggestionsModal({
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={() => handleClose('close')}>
-          Close
+          {t('search.suggestionsModal.buttonClose')}
         </Button>
       </Modal.Footer>
     </Modal>

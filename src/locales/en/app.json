@@ -27,6 +27,16 @@
       "textLearnMore": "To learn more about the FCS, please visit the page <0><em>Content Search</em> at CLARIN.eu</0>.",
       "url": "https://www.clarin.eu/content/content-search"
     },
+    "toasts": {
+      "resourceSelection": {
+        "title": "Resource Selection",
+        "msgPreselectedResources_one": "Preselected <strong>1</strong> resource:",
+        "msgPreselectedResources_other": "Preselected <strong>{{count}}</strong> resources:",
+        "msgUnableToSelectResources_one": "Unable to select <strong>1</strong> resource:",
+        "msgUnableToSelectResources_other": "Unable to select <strong>{{count}}</strong> resources:",
+        "msgErrorUnableToSelectResources": "Unable to preselect resources: {{error}}"
+      }
+    },
     "searchInput": {
       "buttonSearch": "Search",
       "buttonSearchAriaLabel": "Start the search",
@@ -81,7 +91,85 @@
         "buttonExpand_show": "Show Resources"
       }
     },
-    "suggestionsModal": {}
+    "suggestionsModal": {
+      "title": "Search Query Suggestions",
+      "buttonUseQuery": "Use Query",
+      "buttonClose": "Close"
+    },
+    "results": {
+      "progressPopover": {
+        "title": "Search Progress Information",
+        "numResourcesRequested": "<code>{{count}}</code> resources requested",
+        "numResourcesRequestedPending": "<code>{{count}}</code> ↳ resources pending",
+        "numResourcesWithoutResults": "<code>{{count}}</code> resources without results",
+        "numResourcesWithoutResultsOK": "<code>{{count}}</code> ↳ OK, without issues",
+        "numResourcesWithoutResultsErrorsWarnings": "<code>{{count}}</code> ↳ due to warnings or errors",
+        "numResourcesWithoutResultsWarnings": "<code>{{count}}</code> ↳ with warnings",
+        "numResourcesWithoutResultsErrors": "<code>{{count}}</code> ↳ due to fatal errors",
+        "numResourcesWithResults": "<code>{{count}}</code> resources with results",
+        "numResourcesWithResultsWarnings": "<code>{{count}}</code> ↳ with warnings",
+        "numResourcesWithResultsTotal": "<code>\u00A0{{count}}\u00A0/\u00A0{{available}}</code> total hits"
+      },
+      "progressBar": {
+        "numWithResults_one": "1 resource with results",
+        "numWithResults_other": "{{count}} resources with results",
+        "numWithResultsAriaLabel": "Resources with results",
+        "numWithoutResults_one": "1 resource without results",
+        "numWithoutResults_other": "{{count}} resources without results",
+        "numWithoutResultsAriaLabel": "Resources without results (might be due to issues)",
+        "numResultsPending_one": "Search through 1 resource",
+        "numResultsPending_other": "Search through {{count}} resources",
+        "numResultsPendingAriaLabel": "Resources with pending results"
+      },
+      "displayOptions": {
+        "viewModeLabel": "View mode",
+        "viewModeOptions": {
+          "plain": "Plain",
+          "kwic": "Keyword in Context",
+          "annotation-layers": "Annotation Layers",
+          "lexical-entry": "Dictionary"
+        },
+        "sortingLabel": "Sorting",
+        "sortingOptions": {
+          "default": "(default)",
+          "title-up": "Title (up)",
+          "title-down": "Title (down)",
+          "result-count-total-up": "Total result count (up)",
+          "result-count-total-down": "Total result count (down)"
+        },
+        "resultFilterQueryLabel": "Result filter query",
+        "optionShowResultDetails": "Show result details",
+        "optionShowWarningsErrors": "Show warning and error messages"
+      },
+      "resourceInfo": {
+        "labelInstitution": "Institution",
+        "labelDescription": "Description",
+        "labelLanguages": "Languages",
+        "labelPID": "Persistent Identifier",
+        "moreInformation": "More information",
+        "infoTableAriaLabel": "Resource information"
+      },
+      "resultResourceAriaLabel": "Results and details for resource {{title}}",
+      "resultCountAriaLabel": "Number of results (total amount, or currently loaded amount with total available)",
+      "resultResourceTitleAriaLabel": "Resource title",
+      "resultResourceInstitutionAriaLabel": "Institution name",
+      "buttonView": "View",
+      "buttonLoadMore": "Load more results",
+      "buttonDownload": "Download",
+      "msgButtonDownloadOption": "As <strong>{{label}}</strong> file",
+      "buttonSendToWeblicht": "Send to Weblicht",
+      "diagnostics": {
+        "titleException": "Exception:",
+        "msgAriaLabel": "Error message",
+        "msgCause": "Cause: {{cause}}",
+        "msgCausedBy": "Caused by: <code>{{class}}</code>",
+        "msgDiagnosticDetails": "Details: {{details}}",
+        "msgDiagnosticType": "Diagnostic type: <code>{{uri}}</code>"
+      },
+      "msgShowingXresults_one": "Showing <strong>1</strong> result.",
+      "msgShowingXresults_other": "Showing <strong>{{count}}</strong> results.",
+      "msgShowingXresults_hasmore": "Showing <strong>{{count}}</strong> / <strong>{{total}}</strong> results."
+    }
   },
   "about": {
     "title": "About the Federated Content Search (FCS) Aggregator",

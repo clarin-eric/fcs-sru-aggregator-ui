@@ -6,8 +6,7 @@ import 'i18next'
 // import all namespaces (for the default language, only)
 import nsEnApp from '@locales/en/app.json'
 import nsEnCommon from '@locales/en/common.json'
-import nsEnClarinApp from '@locales/en/clarin.app.json'
-import nsEnClarinCommon from '@locales/en/clarin.common.json'
+import nsEnQuerysuggestions from '@locales/en/querysuggestions.json'
 import nsEnQuerybuilder from '@locales/en/querybuilder.json'
 
 declare module 'i18next' {
@@ -19,8 +18,7 @@ declare module 'i18next' {
     resources: {
       app: typeof nsEnApp
       common: typeof nsEnCommon
-      'clarin.app': typeof nsEnClarinApp
-      'clarin.common': typeof nsEnClarinCommon
+      querysuggestions: typeof nsEnQuerysuggestions
       querybuilder: typeof nsEnQuerybuilder
     }
     // other

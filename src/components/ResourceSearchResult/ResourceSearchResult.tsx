@@ -7,7 +7,7 @@ import Card from 'react-bootstrap/Card'
 import Collapse from 'react-bootstrap/Collapse'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
@@ -71,6 +71,8 @@ function ResourceSearchResult({
   useEffect(() => {
     if (userLocale) setLocale(userLocale)
   }, [userLocale])
+
+  const langNames = new Intl.DisplayNames([userLocale, 'en'], { type: 'language' })
 
   const htmlId = useId()
   const [expanded, setExpanded] = useState(true)
@@ -161,7 +163,7 @@ function ResourceSearchResult({
       <Card
         className="my-1 resource-search-result"
         role="group"
-        aria-label={`Results and details for resource ${data.resource.title}`}
+        aria-label={t('search.results.resultResourceAriaLabel', { title: data.resource.title })}
       >
         <Card.Header className="d-flex accordion">
           <button
@@ -176,14 +178,20 @@ function ResourceSearchResult({
             <Badge
               bg=""
               className="text-bg-light border me-2 user-select-text"
-              aria-label="Number of results (total amount, or currently loaded amount with total available)"
+              aria-label={t('search.results.resultCountAriaLabel')}
             >
               {renderResultsCounter()}
             </Badge>
-            <span aria-label="Resource title" className="user-select-text">
+            <span
+              aria-label={t('search.results.resultResourceTitleAriaLabel')}
+              className="user-select-text"
+            >
               {getBestFromMultilingualValuesTryByLanguage(data.resource.title, locale)}
             </span>
-            <small className="text-muted user-select-text" aria-label="Institution name">
+            <small
+              className="text-muted user-select-text"
+              aria-label={t('search.results.resultResourceInstitutionAriaLabel')}
+            >
               {getBestFromMultilingualValuesTryByLanguage(data.resource.institution, locale)}
             </small>
           </button>
@@ -199,17 +207,17 @@ function ResourceSearchResult({
             {/* result details */}
             {showResourceDetails && (
               <Card.Body className="border-bottom resource-info">
-                <dl className="mb-0" aria-label="Resource information">
+                <dl className="mb-0" aria-label={t("search.results.resourceInfo.infoTableAriaLabel")}>
                   <dt>
-                    <i dangerouslySetInnerHTML={{ __html: bankIcon }} />
-                    <span> Institution</span>
+                    <i dangerouslySetInnerHTML={{ __html: bankIcon }} />{' '}
+                    {t('search.results.resourceInfo.labelInstitution')}
                   </dt>
                   <dd className="mb-0">
                     {getBestFromMultilingualValuesTryByLanguage(data.resource.institution, locale)}
                   </dd>
                   <dt>
-                    <i dangerouslySetInnerHTML={{ __html: infoCircleIcon }} />
-                    <span> Description</span>
+                    <i dangerouslySetInnerHTML={{ __html: infoCircleIcon }} />{' '}
+                    {t('search.results.resourceInfo.labelDescription')}
                   </dt>
                   {getBestFromMultilingualValuesTryByLanguage(
                     data.resource.description,
@@ -223,8 +231,8 @@ function ResourceSearchResult({
                         )}
                       </dd>
                       <dt>
-                        <i dangerouslySetInnerHTML={{ __html: translateIcon }} />
-                        <span> Languages</span>
+                        <i dangerouslySetInnerHTML={{ __html: translateIcon }} />{' '}
+                        {t('search.results.resourceInfo.labelLanguages')}
                       </dt>
                     </>
                   )}
@@ -262,7 +270,7 @@ function ResourceSearchResult({
                         id={`${data.resource.id}-result-info-languages-${language}`}
                         value={language}
                       >
-                        {language}
+                        {langNames.of(language)} <sup>{language}</sup>
                       </ToggleButton>
                     ))}
                   </ToggleButtonGroup>
@@ -278,15 +286,24 @@ function ResourceSearchResult({
                 {data.exception && (
                   <Alert variant="danger" aria-label="Error information">
                     <Alert.Heading style={{ fontSize: '1rem' }}>
-                      <span className="text-uppercase">Exception:</span>{' '}
-                      <span aria-label="Error message">{data.exception.message}</span>
+                      <span className="text-uppercase">
+                        {t('search.results.diagnostics.titleException')}
+                      </span>{' '}
+                      <span aria-label={t('search.results.diagnostics.msgAriaLabel')}>
+                        {data.exception.message}
+                      </span>
                     </Alert.Heading>
                     {data.exception.cause && (
-                      <p className="mb-0 small">Cause: {data.exception.cause}</p>
+                      <p className="mb-0 small">
+                        {t('search.results.diagnostics.msgCause', { cause: data.exception.cause })}
+                      </p>
                     )}
                     {data.exception.klass && (
                       <p className="mb-0 small">
-                        Caused by: <code>{data.exception.klass}</code>
+                        <Trans
+                          i18nKey="search.results.diagnostics.msgCausedBy"
+                          values={{ class: data.exception.klass }}
+                        />
                       </p>
                     )}
                   </Alert>
@@ -302,10 +319,17 @@ function ResourceSearchResult({
                         {diagnostic.message}
                       </Alert.Heading>
                       {diagnostic.diagnostic && (
-                        <p className="mb-0 small">Details: {diagnostic.diagnostic}</p>
+                        <p className="mb-0 small">
+                          {t('search.results.diagnostics.msgDiagnosticDetails', {
+                            details: diagnostic.diagnostic,
+                          })}
+                        </p>
                       )}
                       <p className="mb-0 small">
-                        Diagnostic type: <code>{diagnostic.uri}</code>
+                        <Trans
+                          i18nKey="search.results.diagnostics.msgDiagnosticType"
+                          values={{ uri: diagnostic.uri }}
+                        />
                         {/* add link to list? */}
                       </p>
                     </Alert>

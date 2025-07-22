@@ -8,6 +8,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Popover from 'react-bootstrap/Popover'
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
+import { Trans, useTranslation } from 'react-i18next'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import ResourceSearchResult from '@/components/ResourceSearchResult'
@@ -43,6 +44,7 @@ export interface SearchResultsProps {
 
 // TODO: make it (search?) cancelable! (useEffect?)
 function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResultsProps) {
+  const { t } = useTranslation()
   const axios = useAxios()
   const { resources } = useAggregatorData()
   const { query, queryType, resourceIDs } = useSearchParams()
@@ -226,65 +228,83 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
         placement="auto"
         overlay={
           <Popover id="search-progress-information-popover">
-            <Popover.Header>Search Progress Information</Popover.Header>
+            <Popover.Header>{t('search.results.progressPopover.title')}</Popover.Header>
             <Popover.Body style={{ textIndent: '2rem hanging' }}>
+              {/* XXX.toString().padStart(4, '\u00A0'), */}
               <div>
-                <code>{numRequested.toString().padStart(4, '\u00A0')}</code> resources requested
+                <Trans
+                  i18nKey="search.results.progressPopover.numResourcesRequested"
+                  count={numRequested}
+                />
               </div>
               {numInProgress > 0 && (
                 <div>
-                  <code>{numInProgress.toString().padStart(4, '\u00A0')}</code> ↳ resources pending
+                  <Trans
+                    i18nKey="search.results.progressPopover.numResourcesRequestedPending"
+                    count={numInProgress}
+                  />
                 </div>
               )}
               <hr className="mt-2 mb-1" />
               <div>
-                <code>
-                  {(numNoResults + numNoResultsWithIssues).toString().padStart(4, '\u00A0')}
-                </code>{' '}
-                resources without results
+                <Trans
+                  i18nKey="search.results.progressPopover.numResourcesWithoutResults"
+                  count={numNoResults + numNoResultsWithIssues}
+                />
               </div>
               <div>
-                <code>{numNoResults.toString().padStart(4, '\u00A0')}</code> ↳ OK, without issues
+                <Trans
+                  i18nKey="search.results.progressPopover.numResourcesWithoutResultsOK"
+                  count={numNoResults}
+                />
               </div>
               {/*
               <div>
-                <code>{numNoResultsWithIssues.toString().padStart(4, '\u00A0')}</code>{' '}
-                ↳ due to warnings or errors
+                <Trans
+                  i18nKey="search.results.progressPopover.numResourcesWithoutResultsErrorsWarnings"
+                  count={numNoResultsWithIssues}
+                />
               </div>
               */}
               {numNoResultsWithWarnings > 0 && (
                 <div>
-                  <code>{numNoResultsWithWarnings.toString().padStart(4, '\u00A0')}</code> ↳ with
-                  warnings
+                  <Trans
+                    i18nKey="search.results.progressPopover.numResourcesWithoutResultsWarnings"
+                    count={numNoResultsWithWarnings}
+                  />
                 </div>
               )}
               {numNoResultsWithExceptions > 0 && (
                 <div>
-                  <code>{numNoResultsWithExceptions.toString().padStart(4, '\u00A0')}</code> ↳ due
-                  to fatal errors
+                  <Trans
+                    i18nKey="search.results.progressPopover.numResourcesWithoutResultsErrors"
+                    count={numNoResultsWithExceptions}
+                  />
                 </div>
               )}
               <hr className="mt-2 mb-1" />
               <div>
-                <code>{numWithResults.toString().padStart(4, '\u00A0')}</code> resources with
-                results
+                <Trans
+                  i18nKey="search.results.progressPopover.numResourcesWithResults"
+                  count={numWithResults}
+                />
               </div>
               {numWithResultsWithWarnings > 0 && (
                 <div>
-                  <code>{numWithResultsWithWarnings.toString().padStart(4, '\u00A0')}</code> ↳ with
-                  warnings
+                  <Trans
+                    i18nKey="search.results.progressPopover.numResourcesWithResultsWarnings"
+                    count={numWithResultsWithWarnings}
+                  />
                 </div>
               )}
               <hr className="mt-2 mb-0" />
               <hr className="mt-1 mb-1" />
               <div>
-                <code>
-                  {'\u00A0'}
-                  {numResultsTotalLoaded}
-                  {'\u00A0'}/{'\u00A0'}
-                  {numResultsTotalAvailable}
-                </code>{' '}
-                total hits
+                <Trans
+                  i18nKey="search.results.progressPopover.numResourcesWithResultsTotal"
+                  count={numResultsTotalLoaded}
+                  values={{ available: numResultsTotalAvailable }}
+                />
               </div>
             </Popover.Body>
           </Popover>
@@ -295,23 +315,37 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
             variant="success"
             now={numWithResults}
             max={numRequested}
-            label={<span>{numWithResults} resources with results</span>}
-            aria-label="Resources with results"
+            label={
+              <span>
+                {t('search.results.progressBar.numWithResults', { count: numWithResults })}
+              </span>
+            }
+            aria-label={t('search.results.progressBar.numWithResultsAriaLabel')}
           />
           <ProgressBar
             variant="secondary"
             now={numNoResults + numNoResultsWithIssues}
             max={numRequested}
-            label={<span>{numNoResults + numNoResultsWithIssues} resources without results</span>}
-            aria-label="Resources without results (might be due to issues)"
+            label={
+              <span>
+                {t('search.results.progressBar.numWithResults', {
+                  count: numNoResults + numNoResultsWithIssues,
+                })}
+              </span>
+            }
+            aria-label={t('search.results.progressBar.numWithoutResultsAriaLabel')}
           />
           <ProgressBar
             striped
             animated
             now={numInProgress}
             max={numRequested}
-            label={<span>Search through {numInProgress} Resources</span>}
-            aria-label="Resources with pending results"
+            label={
+              <span>
+                {t('search.results.progressBar.numResultsPending', { count: numInProgress })}
+              </span>
+            }
+            aria-label={t('search.results.progressBar.numResultsPendingAriaLabel')}
           />
         </ProgressBar>
       </OverlayTrigger>
@@ -320,33 +354,62 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
         <Card.Body>
           <Row className="row-gap-2">
             <Col lg={'auto'} md={6} sm={6}>
-              <FloatingLabel label="View mode" controlId="results-view-mode">
+              <FloatingLabel
+                label={t('search.results.displayOptions.viewModeLabel')}
+                controlId="results-view-mode"
+              >
                 <Form.Select value={viewMode} onChange={handleViewModeChange}>
-                  <option value="plain">Plain</option>
+                  <option value="plain">
+                    {t('search.results.displayOptions.viewModeOptions.plain')}
+                  </option>
                   {/* maybe allow kwic for LexCQL if not a LexHITS data view */}
                   {(queryType !== 'lex' || !isAllLexHITS) && (
-                    <option value="kwic">Keyword in Context</option>
+                    <option value="kwic">
+                      {t('search.results.displayOptions.viewModeOptions.kwic')}
+                    </option>
                   )}
                   {queryType === 'fcs' && (
-                    <option value="annotation-layers">Annotation Layers</option>
+                    <option value="annotation-layers">
+                      {t('search.results.displayOptions.viewModeOptions.annotation-layers')}
+                    </option>
                   )}
-                  {queryType === 'lex' && <option value="lexical-entry">Dictionary</option>}
+                  {queryType === 'lex' && (
+                    <option value="lexical-entry">
+                      {t('search.results.displayOptions.viewModeOptions.lexical-entry')}
+                    </option>
+                  )}
                 </Form.Select>
               </FloatingLabel>
             </Col>
             <Col lg={'auto'} md={6} sm={6}>
-              <FloatingLabel label="Sorting" controlId="results-sorting">
+              <FloatingLabel
+                label={t('search.results.displayOptions.sortingLabel')}
+                controlId="results-sorting"
+              >
                 <Form.Select value={sorting} onChange={handleSortingChange}>
-                  <option value="default">(default)</option>
-                  <option value="title-up">Title (up)</option>
-                  <option value="title-down">Title (down)</option>
-                  <option value="result-count-total-up">Total result count (up)</option>
-                  <option value="result-count-total-down">Total result count (down)</option>
+                  <option value="default">
+                    {t('search.results.displayOptions.sortingOptions.default')}
+                  </option>
+                  <option value="title-up">
+                    {t('search.results.displayOptions.sortingOptions.title-up')}
+                  </option>
+                  <option value="title-down">
+                    {t('search.results.displayOptions.sortingOptions.title-down')}
+                  </option>
+                  <option value="result-count-total-up">
+                    {t('search.results.displayOptions.sortingOptions.result-count-total-up')}
+                  </option>
+                  <option value="result-count-total-down">
+                    {t('search.results.displayOptions.sortingOptions.result-count-total-down')}
+                  </option>
                 </Form.Select>
               </FloatingLabel>
             </Col>
             <Col lg={'auto'} md={12} sm={6} className="flex-fill order-xl-4">
-              <FloatingLabel label="Result filter query" controlId="result-filter">
+              <FloatingLabel
+                label={t('search.results.displayOptions.resultFilterQueryLabel')}
+                controlId="result-filter"
+              >
                 <DebouncedFuzzySearchInput
                   disabled={sorting !== 'default' || true} // TODO: implement
                   value={filter}
@@ -359,13 +422,13 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
                 checked={showResourceDetails}
                 onChange={() => setShowResourceDetails((show) => !show)}
                 id="results-view-resource-details"
-                label="Show result details"
+                label={t('search.results.displayOptions.optionShowResultDetails')}
               />
               <Form.Check
                 checked={showDiagnostics}
                 onChange={() => setShowDiagnostics((show) => !show)}
                 id="results-view-warnings-errors"
-                label="Show warning and error messages"
+                label={t('search.results.displayOptions.optionShowWarningsErrors')}
               />
             </Col>
           </Row>
