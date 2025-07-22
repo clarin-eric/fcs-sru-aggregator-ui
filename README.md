@@ -17,9 +17,9 @@ The frontend uses the following technologies:
 
 For development and building a few additional dependencies are required:
 
-- [Vite](https://vite.dev/) 7.0.4 with plugins
-  - [estree-walker](https://github.com/Rich-Harris/estree-walker) and [magic-string](https://github.com/rich-harris/magic-string) for custom source code transformation (import rewriting, bundle building)
-  - [picomatch](https://github.com/micromatch/picomatch#globbing-features) for filename filters in output control
+- [Vite](https://vite.dev/) 7.0.5 with plugins
+  - [estree-walker](https://github.com/Rich-Harris/estree-walker) 3.0.3 and [magic-string](https://github.com/rich-harris/magic-string) 0.30.17 for custom source code transformation (import rewriting, bundle building)
+  - [picomatch](https://github.com/micromatch/picomatch#globbing-features) 4.0.3 for filename filters in output control
 - [TypeScript](https://www.typescriptlang.org/) 5.8.3 with `@types/*` definitions
 - [ESLint](https://eslint.org/) 9.31.0 with plugins
 
