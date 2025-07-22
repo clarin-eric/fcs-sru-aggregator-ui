@@ -245,21 +245,27 @@ function SearchInput({
             console.log('Trigger search due to URL parameter!')
             doSearch()
           }
-          setSearchParams((params) => (params.delete('mode'), params))
+          // setSearchParams((params) => (params.delete('mode'), params))
+          searchParams.delete('mode')
+          setSearchParams(searchParams)
         }
       }
     }
   }, [searchParams, setSearchParams, doSearch])
 
   // update URL with query params
-  useEffect(
-    () => setSearchParams((params) => (params.set('query', query), params)),
-    [query, setSearchParams]
-  )
-  useEffect(
-    () => setSearchParams((params) => (params.set('queryType', queryType), params)),
-    [queryType, setSearchParams]
-  )
+  useEffect(() => {
+    if (searchParams.get('query') === query) return
+    // setSearchParams((params) => (params.set('query', query), params))
+    searchParams.set('query', query)
+    setSearchParams(searchParams)
+  }, [query, searchParams, setSearchParams])
+  useEffect(() => {
+    if (searchParams.get('queryType') === queryType) return
+    // setSearchParams((params) => (params.set('queryType', queryType), params))
+    searchParams.set('queryType', queryType)
+    setSearchParams(searchParams)
+  }, [queryType, searchParams, setSearchParams])
 
   // ------------------------------------------------------------------------
 

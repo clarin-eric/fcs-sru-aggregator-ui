@@ -186,7 +186,9 @@ function Search() {
         }
       }
       // remove after use, will trigger next evaluation of URLSearchParams ...
-      setUrlSearchParams((params) => (params.delete('x-aggregation-context'), params))
+      // setUrlSearchParams((params) => (params.delete('x-aggregation-context'), params))
+      urlSearchParams.delete('x-aggregation-context')
+      setUrlSearchParams(urlSearchParams)
     }
   }, [resources, urlSearchParams, setUrlSearchParams])
 

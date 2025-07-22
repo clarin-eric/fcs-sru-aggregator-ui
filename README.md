@@ -5,7 +5,7 @@
 The frontend uses the following technologies:
 
 - [ReactJS](https://18.react.dev/) 18.3.1
-  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.6.3 for <abbr title="Single Page Application">SPA</abbr> routing
+  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.7.0 for <abbr title="Single Page Application">SPA</abbr> routing
   - [React Query](https://tanstack.com/query/latest) 5.83.0 with [Axios](https://github.com/axios/axios) 1.10.0 for web requests
 - [Bootstrap](https://getbootstrap.com/) 5.3.7 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.13.1, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.10
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
