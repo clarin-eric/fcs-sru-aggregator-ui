@@ -132,7 +132,7 @@ export function FCSQueryBuilder({
           }
           const data = layerTypeToID.get(layer.layerType)!
           data.resultIDs.push(layer.resultId)
-          if (layer.qualifier !== null) {
+          if (layer.qualifier !== null && layer.qualifier !== undefined) {
             data.qualifiers.push(layer.qualifier)
           }
         })
@@ -973,6 +973,8 @@ function BasicExpressionInput({
 
   function renderLayerResourceCount(layer: string, qualifier: string | undefined = undefined) {
     if (!showResourceCountForLayer) return null
+
+    console.log('layerInfo', layerInfo)
 
     const countLayer = layerInfo.get(layer)?.resources.length ?? 0
     const countQualifier = qualifier
