@@ -207,7 +207,10 @@ function ResourceSearchResult({
             {/* result details */}
             {showResourceDetails && (
               <Card.Body className="border-bottom resource-info">
-                <dl className="mb-0" aria-label={t("search.results.resourceInfo.infoTableAriaLabel")}>
+                <dl
+                  className="mb-0"
+                  aria-label={t('search.results.resourceInfo.infoTableAriaLabel')}
+                >
                   <dt>
                     <i dangerouslySetInnerHTML={{ __html: bankIcon }} />{' '}
                     {t('search.results.resourceInfo.labelInstitution')}
@@ -284,7 +287,7 @@ function ResourceSearchResult({
               <Card.Body className={hasResults ? 'border-top' : ''}>
                 {/* TODO: aria invisible heading, adjust levels */}
                 {data.exception && (
-                  <Alert variant="danger" aria-label="Error information">
+                  <Alert variant="danger" aria-label={t('statistics.diagnostic.alertAriaLabel')}>
                     <Alert.Heading style={{ fontSize: '1rem' }}>
                       <span className="text-uppercase">
                         {t('search.results.diagnostics.titleException')}

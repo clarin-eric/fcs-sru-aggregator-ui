@@ -13,5 +13,27 @@
       "termsUseAndDisclaimer": "Datenschutzerklärung",
       "contact": "Kontakt"
     }
+  },
+  "search": {
+    "intro": {
+      "textGeneral": "Die Federated Content Search (FCS) ist eine Suchmaschine von CLARIN, mit der Forscher gezielt nach spezifischen Mustern in verteilten Datensammlungen suchen können. Die Suchmaschine ist mit den in den Zentren verfügbaren Datenbeständen verbunden. Die Daten selbst befinden sich dabei weiterhin in dem Zentrum, in dem sie gehostet werden – daher wird die zugrunde liegende Technik als <em>“Federated Content Search”</em> (verteilte Inhaltssuche) bezeichnet.",
+      "textLearnMore": "Weitere Informationen zum FCS finden Sie auf der Seite <0><em>Content Search</em> unter CLARIN.eu</0>."
+    },
+    "searchInput": {
+      "buttonSearch": "Suchen",
+      "buttonSearchAriaLabel": "Starte die Suche",
+      "buttonEnhanceQueryAriaLabel": "Syntaxhervorhebung der Sucheingabe aktivieren",
+      "buttonOpenQueryBuilderAriaLabel": "Öffne Eingabefenster für den graphischen Query Builder um eine Suchanfrage zu erstellen",
+      "buttonOpenQuerySuggestions": "Öffne Fenster mit Vorschlägen für Sucheingaben",
+      "inputQueryAriaLabel": "Eingabefeld für Suchanfrage",
+      "filtersSummary": "Führe ein <0/> in <1/> von <2/> in <3/> mit <4/> Ergebnissen pro Endpunkt durch.",
+      "dropdownQueryTypeAriaLabel": "Suchanfragetyp",
+      "buttonSelectedResources_one": "1 ausgewählten Ressource",
+      "buttonSelectedResources_other": "{{count}} ausgewählten Ressourcen",
+      "buttonSelectedResources_all": "Allen verfügbaren Ressourcen ({{count}})",
+      "buttonSelectedInstitutions_one": "1 Institution",
+      "buttonSelectedInstitutions_other": "{{count}} Institutionen",
+      "selectNumberOfSearchResultsAriaLabel": "Anzahl der gewünschten Suchergebnisse pro Endpunkt"
+    }
   }
 }

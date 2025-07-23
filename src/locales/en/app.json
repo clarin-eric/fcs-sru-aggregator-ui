@@ -7,7 +7,9 @@
     },
     "login": {
       "login": "Login"
-    }
+    },
+    "localeOptionTitle": "Switch to locale '{{code}}' for language {{name}}",
+    "localeOptionTitle_translated": "Switch to locale '{{code}}' for language {{name}} ({{translated}})"
   },
   "footer": {
     "links": {
@@ -73,6 +75,7 @@
       "buttonChangeResourceInfoLanguageTitle_one": "Found 1 resource with information fields in {{language}} language",
       "buttonChangeResourceInfoLanguageTitle_other": "Found {{count}} resources with information fields in '{{language}}' ({{languageName}}) language",
       "resource": {
+        "checkboxResourceAriaLabel": "Checkbox for resource: {{title}}",
         "moreInformation": "More information",
         "toggleExpand_collapse_one": "Collapse (1 subresource)",
         "toggleExpand_collapse_other": "Collapse ({{count}} subresources)",
@@ -122,6 +125,7 @@
         "numResultsPendingAriaLabel": "Resources with pending results"
       },
       "displayOptions": {
+        "cardAriaLabel": "Result display and filter options",
         "viewModeLabel": "View mode",
         "viewModeOptions": {
           "plain": "Plain",
@@ -160,6 +164,7 @@
       "buttonSendToWeblicht": "Send to Weblicht",
       "diagnostics": {
         "titleException": "Exception:",
+        "alertAriaLabel": "Error information",
         "msgAriaLabel": "Error message",
         "msgCause": "Cause: {{cause}}",
         "msgCausedBy": "Caused by: <code>{{class}}</code>",
@@ -268,6 +273,7 @@
     "moreHelp": {
       "title": "More help",
       "text": "More detailed information on using FCS Aggregator is available at the <0>Content Search: Tutorial at CLARIN.eu</0>. If you still cannot find an answer to your question, or if want to send a feedback, youcan write to the <1>CLARIN FCS Helpdesk</1>."
-    }
+    },
+    "contactTitle": "Contact"
   }
 }

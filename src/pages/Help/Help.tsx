@@ -74,7 +74,7 @@ function Help() {
               <a href="https://www.clarin.eu/content/content-search-tutorial">
                 Content Search: Tutorial at CLARIN.eu
               </a>,
-              <a title="contact" href={t('urls.contact', { ns: 'common' })}>
+              <a title={t('help.contactTitle')} href={t('urls.contact', { ns: 'common' })}>
                 CLARIN FCS Helpdesk
               </a>,
             ]}

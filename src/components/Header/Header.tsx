@@ -97,11 +97,13 @@ function Header() {
               disabled={localeOption === locale}
               aria-disabled={localeOption === locale}
               eventKey={localeOption}
-              title={
-                `Switch to locale '${localeOption}' for language '${langNamesLocalized.of(
-                  localeOption
-                )}'` + (localeOption !== locale ? ` (${langNames.of(localeOption)})` : '')
-              }
+              title={t('header.localeOptionTitle', {
+                code: localeOption,
+                name: langNamesLocalized.of(localeOption),
+                // show translated language name in current active language
+                context: localeOption !== locale ? 'translated' : null,
+                translated: langNames.of(localeOption),
+              })}
             >
               {localeOption.toUpperCase()} – {langNamesLocalized.of(localeOption)}
             </NavDropdown.Item>

@@ -350,7 +350,11 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
         </ProgressBar>
       </OverlayTrigger>
 
-      <Card className="mb-2" role="group" aria-label="Result display and filter options">
+      <Card
+        className="mb-2"
+        role="group"
+        aria-label={t('search.results.displayOptions.cardAriaLabel')}
+      >
         <Card.Body>
           <Row className="row-gap-2">
             <Col lg={'auto'} md={6} sm={6}>

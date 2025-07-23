@@ -108,7 +108,9 @@ function ResourceSelector({
         <Col md="auto" sm={1} onClick={handleToggleSelectionClick}>
           <Form.Check
             id={`resource-selection-${resource.id}`}
-            aria-label={`Checkbox for resource: ${resource.title}`}
+            aria-label={t('search.results.resourceInfo.checkboxResourceAriaLabel', {
+              title: resource.title,
+            })}
           >
             <Form.Check.Input
               checked={isSelected}

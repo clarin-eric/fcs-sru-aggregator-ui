@@ -1,0 +1,40 @@
+{
+  "queryTypes": {
+    "cql": {
+      "nameShort": "Volltextsuche",
+      "nameLong": "Contextual Query Language (CQL) auf Textebene"
+    },
+    "fcs": {
+      "nameShort": "Suche auf Annotationsebenen",
+      "nameLong": "Federated Content Search Query Language (FCS-QL) auf Annotationsebenen"
+    },
+    "lex": {
+      "nameShort": "Suche auf lexikalischen Ressourcen",
+      "nameLong": "Lexical Resources Contextual Query Language (LexCQL)"
+    }
+  },
+  "downloadFormats": {
+    "text": {
+      "name": "Einfacher Text"
+    },
+    "csv": {
+      "name": "CSV"
+    },
+    "tcf": {
+      "name": "TCF"
+    },
+    "ods": {
+      "name": "ODS"
+    },
+    "excel": {
+      "name": "Excel"
+    }
+  },
+  "languageCodeToName": {
+    "any": "Alle Sprachen",
+    "unknown": "Unbekannte Sprache"
+  },
+  "generic": {
+    "loadingComponent": "Lade Komponente ..."
+  }
+}
