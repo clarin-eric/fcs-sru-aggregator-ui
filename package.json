@@ -22,7 +22,7 @@
     "@nozbe/microfuzz": "^1.0.0",
     "@tanstack/react-query": "^5.83.0",
     "antlr4ng": "^3.0.16",
-    "axios": "^1.10.0",
+    "axios": "^1.11.0",
     "bootstrap": "^5.3.7",
     "bootstrap-icons": "^1.13.1",
     "i18next": "^25.3.2",
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
-    "@types/node": "^24.0.15",
+    "@types/node": "^24.1.0",
     "@types/picomatch": "^4.0.1",
     "@types/prismjs": "^1.26.5",
     "@types/react": "^18.3.12",
