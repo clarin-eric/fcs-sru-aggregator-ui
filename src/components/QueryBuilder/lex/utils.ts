@@ -1,7 +1,9 @@
-import { CharStream, CommonTokenStream, TokenStreamRewriter } from 'antlr4ng'
+import { CharStream, CommonTokenStream, ParseTree, TokenStreamRewriter } from 'antlr4ng'
 
 import { LexLexer } from '@/parsers/LexLexer'
-import { LexParser } from '@/parsers/LexParser'
+import { IndexContext, LexParser, QueryContext } from '@/parsers/LexParser'
+import { LexParserVisitor } from '@/parsers/LexParserVisitor'
+import { type Resource } from '@/utils/api'
 import { _formatTreeItems, _getTreeItems, QuerySyntaxErrorListener } from '../utils'
 
 // --------------------------------------------------------------------------
@@ -34,6 +36,83 @@ export function parseQuery(input?: string) {
   console.log(/*#__PURE__*/ _formatTreeItems(treeItems))
 
   return { tree, lexer, parser, rewriter, errors: errorListener.errors }
+}
+
+// --------------------------------------------------------------------------
+
+class CollectFieldsVisitor extends LexParserVisitor<void> {
+  public fields: string[] = []
+
+  public visitIndex = (ctx: IndexContext) => {
+    this.fields.push(ctx.getText())
+  }
+}
+
+export function getFieldsUsedInQuery(ctx?: QueryContext | ParseTree) {
+  // collect mentioned fields in query
+  const fieldCollector = new CollectFieldsVisitor()
+  if (ctx) {
+    fieldCollector.visit(ctx)
+  }
+
+  const usedFields = fieldCollector.fields
+  const uniqFields = new Set(usedFields)
+
+  return [...uniqFields]
+}
+
+export interface SupportedResourcesInfo {
+  supported: Resource[]
+  unsupported: (readonly [Resource, string[]])[]
+  unsupportedByField: Map<string, Resource[]>
+}
+
+export function getResourcesFieldSupportInfo(
+  resources: Resource[],
+  fields: string[]
+): SupportedResourcesInfo {
+  if (fields.length === 0 || resources.length === 0) {
+    return {
+      supported: resources,
+      unsupported: [],
+      unsupportedByField: new Map<string, Resource[]>(),
+    }
+  }
+
+  // find resources that do have these fields
+  // TODO: use `layerInfo` where it is precomputed?
+  const resourcesWithField = resources.map((resource) => {
+    const notAvailableFields: string[] = []
+
+    fields.forEach((field) => {
+      if (!resource.availableLexFields?.find((lexField) => lexField.type === field)) {
+        notAvailableFields.push(field)
+      }
+    })
+
+    return [resource, notAvailableFields] as const
+  })
+
+  const validResources = resourcesWithField
+    .filter(([, fields]) => fields.length === 0)
+    .map(([resource]) => resource)
+  const invalidResources = resourcesWithField.filter(([, fields]) => fields.length !== 0)
+  const invalidResourcesByField = invalidResources
+    .map(([resource, fields]) => fields.map((field) => [field, resource] as const))
+    .flat(1)
+    .reduce((map, [field, resource]) => {
+      if (!map.has(field)) {
+        map.set(field, [])
+      }
+      map.get(field)!.push(resource)
+      return map
+    }, new Map<string, Resource[]>())
+
+  return {
+    supported: validResources,
+    unsupported: invalidResources,
+    unsupportedByField: invalidResourcesByField,
+  }
 }
 
 // --------------------------------------------------------------------------

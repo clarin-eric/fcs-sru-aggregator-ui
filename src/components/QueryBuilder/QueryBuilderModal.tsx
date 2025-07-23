@@ -8,6 +8,7 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
 import ToggleButton from 'react-bootstrap/ToggleButton'
+import { Trans, useTranslation } from 'react-i18next'
 
 import ContentEditable from '@/components/ContentEditable'
 import useDebounce from '@/hooks/useDebounce'
@@ -21,6 +22,7 @@ import {
   parseQuery as parseFCSQuery,
 } from './fcs'
 import { LexCQLQueryBuilder, parseQuery as parseLexCQLQuery } from './lex'
+import { getFieldsUsedInQuery, getResourcesFieldSupportInfo } from './lex/utils'
 
 import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
 
@@ -51,6 +53,8 @@ function QueryBuilderModal({
   delay = 1000,
   onModalClose,
 }: QueryBuilderModalProps) {
+  const { t } = useTranslation('querybuilder')
+
   // query input
   const [query, setQuery] = useState(queryProp ?? '')
   const [cursorPos, setCursorPos] = useState<[number, number] | number | null>(null)
@@ -104,6 +108,7 @@ function QueryBuilderModal({
 
   // --------------------------------------------------------------
 
+  const [queryTypeAvailableResources, setQueryTypeAvailableResources] = useState<number>(0)
   const [unavailableResources, setUnavailableResources] = useState<number>(0)
   const [unavailableResourcesByValue, setUnavailableResourcesByValue] = useState<
     Map<string, Resource[]> | undefined
@@ -111,24 +116,63 @@ function QueryBuilderModal({
 
   // conditional update with custom equality check since objects ...
   if (resources && parsed) {
-    const layersUsedInQuery = getLayersUsedInQuery(parsed?.tree)
-    const resourcesWithMissingLayers = getResourcesLayerSupportInfo(resources, layersUsedInQuery)
+    if (queryType === 'fcs') {
+      const resourcesForFCS = resources.filter(
+        (resource) => resource.availableLayers !== null && resource.availableLayers.length > 0
+      )
+      if (queryTypeAvailableResources !== resourcesForFCS.length) {
+        setQueryTypeAvailableResources(resourcesForFCS.length)
+      }
 
-    const newUnavailable = resourcesWithMissingLayers.unsupported.length
-    if (newUnavailable !== unavailableResources) {
-      setUnavailableResources(newUnavailable)
-    }
-    const newLayers = [...resourcesWithMissingLayers.unsupportedByLayer.keys()]
-    const oldLayers = unavailableResourcesByValue ? [...unavailableResourcesByValue.keys()] : []
-    if (
-      newLayers.length !== oldLayers.length ||
-      !newLayers.every((layer) => oldLayers.includes(layer))
-    ) {
-      setUnavailableResourcesByValue(resourcesWithMissingLayers.unsupportedByLayer)
+      const layersUsedInQuery = getLayersUsedInQuery(parsed?.tree)
+      const resourcesWithMissingLayers = getResourcesLayerSupportInfo(
+        resourcesForFCS,
+        layersUsedInQuery
+      )
+
+      const newUnavailable = resourcesWithMissingLayers.unsupported.length
+      if (newUnavailable !== unavailableResources) {
+        setUnavailableResources(newUnavailable)
+      }
+      const newLayers = [...resourcesWithMissingLayers.unsupportedByLayer.keys()]
+      const oldLayers = unavailableResourcesByValue ? [...unavailableResourcesByValue.keys()] : []
+      if (
+        newLayers.length !== oldLayers.length ||
+        !newLayers.every((layer) => oldLayers.includes(layer))
+      ) {
+        setUnavailableResourcesByValue(resourcesWithMissingLayers.unsupportedByLayer)
+      }
+    } else if (queryType === 'lex') {
+      const resourcesForLEX = resources.filter(
+        (resource) => resource.availableLexFields !== null && resource.availableLexFields.length > 0
+      )
+      if (queryTypeAvailableResources !== resourcesForLEX.length) {
+        setQueryTypeAvailableResources(resourcesForLEX.length)
+      }
+
+      const fieldsUsedInQuery = getFieldsUsedInQuery(parsed?.tree)
+      const resourcesWithMissingFields = getResourcesFieldSupportInfo(
+        resourcesForLEX,
+        fieldsUsedInQuery
+      )
+
+      const newUnavailable = resourcesWithMissingFields.unsupported.length
+      if (newUnavailable !== unavailableResources) {
+        setUnavailableResources(newUnavailable)
+      }
+      const newFields = [...resourcesWithMissingFields.unsupportedByField.keys()]
+      const oldFields = unavailableResourcesByValue ? [...unavailableResourcesByValue.keys()] : []
+      if (
+        newFields.length !== oldFields.length ||
+        !newFields.every((layer) => oldFields.includes(layer))
+      ) {
+        setUnavailableResourcesByValue(resourcesWithMissingFields.unsupportedByField)
+      }
     }
   }
   if (!parsed) {
     if (unavailableResources !== 0) {
+      setQueryTypeAvailableResources(resources?.length ?? 0)
       setUnavailableResources(0)
       setUnavailableResourcesByValue(undefined)
     }
@@ -177,11 +221,11 @@ function QueryBuilderModal({
   const [enableWithin, setEnableWithin] = useState(false)
   const [enableWrapGroup, setEnableWrapGroup] = useState(false)
   const [enableWrapNegation, setEnableWrapNegation] = useState(false)
-  const [enableImplicitQuery, setEnableImplicitQuery] = useState(false)
+  const [enableImplicitQuery, setEnableImplicitQuery] = useState(true)
   const [enableMultipleQuerySegments, setEnableMultipleQuerySegments] = useState(true)
-  const [enableQuantifiers, setEnableQuantifiers] = useState(false)
+  const [enableQuantifiers, setEnableQuantifiers] = useState(true)
   const [enableRegexpFlags, setEnableRegexpFlags] = useState(false)
-  const [showBasicLayer, setShowBasicLayer] = useState(false)
+  const [showBasicLayer, setShowBasicLayer] = useState(true)
   const [showAllAdvancedLayers, setShowAllAdvancedLayers] = useState(false)
   const [showCustomLayers, setShowCustomLayers] = useState(true)
   const [showLayerQualifiers, setShowLayerQualifiers] = useState(true)
@@ -192,129 +236,135 @@ function QueryBuilderModal({
   const [showAllFields, setShowAllFields] = useState(false)
   const [showResourceCountForField, setShowResourceCountForField] = useState(true)
 
+  function renderFCSQueryBuilderOptions() {
+    return (
+      <Form className="my-2 p-2 border rounded" style={{ textIndent: '3.6rem hanging' }}>
+        <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
+          Enable
+        </Form.Text>
+        {/* query structures */}
+        <Form.Check
+          inline
+          label="Within"
+          type="checkbox"
+          name="enableWithin"
+          id="enableWithin"
+          checked={enableWithin}
+          onChange={() => setEnableWithin((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Expression Grouping"
+          type="checkbox"
+          name="enableWrapGroup"
+          id="enableWrapGroup"
+          checked={enableWrapGroup}
+          onChange={() => setEnableWrapGroup((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Expression Negation"
+          type="checkbox"
+          name="enableWrapNegation"
+          id="enableWrapNegation"
+          checked={enableWrapNegation}
+          onChange={() => setEnableWrapNegation((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Implicit Query"
+          type="checkbox"
+          name="enableImplicitQuery"
+          id="enableImplicitQuery"
+          checked={enableImplicitQuery}
+          onChange={() => setEnableImplicitQuery((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Multiple Query Segments"
+          type="checkbox"
+          name="enableMultipleQuerySegments"
+          id="enableMultipleQuerySegments"
+          checked={enableMultipleQuerySegments}
+          onChange={() => setEnableMultipleQuerySegments((checked) => !checked)}
+          disabled
+        />
+        {/* inputs */}
+        <Form.Check
+          inline
+          label="Quantifiers"
+          type="checkbox"
+          name="enableQuantifiers"
+          id="enableQuantifiers"
+          checked={enableQuantifiers}
+          onChange={() => setEnableQuantifiers((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Regex Flags"
+          type="checkbox"
+          name="enableRegexpFlags"
+          id="enableRegexpFlags"
+          checked={enableRegexpFlags}
+          onChange={() => setEnableRegexpFlags((checked) => !checked)}
+          disabled
+        />
+        {/* layers */}
+        <Form.Check
+          inline
+          label="BASIC Layer"
+          type="checkbox"
+          name="showBasicLayer"
+          id="showBasicLayer"
+          checked={showBasicLayer}
+          onChange={() => setShowBasicLayer((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="All Advanced Layers"
+          type="checkbox"
+          name="showAllAdvancedLayers"
+          id="showAllAdvancedLayers"
+          checked={showAllAdvancedLayers}
+          onChange={() => setShowAllAdvancedLayers((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Custom Layers"
+          type="checkbox"
+          name="showCustomLayers"
+          id="showCustomLayers"
+          checked={showCustomLayers}
+          onChange={() => setShowCustomLayers((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Layer Qualifiers"
+          type="checkbox"
+          name="showLayerQualifiers"
+          id="showLayerQualifiers"
+          checked={showLayerQualifiers}
+          onChange={() => setShowLayerQualifiers((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Resource Count for Layer"
+          type="checkbox"
+          name="showResourceCountForLayer"
+          id="showResourceCountForLayer"
+          checked={showResourceCountForLayer}
+          onChange={() => setShowResourceCountForLayer((checked) => !checked)}
+        />
+      </Form>
+    )
+  }
+
   function renderFCSQueryBuilder() {
     // make conditional on query type
     return (
       <>
         {/* TODO: testing */}
-        <Form className="my-2 p-2 border rounded" style={{ textIndent: '3.6rem hanging' }}>
-          <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
-            Enable
-          </Form.Text>
-          {/* query structures */}
-          <Form.Check
-            inline
-            label="Within"
-            type="checkbox"
-            name="enableWithin"
-            id="enableWithin"
-            checked={enableWithin}
-            onChange={() => setEnableWithin((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Expression Grouping"
-            type="checkbox"
-            name="enableWrapGroup"
-            id="enableWrapGroup"
-            checked={enableWrapGroup}
-            onChange={() => setEnableWrapGroup((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Expression Negation"
-            type="checkbox"
-            name="enableWrapNegation"
-            id="enableWrapNegation"
-            checked={enableWrapNegation}
-            onChange={() => setEnableWrapNegation((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Implicit Query"
-            type="checkbox"
-            name="enableImplicitQuery"
-            id="enableImplicitQuery"
-            checked={enableImplicitQuery}
-            onChange={() => setEnableImplicitQuery((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Multiple Query Segments"
-            type="checkbox"
-            name="enableMultipleQuerySegments"
-            id="enableMultipleQuerySegments"
-            checked={enableMultipleQuerySegments}
-            onChange={() => setEnableMultipleQuerySegments((checked) => !checked)}
-            disabled
-          />
-          {/* inputs */}
-          <Form.Check
-            inline
-            label="Quantifiers"
-            type="checkbox"
-            name="enableQuantifiers"
-            id="enableQuantifiers"
-            checked={enableQuantifiers}
-            onChange={() => setEnableQuantifiers((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Regex Flags"
-            type="checkbox"
-            name="enableRegexpFlags"
-            id="enableRegexpFlags"
-            checked={enableRegexpFlags}
-            onChange={() => setEnableRegexpFlags((checked) => !checked)}
-            disabled
-          />
-          {/* layers */}
-          <Form.Check
-            inline
-            label="BASIC Layer"
-            type="checkbox"
-            name="showBasicLayer"
-            id="showBasicLayer"
-            checked={showBasicLayer}
-            onChange={() => setShowBasicLayer((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="All Advanced Layers"
-            type="checkbox"
-            name="showAllAdvancedLayers"
-            id="showAllAdvancedLayers"
-            checked={showAllAdvancedLayers}
-            onChange={() => setShowAllAdvancedLayers((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Custom Layers"
-            type="checkbox"
-            name="showCustomLayers"
-            id="showCustomLayers"
-            checked={showCustomLayers}
-            onChange={() => setShowCustomLayers((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Layer Qualifiers"
-            type="checkbox"
-            name="showLayerQualifiers"
-            id="showLayerQualifiers"
-            checked={showLayerQualifiers}
-            onChange={() => setShowLayerQualifiers((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Resource Count for Layer"
-            type="checkbox"
-            name="showResourceCountForLayer"
-            id="showResourceCountForLayer"
-            checked={showResourceCountForLayer}
-            onChange={() => setShowResourceCountForLayer((checked) => !checked)}
-          />
-        </Form>
+        {import.meta.env.DEV && renderFCSQueryBuilderOptions()}
         <FCSQueryBuilder
           query={queryDebounced}
           cursorPos={cursorPos ?? undefined}
@@ -338,51 +388,57 @@ function QueryBuilderModal({
     )
   }
 
+  function renderLexCQLQueryBuilderOptions() {
+    return (
+      <Form className="my-2 p-2 border rounded" style={{ textIndent: '3.6rem hanging' }}>
+        <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
+          Enable
+        </Form.Text>
+        <Form.Check
+          inline
+          label="Forced Search Term Quoting"
+          type="checkbox"
+          name="forceSearchTermQuoting"
+          id="forceSearchTermQuoting"
+          checked={forceSearchTermQuoting}
+          onChange={() => setForceSearchTermQuoting((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Relation Modifiers"
+          type="checkbox"
+          name="enableRelationModifiers"
+          id="enableRelationModifiers"
+          checked={enableRelationModifiers}
+          onChange={() => setEnableRelationModifiers((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="All Fields"
+          type="checkbox"
+          name="showAllFields"
+          id="showAllFields"
+          checked={showAllFields}
+          onChange={() => setShowAllFields((checked) => !checked)}
+        />
+        <Form.Check
+          inline
+          label="Resource Count for Field"
+          type="checkbox"
+          name="showResourceCountForField"
+          id="showResourceCountForField"
+          checked={showResourceCountForField}
+          onChange={() => setShowResourceCountForField((checked) => !checked)}
+        />
+      </Form>
+    )
+  }
+
   function renderLexCQLQueryBuilder() {
     return (
       <>
         {/* TODO: testing */}
-        <Form className="my-2 p-2 border rounded" style={{ textIndent: '3.6rem hanging' }}>
-          <Form.Text className="me-3" style={{ verticalAlign: 'text-bottom' }}>
-            Enable
-          </Form.Text>
-          <Form.Check
-            inline
-            label="Forced Search Term Quoting"
-            type="checkbox"
-            name="forceSearchTermQuoting"
-            id="forceSearchTermQuoting"
-            checked={forceSearchTermQuoting}
-            onChange={() => setForceSearchTermQuoting((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Relation Modifiers"
-            type="checkbox"
-            name="enableRelationModifiers"
-            id="enableRelationModifiers"
-            checked={enableRelationModifiers}
-            onChange={() => setEnableRelationModifiers((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="All Fields"
-            type="checkbox"
-            name="showAllFields"
-            id="showAllFields"
-            checked={showAllFields}
-            onChange={() => setShowAllFields((checked) => !checked)}
-          />
-          <Form.Check
-            inline
-            label="Resource Count for Field"
-            type="checkbox"
-            name="showResourceCountForField"
-            id="showResourceCountForField"
-            checked={showResourceCountForField}
-            onChange={() => setShowResourceCountForField((checked) => !checked)}
-          />
-        </Form>
+        {import.meta.env.DEV && renderLexCQLQueryBuilderOptions()}
         <LexCQLQueryBuilder
           query={queryDebounced}
           cursorPos={cursorPos ?? undefined}
@@ -419,7 +475,7 @@ function QueryBuilderModal({
       centered
     >
       <Modal.Header className="py-2" closeButton>
-        <Modal.Title>Query Builder</Modal.Title>
+        <Modal.Title>{t('title')}</Modal.Title>
       </Modal.Header>
       <Modal.Body className="px-0">
         {/* resource viewing options */}
@@ -428,10 +484,11 @@ function QueryBuilderModal({
             <Row className="d-sm-flex row-gap-2 justify-content-around">
               <Col>
                 <InputGroup hasValidation>
+                  {/* TODO: dynamic placeholders based on query type? */}
                   {/* @ts-expect-error: typing does not work for onChange handler, is correct so */}
                   <Form.Control
-                    placeholder='"Elephant"'
-                    aria-label="query builder input"
+                    placeholder={t('queryInputPlaceholder')}
+                    aria-label={t('queryInputAriaLabel')}
                     className="text-center query-builder-input"
                     value={query}
                     isInvalid={!!queryError}
@@ -466,7 +523,10 @@ function QueryBuilderModal({
                     checked={queryInputEnhanced}
                     onChange={() => setQueryInputEnhanced((isChecked) => !isChecked)}
                     variant="outline-secondary"
-                    aria-label="Enable enhanced visual input support"
+                    aria-label={t('search.searchInput.buttonEnhanceQueryAriaLabel', {
+                      ns: 'app',
+                      context: queryInputEnhanced ? 'enabled' : 'disabled',
+                    })}
                     className="d-flex align-items-center"
                   >
                     <i dangerouslySetInnerHTML={{ __html: highlightsIcon }} aria-hidden="true" />
@@ -481,14 +541,21 @@ function QueryBuilderModal({
         {unavailableResources > 0 && (
           <Container className="px-3">
             <Alert variant="warning" className="mb-0 mt-3" dismissible>
-              For this query, {unavailableResources} of {resources?.length} resources will not be
-              available! Certain layers are not supported by some resources.
+              {t('msgResourcesUnavailable', {
+                count: unavailableResources,
+                total: queryTypeAvailableResources,
+                context: queryTypeAvailableResources === unavailableResources ? 'nothing' : null,
+              })}
               {unavailableResourcesByValue && (
                 <ul className="mb-0">
                   {[...unavailableResourcesByValue.keys()].map((name) => (
-                    <li>
-                      <strong>{name}</strong>: {unavailableResourcesByValue.get(name)?.length}{' '}
-                      unsupported resources
+                    <li key={name}>
+                      <Trans
+                        i18nKey="msgNumUnsupportedResources"
+                        count={unavailableResourcesByValue.get(name)?.length}
+                        values={{ name }}
+                        ns="querybuilder"
+                      />
                     </li>
                   ))}
                 </ul>
@@ -501,10 +568,10 @@ function QueryBuilderModal({
       </Modal.Body>
       <Modal.Footer className="py-2">
         <Button variant="secondary" onClick={() => handleClose('abort')}>
-          Cancel
+          {t('buttonCancel')}
         </Button>
         <Button variant="primary" onClick={() => handleClose('confirm')}>
-          Use Query
+          {t('buttonUseQueryAndClose')}
         </Button>
       </Modal.Footer>
     </Modal>

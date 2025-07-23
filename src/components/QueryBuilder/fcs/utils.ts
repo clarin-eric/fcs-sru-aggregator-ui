@@ -61,7 +61,6 @@ export function getLayersUsedInQuery(ctx?: QueryContext | ParseTree) {
 
   const usedLayers = layerCollector.layers
   const uniqLayers = new Set(usedLayers)
-  // console.log('layers', { usedLayers, uniqLayers })
 
   return [...uniqLayers]
 }

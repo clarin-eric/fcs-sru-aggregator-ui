@@ -1,3 +1,12 @@
 {
-  "loading": "Trying to load Query Builder extension ..."
+  "loading": "Trying to load Query Builder extension ...",
+  "title": "Query Builder",
+  "queryInputPlaceholder": "\"Elephant\"",
+  "queryInputAriaLabel": "Query text input field for visual query builder",
+  "buttonCancel": "Cancel",
+  "buttonUseQueryAndClose": "Use Query",
+  "msgResourcesUnavailable": "For this query, {{count}} of {{total}} resources will not be available! Certain layers are not supported by some resources.",
+  "msgResourcesUnavailable_nothing": "For this query, no resources ({{total}}) might be available! Certain layers are not supported by some resources.",
+  "msgNumUnsupportedResources_one": "<strong>{{name}}</strong>: 1 unsupported resource",
+  "msgNumUnsupportedResources_other": "<strong>{{name}}</strong>: {{count}} unsupported resources"
 }

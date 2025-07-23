@@ -22,7 +22,8 @@
     "searchInput": {
       "buttonSearch": "Suchen",
       "buttonSearchAriaLabel": "Starte die Suche",
-      "buttonEnhanceQueryAriaLabel": "Syntaxhervorhebung der Sucheingabe aktivieren",
+      "buttonEnhanceQueryAriaLabel_enabled": "Syntaxhervorhebung der Sucheingabe deaktivieren",
+      "buttonEnhanceQueryAriaLabel_disabled": "Syntaxhervorhebung der Sucheingabe aktivieren",
       "buttonOpenQueryBuilderAriaLabel": "Öffne Eingabefenster für den graphischen Query Builder um eine Suchanfrage zu erstellen",
       "buttonOpenQuerySuggestions": "Öffne Fenster mit Vorschlägen für Sucheingaben",
       "inputQueryAriaLabel": "Eingabefeld für Suchanfrage",

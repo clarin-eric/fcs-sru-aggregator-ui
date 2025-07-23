@@ -13,6 +13,7 @@ import LanguageModal, { type LanguageModelCloseActions } from '@/components/Lang
 import QuerySuggestionsModal from '@/components/QuerySuggestionsModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import useFlipOnceTrue from '@/hooks/useFlipOnceTrue'
+import useSearchParamsFromHash from '@/hooks/useSearchParamsFromHash'
 import { type Resource } from '@/utils/api'
 import {
   DEFAULT_QUERY_TYPE,
@@ -115,6 +116,7 @@ function SearchInput({
 }: SearchInputProps) {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [hashSearchParams, setHashSearchParams] = useSearchParamsFromHash()
 
   // input modals (trigger)
   const [showResourceSelectionModal, setShowResourceSelectionModal] = useState(false)
@@ -266,6 +268,20 @@ function SearchInput({
     searchParams.set('queryType', queryType)
     setSearchParams(searchParams)
   }, [queryType, searchParams, setSearchParams])
+
+  // some triggers for UI elements
+  useEffect(() => {
+    console.debug('hashSearchParams', hashSearchParams)
+
+    if (hashSearchParams.has('openQueryBuilder')) {
+      console.debug("Trigger Query Builder open due to 'openQueryBuilder' search param")
+      triggerLoadQueryBuilderModal()
+      setShowQueryBuilderModal(true)
+
+      hashSearchParams.delete('openQueryBuilder')
+      setHashSearchParams(hashSearchParams)
+    }
+  }, [hashSearchParams, setHashSearchParams, triggerLoadQueryBuilderModal])
 
   // ------------------------------------------------------------------------
 
@@ -455,7 +471,9 @@ function SearchInput({
             checked={queryInputEnhanced}
             onChange={() => setQueryInputEnhanced((isChecked) => !isChecked)}
             variant="outline-secondary"
-            aria-label={t('search.searchInput.buttonEnhanceQueryAriaLabel')}
+            aria-label={t('search.searchInput.buttonEnhanceQueryAriaLabel', {
+              context: queryInputEnhanced ? 'enabled' : 'disabled',
+            })}
             className="d-flex align-items-center border-end-0"
           >
             <i dangerouslySetInnerHTML={{ __html: highlightsIcon }} aria-hidden="true" />

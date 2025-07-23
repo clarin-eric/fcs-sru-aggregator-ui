@@ -42,7 +42,8 @@
     "searchInput": {
       "buttonSearch": "Search",
       "buttonSearchAriaLabel": "Start the search",
-      "buttonEnhanceQueryAriaLabel": "Enable enhanced visual input support with syntax highlighting",
+      "buttonEnhanceQueryAriaLabel_enabled": "Disable enhanced visual input support with syntax highlighting",
+      "buttonEnhanceQueryAriaLabel_disabled": "Enable enhanced visual input support with syntax highlighting",
       "buttonOpenQueryBuilderAriaLabel": "Open modal to use the visual query builder to construct a search query",
       "buttonOpenQuerySuggestions": "Open modal with suggestions for search queries",
       "inputQueryAriaLabel": "Search query input",
