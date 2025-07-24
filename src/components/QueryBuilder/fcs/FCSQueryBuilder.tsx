@@ -974,8 +974,6 @@ function BasicExpressionInput({
   function renderLayerResourceCount(layer: string, qualifier: string | undefined = undefined) {
     if (!showResourceCountForLayer) return null
 
-    console.log('layerInfo', layerInfo)
-
     const countLayer = layerInfo.get(layer)?.resources.length ?? 0
     const countQualifier = qualifier
       ? layerInfo.get(layer)?.qualifiers?.get(qualifier)?.length ?? 0

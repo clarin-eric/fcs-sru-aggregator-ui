@@ -15,6 +15,7 @@ import useDebounce from '@/hooks/useDebounce'
 import useDebouncedState from '@/hooks/useDebouncedState'
 import { type Resource } from '@/utils/api'
 import { type QueryTypeIDForQueryBuilder } from '@/utils/constants'
+import { flattenResources } from '@/utils/resources'
 import {
   FCSQueryBuilder,
   getLayersUsedInQuery,
@@ -72,11 +73,26 @@ function QueryBuilderModal({
     delay
   )
 
-  const resourcesForQueryBuilder = resources
-    ? selectedResources // && selectedResources.length > 0
-      ? resources.filter((resource) => selectedResources.includes(resource.id))
-      : resources
-    : undefined
+  // flatten nested list to allow fuzzy search everywhere
+  const flattenedResources = flattenResources(resources ?? [])
+
+  const resourcesValidForQueryType = flattenedResources
+    // if fcs then filter what is valid there
+    .filter((resource) =>
+      queryType === 'fcs'
+        ? resource.availableLayers !== null && resource.availableLayers.length > 0
+        : true
+    )
+    // if lex then filter what is valid there
+    .filter((resource) =>
+      queryType === 'lex'
+        ? resource.availableLexFields !== null && resource.availableLexFields.length > 0
+        : true
+    )
+
+  const resourcesForQueryBuilder = selectedResources // && selectedResources.length > 0
+    ? resourcesValidForQueryType.filter((resource) => selectedResources.includes(resource.id))
+    : resourcesValidForQueryType
 
   // --------------------------------------------------------------
   // query syntax error handling
@@ -117,16 +133,13 @@ function QueryBuilderModal({
   // conditional update with custom equality check since objects ...
   if (resources && parsed) {
     if (queryType === 'fcs') {
-      const resourcesForFCS = resources.filter(
-        (resource) => resource.availableLayers !== null && resource.availableLayers.length > 0
-      )
-      if (queryTypeAvailableResources !== resourcesForFCS.length) {
-        setQueryTypeAvailableResources(resourcesForFCS.length)
+      if (queryTypeAvailableResources !== resourcesForQueryBuilder.length) {
+        setQueryTypeAvailableResources(resourcesForQueryBuilder.length)
       }
 
       const layersUsedInQuery = getLayersUsedInQuery(parsed?.tree)
       const resourcesWithMissingLayers = getResourcesLayerSupportInfo(
-        resourcesForFCS,
+        resourcesForQueryBuilder,
         layersUsedInQuery
       )
 
@@ -143,16 +156,13 @@ function QueryBuilderModal({
         setUnavailableResourcesByValue(resourcesWithMissingLayers.unsupportedByLayer)
       }
     } else if (queryType === 'lex') {
-      const resourcesForLEX = resources.filter(
-        (resource) => resource.availableLexFields !== null && resource.availableLexFields.length > 0
-      )
-      if (queryTypeAvailableResources !== resourcesForLEX.length) {
-        setQueryTypeAvailableResources(resourcesForLEX.length)
+      if (queryTypeAvailableResources !== resourcesForQueryBuilder.length) {
+        setQueryTypeAvailableResources(resourcesForQueryBuilder.length)
       }
 
       const fieldsUsedInQuery = getFieldsUsedInQuery(parsed?.tree)
       const resourcesWithMissingFields = getResourcesFieldSupportInfo(
-        resourcesForLEX,
+        resourcesForQueryBuilder,
         fieldsUsedInQuery
       )
 
@@ -182,11 +192,17 @@ function QueryBuilderModal({
   // event handlers
 
   function handleClose(action: string) {
-    onModalClose({
-      query: query,
-      validResources: selectedResources ?? [], // TODO: implement filtering
-      action: action,
-    })
+    const unavailableResourceIDs =
+      unavailableResourcesByValue !== undefined
+        ? Array.from(unavailableResourcesByValue.values())
+            .flat()
+            .map((resource) => resource.id)
+        : []
+    const validResources = resourcesForQueryBuilder
+      // if we have a parsed query and know what is invalid, filter out what should not be available
+      .filter((resource) => !unavailableResourceIDs.includes(resource.id))
+      .map((resource) => resource.id)
+    onModalClose({ query: query, validResources: validResources, action: action })
   }
 
   function handleQueryInputChange(query: string) {

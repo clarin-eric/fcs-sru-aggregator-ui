@@ -2,7 +2,7 @@ import { useFuzzySearchList } from '@nozbe/microfuzz/react'
 import { type FuzzyMatches } from '@nozbe/microfuzz'
 
 import { type Resource } from '@/utils/api'
-import { getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
+import { flattenResources, getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
 
 export default function useFuzzySearchListWithHierarchy(
   filter: string,
@@ -10,11 +10,7 @@ export default function useFuzzySearchListWithHierarchy(
   locale: string
 ) {
   // flatten nested list to allow fuzzy search everywhere
-  const flattenFn = (resource: Resource): Resource[] => [
-    resource,
-    ...resource.subResources.map(flattenFn).flat(),
-  ]
-  const flattenedResources = resources.map(flattenFn).flat()
+  const flattenedResources = flattenResources(resources)
 
   // fuzzy reduce search results
   const filteredResources = useFuzzySearchList({

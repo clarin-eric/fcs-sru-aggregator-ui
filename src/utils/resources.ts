@@ -171,6 +171,14 @@ export function getResourceParentIDs(
   return parentIDs
 }
 
+export function flattenResources(resources: Resource[]) {
+  const flattenFn = (resource: Resource): Resource[] => [
+    resource,
+    ...resource.subResources.map(flattenFn).flat(),
+  ]
+  return resources.map(flattenFn).flat()
+}
+
 // --------------------------------------------------------------------------
 
 export const MULTILINGUAL_VALUE_CHECK_LANGUAGES = ['en', 'eng', 'de', 'deu'] as const
