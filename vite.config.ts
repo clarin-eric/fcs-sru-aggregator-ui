@@ -311,13 +311,16 @@ export default defineConfig(({ mode }) => {
           // vendor
           [`${outputsLibVenderPath}react`]: ['react', 'react-dom', 'react/jsx-runtime'],
           [`${outputsLibVenderPath}react-ext`]: [
-            'react-router',
+            '@nozbe/microfuzz/react',
             '@tanstack/react-query',
             'axios',
-            'zustand',
-            '@nozbe/microfuzz/react',
+            'i18next-resources-to-backend',
+            'i18next',
             'react-helmet-async',
+            'react-i18next',
+            'react-router',
             'react-slugify',
+            'zustand',
           ],
           // lazy loaded chunk (query-builder)
           [`${outputsLibVenderPath}antlr4`]: ['antlr4ng'],
