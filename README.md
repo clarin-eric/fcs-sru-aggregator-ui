@@ -7,6 +7,7 @@ The frontend uses the following technologies:
 - [ReactJS](https://18.react.dev/) 18.3.1
   - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.7.0 for <abbr title="Single Page Application">SPA</abbr> routing
   - [React Query](https://tanstack.com/query/latest) 5.83.0 with [Axios](https://github.com/axios/axios) 1.11.0 for web requests
+  - [react-i18next](https://react.i18next.com/) 15.6.1 and [i18next](https://www.i18next.com/) 25.3.2 for translation support, with [i18next-resources-to-backend](https://github.com/i18next/i18next-resources-to-backend) 1.2.1 for dynamic resource loading
 - [Bootstrap](https://getbootstrap.com/) 5.3.7 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.13.1, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.10
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
 - [react-slugify](https://github.com/martpie/react-slugify) 4.0.1 for generating hash urls
@@ -17,7 +18,7 @@ The frontend uses the following technologies:
 
 For development and building a few additional dependencies are required:
 
-- [Vite](https://vite.dev/) 7.0.5 with plugins
+- [Vite](https://vite.dev/) 7.0.6 with plugins
   - [estree-walker](https://github.com/Rich-Harris/estree-walker) 3.0.3 and [magic-string](https://github.com/rich-harris/magic-string) 0.30.17 for custom source code transformation (import rewriting, bundle building)
   - [picomatch](https://github.com/micromatch/picomatch#globbing-features) 4.0.3 for filename filters in output control
 - [TypeScript](https://www.typescriptlang.org/) 5.8.3 with `@types/*` definitions
