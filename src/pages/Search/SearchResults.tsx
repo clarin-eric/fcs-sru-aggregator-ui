@@ -219,6 +219,8 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
   // --------------------------------------------------------------
   // rendering
 
+  // TODO: add filter for exact vs. fuzzy/normalised search results
+
   return (
     <div id="search-results" className="mt-2 mb-4">
       {/* TODO: add visually-hidden title for semantic site structure */}

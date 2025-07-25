@@ -133,12 +133,12 @@ function ResourceSearchResult({
 
     if (data.numberOfRecords === -1) {
       // probably at end, since endpoints respond with -1 when trying to request more than available
-      return data.kwics.length
-    } else if (data.numberOfRecords === data.kwics.length && data.nextRecordPosition === -1) {
+      return data.records.length
+    } else if (data.numberOfRecords === data.records.length && data.nextRecordPosition === -1) {
       // either everything or possibly more
-      return `${data.kwics.length} / ${data.numberOfRecords}?`
+      return `${data.records.length} / ${data.numberOfRecords}?`
     } else {
-      return `${data.kwics.length} / ${data.numberOfRecords}`
+      return `${data.records.length} / ${data.numberOfRecords}`
     }
   }
 

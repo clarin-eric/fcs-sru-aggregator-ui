@@ -308,61 +308,88 @@ export interface SearchResultsMetaOnly {
   results: ResourceSearchResultMetaOnly[]
 }
 
-export interface ResourceSearchResult {
-  resource: Resource
-  inProgress: boolean
-  nextRecordPosition: number
-  numberOfRecords: number
-  exception: Exception | null
-  diagnostics: Diagnostic[]
-  kwics: Kwic[]
-  advancedLayers: Array<AdvancedLayer[]>
-  lexEntries: LexEntry[]
-  hasAdvResults: boolean
-  isLexHits?: boolean
-}
-
 export interface ResourceSearchResultMetaOnly {
+  id: string
   resourceHandle: string
   endpointUrl: string
+
   inProgress: boolean
   nextRecordPosition: number
   numberOfRecords: number
   numberOfRecordsLoaded: number
+
   exception: Exception | null
   diagnostics: Diagnostic[]
-  id: string
+
   hasAdvResults: boolean
+  hasLexResults: boolean
   isLexHits?: boolean
 }
 
-export interface BaseResultHit {
-  pid: string
-  reference: string | null
-  language: string | null
+export interface ResourceSearchResult {
+  id: string
+  endpointUrl: string
+  resourceHandle: string
+  resource: Resource
+
+  inProgress: boolean
+  nextRecordPosition: number
+  numberOfRecords: number
+  numberOfRecordsLoaded: number
+
+  exception: Exception | null
+  diagnostics: Diagnostic[]
+
+  kwics?: unknown // TODO: deprecated
+  advancedLayers?: unknown // TODO: deprecated
+  lexEntries?: unknown // TODO: deprecated
+
+  isLexHits: boolean
+  hasAdvResults: boolean
+  hasLexResults: boolean
+
+  records: ResultRecord[]
 }
 
-export interface Kwic extends BaseResultHit {
-  fragments: Fragment[]
+export interface ResultRecord {
+  pid: string
+  ref: string | null
+  lang: string | null
+  cql: Kwic
+  fcs: AdvancedLayer[]
+  lex: LexEntry
+}
+
+export interface Kwic {
+  fragments: KwicFragment[]
   left: string
   keyword: string
   right: string
 }
 
-export interface AdvancedLayer extends BaseResultHit {
-  spans: Fragment[]
-}
-
-export interface Fragment {
+export interface KwicFragment {
   text: string
   hit: boolean
   hitKind?: string
 }
 
-export interface LexEntry extends BaseResultHit {
+export interface AdvancedLayer {
+  id: string
+  spans: LayerFragment[]
+}
+
+export interface LayerFragment {
+  text: string
+  hit: boolean
+  range?: [number, number]
+}
+
+export interface LexEntry {
   fields: LexField[]
   lang: string
   langUri: string
+  pid: string
+  reference: string | null
 }
 
 export interface LexField {
@@ -393,6 +420,18 @@ export async function getSearchResults(axios: AxiosInstance, searchID: string) {
 
   const response = await axios.get(`search/${searchID}`)
   console.debug('[getSearchResults]', { searchID }, response)
+
+  if (
+    (response.data as SearchResults)?.results?.length > 0 &&
+    (response.data as SearchResults).results[0].records === undefined
+  ) {
+    console.warn(
+      "Using legacy FCS SRU Aggregator API with Search Results not in '.records'!",
+      { searchID },
+      response.data
+    )
+  }
+
   return response.data as SearchResults
 }
 
@@ -448,6 +487,14 @@ export async function getSearchResultDetails(
     throw new Error(
       `Results for resource not found! (searchId: ${searchID}, resourceId: ${resourceID})`
     )
+
+  if (results[0].records === undefined) {
+    console.warn(
+      "Using legacy FCS SRU Aggregator API with Search Results not in '.records'!",
+      { searchID },
+      results
+    )
+  }
 
   return results[0]
 }

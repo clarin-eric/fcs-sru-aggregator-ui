@@ -34,23 +34,23 @@ function ViewPlain({ data }: ViewPlainProps) {
           </tr>
         </thead>
         <tbody>
-          {data.kwics.map((kwic, index) => (
-            <tr key={`${kwic.pid ?? kwic.reference ?? data.resource.id}-${index}`}>
+          {data.records.map((record, index) => (
+            <tr key={`${record.pid ?? record.ref ?? data.resource.id}-${index}`}>
               <td scope="row" className="result-idx text-end text-muted d-none d-sm-table-cell">
                 {index + 1}
               </td>
               <td scope="row" className="result-refs">
-                {kwic.reference && (
-                  <a href={kwic.reference} className="matomo_link" target="_blank">
+                {record.ref && (
+                  <a href={record.ref} className="matomo_link" target="_blank">
                     <i dangerouslySetInnerHTML={{ __html: link45degIcon }} />
                   </a>
                 )}{' '}
-                {kwic.pid && (
+                {record.pid && (
                   <OverlayTrigger
                     placement="auto-start"
                     container={ref}
                     delay={{ show: 250, hide: 400 }}
-                    overlay={<Tooltip id={`ttip-${kwic.pid}-${index}`}>{kwic.pid}</Tooltip>}
+                    overlay={<Tooltip id={`ttip-${record.pid}-${index}`}>{record.pid}</Tooltip>}
                   >
                     {/* TODO: maybe with on mouse-over stay? see: https://github.com/react-bootstrap/react-bootstrap/issues/1622*/}
                     <Badge bg="secondary" className="pid-badge">
@@ -60,7 +60,7 @@ function ViewPlain({ data }: ViewPlainProps) {
                 )}
               </td>
               <td>
-                {kwic.fragments.map((fragment, index) =>
+                {record.cql.fragments.map((fragment, index) =>
                   fragment.hit && !fragment.hitKind ? (
                     <mark key={index}>
                       <strong>{fragment.text}</strong>
