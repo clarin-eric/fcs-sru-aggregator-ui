@@ -3,6 +3,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
+import InputGroup from 'react-bootstrap/InputGroup'
 
 import {
   Boolean_modifiedContext,
@@ -492,6 +493,55 @@ function Boolean({ ctx, onChange }: { ctx: Boolean_modifiedContext; onChange?: (
   )
 }
 
+function extractRelationModifierIDsFromQuery(relationModifiedCtx: Relation_modifiedContext | null) {
+  // extract names from query
+  const modifierListCtx = relationModifiedCtx?.modifier_list()?.modifier() ?? []
+  const modifierListCtxNames = modifierListCtx.map(
+    (modifierCtx) =>
+      modifierCtx.modifier_name().simple_name().SIMPLE_STRING().symbol.text?.toLowerCase() ?? ''
+  )
+
+  return RELATION_MODIFIERS.map((relMod) => relMod.id).filter((modifier) =>
+    modifierListCtxNames.includes(modifier.toLowerCase())
+  )
+}
+
+function getRelationModifierByName(
+  relationModifiedCtx: Relation_modifiedContext | null,
+  name: string
+) {
+  // extract lang relation modifier from query
+  const modifierListCtx = relationModifiedCtx?.modifier_list()?.modifier() ?? []
+  const modifierLangCtx = modifierListCtx.find(
+    (modifierCtx) =>
+      modifierCtx.modifier_name().simple_name().SIMPLE_STRING().symbol.text?.toLowerCase() === name
+  )
+  return modifierLangCtx
+}
+
+function extractRelationModifierLangValueFromQuery(
+  relationModifiedCtx: Relation_modifiedContext | null
+) {
+  // extract lang relation modifier from query
+  const modifierLangCtx = getRelationModifierByName(relationModifiedCtx, 'lang')
+
+  if (!modifierLangCtx?.modifier_relation()?.relation_symbol().EQUAL()) {
+    console.warn('Language relation modifier with unsupported relation!')
+    // TODO: print location info?
+  }
+
+  const modifierValueCtx = modifierLangCtx?.modifier_relation()?.modifier_value()
+  if (!modifierValueCtx) {
+    console.warn('No language value for for language relation modifier!')
+    return ''
+  }
+
+  const quotedValue = modifierValueCtx.QUOTED_STRING()
+  const simpleValue = modifierValueCtx.SIMPLE_STRING()
+  const newLanguageValue = quotedValue?.symbol.text ?? simpleValue?.symbol.text
+  return maybeUnquoteSearchTerm(newLanguageValue)
+}
+
 function SearchClause({
   ctx,
   onChange,
@@ -523,6 +573,7 @@ function SearchClause({
   const [index, setIndex] = useState<FieldsType | string | null>(null)
   const [relation, setRelation] = useState<RelationsType | string | null>(null)
   const [relationModifiers, setRelationModifiers] = useState<RelationModifiersType[]>([])
+  const [relationModifierLang, setRelationModifierLang] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string>('')
 
   useEffect(() => {
@@ -536,6 +587,7 @@ function SearchClause({
     setIndex(newIndex ?? null)
     setRelation(newRelation ?? null)
     setRelationModifiers(extractRelationModifierIDsFromQuery(relationModifiedCtx))
+    setRelationModifierLang(extractRelationModifierLangValueFromQuery(relationModifiedCtx))
     setSearchTerm(maybeUnquoteSearchTerm(newSearchTerm))
   }, [indexCtx, relationModifiedCtx, searchTermCtx])
 
@@ -612,29 +664,16 @@ function SearchClause({
     // add new modifiers if needed
     for (const newModifier of relationModifiers) {
       if (!relationModifiersCtxNames.includes(newModifier.toLowerCase())) {
-        rewriter.insertAfter(tokenIndexEnd, `/${newModifier}`)
+        if (newModifier.toLowerCase() === 'lang') {
+          rewriter.insertAfter(tokenIndexEnd, `/${newModifier}=""`)
+        } else {
+          rewriter.insertAfter(tokenIndexEnd, `/${newModifier}`)
+        }
         changed = true
       }
     }
 
     if (changed) onChange?.()
-  }
-
-  function extractRelationModifierIDsFromQuery(
-    relationModifiedCtx: Relation_modifiedContext | null
-  ) {
-    // extract names from query
-    const modifierListCtx = relationModifiedCtx?.modifier_list()?.modifier() ?? []
-    const modifierListCtxNames = modifierListCtx
-      .map(
-        (modifierCtx) =>
-          modifierCtx.modifier_name().simple_name().SIMPLE_STRING().symbol.text?.toLowerCase() ?? ''
-      )
-      .filter((modifier) => modifier !== 'lang')
-
-    return RELATION_MODIFIERS.map((relMod) => relMod.id).filter((modifier) =>
-      modifierListCtxNames.includes(modifier.toLowerCase())
-    )
   }
 
   // ------------------------------------------------------------------------
@@ -692,6 +731,45 @@ function SearchClause({
     onChange?.()
   }
 
+  function handleRelationModifierLanguageChange() {
+    if (!relationModifiedCtx) {
+      console.warn(
+        'Unexpected parse state. For updating relation modifiers, the relation context should exist!',
+        { relationModifiers, relationModifiedCtx }
+      )
+      return
+    }
+
+    // TODO: validate "relationModifierLang" otherwise abort
+
+    // extract lang relation modifier from query
+    const modifierLangCtx = getRelationModifierByName(relationModifiedCtx, 'lang')
+    if (!modifierLangCtx) {
+      // no language relation modifier found?!
+      const tokenIndexEnd = relationModifiedCtx.stop!.tokenIndex
+      rewriter.insertAfter(tokenIndexEnd, `/lang="${relationModifierLang}"`)
+      onChange?.()
+      return
+    }
+
+    // extract relation modifier value
+    const modifierValueCtx = modifierLangCtx.modifier_relation()?.modifier_value()
+    if (!modifierValueCtx) {
+      // modifier found but without value
+      const tokenIndexEnd = modifierLangCtx.stop!.tokenIndex
+      rewriter.insertAfter(tokenIndexEnd, `="${relationModifierLang}"`)
+      onChange?.()
+      return
+    }
+
+    const newRelationModifierLanguage = maybeQuoteSearchTerm(
+      relationModifierLang,
+      forceSearchTermQuoting || modifierValueCtx.QUOTED_STRING() !== null
+    )
+    rewriter.replace(modifierValueCtx.start!, modifierValueCtx.stop!, newRelationModifierLanguage)
+    onChange?.()
+  }
+
   function handleToggleRelationModifier(modifier: RelationModifiersType) {
     // update query
     const newRelationModifiers = updateRelationModifiersList(relationModifiers, modifier)
@@ -716,6 +794,42 @@ function SearchClause({
     )
   }
 
+  function renderRelationModifierLanguageInput() {
+    // TODO: maybe pre-compute resource languages and only "allow" those languages
+    const isInvalid = !relationModifierLang.match(/^[a-z]{3}$/i)
+
+    return (
+      <InputGroup hasValidation>
+        <Form.Control
+          className="d-inline"
+          style={{
+            /* maxWidth: '10ch', */
+            /* see .form-check@paddingLeft */
+            marginLeft: '1.5em',
+          }}
+          // maxLength={3}
+          placeholder="ISO638-3 Code"
+          pattern="[a-zA-Z]{3}"
+          required
+          value={relationModifierLang}
+          onChange={(event) => setRelationModifierLang(event.target.value)}
+          onBlur={handleRelationModifierLanguageChange}
+          isInvalid={isInvalid}
+        />
+        <Form.Control.Feedback
+          style={{
+            /* see .form-check@paddingLeft + .form-control@paddingLeft */
+            marginLeft: '1.75em',
+            whiteSpace: 'break-spaces',
+          }}
+          type="invalid"
+        >
+          Invalid ISO639-3 language code
+        </Form.Control.Feedback>
+      </InputGroup>
+    )
+  }
+
   function renderFieldItem(fieldType: string, description: string | undefined = undefined) {
     return (
       <>
@@ -734,9 +848,7 @@ function SearchClause({
     return (
       <>
         <br />
-        <small className="text-body-secondary">
-          Supported by {count} resources.
-        </small>
+        <small className="text-body-secondary">Supported by {count} resources.</small>
       </>
     )
   }
@@ -815,6 +927,18 @@ function SearchClause({
                   {showRelationModifiers && (
                     <>
                       <Dropdown.Header>Modifiers</Dropdown.Header>
+                      <Dropdown.ItemText key="lang">
+                        <Form.Check
+                          id="lang"
+                          name="lang"
+                          label="Language"
+                          type="checkbox"
+                          checked={relationModifiers.includes('lang')}
+                          onChange={() => handleToggleRelationModifier('lang')}
+                        />
+                        {relationModifiers.includes('lang') &&
+                          renderRelationModifierLanguageInput()}
+                      </Dropdown.ItemText>
                       {RELATION_MODIFIERS.filter((relMod) => relMod.id !== 'lang').map((relMod) => (
                         <Dropdown.ItemText key={relMod.id}>
                           <Form.Check
