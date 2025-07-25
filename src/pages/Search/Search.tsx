@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { ReactNode, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
@@ -26,29 +26,12 @@ import { evaluateAggregationContext, fromApi, getResourceIDs } from '@/utils/res
 import { type LanguageCode2NameMap } from '@/utils/search'
 import SearchInput, { type SearchData } from './SearchInput'
 import SearchResults from './SearchResults'
+import { type ToastMessage } from './utils'
 
 import fcsLogoDarkModeUrl from '@images/logo-fcs-dark.png'
 import fcsLogoUrl from '@images/logo-fcs.png'
 
 import './styles.css'
-
-// --------------------------------------------------------------------------
-// types
-
-interface ToastMessage {
-  title: ReactNode
-  body: ReactNode
-  variant?:
-    | 'info'
-    | 'success'
-    | 'warning'
-    | 'danger'
-    | 'primary'
-    | 'secondary'
-    | 'light'
-    | 'dark'
-    | string
-}
 
 // --------------------------------------------------------------------------
 // component
@@ -245,6 +228,10 @@ function Search() {
     mutateSearch(searchData)
   }
 
+  function handleShowToast(toast: ToastMessage) {
+    setToasts((toasts) => [...toasts, toast])
+  }
+
   // ------------------------------------------------------------------------
   // utilities
 
@@ -269,7 +256,7 @@ function Search() {
                 onClose={() =>
                   setToasts((toasts) => toasts.filter((oldToast) => oldToast !== toast))
                 }
-                delay={5000}
+                delay={toast.delay ?? 5000}
                 autohide
               >
                 <Toast.Header closeButton={true}>
@@ -303,6 +290,7 @@ function Search() {
               availableResources={null}
               selectedResources={searchResourceIDs}
               onSearch={handleSearch}
+              onShowToast={handleShowToast}
               hasSearch={hasSearch}
               disabled={isInputDisabled}
             />

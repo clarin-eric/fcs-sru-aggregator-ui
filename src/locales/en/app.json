@@ -37,6 +37,12 @@
         "msgUnableToSelectResources_one": "Unable to select <strong>1</strong> resource:",
         "msgUnableToSelectResources_other": "Unable to select <strong>{{count}}</strong> resources:",
         "msgErrorUnableToSelectResources": "Unable to preselect resources: {{error}}"
+      },
+      "searchInput": {
+        "title": "Resource Selection Changed",
+        "msgResourcesChangedDueToQuery": "The selected resources have been changed due to their suitability with the search query.",
+        "msgResourcesAmountChanged": "Selected resources: {{before}} → {{after}}",
+        "buttonRevertSelection": "Revert to original resource selection"
       }
     },
     "searchInput": {

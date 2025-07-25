@@ -35,6 +35,7 @@ import {
   type LanguageFilterOptions,
   type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
+import { type ToastMessage } from './utils'
 
 // SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import balloonIcon from 'bootstrap-icons/icons/balloon.svg?raw'
@@ -63,6 +64,7 @@ export interface SearchInputProps {
   selectedResources: string[] | null
   languages?: LanguageCode2NameMap
   onSearch: (searchData: SearchData) => void
+  onShowToast?: (toast: ToastMessage) => void
   hasSearch: boolean
   disabled?: boolean
 }
@@ -109,6 +111,7 @@ function SearchInput({
   resources,
   languages,
   onSearch,
+  onShowToast,
   availableResources: availableResourcesProps = null,
   selectedResources: selectedResourcesProps = null,
   hasSearch = false,
@@ -376,17 +379,54 @@ function SearchInput({
     setQuery(query)
   }
 
-  function handleChangeQueryBuilderQuery({ query, action }: { query: string; action: string }) {
-    console.debug('onModalClose', { query, action })
+  function handleChangeQueryBuilderQuery({
+    query,
+    validResources,
+    action,
+  }: {
+    query: string
+    validResources: string[]
+    action: string
+  }) {
+    console.debug('onModalClose', { query, validResources, action })
     // first close the modal
     setShowQueryBuilderModal(false)
     // if 'abort' do nothing
     if (action === 'abort') return
     // if 'close' (ESC / x button) then also do nothing
     if (action === 'close') return
+
     // explicitely wait for confirm
     // process user inputs
     setQuery(query)
+
+    // show info to users
+    // TODO: make diff of selected queries?
+    // a bit basic but should be ok, resource selection is unlikely to increase
+    if (selectedResourceIDs.length !== validResources.length) {
+      onShowToast?.({
+        title: t('search.toasts.searchInput.title'),
+        body: (
+          <>
+            <p>{t('search.toasts.searchInput.msgResourcesChangedDueToQuery')}</p>
+            <p>
+              {t('search.toasts.searchInput.msgResourcesAmountChanged', {
+                before: selectedResourceIDs.length,
+                after: validResources.length,
+              })}
+            </p>
+            <hr />
+            <Button onClick={() => setSelectedResourceIDs(selectedResourceIDs)}>
+              {t('search.toasts.searchInput.buttonRevertSelection')}
+            </Button>
+          </>
+        ),
+        variant: 'info',
+        delay: 7_000,
+      })
+    }
+    // update selected queries
+    setSelectedResourceIDs(validResources)
   }
 
   function handleQueryChange(value: string) {
