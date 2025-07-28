@@ -348,7 +348,7 @@ function ResourceResultsModal({
       {showDiagnostics && hasDiagnostics && (
         <Modal.Body className="border-top">
           {result.exception && (
-            <Alert variant="danger" aria-label={t('statistics.diagnostic.alertAriaLabel')}>
+            <Alert variant="danger" aria-label={t('search.results.diagnostics.alertAriaLabel')}>
               <Alert.Heading style={{ fontSize: '1rem' }}>
                 <span className="text-uppercase">
                   {t('search.results.diagnostics.titleException')}
