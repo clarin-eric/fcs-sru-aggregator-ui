@@ -60,7 +60,7 @@ function ViewLexPlain({ data }: ViewLexPlainProps) {
                 )}
               </td>
               <td>
-                {record.cql.fragments.map((fragment, index) =>
+                {record.hits.fragments.map((fragment, index) =>
                   fragment.hit && !fragment.hitKind ? (
                     <mark key={index}>
                       <strong>{fragment.text}</strong>

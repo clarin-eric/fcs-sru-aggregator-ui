@@ -61,15 +61,15 @@ function ViewKwic({ data }: ViewKwicProps) {
                   </OverlayTrigger>
                 )}
               </td>
-              <td>{record.cql.left}</td>
+              <td>{record.hits.left}</td>
               <td>
-                {record.cql.keyword && (
+                {record.hits.keyword && (
                   <mark>
-                    <strong>{record.cql.keyword}</strong>
+                    <strong>{record.hits.keyword}</strong>
                   </mark>
                 )}
               </td>
-              <td>{record.cql.right}</td>
+              <td>{record.hits.right}</td>
             </tr>
           ))}
         </tbody>

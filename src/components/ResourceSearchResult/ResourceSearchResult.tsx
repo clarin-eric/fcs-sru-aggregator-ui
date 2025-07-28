@@ -148,7 +148,7 @@ function ResourceSearchResult({
     if (viewMode === 'kwic' && (queryType !== 'lex' || !data.isLexHits)) {
       return <ViewKwic data={data} />
     }
-    if (viewMode === 'lexical-entry') {
+    if (viewMode === 'lexical-entry' && data.hasLexResults) {
       return <ViewLex data={data} />
     }
     if (queryType === 'lex' && data.isLexHits) {

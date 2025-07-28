@@ -340,10 +340,6 @@ export interface ResourceSearchResult {
   exception: Exception | null
   diagnostics: Diagnostic[]
 
-  kwics?: unknown // TODO: deprecated
-  advancedLayers?: unknown // TODO: deprecated
-  lexEntries?: unknown // TODO: deprecated
-
   isLexHits: boolean
   hasAdvResults: boolean
   hasLexResults: boolean
@@ -355,8 +351,9 @@ export interface ResultRecord {
   pid: string
   ref: string | null
   lang: string | null
-  cql: Kwic
-  fcs: AdvancedLayer[]
+
+  hits: Kwic
+  adv: AdvancedLayer[]
   lex: LexEntry
 }
 

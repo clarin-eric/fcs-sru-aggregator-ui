@@ -95,7 +95,7 @@ function ResourceResultsModal({
     if (!result) return false
     if (result.nextRecordPosition === -1) return false
     if (result.numberOfRecords === -1) return false
-    if (result.numberOfRecords === result.kwics.length) return true // TODO: maybe?
+    if (result.numberOfRecords === result.records.length) return true // TODO: maybe?
     return true
   }
 
@@ -109,7 +109,7 @@ function ResourceResultsModal({
       } else {
         const languagesFromKwic = [
           ...new Set(
-            result.kwics.map((kwic) => kwic.language).filter((language) => language !== null)
+            result.records.map((record) => record.lang).filter((language) => language !== null)
           ),
         ]
         if (languagesFromKwic.length === 1) {
@@ -336,7 +336,7 @@ function ResourceResultsModal({
           <Trans
             i18nKey="search.results.msgShowingXresults"
             values={{
-              count: result.kwics.length,
+              count: result.records.length,
               context: hasMoreResults() ? 'hasmore' : null,
               total: result.numberOfRecords,
             }}
