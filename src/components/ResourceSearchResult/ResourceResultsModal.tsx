@@ -15,15 +15,22 @@ import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
-import { getURLForDownload, getURLForWeblicht, type ResourceSearchResult } from '@/utils/api'
+import {
+  getURLForDownload,
+  getURLForWeblicht,
+  type Resource,
+  type ResourceSearchResult,
+} from '@/utils/api'
 import { DOWNLOAD_FORMATS, NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import {
+  findResourceByFilter,
   getBestFromMultilingualValuesTryByLanguage,
   getLanguagesFromResourceInfo,
 } from '@/utils/resources'
 import { type ResultsViewMode } from '@/utils/results'
 import { languageCodeToName, MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 import LoadMoreResultsButton from './LoadMoreResultsButton'
+import ViewAdvancedTabular from './ViewAdvancedTabular'
 import ViewKwic from './ViewKwic'
 import ViewLex from './ViewLex'
 import ViewLexPlain from './ViewLexPlain'
@@ -66,7 +73,7 @@ function ResourceResultsModal({
   const axios = useAxios()
   const { t } = useTranslation()
   const userLocale = useLocaleStore((state) => state.locale)
-  const { languages, weblichtLanguages } = useAggregatorData()
+  const { languages, resources, weblichtLanguages } = useAggregatorData()
   const { numberOfResults, queryType, language, languageFilter } = useSearchParams()
 
   const [locale, setLocale] = useState(userLocale)
@@ -136,10 +143,17 @@ function ResourceResultsModal({
   function renderResults() {
     if (!result) return null // TODO: loading spinner? but should not reach here
 
+    if (viewMode === 'annotation-layers' && result.hasAdvResults) {
+      const resource = findResourceByFilter(
+        resources,
+        (resource: Resource) => resource.id === result.id
+      )
+      return <ViewAdvancedTabular data={result} resource={resource} />
+    }
     if (viewMode === 'kwic' && (queryType !== 'lex' || !result.isLexHits)) {
       return <ViewKwic data={result} />
     }
-    if (viewMode === 'lexical-entry') {
+    if (viewMode === 'lexical-entry' && result.hasLexResults) {
       return <ViewLex data={result} />
     }
     if (queryType === 'lex' && result.isLexHits) {

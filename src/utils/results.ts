@@ -14,6 +14,7 @@ export type ResultsSorting =
 
 export const DEFAULT_VIEW_MODE: ResultsViewMode = 'plain'
 export const DEFAULT_VIEW_MODE_WHEN_LEX: ResultsViewMode = 'lexical-entry'
+export const DEFAULT_VIEW_MODE_WHEN_FCS: ResultsViewMode = 'plain' // TODO: 'annotation-layers' might be quite UI expensive for unrestricted searches
 export const DEFAULT_SORTING: ResultsSorting = 'default'
 
 // --------------------------------------------------------------------------

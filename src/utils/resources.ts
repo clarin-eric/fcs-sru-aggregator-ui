@@ -103,6 +103,16 @@ export function recurseResource(resource: Resource, fn: (resource: Resource) => 
   }
 }
 
+export function findResourceByFilter(
+  resources: Resource[],
+  filter: (resource: Resource) => boolean
+) {
+  const findRecFn = (resource: Resource) =>
+    filter(resource) ? resource : resource.subResources.find(findRecFn)
+
+  return resources.find(findRecFn)
+}
+
 export function getResourceIDs(resources: Resource[]) {
   const resourceIDs: string[] = []
   recurseResources(resources, (resource: Resource) => {

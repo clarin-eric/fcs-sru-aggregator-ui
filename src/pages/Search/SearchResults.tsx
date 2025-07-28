@@ -21,6 +21,7 @@ import { trackSiteSearch } from '@/utils/matomo'
 import {
   DEFAULT_SORTING,
   DEFAULT_VIEW_MODE,
+  DEFAULT_VIEW_MODE_WHEN_FCS,
   DEFAULT_VIEW_MODE_WHEN_LEX,
   SORT_FNS,
   type ResultsSorting,
@@ -52,7 +53,11 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
   // TODO: useTransition for changes?
 
   const [viewMode, setViewMode] = useState<ResultsViewMode>(
-    queryType === 'lex' ? DEFAULT_VIEW_MODE_WHEN_LEX : DEFAULT_VIEW_MODE
+    queryType === 'lex'
+      ? DEFAULT_VIEW_MODE_WHEN_LEX
+      : queryType === 'fcs'
+      ? DEFAULT_VIEW_MODE_WHEN_FCS
+      : DEFAULT_VIEW_MODE
   )
   const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
   const [filter, setFilter] = useState('')

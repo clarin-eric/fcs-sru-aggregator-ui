@@ -15,17 +15,20 @@ import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
 import {
   getSearchResultDetails,
+  type Resource,
   type ResourceSearchResult,
   type ResourceSearchResultMetaOnly,
 } from '@/utils/api'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import {
+  findResourceByFilter,
   getBestFromMultilingualValuesTryByLanguage,
   getLanguagesFromResourceInfo,
 } from '@/utils/resources'
 import { type ResultsViewMode } from '@/utils/results'
 import { languageCodeToName } from '@/utils/search'
 import ResourceResultsModal from './ResourceResultsModal'
+import ViewAdvancedTabular from './ViewAdvancedTabular'
 import ViewKwic from './ViewKwic'
 import ViewLex from './ViewLex'
 import ViewLexPlain from './ViewLexPlain'
@@ -64,7 +67,7 @@ function ResourceSearchResult({
   const axios = useAxios()
   const { t } = useTranslation()
   const userLocale = useLocaleStore((state) => state.locale)
-  const { languages } = useAggregatorData()
+  const { languages, resources } = useAggregatorData()
   const { queryType } = useSearchParams()
 
   const [locale, setLocale] = useState(userLocale)
@@ -145,6 +148,13 @@ function ResourceSearchResult({
   function renderResults() {
     if (!data) return null // TODO: loading spinner? but should not reach here
 
+    if (viewMode === 'annotation-layers' && data.hasAdvResults) {
+      const resource = findResourceByFilter(
+        resources,
+        (resource: Resource) => resource.id === data.id
+      )
+      return <ViewAdvancedTabular data={data} resource={resource} />
+    }
     if (viewMode === 'kwic' && (queryType !== 'lex' || !data.isLexHits)) {
       return <ViewKwic data={data} />
     }
@@ -287,7 +297,10 @@ function ResourceSearchResult({
               <Card.Body className={hasResults ? 'border-top' : ''}>
                 {/* TODO: aria invisible heading, adjust levels */}
                 {data.exception && (
-                  <Alert variant="danger" aria-label={t('search.results.diagnostics.alertAriaLabel')}>
+                  <Alert
+                    variant="danger"
+                    aria-label={t('search.results.diagnostics.alertAriaLabel')}
+                  >
                     <Alert.Heading style={{ fontSize: '1rem' }}>
                       <span className="text-uppercase">
                         {t('search.results.diagnostics.titleException')}
