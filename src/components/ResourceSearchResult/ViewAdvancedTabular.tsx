@@ -60,6 +60,94 @@ function computeShortLayerIds(layerIds: string[], collapePlaceholder: string = '
   return layerIdShort
 }
 
+function filterMainLayerIds(layers: AdvancedLayer[], resourceLayers?: Map<string, AvailableLayer>) {
+  // check if spans match the text
+  // TODO: can there be issues for non-latin characters?
+  // TODO: can there be issues for inclusive vs. exclusive indexing -- inclusive
+  // TODO: can there be issues with zero-based vs. one-based indexing -- one based
+  const layersWithMatchingSpanRanges = layers.filter(
+    (layer) =>
+      // exclusive end index
+      layer.spans.every(
+        (span) => span.text && span.text.length === (span.range?.[1] ?? 0) - (span.range?.[0] ?? 0)
+      ) ||
+      // inclusive end index
+      layer.spans.every(
+        (span) =>
+          span.text && span.text.length === (span.range?.[1] ?? 0) - (span.range?.[0] ?? 0) + 1
+      )
+    // zero-based indices with exclusive end index?
+    // || layer.spans.every(
+    //   (span) =>
+    //     span.text && span.text.length === (span.range?.[1] ?? 0) - (span.range?.[0] ?? 0) - 1
+    // )
+  )
+
+  // no resource information, then everything is ok and we also can't sort
+  if (!resourceLayers) return layersWithMatchingSpanRanges
+
+  const mainLayerIds = layersWithMatchingSpanRanges
+    // first for multiple layers based on layer type
+    .filter((layer) => {
+      // no information about this layer, it might be ok?
+      const layerInfo = resourceLayers.get(layer.id)
+      if (!layerInfo) return true
+
+      // can only be one of text (word) to be valid (probably)
+      if (!['text', 'word'].includes(layerInfo.layerType.toLowerCase())) return false
+
+      return true
+    })
+    // sort based on layer infos (do they exist, has the layer no qualifier)
+    .toSorted((layerA, layerB) => {
+      const layerAInfo = resourceLayers.get(layerA.id)
+      const layerBInfo = resourceLayers.get(layerB.id)
+
+      // no information about this layer (order layers with information first)
+      if (layerAInfo === undefined || layerBInfo === undefined) {
+        if (layerAInfo === layerBInfo) return 0
+        // B is smaller/first if no information about A
+        if (layerAInfo === undefined) return 1
+        // A is smaller/first if no information about B
+        if (layerBInfo === undefined) return -1
+      }
+
+      // maybe sort "word" before "text" layer (legacy)
+      const layerAType = layerAInfo.layerType.toLowerCase()
+      const layerBType = layerBInfo.layerType.toLowerCase()
+      if (layerAType === 'word' || layerBType === 'word') {
+        if (layerAType === layerBType) return 0
+        // if A is "word", then smaller/first
+        if (layerAType === 'word') return -1
+        // if B is "word", then smaller/first
+        if (layerBType === 'word') return 1
+      }
+
+      // order layer without qualifier first
+      if (
+        (layerAInfo.qualifier !== null && layerAInfo.qualifier !== undefined) ||
+        (layerBInfo.qualifier !== null && layerBInfo.qualifier !== undefined)
+      ) {
+        // TODO: sort based on some layer qualifiers?
+        if (
+          layerAInfo.qualifier !== null &&
+          layerAInfo.qualifier !== undefined &&
+          layerBInfo.qualifier !== null &&
+          layerBInfo.qualifier !== undefined
+        )
+          return 0
+
+        // B is smaller/first if A has a qualifier
+        if (layerAInfo.qualifier !== null && layerAInfo.qualifier !== undefined) return 1
+        // A is smaller/first if B has a qualifier
+        if (layerBInfo.qualifier !== null && layerBInfo.qualifier !== undefined) return -1
+      }
+
+      return 0
+    })
+  return mainLayerIds
+}
+
 // --------------------------------------------------------------------------
 // component
 
@@ -79,6 +167,24 @@ function ViewAdvancedTabular({ data, resource }: ViewAdvancedTabularProps) {
     const layerIdShort = computeShortLayerIds(layerIds)
 
     const numSpans = Math.max(...layers.map((layer) => layer.spans.length))
+
+    const mainLayerIds = filterMainLayerIds(layers, resourceLayers)
+    const mainLayerId = mainLayerIds?.[0]?.id
+    // if (mainLayerId === undefined) {
+    //   console.warn('No main layer found!', { layers, resourceLayers, resourceId: resource?.id })
+    // } else if (mainLayerIds.length > 1) {
+    //   console.debug('multiple possible mainLayerIds', mainLayerIds, resourceLayers, resource?.id)
+    // }
+
+    layers.sort((layerA, layerB) => {
+      if (mainLayerId === undefined) return 0
+      if (layerA.id === mainLayerId) return -1
+      if (layerB.id === mainLayerId) return 1
+
+      if (!resourceLayers) return 0
+
+      return 0
+    })
 
     // whether to show layer type and layer identifier columns
     const showLayerInfoColumns = layerIds.length > 1
@@ -105,14 +211,20 @@ function ViewAdvancedTabular({ data, resource }: ViewAdvancedTabularProps) {
         </thead>
         <tbody>
           {layers.map((layer) => (
-            <tr key={layer.id}>
+            <tr
+              key={layer.id}
+              className={(['text-nowrap'] as (string | null)[])
+                .concat([layer.id === mainLayerId && layers.length > 1 ? 'table-primary' : null])
+                .filter(Boolean)
+                .join(' ')}
+            >
               {resourceLayers !== undefined && showLayerInfoColumns && (
                 <td scope="row" className="text-uppercase">
                   {resourceLayers.get(layer.id)?.layerType}
                 </td>
               )}
               {showLayerInfoColumns && (
-                <td scope="row" title={layer.id}>
+                <td scope="row" title={layer.id} className="border-end">
                   {layerIdShort.get(layer.id)}
                 </td>
               )}
