@@ -15,6 +15,7 @@ import { useAxios } from '@/providers/AxiosContext'
 import AppStore from '@/stores/app'
 import type { ExtraScopingParams, StatisticsSection } from '@/utils/api'
 import { getStatisticsData, REQ_PARAM_CONSORTIA } from '@/utils/api'
+import ResourcesDetails from './ResourcesDetails'
 import SectionStatistics from './SectionStatistics'
 
 import arrowClockwiseIcon from 'bootstrap-icons/icons/arrow-clockwise.svg?raw'
@@ -32,6 +33,8 @@ const CATEGORY_LABELS = [
   { id: 'recent-searches', label: 'Recent Searches' },
 ] as const
 const CATEGORY_LABELS_MAP = Object.fromEntries(CATEGORY_LABELS.map((item) => [item.id, item]))
+
+const OTHER_TABS = ['resources']
 
 // --------------------------------------------------------------------------
 // component
@@ -63,7 +66,8 @@ function Statistics() {
   const categoryKeys = data !== undefined ? Object.keys(data).toSorted() : []
   // check if path param of to-be-selected statistics category exists and is valid otherwise default
   const defaultCategoryTab =
-    categoryId != undefined && categoryKeys.includes(categoryId)
+    categoryId != undefined &&
+    (categoryKeys.includes(categoryId) || OTHER_TABS.includes(categoryId))
       ? categoryId
       : categoryKeys.length > 0
       ? categoryKeys[0]
@@ -118,6 +122,11 @@ function Statistics() {
                   </Nav.Link>
                 </Nav.Item>
               ))}
+              <Nav.Item as="li" role="presentation" key="resources">
+                <Nav.Link as="button" eventKey="resources">
+                  {t('statistics.tabs.resources')}
+                </Nav.Link>
+              </Nav.Item>
               {/* custom right aligned "refresh" tab button */}
               <Nav.Item as="li" role="presentation" className="ms-auto">
                 <Nav.Link as="button" onClick={refreshData}>
@@ -132,6 +141,9 @@ function Statistics() {
                   <SectionStatistics data={contents} validatorUrl={validatorUrl} />
                 </Tab.Pane>
               ))}
+              <Tab.Pane eventKey="resources" key="resources">
+                <ResourcesDetails validatorUrl={validatorUrl} />
+              </Tab.Pane>
             </Tab.Content>
           </Tab.Container>
         )}

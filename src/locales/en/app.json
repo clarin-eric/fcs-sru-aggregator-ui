@@ -225,11 +225,14 @@
       "Recent Searches": "Recent Searches",
       "last-scan": "Last Scan",
       "recent-searches": "Recent Searches",
+      "resources": "Resources",
       "btnRefresh": "Refresh"
     },
     "labels": {
       "startDate": "Start date",
       "timeout": "Timeout",
+      "endpointInstitution": "Endpoint Operator",
+      "endpointUrl": "FCS Endpoint URL",
       "fcsVersion": "FCS Version",
       "searchCapabilities": "Search capabilities",
       "maxConcurrentScanRequests": "Max concurrent scan requests",
@@ -240,7 +243,8 @@
       "queueTime": "Queue time: average: {{avg}}, max: {{max}}",
       "executionTime": "Execution time: average: {{avg}}, max: {{max}}",
       "numberOfRootResources_one": "1 root resource",
-      "numberOfRootResources_other": "{{count}} root resources"
+      "numberOfRootResources_other": "{{count}} root resources",
+      "moreInformation": "More information"
     },
     "filter": {
       "inputPlaceholder": "Type to filter statistics ...",
@@ -260,6 +264,17 @@
     },
     "errors": {
       "notAvailableInAggregator": "This resource is not available in the Aggregator!"
+    },
+    "resources": {
+      "dropdownLabel": "Select a resource ({{count}})",
+      "titleBasicMetadata": "Basic Resource Metadata",
+      "titleTechnicalMetadata": "Technical Resource Metadata",
+      "titleSeachInformation": "Search Support Information",
+      "title": "Titles",
+      "description": "Descriptions",
+      "institution": "Institutions",
+      "landingPage": "Landing Page",
+      "endpoint": "FCS Endpoint Technical Information"
     }
   },
   "help": {

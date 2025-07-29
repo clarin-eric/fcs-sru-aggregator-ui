@@ -1,4 +1,3 @@
-import type { FuzzyMatches } from '@nozbe/microfuzz'
 import { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
@@ -7,6 +6,7 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import { useTranslation } from 'react-i18next'
 
+import { type FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
 import { type Resource } from '@/utils/api'
 import { getResourceIDs } from '@/utils/resources'
 import ResourceSelector from './ResourceSelector'
@@ -32,7 +32,7 @@ function GroupedResources({
   resources: Resource[]
   selectedResourceIDs: string[]
   resourceScores?: Map<string, number>
-  highlightings?: Map<string, FuzzyMatches>
+  highlightings?: Map<string, FuzzyMatchesByField>
   expanded: boolean
   shouldBeShown: ((resource: Resource) => boolean) | boolean
   localeForInfos?: string | null

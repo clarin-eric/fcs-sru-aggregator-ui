@@ -11,6 +11,7 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
+import useFuzzySearchListWithHierarchy from '@/hooks/useFuzzySearchListWithHierarchy'
 import { useLocaleStore } from '@/stores/locale'
 import { type Resource } from '@/utils/api'
 import {
@@ -32,7 +33,6 @@ import {
 } from '@/utils/search'
 import GroupedResources from './GroupedResources'
 import ResourceSelector from './ResourceSelector'
-import useFuzzySearchListWithHierarchy from './useFuzzySearchListWithHierarchy'
 
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'

@@ -1,4 +1,3 @@
-import type { FuzzyMatches } from '@nozbe/microfuzz'
 import { Highlight } from '@nozbe/microfuzz/react'
 import { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
@@ -10,6 +9,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
 
+import { type FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
 import { useLocaleStore } from '@/stores/locale'
 import { type Resource } from '@/utils/api'
 import {
@@ -37,8 +37,8 @@ function ResourceSelector({
 }: {
   resource: Resource
   selectedResourceIDs: string[]
-  highlighting?: FuzzyMatches
-  highlightings?: Map<string, FuzzyMatches>
+  highlighting?: FuzzyMatchesByField
+  highlightings?: Map<string, FuzzyMatchesByField>
   shouldBeShown: ((resource: Resource) => boolean) | boolean
   localeForInfos?: string | null
   onSelectClick: (resource: Resource, selected: boolean) => void
@@ -48,7 +48,7 @@ function ResourceSelector({
   const [expanded, setExpanded] = useState(false)
   const [showSubResources, setShowSubResources] = useState(false)
 
-  highlighting ??= highlightings?.get(resource.id) ?? [null, null, null]
+  highlighting ??= highlightings?.get(resource.id) ?? new Map()
 
   const isSelected = selectedResourceIDs.includes(resource.id)
 
@@ -128,7 +128,7 @@ function ResourceSelector({
           <h4 className={`h5 ${expanded ? '' : 'text-truncate'}`}>
             <Highlight
               text={getBestFromMultilingualValuesTryByLanguage(resource.title, locale) ?? ''}
-              ranges={highlighting[0]}
+              ranges={highlighting.get('title') ?? null}
             />{' '}
             {resource.landingPage && (
               <small>
@@ -145,7 +145,7 @@ function ResourceSelector({
                 text={
                   getBestFromMultilingualValuesTryByLanguage(resource.description, locale) ?? ''
                 }
-                ranges={highlighting[2]}
+                ranges={highlighting.get('description') ?? null}
               />
             )}
           </p>
@@ -159,7 +159,7 @@ function ResourceSelector({
           <i dangerouslySetInnerHTML={{ __html: bankIcon }} />{' '}
           <Highlight
             text={getBestFromMultilingualValuesTryByLanguage(resource.institution, locale) ?? ''}
-            ranges={highlighting[1]}
+            ranges={highlighting.get('institution') ?? null}
           />
           <br />
           <i dangerouslySetInnerHTML={{ __html: translateIcon }} />{' '}

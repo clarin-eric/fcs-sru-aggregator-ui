@@ -260,6 +260,37 @@ export function getBestFromMultilingualValuesTryByLanguage(
   return getBestFromMultilingualValues(values)
 }
 
+/** Compute the language that would be used to retrieve a multi-lingual resource information value. */
+export function getBestLanguageFromMultilingualValuesTryByLanguage(
+  values: null | string | { [language: string]: string },
+  language?: string
+) {
+  // if null, then we have nothing
+  if (values === null) return undefined
+  // if not a mapping, then we only have one choice
+  if (typeof values === 'string') return undefined
+
+  // try to guess browser/user language (if not provided)
+  if (language === undefined) {
+    language = LocaleStore.getState().locale
+  }
+
+  // getFromMultilingualValuesByLanguage(values, language)
+  // try to find value for language
+  if (language && Object.hasOwn(values, language)) return language
+
+  // getBestFromMultilingualValues(values)
+  // check from list of languages
+  for (const language of MULTILINGUAL_VALUE_CHECK_LANGUAGES) {
+    if (Object.hasOwn(values, language)) return language
+  }
+  // otherwise try to use first
+  const ownLanguages = Object.getOwnPropertyNames(values)
+  if (ownLanguages.length > 0) return ownLanguages[0]
+  // if not, it is empty? then null (this should not be possible)
+  return undefined
+}
+
 /**
  * Get languages/locales used in resource meta information.
  * @param resource Resource with meta information (title, description, institution, ...)

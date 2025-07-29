@@ -1,16 +1,22 @@
+import { type HighlightRanges } from '@nozbe/microfuzz'
 import { useFuzzySearchList } from '@nozbe/microfuzz/react'
-import { type FuzzyMatches } from '@nozbe/microfuzz'
 
 import { type Resource } from '@/utils/api'
 import { flattenResources, getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
 
+export type ResourceSearchFields = 'title' | 'institution' | 'description'
+export type FuzzyMatchesByField = Map<ResourceSearchFields, HighlightRanges | null>
+
 export default function useFuzzySearchListWithHierarchy(
   filter: string,
   resources: Resource[],
-  locale: string
+  locale: string,
+  fields?: ResourceSearchFields[]
 ) {
   // flatten nested list to allow fuzzy search everywhere
   const flattenedResources = flattenResources(resources)
+
+  fields ??= ['title', 'institution', 'description']
 
   // fuzzy reduce search results
   const filteredResources = useFuzzySearchList({
@@ -18,14 +24,30 @@ export default function useFuzzySearchListWithHierarchy(
     // TODO: only search in "resource" mode for now
     // queryText: viewResourcesGrouping === 'resource' ? filter : '',
     queryText: filter,
-    getText: (item) => [
-      getBestFromMultilingualValuesTryByLanguage(item.title, locale),
-      getBestFromMultilingualValuesTryByLanguage(item.institution, locale),
-      getBestFromMultilingualValuesTryByLanguage(item.description, locale),
-      // ...item.languages.map((code) => languageCodeToNameHelper(code, languages)).toSorted(),
-    ],
+    getText: (item) => {
+      const strings = []
+      if (fields.includes('title')) {
+        strings.push(getBestFromMultilingualValuesTryByLanguage(item.title, locale))
+      }
+      if (fields.includes('institution')) {
+        strings.push(getBestFromMultilingualValuesTryByLanguage(item.institution, locale))
+      }
+      if (fields.includes('description')) {
+        strings.push(getBestFromMultilingualValuesTryByLanguage(item.description, locale))
+      }
+      return strings
+    },
     // structure matches for better access?
-    mapResultItem: ({ item, score, matches }) => ({ resource: item, matches, score }),
+    mapResultItem: ({ item, score, matches }) => {
+      // map array to map
+      const matchesByField = new Map<ResourceSearchFields, HighlightRanges | null>()
+      let fieldIdx = 0
+      if (fields.includes('title')) matchesByField.set('title', matches[fieldIdx++])
+      if (fields.includes('institution')) matchesByField.set('institution', matches[fieldIdx++])
+      if (fields.includes('description')) matchesByField.set('description', matches[fieldIdx++])
+
+      return { resource: item, matches: matchesByField, score }
+    },
   })
   // console.debug('filtered resources', filter, filteredResources)
 
@@ -39,7 +61,7 @@ export default function useFuzzySearchListWithHierarchy(
   // }
 
   // all matches for highlighting
-  const filteredResourcesHighlights: Map<string, FuzzyMatches> = filteredResources.reduce(
+  const filteredResourcesHighlights: Map<string, FuzzyMatchesByField> = filteredResources.reduce(
     (map, { resource, matches }) => (map.set(resource.id, matches), map),
     new Map()
   )
