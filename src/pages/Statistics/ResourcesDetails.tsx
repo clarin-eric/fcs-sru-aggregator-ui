@@ -67,7 +67,7 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
   const extraParams = {
     consortia: urlSearchParams.get(REQ_PARAM_CONSORTIA),
   } satisfies ExtraScopingParams
-  const { data, isLoading, isError } = useQuery({
+  const { data, isPending, isError, error } = useQuery({
     queryKey: ['resources'],
     queryFn: getResources.bind(null, axios, extraParams),
   })
@@ -182,6 +182,16 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
 
   return (
     <Container className="d-grid gap-2 mt-3">
+      {(isPending || isError) && (
+        <Row>
+          <Col>
+            {isPending ? t('statistics.loading') : null}
+            <br />
+            {isError ? error.message : null}
+          </Col>
+        </Row>
+      )}
+
       <Form onSubmit={(event) => event.preventDefault()}>
         <Dropdown onSelect={handleChangeResource}>
           <Dropdown.Toggle variant="outline-dark">
