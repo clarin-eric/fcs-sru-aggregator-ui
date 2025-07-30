@@ -40,6 +40,10 @@ import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 import './styles.css'
 
 // --------------------------------------------------------------------------
+
+const REQ_PARAM_RESOURCE_ID = 'resource'
+
+// --------------------------------------------------------------------------
 // component
 
 function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
@@ -51,11 +55,13 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
 
   const langNames = new Intl.DisplayNames([userLocale, 'en'], { type: 'language' })
 
-  const [urlSearchParams] = useSearchParams()
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
 
   const [resources, setResources] = useState<Resource[]>([])
   const [filter, setFilter] = useState('')
-  const [selectedResourceId, setSelectedResourceId] = useState<string | undefined>(undefined)
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(
+    urlSearchParams.get(REQ_PARAM_RESOURCE_ID)
+  )
 
   const selectedResource = selectedResourceId
     ? findResourceByFilter(resources, (resource: Resource) => resource.id === selectedResourceId)
@@ -80,6 +86,15 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
     setResources(newResources)
   }, [data])
 
+  useEffect(() => {
+    const newResourceId = urlSearchParams.get(REQ_PARAM_RESOURCE_ID)
+    if (!newResourceId) return
+    if (newResourceId === selectedResourceId) return
+    // TODO: check if resource id exists?
+    console.debug('Set selected resource from URLSearchParams', newResourceId)
+    setSelectedResourceId(newResourceId)
+  }, [urlSearchParams, selectedResourceId])
+
   // languages for resource infos (title/description/institution)
   const resourceInfoLanguages = resources
     .map((resource) => getLanguagesFromResourceInfo(resource))
@@ -100,7 +115,13 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
 
   function handleChangeResource(eventKey: string | null) {
     if (!eventKey) return
-    setSelectedResourceId(eventKey)
+
+    const newResourceId = eventKey
+    // set selection
+    setSelectedResourceId(newResourceId)
+    // update url search parameter
+    urlSearchParams.set(REQ_PARAM_RESOURCE_ID, newResourceId)
+    setUrlSearchParams(urlSearchParams)
   }
 
   // ------------------------------------------------------------------------
@@ -156,7 +177,9 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
 
     return (
       <Card className="my-2">
-        <Card.Header>{t(`statistics.resources.${fieldType}`)}</Card.Header>
+        <Card.Header>
+          {t(`statistics.resources.cardHeader${fieldType[0].toUpperCase()}${fieldType.slice(1)}`)}
+        </Card.Header>
         {typeof fieldValues === 'string' ? (
           <Card.Body>{fieldValues || fallbackEmptyValue}</Card.Body>
         ) : (
@@ -263,7 +286,7 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
           {renderResourceMetadataField('institution', selectedResource.institution)}
           {selectedResource.landingPage && (
             <Card className="my-2">
-              <Card.Header>{t('statistics.resources.landingPage')}</Card.Header>
+              <Card.Header>{t('statistics.resources.cardHeaderLandingPage')}</Card.Header>
               <Card.Body>
                 <a href={selectedResource.landingPage} className="matomo_link" target="_blank">
                   {selectedResource.landingPage}
@@ -277,50 +300,62 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
           </h4>
 
           <Card className="my-2">
-            <Card.Header>{t('statistics.resources.endpoint')}</Card.Header>
+            <Card.Header>{t('statistics.resources.cardHeaderResource')}</Card.Header>
             <Card.Body>
-              <dt>{t('statistics.labels.endpointUrl')}</dt>
-              <dd>
-                {selectedResource.endpoint.url}{' '}
-                {validatorUrl && (
-                  <>
-                    {' '}
-                    <a
-                      href={`${validatorUrl}?url=${encodeURIComponent(
-                        selectedResource.endpoint.url
-                      )}`}
-                      className="matomo_link"
-                      target="_blank"
-                    >
-                      <i
-                        dangerouslySetInnerHTML={{ __html: eyeIcon }}
-                        className="align-baseline ms-2"
-                      />
-                    </a>
-                  </>
-                )}
-              </dd>
-              <dt>{t('statistics.labels.fcsVersion')}</dt>
-              <dd>{selectedResource.endpoint.protocol}</dd>
-              <dt>{t('statistics.labels.searchCapabilities')}</dt>
-              <dd>{selectedResource.endpoint.searchCapabilities.join(', ')}</dd>
-              <dt>{t('statistics.labels.endpointInstitution')}</dt>
-              <dd>
-                {selectedResource.endpointInstitution.name}
-                {selectedResource.endpointInstitution.link && (
-                  <>
-                    {' – '}
-                    <a
-                      href={selectedResource.endpointInstitution.link}
-                      className="matomo_link"
-                      target="_blank"
-                    >
-                      {t('statistics.labels.moreInformation')}{' '}
-                      <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />
-                    </a>
-                  </>
-                )}
-              </dd>
+              <dl className="mb-0">
+                <dt>{t('statistics.labels.resourcePid')}</dt>
+                <dd>{selectedResource.handle}</dd>
+              </dl>
+            </Card.Body>
+          </Card>
+
+          <Card className="my-2">
+            <Card.Header>{t('statistics.resources.cardHeaderEndpoint')}</Card.Header>
+            <Card.Body>
+              <dl className="mb-0">
+                <dt>{t('statistics.labels.endpointUrl')}</dt>
+                <dd>
+                  {selectedResource.endpoint.url}{' '}
+                  {validatorUrl && (
+                    <>
+                      {' '}
+                      <a
+                        href={`${validatorUrl}?url=${encodeURIComponent(
+                          selectedResource.endpoint.url
+                        )}`}
+                        className="matomo_link"
+                        target="_blank"
+                      >
+                        <i
+                          dangerouslySetInnerHTML={{ __html: eyeIcon }}
+                          className="align-baseline ms-2"
+                        />
+                      </a>
+                    </>
+                  )}
+                </dd>
+                <dt>{t('statistics.labels.fcsVersion')}</dt>
+                <dd>{selectedResource.endpoint.protocol}</dd>
+                <dt>{t('statistics.labels.searchCapabilities')}</dt>
+                <dd>{selectedResource.endpoint.searchCapabilities.join(', ')}</dd>
+                <dt>{t('statistics.labels.endpointInstitution')}</dt>
+                <dd>
+                  {selectedResource.endpointInstitution.name}
+                  {selectedResource.endpointInstitution.link && (
+                    <>
+                      {' – '}
+                      <a
+                        href={selectedResource.endpointInstitution.link}
+                        className="matomo_link"
+                        target="_blank"
+                      >
+                        {t('statistics.labels.moreInformation')}{' '}
+                        <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />
+                      </a>
+                    </>
+                  )}
+                </dd>
+              </dl>
             </Card.Body>
           </Card>
 

@@ -233,6 +233,7 @@
       "timeout": "Timeout",
       "endpointInstitution": "Endpoint Operator",
       "endpointUrl": "FCS Endpoint URL",
+      "resourcePid": "Resource Persistent Identifier",
       "fcsVersion": "FCS Version",
       "searchCapabilities": "Search capabilities",
       "maxConcurrentScanRequests": "Max concurrent scan requests",
@@ -267,14 +268,15 @@
     },
     "resources": {
       "dropdownLabel": "Select a resource ({{count}})",
-      "titleBasicMetadata": "Basic Resource Metadata",
-      "titleTechnicalMetadata": "Technical Resource Metadata",
+      "titleBasicMetadata": "Basic Metadata",
+      "titleTechnicalMetadata": "Technical Metadata",
       "titleSeachInformation": "Search Support Information",
-      "title": "Titles",
-      "description": "Descriptions",
-      "institution": "Institutions",
-      "landingPage": "Landing Page",
-      "endpoint": "FCS Endpoint Technical Information"
+      "cardHeaderTitle": "Titles",
+      "cardHeaderDescription": "Descriptions",
+      "cardHeaderInstitution": "Institutions",
+      "cardHeaderLandingPage": "Landing Page",
+      "cardHeaderEndpoint": "FCS Endpoint",
+      "cardHeaderResource": "FCS Resource"
     }
   },
   "help": {

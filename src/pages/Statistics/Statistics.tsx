@@ -63,11 +63,10 @@ function Statistics() {
 
   const appTitleHead = AppStore.getState().appTitleHead
 
-  const categoryKeys = data !== undefined ? Object.keys(data).toSorted() : []
+  const categoryKeys = [...(data !== undefined ? Object.keys(data).toSorted() : []), ...OTHER_TABS]
   // check if path param of to-be-selected statistics category exists and is valid otherwise default
   const defaultCategoryTab =
-    categoryId != undefined &&
-    (categoryKeys.includes(categoryId) || OTHER_TABS.includes(categoryId))
+    categoryId != undefined && categoryKeys.includes(categoryId)
       ? categoryId
       : categoryKeys.length > 0
       ? categoryKeys[0]
@@ -111,7 +110,12 @@ function Statistics() {
         )}
         {/* TODO: add some fuzzy search on title/endpoint/resource names */}
         {data && (
-          <Tab.Container defaultActiveKey={defaultCategoryTab} onSelect={handleTabChange}>
+          <Tab.Container
+            activeKey={
+              categoryId && categoryKeys.includes(categoryId) ? categoryId : defaultCategoryTab
+            }
+            onSelect={handleTabChange}
+          >
             <Nav className="nav-tabs" as="ul">
               {Object.keys(data).map((section: string) => (
                 <Nav.Item as="li" role="presentation" key={section}>
