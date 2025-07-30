@@ -106,11 +106,23 @@ export function recurseResource(resource: Resource, fn: (resource: Resource) => 
 export function findResourceByFilter(
   resources: Resource[],
   filter: (resource: Resource) => boolean
-) {
-  const findRecFn = (resource: Resource) =>
-    filter(resource) ? resource : resource.subResources.find(findRecFn)
+): Resource | undefined {
+  let found: Resource | undefined = undefined
 
-  return resources.find(findRecFn)
+  // NOTE: we use find to abort search if we have found anything
+  const findRecFn = (resource: Resource) => {
+    if (found !== undefined) return true
+
+    if (filter(resource)) {
+      found = resource
+      return true
+    }
+
+    return resource.subResources.find(findRecFn) !== undefined
+  }
+  resources.find(findRecFn)
+
+  return found
 }
 
 export function getResourceIDs(resources: Resource[]) {

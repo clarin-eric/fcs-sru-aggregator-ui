@@ -9,6 +9,7 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
 import ListGroup from 'react-bootstrap/ListGroup'
 import Row from 'react-bootstrap/Row'
+import Table from 'react-bootstrap/Table'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
@@ -201,7 +202,68 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
     )
   }
 
+  function renderResourceHierarchy(resource: Resource) {
+    if (!resources) return null
+    if (!resource) return null
+
+    const rootResource =
+      resource.rootResourceId === null
+        ? resource
+        : findResourceByFilter(resources, (r: Resource) => r.id === resource.rootResourceId)
+    if (!rootResource) return null
+
+    function renderRecursiveResourceHierarchy(resourceInHierarchy: Resource) {
+      return (
+        <li key={resourceInHierarchy.id}>
+          {resourceInHierarchy.id === resource.id ? (
+            <strong>{resourceInHierarchy.handle}</strong>
+          ) : (
+            <>
+              {resourceInHierarchy.handle}
+              <a
+                href={`?${REQ_PARAM_RESOURCE_ID}=${encodeURIComponent(resourceInHierarchy.id)}`}
+                onClick={(event) => {
+                  event.preventDefault()
+                  handleChangeResource(resourceInHierarchy.id)
+                }}
+              >
+                <i
+                  dangerouslySetInnerHTML={{ __html: eyeIcon }}
+                  className="align-baseline ms-2 me-1"
+                />
+              </a>
+            </>
+          )}{' '}
+          – {getBestFromMultilingualValuesTryByLanguage(resourceInHierarchy.title, userLocale)}
+          {resourceInHierarchy.subResources.length > 0 && (
+            <ul>
+              {resourceInHierarchy.subResources.map((subResource) =>
+                renderRecursiveResourceHierarchy(subResource)
+              )}
+            </ul>
+          )}
+        </li>
+      )
+    }
+
+    return <ul>{renderRecursiveResourceHierarchy(rootResource)}</ul>
+  }
+
   // ------------------------------------------------------------------------
+
+  const showLexDVInfo =
+    selectedResource &&
+    (selectedResource.availableDataViews?.find(
+      (dv) => dv.mimeType === 'application/x-clarin-fcs-lex+xml'
+    ) ||
+      (selectedResource.availableLexFields && selectedResource.availableLexFields.length > 0))
+
+  const showAdvDVInfo =
+    selectedResource &&
+    (selectedResource.availableDataViews?.find(
+      (dv) => dv.mimeType === 'application/x-clarin-fcs-adv+xml'
+    ) ||
+      (selectedResource.availableLayers && selectedResource.availableLayers.length > 0))
 
   return (
     <Container className="d-grid gap-2 mt-3">
@@ -305,6 +367,8 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
               <dl className="mb-0">
                 <dt>{t('statistics.labels.resourcePid')}</dt>
                 <dd>{selectedResource.handle}</dd>
+                <dt>{t('statistics.labels.resourceHierarchy')}</dt>
+                <dd>{renderResourceHierarchy(selectedResource)}</dd>
               </dl>
             </Card.Body>
           </Card>
@@ -362,6 +426,68 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
           <h4 className="h5 pb-1 mt-4 mb-3 border-bottom">
             {t('statistics.resources.titleSeachInformation')}
           </h4>
+
+          {showAdvDVInfo && (
+            <Card className="my-2">
+              <Card.Header>{t('statistics.resources.cardHeaderAdvancedDataView')}</Card.Header>
+              <Card.Body>
+                {selectedResource.availableLayers && (
+                  <Table hover responsive>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t('statistics.resources.thLayerType')}</th>
+                        <th scope="col">{t('statistics.resources.thQualifier')}</th>
+                        <th scope="col">{t('statistics.resources.thResultId')}</th>
+                        <th scope="col">{t('statistics.resources.thIdentifier')}</th>
+                        <th scope="col">{t('statistics.resources.thEncoding')}</th>
+                        <th scope="col">{t('statistics.resources.thAltValueInfo')}</th>
+                        <th scope="col">{t('statistics.resources.thAltValueInfoURI')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedResource.availableLayers.map((layer) => (
+                        <tr key={layer.identifier}>
+                          <td>{layer.layerType}</td>
+                          <td>{layer.qualifier}</td>
+                          <td>{layer.resultId}</td>
+                          <td>{layer.identifier}</td>
+                          <td>{layer.encoding}</td>
+                          <td>{layer.altValueInfo}</td>
+                          <td>{layer.altValueInfoURI}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                )}
+              </Card.Body>
+            </Card>
+          )}
+
+          {showLexDVInfo && (
+            <Card className="my-2">
+              <Card.Header>{t('statistics.resources.cardHeaderLexDataView')}</Card.Header>
+              <Card.Body>
+                {selectedResource.availableLexFields && (
+                  <Table hover responsive>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t('statistics.resources.thLexFieldType')}</th>
+                        <th scope="col">{t('statistics.resources.thLexIdentifier')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedResource.availableLexFields.map((field) => (
+                        <tr key={field.id}>
+                          <td>{field.type}</td>
+                          <td>{field.id}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                )}
+              </Card.Body>
+            </Card>
+          )}
         </Card>
       )}
     </Container>

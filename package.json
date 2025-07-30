@@ -10,10 +10,15 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:textplus": "VITE_CANONCIAL_URL='https://alpha-fcs.text-plus.org' VITE_API_URL='https://alpha-fcs.text-plus.org/rest/' vite",
+    "dev:local": "VITE_CANONCIAL_URL='http://172.19.87.70:4019' VITE_API_URL='http://172.19.87.70:4019/rest/' vite",
     "preview": "vite preview",
     "build": "tsc -b && vite build",
     "build:bundle": "tsc -b && vite --mode bundle build",
     "lint": "eslint .",
+    "deploy:saw-demo": "npm run deploy:saw-demo-build && npm run deploy:saw-demo-rsync",
+    "deploy:saw-demo-build": "VITE_CANONCIAL_URL='https://alpha-fcs.text-plus.org' VITE_API_URL='https://alpha-fcs.text-plus.org/rest/' VITE_I18N_NS_CONTEXT_PREFIX=textplus VITE_LOCALE=en VITE_LOCALES='[\"en\", \"de\"]' VITE_DEPLOY_PATH='/aggregator' npm run build",
+    "deploy:saw-demo-rsync": "rsync -av --delete dist/ saw-tppssi:public_html/aggregator",
     "build:antlr-ng": "npm run build:antlr-ng:fcs-ql && npm run build:antlr-ng:lexcql",
     "build:antlr-ng:fcs-ql": "antlr-ng -Dlanguage=TypeScript -v -l --exact-output-dir -o src/parsers/ src/vendor/fcs-ql/FCSLexer.g4 src/vendor/fcs-ql/FCSParser.g4",
     "build:antlr-ng:lexcql": "antlr-ng -Dlanguage=TypeScript -v -l --exact-output-dir -o src/parsers/ src/vendor/fcs-ql/LexLexer.g4 src/vendor/fcs-ql/LexParser.g4"

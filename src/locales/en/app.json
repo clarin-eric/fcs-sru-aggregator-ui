@@ -234,6 +234,7 @@
       "endpointInstitution": "Endpoint Operator",
       "endpointUrl": "FCS Endpoint URL",
       "resourcePid": "Resource Persistent Identifier",
+      "resourceHierarchy": "Resource Hierarchy",
       "fcsVersion": "FCS Version",
       "searchCapabilities": "Search capabilities",
       "maxConcurrentScanRequests": "Max concurrent scan requests",
@@ -276,7 +277,18 @@
       "cardHeaderInstitution": "Institutions",
       "cardHeaderLandingPage": "Landing Page",
       "cardHeaderEndpoint": "FCS Endpoint",
-      "cardHeaderResource": "FCS Resource"
+      "cardHeaderResource": "FCS Resource",
+      "cardHeaderAdvancedDataView": "Advanced Data View – FCS-QL",
+      "cardHeaderLexDataView": "Lex Data View – LexCQL",
+      "thLayerType": "Layer Type",
+      "thQualifier": "Layer Type Qualifier",
+      "thIdentifier": "Identifier",
+      "thResultId": "Result Identifier",
+      "thEncoding": "Layer Value Encoding",
+      "thAltValueInfo": "Information",
+      "thAltValueInfoURI": "Information URL",
+      "thLexFieldType": "Field Type",
+      "thLexIdentifier": "Identifier"
     }
   },
   "help": {
