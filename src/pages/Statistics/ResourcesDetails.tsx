@@ -427,6 +427,32 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
             {t('statistics.resources.titleSeachInformation')}
           </h4>
 
+          <Card className="my-2">
+            <Card.Header>{t('statistics.resources.cardHeaderDataViews')}</Card.Header>
+            <Card.Body>
+              {selectedResource.availableDataViews && (
+                <Table hover responsive>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t('statistics.resources.thDataViewIdentifier')}</th>
+                      <th scope="col">{t('statistics.resources.thDataViewMimeType')}</th>
+                      <th scope="col">{t('statistics.resources.thDataViewDeliveryPolicy')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedResource.availableDataViews.map((dv) => (
+                      <tr key={dv.identifier}>
+                        <td>{dv.identifier}</td>
+                        <td>{dv.mimeType}</td>
+                        <td>{dv.deliveryPolicy}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
+            </Card.Body>
+          </Card>
+
           {showAdvDVInfo && (
             <Card className="my-2">
               <Card.Header>{t('statistics.resources.cardHeaderAdvancedDataView')}</Card.Header>
