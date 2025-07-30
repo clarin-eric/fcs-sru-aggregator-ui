@@ -35,6 +35,8 @@ export default function useColorMode() {
       setTheme(getPreferredTheme())
     }
 
+    console.debug('Set color mode and watch for changes ...')
+
     // run initial update
     updateTheme()
 

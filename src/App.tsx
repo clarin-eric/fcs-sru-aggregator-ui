@@ -20,13 +20,12 @@ function App() {
   const appTitleHead = AppStore.getState().appTitleHead
 
   // initial setup
-  console.debug('[App] set color mode and watch for changes ...')
   useColorMode() // TODO: or move to index.tsx?
 
   // locale changes
   const locale = useLocaleStore((state) => state.locale)
   useEffect(() => {
-    i18n.changeLanguage(locale)
+    if (i18n.language !== locale) i18n.changeLanguage(locale)
   }, [locale])
 
   if (import.meta.env.FEATURE_TRACKING_MATOMO) {

@@ -80,7 +80,11 @@ function Statistics() {
   }
 
   function handleTabChange(eventKey: string | null) {
-    console.debug('eventKey', { eventKey, routeMatch, categoryId: routeMatch?.params.categoryId })
+    console.debug('[handleTabChange]', {
+      eventKey,
+      routeMatch,
+      categoryId: routeMatch?.params.categoryId,
+    })
     if (routeMatch) {
       if (routeMatch.params.categoryId !== eventKey) {
         if (routeMatch.route.path) {
