@@ -9,7 +9,8 @@
       "login": "Login"
     },
     "localeOptionTitle": "Switch to locale '{{code}}' for language {{name}}",
-    "localeOptionTitle_translated": "Switch to locale '{{code}}' for language {{name}} ({{translated}})"
+    "localeOptionTitle_translated": "Switch to locale '{{code}}' for language {{name}} ({{translated}})",
+    "localeHelpWithTranslations": "Want to help with translations?"
   },
   "footer": {
     "links": {

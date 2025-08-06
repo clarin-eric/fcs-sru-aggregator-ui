@@ -36,6 +36,10 @@ function Header() {
 
   const linkSearch = useKeepSearchParams()
 
+  const i18nKeyTranslationHelpUrl = 'urls.helpWithTranslations'
+  const urlHelpWithTranslations = t(i18nKeyTranslationHelpUrl, { ns: 'common' })
+  const hasHelpWithTranslationsUrl = urlHelpWithTranslations !== i18nKeyTranslationHelpUrl
+
   // ------------------------------------------------------------------------
   // event handlers
 
@@ -109,6 +113,18 @@ function Header() {
             </NavDropdown.Item>
           )
         })}
+        {hasHelpWithTranslationsUrl && (
+          <>
+            <NavDropdown.Divider />
+            <NavDropdown.Item
+              className="matomo_link text-wrap"
+              target="_blank"
+              href={urlHelpWithTranslations}
+            >
+              {t('header.localeHelpWithTranslations')}
+            </NavDropdown.Item>
+          </>
+        )}
       </NavDropdown>
     )
   }

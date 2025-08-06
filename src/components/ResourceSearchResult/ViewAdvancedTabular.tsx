@@ -176,6 +176,29 @@ function ViewAdvancedTabular({ data, resource }: ViewAdvancedTabularProps) {
     //   console.debug('multiple possible mainLayerIds', mainLayerIds, resourceLayers, resource?.id)
     // }
 
+    // console.debug(
+    //   'layer span ranges',
+    //   resource?.id,
+    //   layers.map((layer) => ({
+    //     ...layer,
+    //     spans: layer.spans.map((span) => ({
+    //       ...span,
+    //       textlen: span.text?.length,
+    //       rangeDiff: (span.range?.[1] ?? 0) - (span.range?.[0] ?? 0),
+    //     })),
+    //     startIndex: layer.spans?.[0].range?.[0],
+    //     variant: layer.spans.every((span) => span.text && span.text.length === (span.range?.[1] ?? 0) - (span.range?.[0] ?? 0))
+    //       ? 'exclusive end index'
+    //       : layer.spans.every((span) => span.text && span.text.length === (span.range?.[1] ?? 0) - (span.range?.[0] ?? 0) + 1)
+    //       ? 'inclusive end index'
+    //       : layer.spans.every((span) => span.text && span.text.length === (span.range?.[1] ?? 0) - (span.range?.[0] ?? 0) - 1)
+    //       ? 'exclusive end index and ?'
+    //       : layer.spans.reduce((acc, span) => acc + (span.text?.length ?? 0), 0) == (layer.spans[layer.spans.length - 1]?.range?.[1] ?? 0) - (layer.spans?.[0].range?.[0] ?? 0)
+    //       ? 'total length matches'
+    //       : '?',
+    //   }))
+    // )
+
     layers.sort((layerA, layerB) => {
       if (mainLayerId === undefined) return 0
       if (layerA.id === mainLayerId) return -1

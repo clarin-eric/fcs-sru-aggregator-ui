@@ -1,7 +1,8 @@
 {
   "urls": {
     "contact": null,
-    "termsUseAndDisclaimer": null
+    "termsUseAndDisclaimer": null,
+    "helpWithTranslations": null
   },
   "queryTypes": {
     "cql": {
