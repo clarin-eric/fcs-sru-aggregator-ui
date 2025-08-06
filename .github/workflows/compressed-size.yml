@@ -1,0 +1,28 @@
+name: Compressed Size
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package-lock.json'
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compressed_size:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - uses: preactjs/compressed-size-action@v2
+        with:
+          pattern: './dist/**/*.{js,html,css}'
