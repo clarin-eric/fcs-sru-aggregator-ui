@@ -120,6 +120,7 @@ function Header() {
               className="matomo_link text-wrap"
               target="_blank"
               href={urlHelpWithTranslations}
+              onClick={(e) => e.stopPropagation()}
             >
               {t('header.localeHelpWithTranslations')}
             </NavDropdown.Item>
