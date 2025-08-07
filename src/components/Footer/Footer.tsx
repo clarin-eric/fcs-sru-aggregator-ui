@@ -49,15 +49,13 @@ function Footer() {
           <Col className="text-center">
             {/* CLARIN logo and copyright (center column on larger screens) */}
             {hasServiceInfo && (
-              <Trans i18nKey={i18nKeyServiceInfo}>
-                <span className="footer-fineprint">
-                  Service provided by <a href={t('footer.serviceInfo.url')}>CLARIN</a>
-                </span>
-                <span>
-                  <br />
-                  Hosted by CLARIN ERIC
-                </span>
-              </Trans>
+              <Trans
+                i18nKey={i18nKeyServiceInfo}
+                components={{
+                  serviceBy: <a href={t('footer.serviceInfo.urlServiceBy')} />,
+                  hostedBy: <a href={t('footer.serviceInfo.urlHostedBy')} />,
+                }}
+              />
             )}
           </Col>
           <Col className="hidden-xs text-end d-flex flex-sm-row flex-column justify-content-sm-end column-gap-3 row-gap-2">

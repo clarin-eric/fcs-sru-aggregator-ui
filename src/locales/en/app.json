@@ -21,7 +21,8 @@
     },
     "serviceInfo": {
       "text": null,
-      "url": null
+      "urlServiceBy": null,
+      "urlHostedBy": null
     }
   },
   "search": {
