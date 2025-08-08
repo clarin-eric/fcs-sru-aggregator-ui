@@ -40,6 +40,9 @@ const outputsLibAssetsPath = `${outputsLibPath}assets/`
 const outputsLibLocalesPath = `${outputsLibPath}locales/`
 // NOTE: that single chunk (bundle mode) build will not use the "lib/" prefix
 
+// entry point name (dynamic components)
+const entryQueryBuilder = 'src/components/QueryBuilder/index.ts'
+
 // locale stuff
 const inputSrcLocales = 'src/locales'
 const I18n_LANGUAGES = ['en', 'de'] // languages we support
@@ -77,7 +80,7 @@ export default defineConfig(({ mode }) => {
           assetFileNames(chunkInfo: PreRenderedAsset) {
             if (chunkInfo.names.includes('index.css')) {
               // lazy import modules
-              if (chunkInfo.originalFileNames.includes('src/components/QueryBuilder/index.ts')) {
+              if (chunkInfo.originalFileNames.includes(entryQueryBuilder)) {
                 return `${pkg.name}-query-builder-${pkg.version}.[ext]`
               }
               // main
@@ -88,11 +91,21 @@ export default defineConfig(({ mode }) => {
           entryFileNames: `${name}.js`,
           chunkFileNames(chunkInfo: PreRenderedChunk) {
             if (chunkInfo.isDynamicEntry) {
-              if (chunkInfo.facadeModuleId?.endsWith('src/components/QueryBuilder/index.ts')) {
+              if (chunkInfo.facadeModuleId?.endsWith(entryQueryBuilder)) {
                 return `${pkg.name}-query-builder-${pkg.version}.js`
               }
             }
             return `[name].js`
+          },
+        },
+        treeshake: {
+          moduleSideEffects(id: string, external: boolean) {
+            // keep to defaults (-> true)
+            if (external) return true
+            // but mark QueryBuilder as side effect free
+            if (id.endsWith(entryQueryBuilder)) return false
+            // back to defaults for everything else
+            return true
           },
         },
       },
@@ -200,6 +213,14 @@ export default defineConfig(({ mode }) => {
 
   const paramLocalePrefix = JSON.parse(baseConfig.define['import.meta.env.I18N_NS_CONTEXT_PREFIX'])
   const paramLocale = JSON.parse(baseConfig.define['import.meta.env.LOCALE'])
+  const paramFeatureQueryBuilderEnabled = JSON.parse(
+    baseConfig.define['import.meta.env.FEATURE_QUERY_BUILDER']
+  )
+
+  // filter out stuff that is not enabled/available/used
+  const i18nLazyLoadNs = I18N_LAZY_LOAD_NS.filter((ns) =>
+    !paramFeatureQueryBuilderEnabled ? ns !== 'querybuilder' : true
+  )
 
   if (isSingleChunk) {
     // keep a single chunk
@@ -218,8 +239,8 @@ export default defineConfig(({ mode }) => {
             [locale]: [
               ...I18N_BASE_NS.map((ns) => `${paramLocalePrefix}.${ns}`),
               ...I18N_BASE_NS,
-              ...I18N_LAZY_LOAD_NS.map((ns) => `${paramLocalePrefix}.${ns}`),
-              ...I18N_LAZY_LOAD_NS,
+              ...i18nLazyLoadNs.map((ns) => `${paramLocalePrefix}.${ns}`),
+              ...i18nLazyLoadNs,
             ].filter((ns) => existsSync(resolve(`${inputSrcLocales}/${locale}/${ns}.json`))),
           }))
         ),
@@ -247,7 +268,7 @@ export default defineConfig(({ mode }) => {
             // main output chunks
             if (chunkInfo.names.includes('index.css')) {
               // lazy import modules
-              if (chunkInfo.originalFileNames.includes('src/components/QueryBuilder/index.ts')) {
+              if (chunkInfo.originalFileNames.includes(entryQueryBuilder)) {
                 return `${outputsLibPath}${pkg.name}-query-builder-${pkg.version}.[ext]`
               }
               // main
@@ -288,7 +309,7 @@ export default defineConfig(({ mode }) => {
           //   // moduleIds: chunkInfo.moduleIds,
           // })
           if (chunkInfo.isDynamicEntry) {
-            if (chunkInfo.facadeModuleId?.endsWith('src/components/QueryBuilder/index.ts')) {
+            if (chunkInfo.facadeModuleId?.endsWith(entryQueryBuilder)) {
               return `${outputsLibPath}${pkg.name}-query-builder-${pkg.version}.js`
             }
 
@@ -322,8 +343,6 @@ export default defineConfig(({ mode }) => {
             'react-slugify',
             'zustand',
           ],
-          // lazy loaded chunk (query-builder)
-          [`${outputsLibVenderPath}antlr4`]: ['antlr4ng'],
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
@@ -336,6 +355,15 @@ export default defineConfig(({ mode }) => {
         ),
       ] satisfies ExternalOption,
     })
+
+    const manualChunks = (baseConfig.build.rollupOptions.output as OutputOptions).manualChunks!
+
+    if (paramFeatureQueryBuilderEnabled) {
+      Object.assign(manualChunks, {
+        // lazy loaded chunk (query-builder)
+        [`${outputsLibVenderPath}antlr4`]: ['antlr4ng'],
+      })
+    }
 
     // embed locale dynamic import into default chunk
     baseConfig.plugins.push(
@@ -356,15 +384,24 @@ export default defineConfig(({ mode }) => {
     // delete generated output files we don't want
     baseConfig.plugins.push(
       deleteGeneratedFilesPlugin({
-        pattern: I18N_PREFIXES.filter((prefix) => prefix !== paramLocalePrefix).map(
-          (prefix) => `${outputsLibLocalesPath}*/${prefix}*`
-        ),
+        pattern: [
+          // other prefixed variants
+          ...I18N_PREFIXES.filter((prefix) => prefix !== paramLocalePrefix).map(
+            (prefix) => `${outputsLibLocalesPath}*/${prefix}*`
+          ),
+          // disabled dynamic components
+          ...(!paramFeatureQueryBuilderEnabled
+            ? [
+                `${outputsLibLocalesPath}*/querybuilder.*`,
+                `${outputsLibLocalesPath}*/*.querybuilder.*`,
+              ]
+            : []),
+        ],
         debug: debug,
       })
     )
 
     // create bundled i18n locale chunks
-    const manualChunks = (baseConfig.build.rollupOptions.output as OutputOptions).manualChunks!
     for (const language of I18n_LANGUAGES) {
       const modules: string[] = []
       const pushIfExists = (modules: string[], fn: string) => {
@@ -387,7 +424,7 @@ export default defineConfig(({ mode }) => {
       }
 
       // lazy load / async import modules
-      for (const namespace of I18N_LAZY_LOAD_NS) {
+      for (const namespace of i18nLazyLoadNs) {
         const modules: string[] = []
         pushIfExists(
           modules,
@@ -414,7 +451,7 @@ export default defineConfig(({ mode }) => {
     //     for (const namespace of I18N_BASE_NS) {
     //       pushIfExists(`${inputSrcLocales}/${language}/${prefix}.${namespace}.json`)
     //     }
-    //     for (const namespace of I18N_LAZY_LOAD_NS) {
+    //     for (const namespace of i18nLazyLoadNs) {
     //       pushIfExists(`${inputSrcLocales}/${language}/${prefix}.${namespace}.json`)
     //     }
     //   }
