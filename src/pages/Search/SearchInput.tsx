@@ -276,13 +276,15 @@ function SearchInput({
   useEffect(() => {
     console.debug('hashSearchParams', hashSearchParams)
 
-    if (hashSearchParams.has('openQueryBuilder')) {
-      console.debug("Trigger Query Builder open due to 'openQueryBuilder' search param")
-      triggerLoadQueryBuilderModal()
-      setShowQueryBuilderModal(true)
+    if (import.meta.env.FEATURE_QUERY_BUILDER) {
+      if (hashSearchParams.has('openQueryBuilder')) {
+        console.debug("Trigger Query Builder open due to 'openQueryBuilder' search param")
+        triggerLoadQueryBuilderModal()
+        setShowQueryBuilderModal(true)
 
-      hashSearchParams.delete('openQueryBuilder')
-      setHashSearchParams(hashSearchParams)
+        hashSearchParams.delete('openQueryBuilder')
+        setHashSearchParams(hashSearchParams)
+      }
     }
   }, [hashSearchParams, setHashSearchParams, triggerLoadQueryBuilderModal])
 
