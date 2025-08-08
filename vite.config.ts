@@ -156,7 +156,7 @@ export default defineConfig(({ mode }) => {
 
       // show direct link to search results
       'import.meta.env.SHOW_SEARCH_RESULT_LINK': process.env.VITE_SHOW_SEARCH_RESULT_LINK
-        ? `"${process.env.VITE_SHOW_SEARCH_RESULT_LINK}"`
+        ? `${process.env.VITE_SHOW_SEARCH_RESULT_LINK}`
         : JSON.stringify(false),
       // features
       'import.meta.env.FEATURE_TRACKING_MATOMO': process.env.VITE_FEATURE_TRACKING_MATOMO
@@ -165,12 +165,12 @@ export default defineConfig(({ mode }) => {
       // params = { srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }
       'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': process.env
         .VITE_FEATURE_TRACKING_MATOMO_PARAMS
-        ? `"${process.env.VITE_FEATURE_TRACKING_MATOMO_PARAMS}"`
+        ? `${process.env.VITE_FEATURE_TRACKING_MATOMO_PARAMS}`
         : JSON.stringify(null),
 
       // enable visual query builder
       'import.meta.env.FEATURE_QUERY_BUILDER': process.env.VITE_FEATURE_QUERY_BUILDER
-        ? `"${process.env.VITE_FEATURE_QUERY_BUILDER}"`
+        ? `${process.env.VITE_FEATURE_QUERY_BUILDER}`
         : JSON.stringify(true),
 
       'import.meta.env.LOCALE': process.env.VITE_LOCALE

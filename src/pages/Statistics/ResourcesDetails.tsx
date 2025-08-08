@@ -279,7 +279,7 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
 
       <Form onSubmit={(event) => event.preventDefault()}>
         <Dropdown onSelect={handleChangeResource}>
-          <Dropdown.Toggle variant="outline-dark">
+          <Dropdown.Toggle className="resource-selector" variant="outline-dark">
             {t('statistics.resources.dropdownLabel', { count: resources.length })}{' '}
           </Dropdown.Toggle>
           <Dropdown.Menu>

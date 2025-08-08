@@ -41,5 +41,128 @@
   },
   "generic": {
     "loadingComponent": "Loading component ..."
+  },
+  "icons": {
+    "arrow-clockwise": {
+      "label": "Refresh",
+      "description": "Refresh data from remote API",
+      "context": [
+        "statistics"
+      ]
+    },
+    "balloon": {
+      "label": "Query Suggestions",
+      "description": "Show search query suggestions in a dialog"
+    },
+    "bank": {
+      "label": "Institution",
+      "description": "Resource institution name"
+    },
+    "braces": {
+      "label": "Wrap in braces",
+      "description": "Wrap expression / query in braces, e.g., for nesting",
+      "context": [
+        "querybuilder"
+      ]
+    },
+    "download": {
+      "label": "Download",
+      "description": "Download search results (in various formats)",
+      "context": [
+        "search-results"
+      ]
+    },
+    "envelope-arrow-up": {
+      "label": "Send to Weblicht",
+      "description": "Send result texts to Weblicht for further processing",
+      "context": [
+        "search-results"
+      ]
+    },
+    "exclamation-triangle": {
+      "label": "Warning",
+      "description": "Warning message about resource",
+      "context": [
+        "statistics"
+      ]
+    },
+    "eye": {
+      "label": "Result Details",
+      "description": "Show result details in own dialog"
+    },
+    "eye-fill": {
+      "label": "Inspect",
+      "description": "Inspect endpoint with FCS Endpoint Validator or show resource information",
+      "context": [
+        "statistics"
+      ]
+    },
+    "gear-fill": {
+      "label": "Configurations / Options",
+      "description": "Open filters or show options"
+    },
+    "highlights": {
+      "label": "Syntax Highlight",
+      "description": "Toggle syntax highlighting with colors"
+    },
+    "house-door": {
+      "label": "Homepage / More information",
+      "description": "Link with more information, e.g., to homepage"
+    },
+    "info-circle": {
+      "label": "Description",
+      "description": "Resource description"
+    },
+    "link-45deg": {
+      "label": "External link",
+      "description": "External link to resource details or result"
+    },
+    "magic": {
+      "label": "Visual Query Builder",
+      "description": "Open Visual Query Builder for create a new search query in a dialog",
+      "context": [
+        "querybuilder"
+      ]
+    },
+    "person": {
+      "label": "Login / User",
+      "description": "Login or logged-in user"
+    },
+    "plus-circle": {
+      "label": "Add",
+      "description": "Add a new query fragment, expression, etc.",
+      "context": [
+        "querybuilder"
+      ]
+    },
+    "repeat": {
+      "label": "Add Quantifier",
+      "description": "Add a quantifier for a query fragment",
+      "context": [
+        "querybuilder"
+      ]
+    },
+    "search": {
+      "label": "Search",
+      "description": "Start a new search"
+    },
+    "three-dots": {
+      "label": "Load more",
+      "description": "Try to load more results",
+      "context": [
+        "search-results"
+      ]
+    },
+    "translate": {
+      "label": "Language(s)",
+      "description": "Language or language options"
+    },
+    "x-circle": {
+      "label": "Remove",
+      "description": "Remove a part of a query",
+      "context": [
+        "querybuilder"
+      ]
+    }
   }
 }

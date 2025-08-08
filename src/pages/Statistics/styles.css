@@ -19,3 +19,23 @@
 #statistics form .filter-checkboxes .form-check+.form-check {
   margin-left: 1rem;
 }
+
+/* resources info */
+
+/* XXX: Fixes for react-bootstrap missing dark-mode styles */
+@media (prefers-color-scheme: dark) {
+  #statistics .resource-selector.btn-outline-dark {
+    /* .btn-outline-light */
+    --bs-btn-color: #f8f9fa;
+    --bs-btn-border-color: #f8f9fa;
+    --bs-btn-hover-color: #000;
+    --bs-btn-hover-bg: #f8f9fa;
+    --bs-btn-hover-border-color: #f8f9fa;
+    --bs-btn-focus-shadow-rgb: 248, 249, 250;
+    --bs-btn-active-color: #000;
+    --bs-btn-active-bg: #f8f9fa;
+    --bs-btn-active-border-color: #f8f9fa;
+    --bs-btn-disabled-color: #f8f9fa;
+    --bs-btn-disabled-border-color: #f8f9fa;
+  }
+}
