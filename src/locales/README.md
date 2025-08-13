@@ -52,3 +52,17 @@ The general contribution workflow is as follows:
 ---
 
 NOTE: _If anything is unclear, please reach out to us. Via issue or by email. Feedback is always welcome._
+
+---
+
+## Development
+
+Count translation keys:
+
+```bash
+# merge all four default translation files with `-s` and `*` operator
+# generate nested path expressions, `paths(scalars) | join(".")`
+# output raw `-r`, and count lines
+# NOTE: some keys could be ignore but would complicate everything, e.g., `.context.0`
+jq -sr '(.[0] * .[1] * .[2] * .[3]) | paths(scalars) | join(".")' en/app.json en/common.json en/querybuilder.json en/querysuggestions.json | wc -l
+```
