@@ -36,8 +36,8 @@ const DEFAULT_URL_VARIANT: URLVariantOptions = 'url'
 // --------------------------------------------------------------------------
 
 function extractTLD(url: string): string {
-  // TODO: best effort
-  const domain = new URL(url).host
+  // TODO: best effort TLD extraction
+  const domain = new URL(url).hostname
   const parts = domain.split('.')
 
   // this should not be possible
@@ -50,7 +50,7 @@ function extractTLD(url: string): string {
 
   const preLastTLDPart = parts.at(-2)!
 
-  // NOTE: heuristic ...
+  // NOTE: heuristic to check if parts are too short...
   if (
     (lastTLDPart.length === 2 && preLastTLDPart.length === 2) ||
     (lastTLDPart.length === 3 && preLastTLDPart.length === 2)
@@ -64,19 +64,30 @@ function extractTLD(url: string): string {
 function extractMainDomain(url: string): string {
   const tld = extractTLD(url)
 
-  const domain = new URL(url).host
+  const parsed = new URL(url)
+  const domain = parsed.hostname
   const domainWithoutTLD = domain.slice(0, -(tld.length + 1))
 
   const parts = domainWithoutTLD.split('.')
   const mainDomainPart = parts.slice(-1)
 
-  return `${mainDomainPart}.${tld}`
+  const shortDomain = `${mainDomainPart}.${tld}`
+
+  if (parsed.port) {
+    return `${shortDomain}:${parsed.port}`
+  }
+  return shortDomain
 }
 
 function getSURT(url: string): string[] {
-  const domain = new URL(url).host
+  const parsed = new URL(url)
+  const domain = parsed.hostname
   const domainSURT = domain.split('.').toReversed()
-  return [...domainSURT]
+  const restOfURL = url.substring(
+    url.indexOf('/', parsed.protocol.length + 2 + parsed.hostname.length)
+  )
+  // ignore protocol
+  return [...domainSURT, parsed.port, restOfURL]
 }
 
 function sortBySURT(urlA: string, urlB: string) {
