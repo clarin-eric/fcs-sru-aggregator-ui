@@ -228,6 +228,7 @@
       "last-scan": "Last Scan",
       "recent-searches": "Recent Searches",
       "resources": "Resources",
+      "fcs": "FCS Statistics",
       "btnRefresh": "Refresh"
     },
     "labels": {
@@ -295,6 +296,35 @@
       "thAltValueInfoURI": "Information URL",
       "thLexFieldType": "Field Type",
       "thLexIdentifier": "Identifier"
+    },
+    "fcs": {
+      "title": "FCS Statistics",
+      "titleOverall": "Quick Overview",
+      "titleInstitutions": "Institutions",
+      "titleEndpoints": "Endpoints",
+      "cardHeaderInstitutionStats": "Statistics about Institutions",
+      "cardHeaderEndpointStats": "Statistics about Endpoints",
+      "cardHeaderInstitutions": "List of Institutions",
+      "cardHeaderEndpoints": "List of Endpoints",
+      "thStatsKey": "Category",
+      "thStatsValue": "Value",
+      "thInstitutionName": "Institution name",
+      "thCountResourcesFromInstitution": "Number of resources",
+      "thEndpointUrl": "Endpoint URL",
+      "tdLabelResourceCount": "Number of resources",
+      "tdLabelEndpointCount": "Number of endpoints",
+      "tdLabelEndpointDomainCount": "Number of endpoint domains",
+      "tdLabelInstitutionCount": "Number of institutions",
+      "tdLabelInstitutionHosterCount": "Number of FCS endpoint operators",
+      "thEndpointDomain": "Endpoint domain",
+      "thCountURLsForDomain": "Endpoints at domain",
+      "thCountResourcesFromEndpoint": "Number of resources",
+      "labelForResourceInstitutionVariants": "Show by",
+      "resourceInstitutionVariantinstitution": "Institutions that own resources",
+      "resourceInstitutionVarianthoster": "Institutions that operate FCS endpoints",
+      "endpointURLVarianturl": "Full URL",
+      "endpointURLVariantdomain": "Domain",
+      "endpointURLVarianttld": "Top Level Domain"
     }
   },
   "help": {

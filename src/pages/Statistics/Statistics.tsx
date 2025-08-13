@@ -15,6 +15,7 @@ import { useAxios } from '@/providers/AxiosContext'
 import AppStore from '@/stores/app'
 import type { ExtraScopingParams, StatisticsSection } from '@/utils/api'
 import { getStatisticsData, REQ_PARAM_CONSORTIA } from '@/utils/api'
+import FCSStatistics from './FCSStatistics'
 import ResourcesDetails from './ResourcesDetails'
 import SectionStatistics from './SectionStatistics'
 
@@ -34,7 +35,7 @@ const CATEGORY_LABELS = [
 ] as const
 const CATEGORY_LABELS_MAP = Object.fromEntries(CATEGORY_LABELS.map((item) => [item.id, item]))
 
-const OTHER_TABS = ['resources']
+const OTHER_TABS = ['resources', 'fcs']
 
 // --------------------------------------------------------------------------
 // component
@@ -136,6 +137,11 @@ function Statistics() {
                   {t('statistics.tabs.resources')}
                 </Nav.Link>
               </Nav.Item>
+              <Nav.Item as="li" role="presentation" key="fcs">
+                <Nav.Link as="button" eventKey="fcs">
+                  {t('statistics.tabs.fcs')}
+                </Nav.Link>
+              </Nav.Item>
               {/* custom right aligned "refresh" tab button */}
               <Nav.Item as="li" role="presentation" className="ms-auto">
                 <Nav.Link as="button" onClick={refreshData}>
@@ -152,6 +158,9 @@ function Statistics() {
               ))}
               <Tab.Pane eventKey="resources" key="resources">
                 <ResourcesDetails validatorUrl={validatorUrl} />
+              </Tab.Pane>
+              <Tab.Pane eventKey="fcs" key="fcs">
+                <FCSStatistics />
               </Tab.Pane>
             </Tab.Content>
           </Tab.Container>
