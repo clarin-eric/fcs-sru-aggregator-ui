@@ -302,8 +302,10 @@
       "titleOverall": "Quick Overview",
       "titleInstitutions": "Institutions",
       "titleEndpoints": "Endpoints",
+      "titleResources": "Resources",
       "cardHeaderInstitutionStats": "Statistics about Institutions",
       "cardHeaderEndpointStats": "Statistics about Endpoints",
+      "cardHeaderResourceStats": "Statistics about Resources",
       "cardHeaderInstitutions": "List of Institutions",
       "cardHeaderEndpoints": "List of Endpoints",
       "thStatsKey": "Category",
@@ -312,6 +314,7 @@
       "thCountResourcesFromInstitution": "Number of resources",
       "thEndpointUrl": "Endpoint URL",
       "tdLabelResourceCount": "Number of resources",
+      "tdLabelRootResourceCount": "Number of root resources",
       "tdLabelEndpointCount": "Number of endpoints",
       "tdLabelEndpointDomainCount": "Number of endpoint domains",
       "tdLabelInstitutionCount": "Number of institutions",
@@ -324,7 +327,8 @@
       "resourceInstitutionVarianthoster": "Institutions that operate FCS endpoints",
       "endpointURLVarianturl": "Full URL",
       "endpointURLVariantdomain": "Domain",
-      "endpointURLVarianttld": "Top Level Domain"
+      "endpointURLVarianttld": "Top Level Domain",
+      "btnOpenResourceLanguageSelectionModal": "Open Resource Language Selection Modal"
     }
   },
   "help": {

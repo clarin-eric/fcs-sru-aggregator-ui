@@ -1,0 +1,16 @@
+<ifModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # prefix path for relative rewrite urls
+    RewriteBase /
+    # if deployed on subpath, e.g., `https://example.org/aggregator/`
+    # RewriteBase /aggregator/
+    
+    # assets
+    RewriteRule ^.*/(lib/.*)$ ./$1 [L]
+    
+    # everything else
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule (.*) ./index.html [QSA,L]
+</ifModule>

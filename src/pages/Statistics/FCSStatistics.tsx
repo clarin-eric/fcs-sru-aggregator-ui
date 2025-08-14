@@ -1,6 +1,7 @@
 import { useAxios } from '@/providers/AxiosContext'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
@@ -10,9 +11,11 @@ import Table from 'react-bootstrap/Table'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import LanguageModal from '@/components/LanguageModal'
 import { useLocaleStore } from '@/stores/locale'
 import {
   type ExtraScopingParams,
+  getLanguages,
   getResources,
   REQ_PARAM_CONSORTIA,
   type Resource,
@@ -22,6 +25,7 @@ import {
   fromApi,
   getBestFromMultilingualValuesTryByLanguage,
 } from '@/utils/resources'
+import { type LanguageCode2NameMap } from '@/utils/search'
 
 import './styles.css'
 
@@ -117,11 +121,13 @@ function FCSStatistics() {
   const [urlSearchParams] = useSearchParams()
 
   const [resources, setResources] = useState<Resource[]>([])
+  const [languages, setLanguages] = useState<LanguageCode2NameMap>({})
 
   const [selectedResourceInstitutionVariantOption, setSelectedResourceInstitutionVariantOption] =
     useState<ResourceInstitutionVariantOptions>(DEFAULT_RESOURCE_INSTITUTION_VARIANT)
   const [selectedEndpointURLVariantOption, setSelectedEndpointURLVariantOption] =
     useState<URLVariantOptions>(DEFAULT_URL_VARIANT)
+  const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
 
   // ------------------------------------------------------------------------
   // initialization
@@ -129,18 +135,36 @@ function FCSStatistics() {
   const extraParams = {
     consortia: urlSearchParams.get(REQ_PARAM_CONSORTIA),
   } satisfies ExtraScopingParams
-  const { data, isPending, isError, error } = useQuery({
+  const {
+    data: dataResources,
+    isPending: isPendingResources,
+    isError: isErrorResources,
+    error: errorResources,
+  } = useQuery({
     queryKey: ['resources'],
     queryFn: getResources.bind(null, axios, extraParams),
   })
+  const {
+    data: dataLanguages,
+    isPending: isPendingLanguages,
+    isError: isErrorLanguages,
+    error: errorLanguages,
+  } = useQuery({
+    queryKey: ['languages'],
+    queryFn: getLanguages.bind(null, axios, extraParams),
+  })
 
   useEffect(() => {
-    if (!data) return
+    if (!dataResources) return
     // do some initialization (based on `data`)
-    const newResources = fromApi(data)
+    const newResources = fromApi(dataResources)
     // set state
     setResources(newResources)
-  }, [data])
+  }, [dataResources])
+  useEffect(() => {
+    if (!dataLanguages) return
+    setLanguages(dataLanguages)
+  }, [dataLanguages])
 
   // ------------------------------------------------------------------------
 
@@ -192,6 +216,10 @@ function FCSStatistics() {
     map.get(institution)!.push(resource)
     return map
   }, new Map<string, Resource[]>())
+
+  const hasResources = resources && resources.length > 0
+  const hasLanguages = languages && Object.getOwnPropertyNames(languages).length > 0
+  const enableResourceLanguageSelectionModal = hasResources && hasLanguages
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -284,12 +312,21 @@ function FCSStatistics() {
 
   return (
     <Container className="d-grid gap-2 mt-3">
-      {(isPending || isError) && (
+      {(isPendingResources || isErrorResources) && (
         <Row>
           <Col>
-            {isPending ? t('statistics.loading') : null}
+            {isPendingResources ? t('statistics.loading') : null}
             <br />
-            {isError ? error.message : null}
+            {isErrorResources ? errorResources.message : null}
+          </Col>
+        </Row>
+      )}
+      {(isPendingLanguages || isErrorLanguages) && (
+        <Row>
+          <Col>
+            {isPendingLanguages ? t('statistics.loading') : null}
+            <br />
+            {isErrorLanguages ? errorLanguages.message : null}
           </Col>
         </Row>
       )}
@@ -429,7 +466,39 @@ function FCSStatistics() {
             {renderEndpointURLTable()}
           </Card.Body>
         </Card>
+
+        <h4 className="h5 pb-1 mb-3 border-bottom" id="resources">
+          {t('statistics.fcs.titleResources')}
+        </h4>
+
+        <Card className="my-2">
+          <Card.Header>{t('statistics.fcs.cardHeaderResourceStats')}</Card.Header>
+          <Card.Body>
+            <dl className="mb-0">
+              <dt>{t('statistics.fcs.tdLabelResourceCount')}</dt>
+              <dd>{flatResources.length}</dd>
+              <dt>{t('statistics.fcs.tdLabelRootResourceCount')}</dt>
+              <dd>{resources.length}</dd>
+            </dl>
+          </Card.Body>
+          {enableResourceLanguageSelectionModal && (
+            <Card.Footer className="d-flex gap-2">
+              <Button variant="primary" onClick={() => setShowLanguageSelectionModal(true)}>
+                {t('statistics.fcs.btnOpenResourceLanguageSelectionModal')}
+              </Button>
+            </Card.Footer>
+          )}
+        </Card>
       </Card>
+
+      <LanguageModal
+        languages={languages}
+        resources={resources}
+        showResourceCounts={true}
+        showLanguageFilterOptions={false}
+        show={showLanguageSelectionModal}
+        onModalClose={() => setShowLanguageSelectionModal(false)}
+      />
     </Container>
   )
 }

@@ -28,6 +28,8 @@ interface LanguageModalProps {
   resources?: Resource[]
   searchLanguage?: string
   searchLanguageFilter?: LanguageFilterOptions
+  showResourceCounts?: boolean
+  showLanguageFilterOptions?: boolean
   onModalClose: (result: {
     language: string
     filter: LanguageFilterOptions
@@ -44,6 +46,8 @@ function LanguageModal({
   resources,
   searchLanguage,
   searchLanguageFilter,
+  showResourceCounts: paramShowResourceCounts,
+  showLanguageFilterOptions = true,
   onModalClose,
 }: LanguageModalProps) {
   const { t } = useTranslation()
@@ -54,7 +58,7 @@ function LanguageModal({
     searchLanguageFilter || DEFAULT_SEARCH_LANGUAGE_FILTER
   )
   const [languageFilter, setLanguageFilter] = useState('')
-  const [showResourceCounts, setShowResourceCounts] = useState(false)
+  const [showResourceCounts, setShowResourceCounts] = useState(paramShowResourceCounts ?? false)
 
   const languageToNumberOfResources = useMemo(() => {
     const counts = new Map<string, number>()
@@ -149,7 +153,11 @@ function LanguageModal({
         <Modal.Title>{t('search.languagesModal.title')}</Modal.Title>
       </Modal.Header>
       <Modal.Body className="px-0">
-        <Container className="px-4 pb-3 border-bottom">
+        <Container
+          className={['px-4']
+            .concat(showLanguageFilterOptions ? ['pb-3 border-bottom'] : [])
+            .join(' ')}
+        >
           <Row>
             <Col sm></Col>
             <Col sm className="mb-3 mb-sm-2 align-content-end">
@@ -203,22 +211,24 @@ function LanguageModal({
             </Col>
           </Row>
         </Container>
-        <Form>
-          <Container className="px-4 pt-3">
-            {(['byMeta', 'byGuess', 'byMetaAndGuess'] as LanguageFilterOptions[]).map((type) => (
-              <Form.Check
-                key={type}
-                type="radio"
-                name="filterOpts"
-                value={type}
-                id={`filterOpts-${type}`}
-                checked={selectedFilterOption === type}
-                onChange={() => setSelectedFilterOption(type)}
-                label={t(`search.languagesModal.optionLanguage${type}`)}
-              />
-            ))}
-          </Container>
-        </Form>
+        {showLanguageFilterOptions && (
+          <Form>
+            <Container className="px-4 pt-3">
+              {(['byMeta', 'byGuess', 'byMetaAndGuess'] as LanguageFilterOptions[]).map((type) => (
+                <Form.Check
+                  key={type}
+                  type="radio"
+                  name="filterOpts"
+                  value={type}
+                  id={`filterOpts-${type}`}
+                  checked={selectedFilterOption === type}
+                  onChange={() => setSelectedFilterOption(type)}
+                  label={t(`search.languagesModal.optionLanguage${type}`)}
+                />
+              ))}
+            </Container>
+          </Form>
+        )}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleReset}>

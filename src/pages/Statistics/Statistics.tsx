@@ -79,6 +79,7 @@ function Statistics() {
     console.debug('Invalidate data and refresh ...')
     queryClient.invalidateQueries({ queryKey: ['statistics'] })
     queryClient.invalidateQueries({ queryKey: ['resources'] })
+    queryClient.invalidateQueries({ queryKey: ['languages'] })
   }
 
   function handleTabChange(eventKey: string | null) {
