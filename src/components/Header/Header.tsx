@@ -10,6 +10,7 @@ import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import AppStore from '@/stores/app'
 import { useLocaleStore } from '@/stores/locale'
 
+import appLogoUrl from '@images/app-logo.png' // NOTE: placeholder will be resolved with plugin
 import logoUrl from '@images/icon-services-fcs.png'
 
 import personIcon from 'bootstrap-icons/icons/person.svg?raw'
@@ -130,6 +131,27 @@ function Header() {
     )
   }
 
+  function renderAppLogo() {
+    if (!appLogoUrl) return null
+
+    return (
+      <Navbar.Brand className="ms-4">
+        <img
+          src={appLogoUrl}
+          alt="Service operator logo"
+          height={30}
+          className="d-inline-block align-top"
+          onError={({ currentTarget }) => {
+            // on error, simply disable the logo element
+            console.warn('Logo not found!')
+            currentTarget.onerror = null // prevents looping
+            currentTarget.parentElement!.style.display = 'none'
+          }}
+        />
+      </Navbar.Brand>
+    )
+  }
+
   // ------------------------------------------------------------------------
   // UI
 
@@ -158,6 +180,7 @@ function Header() {
               </Nav.Link>
               {renderAuth()}
               {renderLocales()}
+              {renderAppLogo()}
             </Nav>
           </Navbar.Collapse>
         </Container>

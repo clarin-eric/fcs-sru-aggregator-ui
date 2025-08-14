@@ -19,14 +19,14 @@ import {
 import version from 'vite-plugin-package-version'
 
 import { existsSync, globSync } from 'node:fs'
-import { fileURLToPath, URL } from 'node:url'
 import { basename } from 'node:path'
-// import path from 'node:path'
+import { fileURLToPath, URL } from 'node:url'
 
 // build customization
+import configurableAppLogoImagePlugin from './build/configurable-app-logo-image'
+import deleteGeneratedFilesPlugin from './build/delete-generated-files'
 import transformDynamicToStaticImportsPlugin from './build/transform-dynamic-to-static-imports'
 import transformEmbedLocalesResourcesPlugin from './build/transform-embed-locales-resources'
-import deleteGeneratedFilesPlugin from './build/delete-generated-files'
 
 import pkg from './package.json'
 
@@ -166,6 +166,10 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.APP_TITLE_HEAD': process.env.VITE_APP_TITLE_HEAD
         ? `"${process.env.VITE_APP_TITLE_HEAD}"`
         : JSON.stringify('FCS Aggregator – Content Search'),
+      // application logo
+      'import.meta.env.APP_LOGO_PATH': process.env.VITE_APP_LOGO_PATH
+        ? `"${process.env.VITE_APP_LOGO_PATH}"`
+        : JSON.stringify('src/assets/images/clarin-logo-wide.png'),
 
       // show direct link to search results
       'import.meta.env.SHOW_SEARCH_RESULT_LINK': process.env.VITE_SHOW_SEARCH_RESULT_LINK
@@ -216,6 +220,10 @@ export default defineConfig(({ mode }) => {
   const paramFeatureQueryBuilderEnabled = JSON.parse(
     baseConfig.define['import.meta.env.FEATURE_QUERY_BUILDER']
   )
+
+  // configure app logo
+  const paramAppLogoPath = JSON.parse(baseConfig.define['import.meta.env.APP_LOGO_PATH'])
+  baseConfig.plugins.push(configurableAppLogoImagePlugin({ logoPath: paramAppLogoPath, debug }))
 
   // filter out stuff that is not enabled/available/used
   const i18nLazyLoadNs = I18N_LAZY_LOAD_NS.filter((ns) =>
