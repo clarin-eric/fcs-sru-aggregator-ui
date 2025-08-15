@@ -368,6 +368,10 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
                 <dd>{selectedResource.handle}</dd>
                 <dt>{t('statistics.labels.resourceHierarchy')}</dt>
                 <dd>{renderResourceHierarchy(selectedResource)}</dd>
+                <dt>{t('statistics.labels.searchCapabilitiesOfResource')}</dt>
+                <dd>{selectedResource.searchCapabilitiesResolved.join(', ')}</dd>
+                <dt>{t('statistics.labels.availabilityRestriction')}</dt>
+                <dd>{selectedResource.availabilityRestriction}</dd>
               </dl>
             </Card.Body>
           </Card>
@@ -397,14 +401,11 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
                     </>
                   )}
                 </dd>
+                {/* TODO: add sideloaded status? */}
                 <dt>{t('statistics.labels.fcsVersion')}</dt>
                 <dd>{selectedResource.endpoint.protocol}</dd>
                 <dt>{t('statistics.labels.searchCapabilitiesOfEndpoint')}</dt>
                 <dd>{selectedResource.endpoint.searchCapabilities.join(', ')}</dd>
-                <dt>{t('statistics.labels.searchCapabilitiesOfResource')}</dt>
-                <dd>{selectedResource.searchCapabilitiesResolved.join(', ')}</dd>
-                <dt>{t('statistics.labels.availabilityRestriction')}</dt>
-                <dd>{selectedResource.availabilityRestriction}</dd>
                 <dt>{t('statistics.labels.endpointInstitution')}</dt>
                 <dd>
                   {selectedResource.endpointInstitution.name}
