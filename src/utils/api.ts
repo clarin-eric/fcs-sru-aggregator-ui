@@ -52,7 +52,9 @@ export interface Endpoint {
 export interface EndpointInstitution {
   name: string
   link: string
+  consortium?: Consortium
   endpoints: Endpoint[]
+  sideloaded?: boolean
 }
 
 export interface AvailableDataView {
@@ -75,6 +77,19 @@ export interface AvailableLexField {
   id: string
   type: LexFieldType
 }
+
+export type Consortium =
+  | 'CLARIAH-AT'
+  | 'CLARIN-BE'
+  | 'CLARIN-D'
+  | 'CLARIN-DK'
+  | 'CLARIN-IT'
+  | 'CLARIN-LV'
+  | 'CLARIN-PL'
+  | 'LINDAT/CLARIAH-CZ'
+  | 'PORTULAN CLARIN'
+  | 'SWE-CLARIN'
+  | string
 
 export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH' | 'LEX_SEARCH'
 export type ProtocolVersion = 'VERSION_2' | 'VERSION_1' | 'LEGACY'
@@ -171,6 +186,13 @@ export async function getLanguages(axios: AxiosInstance, params?: ExtraScopingPa
 
   // TODO: mock
   // return {} satisfies LanguageCode2NameMap
+}
+
+export async function getConsortia(axios: AxiosInstance) {
+  const url = 'consortia'
+  const response = await axios.get(url)
+  console.debug('[getConsortia]', response)
+  return (response.data as (string | null)[]).filter((consortium) => consortium !== null)
 }
 
 // --------------------------------------------------------------------------

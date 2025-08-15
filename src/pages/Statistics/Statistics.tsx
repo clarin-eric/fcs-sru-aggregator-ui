@@ -80,6 +80,11 @@ function Statistics() {
     queryClient.invalidateQueries({ queryKey: ['statistics'] })
     queryClient.invalidateQueries({ queryKey: ['resources'] })
     queryClient.invalidateQueries({ queryKey: ['languages'] })
+
+    if (import.meta.env.SHOW_CONSORTIA_INFO) {
+      queryClient.invalidateQueries({ queryKey: ['resources-all'] })
+      queryClient.invalidateQueries({ queryKey: ['consortia'] })
+    }
   }
 
   function handleTabChange(eventKey: string | null) {

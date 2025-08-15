@@ -1,5 +1,5 @@
 import { useAxios } from '@/providers/AxiosContext'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
@@ -13,9 +13,11 @@ import { Link, useSearchParams } from 'react-router'
 
 import LanguageModal from '@/components/LanguageModal'
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
+import usePrevious from '@/hooks/usePrevious'
 import { useLocaleStore } from '@/stores/locale'
 import {
   type AvailabilityRestriction,
+  type Consortium,
   type ExtraScopingParams,
   getLanguages,
   getResources,
@@ -118,6 +120,7 @@ function sortBySURT(urlA: string, urlB: string) {
 
 function FCSStatistics() {
   const axios = useAxios()
+  const queryClient = useQueryClient()
   const { t } = useTranslation()
 
   const userLocale = useLocaleStore((state) => state.locale)
@@ -125,9 +128,10 @@ function FCSStatistics() {
   // const langNames = new Intl.DisplayNames([userLocale, 'en'], { type: 'language' })
 
   const [, getLinkSearch] = useKeepSearchParams()
-  const [urlSearchParams] = useSearchParams()
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
 
   const [resources, setResources] = useState<Resource[]>([])
+  const [resourcesAll, setResourcesAll] = useState<Resource[]>([])
   const [languages, setLanguages] = useState<LanguageCode2NameMap>({})
 
   const [selectedResourceInstitutionVariantOption, setSelectedResourceInstitutionVariantOption] =
@@ -138,6 +142,8 @@ function FCSStatistics() {
 
   // ------------------------------------------------------------------------
   // initialization
+
+  const consortia = urlSearchParams.get(REQ_PARAM_CONSORTIA)?.split(',') ?? []
 
   const extraParams = {
     consortia: urlSearchParams.get(REQ_PARAM_CONSORTIA),
@@ -161,9 +167,22 @@ function FCSStatistics() {
     queryFn: getLanguages.bind(null, axios, extraParams),
   })
 
+  // conditional data
+  const {
+    data: dataResourcesAll,
+    isPending: isPendingResourcesAll,
+    isError: isErrorResourcesAll,
+    error: errorResourcesAll,
+  } = useQuery({
+    queryKey: ['resources-all'],
+    queryFn: import.meta.env.SHOW_CONSORTIA_INFO
+      ? getResources.bind(null, axios, undefined)
+      : () => [],
+  })
+
   useEffect(() => {
     if (!dataResources) return
-    // do some initialization (based on `data`)
+    // do some initialization (based on `dataResources`)
     const newResources = fromApi(dataResources)
     // set state
     setResources(newResources)
@@ -172,6 +191,27 @@ function FCSStatistics() {
     if (!dataLanguages) return
     setLanguages(dataLanguages)
   }, [dataLanguages])
+
+  if (import.meta.env.SHOW_CONSORTIA_INFO) {
+    // NOTE: intential for conditional build (either it exists or not)
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      if (!dataResourcesAll) return
+      setResourcesAll(fromApi(dataResourcesAll))
+    }, [dataResourcesAll])
+
+    // invalidate every query to refresh data
+    // BUT only run if consortia query param changed
+    // NOTE: needs to be delayed as API requests and URL change race each other...
+    const consortia = urlSearchParams.get(REQ_PARAM_CONSORTIA)
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const prevConsortia = usePrevious(consortia)
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      const newConsortia = urlSearchParams.get(REQ_PARAM_CONSORTIA)
+      if (prevConsortia !== newConsortia) queryClient.invalidateQueries()
+    }, [prevConsortia, queryClient, urlSearchParams])
+  }
 
   // ------------------------------------------------------------------------
 
@@ -229,6 +269,19 @@ function FCSStatistics() {
     return map
   }, new Map<AvailabilityRestriction, Resource[]>())
 
+  const consortiaWithResources = import.meta.env.SHOW_CONSORTIA_INFO
+    ? flattenResources(resourcesAll).reduce((map, resource) => {
+        const consortium = resource.endpointInstitution.consortium ?? null
+        if (!map.has(consortium)) {
+          map.set(consortium, { resources: [], endpoints: new Set<string>() })
+        }
+        const consortiumData = map.get(consortium)!
+        consortiumData.resources.push(resource)
+        consortiumData.endpoints.add(resource.endpoint.url)
+        return map
+      }, new Map<Consortium | null, { resources: Resource[]; endpoints: Set<string> }>())
+    : new Map<Consortium | null, { resources: Resource[]; endpoints: Set<string> }>()
+
   const hasResources = resources && resources.length > 0
   const hasLanguages = languages && Object.getOwnPropertyNames(languages).length > 0
   const enableResourceLanguageSelectionModal = hasResources && hasLanguages
@@ -241,6 +294,25 @@ function FCSStatistics() {
   // ------------------------------------------------------------------------
   // event handlers
 
+  function toggleConsortium(consortium: string) {
+    // compute the new list of consortia
+    const consortia = urlSearchParams.get(REQ_PARAM_CONSORTIA)?.split(',').filter(Boolean) ?? []
+    console.debug('Toggle consortia', { consortia, consortium })
+    const newConsortia = consortia.includes(consortium)
+      ? consortia.filter((c) => c !== consortium)
+      : consortia.concat([consortium])
+
+    // update our persistent query param
+    if (newConsortia.length === 0) {
+      urlSearchParams.delete(REQ_PARAM_CONSORTIA)
+    } else {
+      urlSearchParams.set(REQ_PARAM_CONSORTIA, newConsortia.join(','))
+    }
+    setUrlSearchParams(urlSearchParams)
+
+    // query invalidation happens above with usePrevious hook/state machine
+  }
+
   // ------------------------------------------------------------------------
   // rendering
 
@@ -252,7 +324,7 @@ function FCSStatistics() {
             <tr>
               <th scope="col">{t('statistics.fcs.thEndpointDomain')}</th>
               <th scope="col">{t('statistics.fcs.thCountURLsForDomain')}</th>
-              <th scope="col">{t('statistics.fcs.thCountResourcesFromEndpoint')}</th>
+              <th scope="col">{t('statistics.fcs.thCountResources')}</th>
             </tr>
           </thead>
           <tbody>
@@ -281,7 +353,7 @@ function FCSStatistics() {
             <tr>
               <th scope="col">{t('statistics.fcs.thEndpointDomain')}</th>
               <th scope="col">{t('statistics.fcs.thCountURLsForDomain')}</th>
-              <th scope="col">{t('statistics.fcs.thCountResourcesFromEndpoint')}</th>
+              <th scope="col">{t('statistics.fcs.thCountResources')}</th>
             </tr>
           </thead>
           <tbody>
@@ -308,7 +380,7 @@ function FCSStatistics() {
         <thead>
           <tr>
             <th scope="col">{t('statistics.fcs.thEndpointUrl')}</th>
-            <th scope="col">{t('statistics.fcs.thCountResourcesFromEndpoint')}</th>
+            <th scope="col">{t('statistics.fcs.thCountResources')}</th>
           </tr>
         </thead>
         <tbody>
@@ -329,10 +401,13 @@ function FCSStatistics() {
 
   return (
     <Container className="d-grid gap-2 mt-3">
+      {/* error / loading indicators */}
       {(isPendingResources || isErrorResources) && (
         <Row>
           <Col>
-            {isPendingResources ? t('statistics.loading') : null}
+            {isPendingResources
+              ? t('statistics.loading', { context: 'what', what: 'resources' })
+              : null}
             <br />
             {isErrorResources ? errorResources.message : null}
           </Col>
@@ -341,11 +416,28 @@ function FCSStatistics() {
       {(isPendingLanguages || isErrorLanguages) && (
         <Row>
           <Col>
-            {isPendingLanguages ? t('statistics.loading') : null}
+            {isPendingLanguages
+              ? t('statistics.loading', { context: 'what', what: 'languages' })
+              : null}
             <br />
             {isErrorLanguages ? errorLanguages.message : null}
           </Col>
         </Row>
+      )}
+      {import.meta.env.SHOW_CONSORTIA_INFO && (
+        <>
+          {(isPendingResourcesAll || isErrorResourcesAll) && (
+            <Row>
+              <Col>
+                {isPendingResourcesAll
+                  ? t('statistics.loading', { context: 'what', what: 'resources-all' })
+                  : null}
+                <br />
+                {isErrorResourcesAll ? errorResourcesAll.message : null}
+              </Col>
+            </Row>
+          )}
+        </>
       )}
 
       <Card className="p-3">
@@ -377,6 +469,59 @@ function FCSStatistics() {
             </tr>
           </tbody>
         </Table>
+
+        {import.meta.env.SHOW_CONSORTIA_INFO && (
+          <>
+            <h4 className="h5 pb-1 mb-3 border-bottom" id="consortia">
+              {t('statistics.fcs.titleConsortia')}
+            </h4>
+
+            <Card className="my-2">
+              <Card.Header>{t('statistics.fcs.cardHeaderConsortia')}</Card.Header>
+              <Card.Body>
+                <Table hover responsive className="mt-2">
+                  <thead>
+                    <tr>
+                      <th scope="col">{t('statistics.fcs.thConsortium')}</th>
+                      <th scope="col">{t('statistics.fcs.thCountEndpoints')}</th>
+                      <th scope="col">{t('statistics.fcs.thCountResources')}</th>
+                      <th scope="col">{t('statistics.fcs.thActions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from(consortiaWithResources.entries()).map(
+                      ([consortium, { resources, endpoints }]) => (
+                        <tr
+                          key={consortium}
+                          className={
+                            consortium && consortia.includes(consortium)
+                              ? 'table-primary'
+                              : undefined
+                          }
+                        >
+                          <td>{consortium ?? t('statistics.fcs.tdNoConsortium')}</td>
+                          <td>{endpoints.size}</td>
+                          <td>{resources.length}</td>
+                          <td className={consortium === null ? '' : 'py-0 align-middle'}>
+                            {consortium === null ? (
+                              '–'
+                            ) : (
+                              <Button size="sm" onClick={() => toggleConsortium(consortium)}>
+                                {t('statistics.fcs.btnToggleConsortium', {
+                                  context: consortia.includes(consortium) ? 'remove' : 'add',
+                                })}
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          </>
+        )}
 
         <h4 className="h5 pb-1 mb-3 border-bottom" id="institutions">
           {t('statistics.fcs.titleInstitutions')}
@@ -421,7 +566,7 @@ function FCSStatistics() {
               <thead>
                 <tr>
                   <th scope="col">{t('statistics.fcs.thInstitutionName')}</th>
-                  <th scope="col">{t('statistics.fcs.thCountResourcesFromInstitution')}</th>
+                  <th scope="col">{t('statistics.fcs.thCountResources')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -523,7 +668,7 @@ function FCSStatistics() {
               <thead>
                 <tr>
                   <th scope="col">{t('statistics.fcs.thSearchCapability')}</th>
-                  <th scope="col">{t('statistics.fcs.thCountResourcesForSearchCapability')}</th>
+                  <th scope="col">{t('statistics.fcs.thCountResources')}</th>
                 </tr>
               </thead>
               <tbody>

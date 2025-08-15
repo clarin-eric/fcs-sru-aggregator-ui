@@ -222,6 +222,7 @@
   "statistics": {
     "title": "Statistics",
     "loading": "Loading ...",
+    "loading_what": "Loading '{{what}}' ...",
     "tabs": {
       "Last Scan": "Last Scan",
       "Recent Searches": "Recent Searches",
@@ -302,12 +303,14 @@
     "fcs": {
       "title": "FCS Statistics",
       "titleOverall": "Quick Overview",
+      "titleConsortia": "Consortia",
       "titleInstitutions": "Institutions",
       "titleEndpoints": "Endpoints",
       "titleResources": "Resources",
       "cardHeaderInstitutionStats": "Statistics about Institutions",
       "cardHeaderEndpointStats": "Statistics about Endpoints",
       "cardHeaderResourceStats": "Statistics about Resources",
+      "cardHeaderConsortia": "List of Consortia",
       "cardHeaderInstitutions": "List of Institutions",
       "cardHeaderEndpoints": "List of Endpoints",
       "cardHeaderSearchCapabilities": "List of Search Capabilities",
@@ -315,15 +318,16 @@
       "thStatsKey": "Category",
       "thStatsValue": "Value",
       "thInstitutionName": "Institution name",
-      "thCountResourcesFromInstitution": "Number of resources",
       "thEndpointUrl": "Endpoint URL",
       "thEndpointDomain": "Endpoint domain",
-      "thCountURLsForDomain": "Endpoints at domain",
-      "thCountResourcesFromEndpoint": "Number of resources",
-      "thCountResourcesForSearchCapability": "Number of resources",
+      "thConsortium": "Consortium",
       "thSearchCapability": "Search Capability",
       "thAvailabilityRestriction": "Availability Restriction",
       "thResourceTitle": "Resource Title",
+      "thCountURLsForDomain": "Endpoints at domain",
+      "thCountResources": "Number of resources",
+      "thCountEndpoints": "Number of endpoints",
+      "thActions": "Actions",
       "tdLabelResourceCount": "Number of resources",
       "tdLabelRootResourceCount": "Number of root resources",
       "tdLabelResourceWithAvailabilityRestrictionCount": "Number of resources with availability restriction",
@@ -331,6 +335,7 @@
       "tdLabelEndpointDomainCount": "Number of endpoint domains",
       "tdLabelInstitutionCount": "Number of institutions",
       "tdLabelInstitutionHosterCount": "Number of FCS endpoint operators",
+      "tdNoConsortium": "(No Consortium)",
       "tblAvailabilityRestrictionCaption": "Table only lists resources that declare an Availability Restriction. As most resources are not expected to have any restrictions, they are not listed here in order to avoid unnecessarily inflating the table.",
       "labelForResourceInstitutionVariants": "Show by",
       "resourceInstitutionVariantinstitution": "Institutions that own resources",
@@ -338,7 +343,9 @@
       "endpointURLVarianturl": "Full URL",
       "endpointURLVariantdomain": "Domain",
       "endpointURLVarianttld": "Top Level Domain",
-      "btnOpenResourceLanguageSelectionModal": "Open Resource Language Selection Modal"
+      "btnOpenResourceLanguageSelectionModal": "Open Resource Language Selection Modal",
+      "btnToggleConsortium_add": "Add",
+      "btnToggleConsortium_remove": "Remove"
     }
   },
   "help": {

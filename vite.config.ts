@@ -129,7 +129,7 @@ export default defineConfig(({ mode }) => {
       version(),
       // DEBUG
       visualizer({
-        open: true,
+        open: debug, // do not open by default (might get annoying)
         filename: 'bundle-visualization.html',
         emitFile: false, // to place output into "dist/" folder on build
         gzipSize: true,
@@ -175,7 +175,12 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.SHOW_SEARCH_RESULT_LINK': process.env.VITE_SHOW_SEARCH_RESULT_LINK
         ? `${process.env.VITE_SHOW_SEARCH_RESULT_LINK}`
         : JSON.stringify(false),
-      // features
+      // show consortia info and switcher (by default disabled for "scoped" deployments that restrict to a single consortium)
+      'import.meta.env.SHOW_CONSORTIA_INFO': process.env.VITE_SHOW_CONSORTIA_INFO
+        ? `${process.env.VITE_SHOW_CONSORTIA_INFO}`
+        : JSON.stringify(false),
+
+      // matomo tracking
       'import.meta.env.FEATURE_TRACKING_MATOMO': process.env.VITE_FEATURE_TRACKING_MATOMO
         ? `"${process.env.VITE_FEATURE_TRACKING_MATOMO}"`
         : JSON.stringify(true),
@@ -215,6 +220,7 @@ export default defineConfig(({ mode }) => {
     },
   } satisfies UserConfig
 
+  // extract evaluated parameter values to update build configuration
   const paramLocalePrefix = JSON.parse(baseConfig.define['import.meta.env.I18N_NS_CONTEXT_PREFIX'])
   const paramLocale = JSON.parse(baseConfig.define['import.meta.env.LOCALE'])
   const paramFeatureQueryBuilderEnabled = JSON.parse(
