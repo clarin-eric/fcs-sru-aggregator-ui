@@ -33,6 +33,7 @@ jobs:
           VITE_I18N_NS_CONTEXT_PREFIX: 'clarin'
           VITE_LOCALES: '["en", "de"]'
           VITE_LOCALE: 'en'
+          VITE_SHOW_CONSORTIA_INFO: 'true'
         run: npm run build
 
       - name: Store build artifact
