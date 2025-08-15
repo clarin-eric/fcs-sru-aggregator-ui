@@ -13,11 +13,12 @@ import Table from 'react-bootstrap/Table'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import useFuzzySearchListWithHierarchy, {
   type FuzzyMatchesByField,
 } from '@/hooks/useFuzzySearchListWithHierarchy'
+import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import { useAxios } from '@/providers/AxiosContext'
 import { useLocaleStore } from '@/stores/locale'
 import {
@@ -34,15 +35,12 @@ import {
   getLanguagesFromResourceInfo,
   SORT_FNS,
 } from '@/utils/resources'
+import { REQ_PARAM_RESOURCE_ID } from './utils'
 
 import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 
 import './styles.css'
-
-// --------------------------------------------------------------------------
-
-const REQ_PARAM_RESOURCE_ID = 'resource'
 
 // --------------------------------------------------------------------------
 // component
@@ -56,6 +54,7 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
 
   const langNames = new Intl.DisplayNames([userLocale, 'en'], { type: 'language' })
 
+  const [, getLinkSearch] = useKeepSearchParams()
   const [urlSearchParams, setUrlSearchParams] = useSearchParams()
 
   const [resources, setResources] = useState<Resource[]>([])
@@ -220,8 +219,8 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
           ) : (
             <>
               {resourceInHierarchy.handle}
-              <a
-                href={`?${REQ_PARAM_RESOURCE_ID}=${encodeURIComponent(resourceInHierarchy.id)}`}
+              <Link
+                to={{ search: getLinkSearch({ [REQ_PARAM_RESOURCE_ID]: resourceInHierarchy.id }) }}
                 onClick={(event) => {
                   event.preventDefault()
                   handleChangeResource(resourceInHierarchy.id)
@@ -231,7 +230,7 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
                   dangerouslySetInnerHTML={{ __html: eyeIcon }}
                   className="align-baseline ms-2 me-1"
                 />
-              </a>
+              </Link>
             </>
           )}{' '}
           – {getBestFromMultilingualValuesTryByLanguage(resourceInHierarchy.title, userLocale)}
@@ -400,8 +399,12 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
                 </dd>
                 <dt>{t('statistics.labels.fcsVersion')}</dt>
                 <dd>{selectedResource.endpoint.protocol}</dd>
-                <dt>{t('statistics.labels.searchCapabilities')}</dt>
+                <dt>{t('statistics.labels.searchCapabilitiesOfEndpoint')}</dt>
                 <dd>{selectedResource.endpoint.searchCapabilities.join(', ')}</dd>
+                <dt>{t('statistics.labels.searchCapabilitiesOfResource')}</dt>
+                <dd>{selectedResource.searchCapabilitiesResolved.join(', ')}</dd>
+                <dt>{t('statistics.labels.availabilityRestriction')}</dt>
+                <dd>{selectedResource.availabilityRestriction}</dd>
                 <dt>{t('statistics.labels.endpointInstitution')}</dt>
                 <dd>
                   {selectedResource.endpointInstitution.name}

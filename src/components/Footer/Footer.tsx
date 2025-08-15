@@ -23,7 +23,7 @@ function Footer() {
   const transServiceInfo = t(i18nKeyServiceInfo)
   const hasServiceInfo = transServiceInfo !== i18nKeyServiceInfo
 
-  const linkSearch = useKeepSearchParams()
+  const [linkSearch] = useKeepSearchParams()
 
   // ------------------------------------------------------------------------
 

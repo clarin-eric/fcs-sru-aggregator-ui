@@ -20,7 +20,7 @@ import useKeepSearchParams from './useKeepSearchParams'
  */
 export default function useNavigate() {
   const routerNavigate = useReactRouterNavigate()
-  const search = useKeepSearchParams()
+  const [search] = useKeepSearchParams()
 
   /**
    * Do a `location` update using a path and parameters.

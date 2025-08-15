@@ -32,6 +32,7 @@ export interface Resource {
   description: null | string | { [language: string]: string }
   institution: string | { [language: string]: string }
   searchCapabilities: SearchCapability[]
+  availabilityRestriction: AvailabilityRestriction
   availableDataViews: AvailableDataView[] | null
   availableLayers: AvailableLayer[] | null
   availableLexFields: AvailableLexField[] | null
@@ -77,6 +78,7 @@ export interface AvailableLexField {
 
 export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH' | 'LEX_SEARCH'
 export type ProtocolVersion = 'VERSION_2' | 'VERSION_1' | 'LEGACY'
+export type AvailabilityRestriction = 'NONE' | 'AUTH_ONLY' | 'PERSONAL_IDENTIFIER'
 
 export type Encoding = 'VALUE' | 'EMPTY'
 export type DeliveryPolicy = 'SEND_BY_DEFAULT' | 'NEED_TO_REQUEST'

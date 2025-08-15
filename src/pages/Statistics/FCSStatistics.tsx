@@ -9,16 +9,19 @@ import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import Table from 'react-bootstrap/Table'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import LanguageModal from '@/components/LanguageModal'
+import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import { useLocaleStore } from '@/stores/locale'
 import {
+  type AvailabilityRestriction,
   type ExtraScopingParams,
   getLanguages,
   getResources,
   REQ_PARAM_CONSORTIA,
   type Resource,
+  type SearchCapability,
 } from '@/utils/api'
 import {
   flattenResources,
@@ -26,6 +29,9 @@ import {
   getBestFromMultilingualValuesTryByLanguage,
 } from '@/utils/resources'
 import { type LanguageCode2NameMap } from '@/utils/search'
+import { REQ_PARAM_RESOURCE_ID } from './utils'
+
+import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
 
 import './styles.css'
 
@@ -118,6 +124,7 @@ function FCSStatistics() {
   // const [locale, setLocale] = useState(userLocale)
   // const langNames = new Intl.DisplayNames([userLocale, 'en'], { type: 'language' })
 
+  const [, getLinkSearch] = useKeepSearchParams()
   const [urlSearchParams] = useSearchParams()
 
   const [resources, setResources] = useState<Resource[]>([])
@@ -172,18 +179,14 @@ function FCSStatistics() {
 
   const endpointURLsWithResources = flatResources.reduce((map, resource) => {
     const url = resource.endpoint.url
-    if (!map.has(url)) {
-      map.set(url, [])
-    }
+    if (!map.has(url)) map.set(url, [])
     map.get(url)!.push(resource)
     return map
   }, new Map<string, Resource[]>())
   const endpointDomainsWithURLs = Array.from(endpointURLsWithResources.keys()).reduce(
     (map, url) => {
       const domain = extractMainDomain(url)
-      if (!map.has(domain)) {
-        map.set(domain, [])
-      }
+      if (!map.has(domain)) map.set(domain, [])
       map.get(domain)!.push(url)
       return map
     },
@@ -191,9 +194,7 @@ function FCSStatistics() {
   )
   const endpointTLDsWithURLs = Array.from(endpointURLsWithResources.keys()).reduce((map, url) => {
     const tld = extractTLD(url)
-    if (!map.has(tld)) {
-      map.set(tld, [])
-    }
+    if (!map.has(tld)) map.set(tld, [])
     map.get(tld)!.push(url)
     return map
   }, new Map<string, string[]>())
@@ -202,24 +203,40 @@ function FCSStatistics() {
     const institution =
       getBestFromMultilingualValuesTryByLanguage(resource.institution, userLocale) ??
       resource.endpointInstitution.name
-    if (!map.has(institution)) {
-      map.set(institution, [])
-    }
+    if (!map.has(institution)) map.set(institution, [])
     map.get(institution)!.push(resource)
     return map
   }, new Map<string, Resource[]>())
   const endpointInstitutionsWithResources = flatResources.reduce((map, resource) => {
     const institution = resource.endpointInstitution.name
-    if (!map.has(institution)) {
-      map.set(institution, [])
-    }
+    if (!map.has(institution)) map.set(institution, [])
     map.get(institution)!.push(resource)
     return map
   }, new Map<string, Resource[]>())
 
+  const searchCapabilitiesWithResources = flatResources.reduce((map, resource) => {
+    const capabilities = resource.searchCapabilitiesResolved
+    for (const capability of capabilities) {
+      if (!map.has(capability)) map.set(capability, [])
+      map.get(capability)!.push(resource)
+    }
+    return map
+  }, new Map<SearchCapability, Resource[]>())
+  const availabilityRestrictionsWithResources = flatResources.reduce((map, resource) => {
+    const restriction = resource.availabilityRestriction
+    if (!map.has(restriction)) map.set(restriction, [])
+    map.get(restriction)!.push(resource)
+    return map
+  }, new Map<AvailabilityRestriction, Resource[]>())
+
   const hasResources = resources && resources.length > 0
   const hasLanguages = languages && Object.getOwnPropertyNames(languages).length > 0
   const enableResourceLanguageSelectionModal = hasResources && hasLanguages
+
+  const hasResourcesWithAvailabilityRestriction =
+    Array.from(availabilityRestrictionsWithResources.keys()).filter(
+      (restriction) => restriction !== 'NONE'
+    ).length > 0
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -479,6 +496,15 @@ function FCSStatistics() {
               <dd>{flatResources.length}</dd>
               <dt>{t('statistics.fcs.tdLabelRootResourceCount')}</dt>
               <dd>{resources.length}</dd>
+              <dt>{t('statistics.fcs.tdLabelResourceWithAvailabilityRestrictionCount')}</dt>
+              <dd>
+                {
+                  Array.from(availabilityRestrictionsWithResources.entries())
+                    .filter(([restriction]) => restriction !== 'NONE')
+                    .map(([, resources]) => resources)
+                    .flat().length
+                }
+              </dd>
             </dl>
           </Card.Body>
           {enableResourceLanguageSelectionModal && (
@@ -489,6 +515,74 @@ function FCSStatistics() {
             </Card.Footer>
           )}
         </Card>
+
+        <Card className="my-2">
+          <Card.Header>{t('statistics.fcs.cardHeaderSearchCapabilities')}</Card.Header>
+          <Card.Body>
+            <Table hover responsive className="mt-2">
+              <thead>
+                <tr>
+                  <th scope="col">{t('statistics.fcs.thSearchCapability')}</th>
+                  <th scope="col">{t('statistics.fcs.thCountResourcesForSearchCapability')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from(searchCapabilitiesWithResources.entries()).map(
+                  ([capability, resources]) => (
+                    <tr key={capability}>
+                      <td>{capability}</td>
+                      <td>{resources.length}</td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </Table>
+          </Card.Body>
+        </Card>
+
+        {hasResourcesWithAvailabilityRestriction && (
+          <Card className="my-2">
+            <Card.Header>
+              {t('statistics.fcs.cardHeaderResourcesWithAvailabilityRestrictions')}
+            </Card.Header>
+            <Card.Body>
+              <Table hover responsive className="mt-2">
+                <caption>{t('statistics.fcs.tblAvailabilityRestrictionCaption')}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{t('statistics.fcs.thAvailabilityRestriction')}</th>
+                    <th scope="col">{t('statistics.fcs.thResourceTitle')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from(availabilityRestrictionsWithResources.entries())
+                    .filter(([restriction]) => restriction !== 'NONE')
+                    .map(([restriction, resources]) =>
+                      resources.map((resource) => (
+                        <tr key={resource.id}>
+                          <td>{restriction}</td>
+                          <td>
+                            {getBestFromMultilingualValuesTryByLanguage(resource.title, userLocale)}{' '}
+                            <Link
+                              to={{
+                                pathname: '/stats/resources',
+                                search: getLinkSearch({ [REQ_PARAM_RESOURCE_ID]: resource.id }),
+                              }}
+                            >
+                              <i
+                                dangerouslySetInnerHTML={{ __html: eyeIcon }}
+                                className="align-baseline ms-2"
+                              />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
+        )}
       </Card>
 
       <LanguageModal

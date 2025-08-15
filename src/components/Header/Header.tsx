@@ -35,7 +35,7 @@ function Header() {
   const deployPath = AppStore.getState().deployPath ?? ''
   const loginPath = deployPath + (deployPath.endsWith('/') ? '' : '/') + 'login'
 
-  const linkSearch = useKeepSearchParams()
+  const [linkSearch] = useKeepSearchParams()
 
   const i18nKeyTranslationHelpUrl = 'urls.helpWithTranslations'
   const urlHelpWithTranslations = t(i18nKeyTranslationHelpUrl, { ns: 'common' })
