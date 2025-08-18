@@ -107,7 +107,7 @@ export default defineConfig(({ mode }) => {
         },
       },
       // manifest: true,
-      sourcemap: true,
+      sourcemap: 'hidden',
       // DEBUG
       // minify: false,
     },
