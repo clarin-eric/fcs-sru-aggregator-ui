@@ -30,9 +30,6 @@ import transformEmbedLocalesResourcesPlugin from './build/transform-embed-locale
 
 import pkg from './package.json'
 
-// name for our custom JS/CSS output
-const name = `${pkg.name}-${pkg.version}`
-
 // output paths
 const outputsLibPath = 'lib/'
 const outputsLibVenderPath = `${outputsLibPath}vendor/`
@@ -81,18 +78,18 @@ export default defineConfig(({ mode }) => {
             if (chunkInfo.names.includes('index.css')) {
               // lazy import modules
               if (chunkInfo.originalFileNames.includes(entryQueryBuilder)) {
-                return `${pkg.name}-query-builder-${pkg.version}.[ext]`
+                return `${pkg.name}-querybuilder.[ext]`
               }
               // main
-              return `${name}.[ext]`
+              return `${pkg.name}.[ext]`
             }
             return `assets/[name].[ext]`
           },
-          entryFileNames: `${name}.js`,
+          entryFileNames: `${pkg.name}.js`,
           chunkFileNames(chunkInfo: PreRenderedChunk) {
             if (chunkInfo.isDynamicEntry) {
               if (chunkInfo.facadeModuleId?.endsWith(entryQueryBuilder)) {
-                return `${pkg.name}-query-builder-${pkg.version}.js`
+                return `${pkg.name}-querybuilder.js`
               }
             }
             return `[name].js`
@@ -283,10 +280,10 @@ export default defineConfig(({ mode }) => {
             if (chunkInfo.names.includes('index.css')) {
               // lazy import modules
               if (chunkInfo.originalFileNames.includes(entryQueryBuilder)) {
-                return `${outputsLibPath}${pkg.name}-query-builder-${pkg.version}.[ext]`
+                return `${outputsLibPath}${pkg.name}-querybuilder.[ext]`
               }
               // main
-              return `${outputsLibPath}${name}.[ext]`
+              return `${outputsLibPath}${pkg.name}.[ext]`
             }
             // known output chunks (vendor)
             if (['bootstrap.css'].some((name) => chunkInfo.names.includes(name))) {
@@ -312,7 +309,7 @@ export default defineConfig(({ mode }) => {
           // ) {
           //   return `${outputsLibVenderPath}antlr.js`
           // }
-          return `${outputsLibPath}${name}.js`
+          return `${outputsLibPath}${pkg.name}.js`
         },
         chunkFileNames(chunkInfo: PreRenderedChunk) {
           // DEBUG
@@ -324,7 +321,7 @@ export default defineConfig(({ mode }) => {
           // })
           if (chunkInfo.isDynamicEntry) {
             if (chunkInfo.facadeModuleId?.endsWith(entryQueryBuilder)) {
-              return `${outputsLibPath}${pkg.name}-query-builder-${pkg.version}.js`
+              return `${outputsLibPath}${pkg.name}-querybuilder.js`
             }
 
             const locales_pat = `/${inputSrcLocales}/`
@@ -374,7 +371,7 @@ export default defineConfig(({ mode }) => {
 
     if (paramFeatureQueryBuilderEnabled) {
       Object.assign(manualChunks, {
-        // lazy loaded chunk (query-builder)
+        // lazy loaded chunk (querybuilder)
         [`${outputsLibVenderPath}antlr4`]: ['antlr4ng'],
       })
     }
