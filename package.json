@@ -6,7 +6,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://git.saw-leipzig.de/text-plus/FCS/fcs-sru-aggregator-ui.git"
+    "url": "https://github.com/clarin-eric/fcs-sru-aggregator-ui.git"
   },
   "scripts": {
     "dev": "vite",
