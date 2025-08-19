@@ -20,6 +20,7 @@ type AppStoreState = {
   matomoTrackingParams: string | MatomoSetupParams | null
 
   authUsername: string | null
+  isAuthenticated: boolean
 }
 type AppStoreActions = {
   setDeployPath: (
@@ -86,6 +87,7 @@ const appStore = createStore<AppStore>((set) => ({
     ? import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS
     : null,
   authUsername: null,
+  isAuthenticated: false,
 
   // actions
   setDeployPath: (path) =>
@@ -110,9 +112,13 @@ const appStore = createStore<AppStore>((set) => ({
         typeof params === 'function' ? params(state.matomoTrackingParams) : params,
     })),
   setAuthUsername: (user) =>
-    set((state) => ({
-      authUsername: typeof user === 'function' ? user(state.authUsername) : user,
-    })),
+    set((state) => {
+      const newUsername = typeof user === 'function' ? user(state.authUsername) : user
+      return {
+        authUsername: newUsername,
+        isAuthenticated: newUsername !== null && newUsername !== 'anonymous', // anonymous
+      }
+    }),
 }))
 
 export default appStore

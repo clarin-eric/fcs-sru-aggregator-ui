@@ -70,8 +70,10 @@ export function configure() {
       AppStore.getState().setMatomoTrackingParams(window.MyAggregator.MATOMO_TRACKING_PARAMS)
     }
   }
-  if (window.MyAggregator.AUTH_USERNAME !== undefined) {
-    AppStore.getState().setAuthUsername(window.MyAggregator.AUTH_USERNAME)
+  if (import.meta.env.FEATURE_AUTHENTICATION) {
+    if (window.MyAggregator.AUTH_USERNAME !== undefined) {
+      AppStore.getState().setAuthUsername(window.MyAggregator.AUTH_USERNAME)
+    }
   }
 
   // observe and notify about invalid configuration changes
@@ -102,13 +104,15 @@ export function configure() {
         return false
       }
 
-      if (prop === 'AUTH_USERNAME') {
-        if (val === null || typeof val === 'string') {
-          console.log('Updating AUTH_USERNAME ...')
-          AppStore.getState().setAuthUsername(val)
-          return true
+      if (import.meta.env.FEATURE_AUTHENTICATION) {
+        if (prop === 'AUTH_USERNAME') {
+          if (val === null || typeof val === 'string') {
+            console.log('Updating AUTH_USERNAME ...')
+            AppStore.getState().setAuthUsername(val)
+            return true
+          }
+          return false
         }
-        return false
       }
 
       target[prop] = val

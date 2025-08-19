@@ -10,6 +10,7 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
 
 import { type FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
+import appStore from '@/stores/app'
 import { useLocaleStore } from '@/stores/locale'
 import { type Resource } from '@/utils/api'
 import {
@@ -19,6 +20,8 @@ import {
 
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
+import shieldCheckIcon from 'bootstrap-icons/icons/shield-check.svg?raw'
+import shieldLockIcon from 'bootstrap-icons/icons/shield-lock.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
 
 import './styles.css'
@@ -45,6 +48,9 @@ function ResourceSelector({
   languageCodeToName: (code: string) => string
 }) {
   const { t } = useTranslation()
+
+  const isAuthenticated = appStore.getState().isAuthenticated
+
   const [expanded, setExpanded] = useState(false)
   const [showSubResources, setShowSubResources] = useState(false)
 
@@ -102,6 +108,24 @@ function ResourceSelector({
 
   // --------------------------------------------------------------
 
+  function renderResourceAvailabilityRestriction() {
+    // TODO: do we always want to render this, regardless of whether we enable authentication?
+    if (!import.meta.env.FEATURE_AUTHENTICATION) return null
+
+    if (resource.availabilityRestriction !== 'NONE') {
+      // TODO: add tooltips/aria-labels to describe access status
+      return (
+        <>
+          <i
+            dangerouslySetInnerHTML={{ __html: isAuthenticated ? shieldCheckIcon : shieldLockIcon }}
+          />{' '}
+        </>
+      )
+    }
+  }
+
+  // --------------------------------------------------------------
+
   return (
     <>
       <Row className={`p-2 m-1 ${expanded && 'border-bottom'}`}>
@@ -126,6 +150,7 @@ function ResourceSelector({
           onClick={handleToggleExpansionClick}
         >
           <h4 className={`h5 ${expanded ? '' : 'text-truncate'}`}>
+            {renderResourceAvailabilityRestriction()}
             <Highlight
               text={getBestFromMultilingualValuesTryByLanguage(resource.title, locale) ?? ''}
               ranges={highlighting.get('title') ?? null}

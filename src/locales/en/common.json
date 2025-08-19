@@ -126,7 +126,10 @@
     },
     "person": {
       "label": "Login / User",
-      "description": "Login or logged-in user"
+      "description": "Login or logged-in user",
+      "context": [
+        "authentication"
+      ]
     },
     "plus-circle": {
       "label": "Add",
@@ -145,6 +148,20 @@
     "search": {
       "label": "Search",
       "description": "Start a new search"
+    },
+    "shield-check": {
+      "label": "Available Access-restricted Resource",
+      "description": "Resource has availability restriction and should be available due to authenticated user.",
+      "context": [
+        "authentication"
+      ]
+    },
+    "shield-lock": {
+      "label": "Access-restricted Resource",
+      "description": "Resource has availability restriction and requires user authentication.",
+      "context": [
+        "authentication"
+      ]
     },
     "three-dots": {
       "label": "Load more",

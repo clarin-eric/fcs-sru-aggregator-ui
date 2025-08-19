@@ -6,11 +6,14 @@
       "help": "Help"
     },
     "login": {
-      "login": "Login"
+      "login": "Login",
+      "signedInAs": "Signed in as <0/>"
     },
+    "localeLabelOnMobile": "Language:",
     "localeOptionTitle": "Switch to locale '{{code}}' for language {{name}}",
     "localeOptionTitle_translated": "Switch to locale '{{code}}' for language {{name}} ({{translated}})",
-    "localeHelpWithTranslations": "Want to help with translations?"
+    "localeHelpWithTranslations": "Want to help with translations?",
+    "appLogoAlt": "Service operator logo"
   },
   "footer": {
     "links": {
@@ -38,7 +41,9 @@
         "msgPreselectedResources_other": "Preselected <strong>{{count}}</strong> resources:",
         "msgUnableToSelectResources_one": "Unable to select <strong>1</strong> resource:",
         "msgUnableToSelectResources_other": "Unable to select <strong>{{count}}</strong> resources:",
-        "msgErrorUnableToSelectResources": "Unable to preselect resources: {{error}}"
+        "msgErrorUnableToSelectResources": "Unable to preselect resources: {{error}}",
+        "msgAuthOnlyResourcesNotSelected_one": "User is not authenticated. Removed default selection of <strong>1</strong> resources:",
+        "msgAuthOnlyResourcesNotSelected_other": "User is not authenticated. Removed default selection of <strong>{{count}}</strong> resources:"
       },
       "searchInput": {
         "title": "Resource Selection Changed",

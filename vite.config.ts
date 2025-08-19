@@ -209,6 +209,10 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.FEATURE_QUERY_BUILDER': process.env.VITE_FEATURE_QUERY_BUILDER
         ? `${process.env.VITE_FEATURE_QUERY_BUILDER}`
         : JSON.stringify(true),
+      // enable authentication (login/logout etc.)
+      'import.meta.env.FEATURE_AUTHENTICATION': process.env.VITE_FEATURE_AUTHENTICATION
+        ? `${process.env.VITE_FEATURE_AUTHENTICATION}`
+        : JSON.stringify(true),
 
       'import.meta.env.LOCALE': process.env.VITE_LOCALE
         ? JSON.stringify(process.env.VITE_LOCALE)

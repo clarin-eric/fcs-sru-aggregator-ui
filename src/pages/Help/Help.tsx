@@ -28,6 +28,8 @@ import personIcon from 'bootstrap-icons/icons/person.svg?raw'
 import plusCircleIcon from 'bootstrap-icons/icons/plus-circle.svg?raw'
 import repeatIcon from 'bootstrap-icons/icons/repeat.svg?raw'
 import searchIcon from 'bootstrap-icons/icons/search.svg?raw'
+import shieldCheckIcon from 'bootstrap-icons/icons/shield-check.svg?raw'
+import shieldLockIcon from 'bootstrap-icons/icons/shield-lock.svg?raw'
 import threeDotsIcon from 'bootstrap-icons/icons/three-dots.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
 import xCircleIcon from 'bootstrap-icons/icons/x-circle.svg?raw'
@@ -50,7 +52,6 @@ const iconMap: { [iconKey: string]: string } = {
   highlights: highlightsIcon,
   // TODO: adjust help texts to support no-querybuilder distributions
   magic: magicIcon,
-  person: personIcon,
   search: searchIcon,
   translate: translateIcon,
 }
@@ -62,6 +63,13 @@ if (import.meta.env.FEATURE_QUERY_BUILDER) {
     braces: bracesIcon,
     magic: magicIcon,
     repeat: repeatIcon,
+  } as { [iconKey: string]: string })
+}
+if (import.meta.env.FEATURE_AUTHENTICATION) {
+  Object.assign(iconMap, {
+    'shield-check': shieldCheckIcon,
+    'shield-lock': shieldLockIcon,
+    person: personIcon,
   } as { [iconKey: string]: string })
 }
 

@@ -133,6 +133,19 @@ export function getResourceIDs(resources: Resource[]) {
   return resourceIDs
 }
 
+export function getResourceIDsBySplit<T extends string | number | symbol | boolean>(
+  resources: Resource[],
+  filter: (resource: Resource) => T
+): Map<T, string[]> {
+  const resourceIDsMap: Map<T, string[]> = new Map()
+  recurseResources(resources, (resource: Resource) => {
+    const category: T = filter(resource)
+    if (!resourceIDsMap.has(category)) resourceIDsMap.set(category, [])
+    resourceIDsMap.get(category)!.push(resource.id)
+  })
+  return resourceIDsMap
+}
+
 export function getAvailableResourceIDs(
   resources: Resource[],
   queryTypeId: QueryTypeID,

@@ -2,7 +2,7 @@ import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 import NavDropdown from 'react-bootstrap/NavDropdown'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link, NavLink } from 'react-router'
 // import { useStore } from 'zustand'
 
@@ -30,7 +30,7 @@ function Header() {
   // const AppStoreReactive = useStore(AppStore)
   // const authName = AppStoreReactive.authUsername
   const authName = AppStore.getState().authUsername
-  const authed = authName !== null && authName !== 'anonymous' // anonymous
+  const isAuthenticated = AppStore.getState().isAuthenticated
 
   const deployPath = AppStore.getState().deployPath ?? ''
   const loginPath = deployPath + (deployPath.endsWith('/') ? '' : '/') + 'login'
@@ -55,19 +55,25 @@ function Header() {
   // rendering
 
   function renderAuth() {
-    if (authed) {
+    if (!import.meta.env.FEATURE_AUTHENTICATION) return null
+
+    if (isAuthenticated) {
       return (
-        <Navbar.Text className="ms-auto">
-          <i dangerouslySetInnerHTML={{ __html: personIcon }} /> Signed in as{' '}
-          <span className="fw-bold">{authName}</span>
+        <Navbar.Text>
+          <i dangerouslySetInnerHTML={{ __html: personIcon }} className="d-md-inline d-none" />{' '}
+          <Trans
+            i18nKey="header.login.signedInAs"
+            components={[<span className="fw-bold">{authName}</span>]}
+          />
         </Navbar.Text>
       )
     }
 
     // unauthorized
     return (
-      <Nav.Link href={`${loginPath}${linkSearch ?? ''}`} className="ms-auto">
-        <i dangerouslySetInnerHTML={{ __html: personIcon }} /> {t('header.login.login')}
+      <Nav.Link href={`${loginPath}${linkSearch ?? ''}`}>
+        <i dangerouslySetInnerHTML={{ __html: personIcon }} className="d-md-inline d-none" />{' '}
+        {t('header.login.login')}
       </Nav.Link>
     )
   }
@@ -80,7 +86,9 @@ function Header() {
 
     const currentSelectedLanguage = (
       <>
-        <i dangerouslySetInnerHTML={{ __html: translateIcon }} /> {locale.toUpperCase()}{' '}
+        <i dangerouslySetInnerHTML={{ __html: translateIcon }} className="d-md-inline d-none" />
+        <span className="d-inline d-md-none">{t('header.localeLabelOnMobile')}</span>{' '}
+        {locale.toUpperCase()}{' '}
       </>
     )
 
@@ -89,7 +97,7 @@ function Header() {
       <NavDropdown
         title={currentSelectedLanguage}
         align="end"
-        className="ms-2"
+        className="ms-md-2"
         onSelect={handleLocaleChangeClick}
       >
         {locales.map((localeOption) => {
@@ -135,10 +143,10 @@ function Header() {
     if (!appLogoUrl) return null
 
     return (
-      <Navbar.Brand className="ms-4">
+      <Navbar.Brand className="ms-md-4">
         <img
           src={appLogoUrl}
-          alt="Service operator logo"
+          alt={t('header.appLogoAlt')}
           height={30}
           className="d-inline-block align-top"
           onError={({ currentTarget }) => {
@@ -178,6 +186,7 @@ function Header() {
               <Nav.Link as={NavLink} to={{ pathname: '/help', search: linkSearch }}>
                 {t('header.menu.help')}
               </Nav.Link>
+              <Navbar.Text className="ms-auto d-md-block d-none" />
               {renderAuth()}
               {renderLocales()}
               {renderAppLogo()}

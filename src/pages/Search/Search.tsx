@@ -22,7 +22,12 @@ import {
   type Resource,
 } from '@/utils/api'
 import { trackSiteSearch } from '@/utils/matomo'
-import { evaluateAggregationContext, fromApi, getResourceIDs } from '@/utils/resources'
+import {
+  evaluateAggregationContext,
+  fromApi,
+  getResourceIDs,
+  getResourceIDsBySplit,
+} from '@/utils/resources'
 import { type LanguageCode2NameMap } from '@/utils/search'
 import SearchInput, { type SearchData } from './SearchInput'
 import SearchResults from './SearchResults'
@@ -55,6 +60,7 @@ function Search() {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
   const appTitleHead = AppStore.getState().appTitleHead
+  const isAuthenticated = AppStore.getState().isAuthenticated
 
   // ------------------------------------------------------------------------
   // initialization
@@ -79,8 +85,49 @@ function Search() {
     setResources(newResources)
 
     // initialization (hack) to select all resources
-    setSearchResourceIDs(getResourceIDs(newResources))
-  }, [data])
+    if (import.meta.env.FEATURE_AUTHENTICATION) {
+      // filter resources by authentication, free === true, false otherwise
+      const resourcesByAuth = getResourceIDsBySplit(newResources, (resource: Resource) =>
+        resource.availabilityRestriction === 'NONE' ? true : false
+      )
+      console.log('resourcesByAuth', resourcesByAuth)
+      const numberOfAuthOnlyRessources = (resourcesByAuth.get(false) ?? []).length
+      if (!isAuthenticated && numberOfAuthOnlyRessources > 0) {
+        console.log(
+          'Not authenticated, dropping resources from default selection',
+          resourcesByAuth.get(false)
+        )
+        const authFreeResources = resourcesByAuth.get(true)!
+        setSearchResourceIDs(authFreeResources)
+
+        setToasts((toasts) => [
+          ...toasts,
+          {
+            title: t('search.toasts.resourceSelection.title'),
+            body: (
+              <>
+                <Trans
+                  i18nKey="search.toasts.resourceSelection.msgAuthOnlyResourcesNotSelected"
+                  count={numberOfAuthOnlyRessources}
+                />
+                <br />
+                <ul className="ps-3">
+                  {(resourcesByAuth.get(false) ?? []).map((rid) => (
+                    <li style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>{rid}</li>
+                  ))}
+                </ul>
+              </>
+            ),
+            variant: 'success',
+          },
+        ])
+      } else {
+        setSearchResourceIDs(getResourceIDs(newResources))
+      }
+    } else {
+      setSearchResourceIDs(getResourceIDs(newResources))
+    }
+  }, [data, isAuthenticated, t])
 
   useEffect(() => {
     console.debug('searchParams', urlSearchParams)
@@ -101,6 +148,9 @@ function Search() {
           endpoints2handles,
           evaluated: { selected, unavailable },
         })
+
+        // TODO: check if selected resources require auth and user is unauthenticated?
+
         if (selected.length > 0) {
           setSearchResourceIDs(selected)
 
@@ -110,9 +160,10 @@ function Search() {
               title: t('search.toasts.resourceSelection.title'),
               body: (
                 <>
-                  {t('search.toasts.resourceSelection.msgPreselectedResources', {
-                    count: selected.length,
-                  })}
+                  <Trans
+                    i18nKey="search.toasts.resourceSelection.msgPreselectedResources"
+                    count={selected.length}
+                  />
                   <br />
                   <ul className="ps-3">
                     {selected.map((rid) => (
@@ -132,9 +183,10 @@ function Search() {
               title: t('search.toasts.resourceSelection.title'),
               body: (
                 <>
-                  {t('search.toasts.resourceSelection.msgUnableToSelectResources', {
-                    count: unavailable.length,
-                  })}
+                  <Trans
+                    i18nKey="search.toasts.resourceSelection.msgUnableToSelectResources"
+                    count={unavailable.length}
+                  />
                   <br />
                   <ul className="ps-3">
                     {unavailable.map((rid) => (
