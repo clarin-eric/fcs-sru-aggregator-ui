@@ -8,6 +8,9 @@ interface PluginOptions {
 export const virtualModuleId = 'clarin/configurable-app-logo-image-module'
 const resolvedVirtualModuleId = '\0' + virtualModuleId + '.js'
 
+// TODO: maybe extend this to multiple assets?
+// would need some distinctive virtual module id or user data to distinguish between resolveId<->load calls
+
 export default function configurableAppLogoImagePlugin(config: PluginOptions) {
   if (config.debug) console.debug('config', config)
 
