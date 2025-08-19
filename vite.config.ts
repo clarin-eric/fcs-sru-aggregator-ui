@@ -6,6 +6,7 @@ import {
   type OutputOptions,
   type PreRenderedAsset,
   type PreRenderedChunk,
+  type RenderedChunk,
   type RollupOptions,
 } from 'rollup'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -29,6 +30,16 @@ import transformDynamicToStaticImportsPlugin from './build/transform-dynamic-to-
 import transformEmbedLocalesResourcesPlugin from './build/transform-embed-locales-resources'
 
 import pkg from './package.json'
+
+const bannerTemplate = [
+  '/*!',
+  '* FCS SRU Aggragator UI',
+  '* @module {MODULE}', // will be replaced by chunk filename
+  `* @version ${pkg.version}`,
+  `* @license ${pkg.license}`,
+  `* @see {@link ${pkg.repository.url}}`,
+  '*/',
+].join('\n ')
 
 // output paths
 const outputsLibPath = 'lib/'
@@ -62,6 +73,8 @@ export default defineConfig(({ mode }) => {
 
   const isSingleChunk = mode === 'bundle'
 
+  const getBanner = (chunk: RenderedChunk) => bannerTemplate.replace('{MODULE}', chunk.fileName)
+
   // base configuration
   const baseConfig = {
     // https://vite.dev/guide/build.html#relative-base
@@ -94,6 +107,7 @@ export default defineConfig(({ mode }) => {
             }
             return `[name].js`
           },
+          banner: getBanner,
         },
         treeshake: {
           moduleSideEffects(id: string, external: boolean) {
@@ -137,35 +151,39 @@ export default defineConfig(({ mode }) => {
       // TODO: required?
       'process.env': {},
 
+      'import.meta.env.APPLICATION_VERSION': process.env.VITE_APPLICATION_VERSION
+        ? JSON.stringify(process.env.VITE_APPLICATION_VERSION)
+        : undefined,
+
       // deployment on subpath, default is "/" for root
       // see also the "base" configuration on top
       'import.meta.env.DEPLOY_PATH': process.env.VITE_DEPLOY_PATH
-        ? `"${process.env.VITE_DEPLOY_PATH}"`
+        ? JSON.stringify(process.env.VITE_DEPLOY_PATH)
         : JSON.stringify('/'),
       // canonical URL for FCS SRU Aggregator
       'import.meta.env.CANONCIAL_URL': process.env.VITE_CANONCIAL_URL
-        ? `"${process.env.VITE_CANONCIAL_URL}"`
+        ? JSON.stringify(process.env.VITE_CANONCIAL_URL)
         : JSON.stringify('https://contentsearch.clarin.eu'),
       // API base URL for FCS SRU Aggregator
       'import.meta.env.API_URL': process.env.VITE_API_URL
-        ? `"${process.env.VITE_API_URL}"`
+        ? JSON.stringify(process.env.VITE_API_URL)
         : JSON.stringify('https://contentsearch.clarin.eu/rest/'),
       // base URL for FCS Endpoint Validator to build redirect links
       'import.meta.env.VALIDATOR_URL': process.env.VITE_VALIDATOR_URL
-        ? `"${process.env.VITE_VALIDATOR_URL}"`
+        ? JSON.stringify(process.env.VITE_VALIDATOR_URL)
         : JSON.stringify('https://www.clarin.eu/fcsvalidator/'),
 
       // application title
       'import.meta.env.APP_TITLE': process.env.VITE_APP_TITLE
-        ? `"${process.env.VITE_APP_TITLE}"`
+        ? JSON.stringify(process.env.VITE_APP_TITLE)
         : JSON.stringify('Content Search'),
       // HTML head page title
       'import.meta.env.APP_TITLE_HEAD': process.env.VITE_APP_TITLE_HEAD
-        ? `"${process.env.VITE_APP_TITLE_HEAD}"`
+        ? JSON.stringify(process.env.VITE_APP_TITLE_HEAD)
         : JSON.stringify('FCS Aggregator – Content Search'),
       // application logo
       'import.meta.env.APP_LOGO_PATH': process.env.VITE_APP_LOGO_PATH
-        ? `"${process.env.VITE_APP_LOGO_PATH}"`
+        ? JSON.stringify(process.env.VITE_APP_LOGO_PATH)
         : JSON.stringify('src/assets/images/clarin-logo-wide.png'),
 
       // show direct link to search results
@@ -179,7 +197,7 @@ export default defineConfig(({ mode }) => {
 
       // matomo tracking
       'import.meta.env.FEATURE_TRACKING_MATOMO': process.env.VITE_FEATURE_TRACKING_MATOMO
-        ? `"${process.env.VITE_FEATURE_TRACKING_MATOMO}"`
+        ? JSON.stringify(process.env.VITE_FEATURE_TRACKING_MATOMO)
         : JSON.stringify(true),
       // params = { srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }
       'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': process.env
@@ -193,7 +211,7 @@ export default defineConfig(({ mode }) => {
         : JSON.stringify(true),
 
       'import.meta.env.LOCALE': process.env.VITE_LOCALE
-        ? `"${process.env.VITE_LOCALE}"`
+        ? JSON.stringify(process.env.VITE_LOCALE)
         : JSON.stringify(I18n_LANGUAGES[0]),
       'import.meta.env.LOCALES': process.env.VITE_LOCALES
         ? `${process.env.VITE_LOCALES}`
@@ -201,7 +219,7 @@ export default defineConfig(({ mode }) => {
 
       // i18n context prefix, e.g., CLARIN
       'import.meta.env.I18N_NS_CONTEXT_PREFIX': process.env.VITE_I18N_NS_CONTEXT_PREFIX
-        ? `"${process.env.VITE_I18N_NS_CONTEXT_PREFIX}"`
+        ? JSON.stringify(process.env.VITE_I18N_NS_CONTEXT_PREFIX)
         : JSON.stringify(I18N_PREFIXES[0]),
     },
     resolve: {
@@ -357,6 +375,7 @@ export default defineConfig(({ mode }) => {
           // ui
           [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
+        banner: getBanner,
       } satisfies OutputOptions,
       // filter out locales from dynamic import detection
       // see: https://vite.dev/config/build-options.html#build-dynamicimportvarsoptions
