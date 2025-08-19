@@ -255,6 +255,9 @@ export default defineConfig(({ mode }) => {
     // keep a single chunk
     // Object.assign(baseConfig.define, {} satisfies Record<string, unknown>)
 
+    // TODO: inline assets? (i.e., images, each up to 100kB in size)
+    // Object.assign(baseConfig.build, { assetsInlineLimit: 100 * 2 ** 10 } satisfies BuildEnvironmentOptions)
+
     // rewrite dynamic imports into static import
     baseConfig.plugins.push(transformDynamicToStaticImportsPlugin())
     // include locale dynamic import into default chunk
