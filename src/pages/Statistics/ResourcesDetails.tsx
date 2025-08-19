@@ -63,9 +63,28 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
     urlSearchParams.get(REQ_PARAM_RESOURCE_ID)
   )
 
-  const selectedResource = selectedResourceId
-    ? findResourceByFilter(resources, (resource: Resource) => resource.id === selectedResourceId)
-    : undefined
+  // iff resourceId is a resourceHandle
+  // redirect to full endpointUrl#resourceHandle == resourceId format
+  const resourceFoundById = findResourceByFilter(
+    resources,
+    (resource: Resource) => resource.id === selectedResourceId
+  )
+  if (resourceFoundById === undefined) {
+    const resourceFoundByHandle = findResourceByFilter(
+      resources,
+      (resource: Resource) => resource.handle === selectedResourceId
+    )
+    if (resourceFoundByHandle !== undefined) {
+      const newResourceId = resourceFoundByHandle.id
+      if (newResourceId !== selectedResourceId) {
+        setSelectedResourceId(newResourceId)
+        urlSearchParams.set(REQ_PARAM_RESOURCE_ID, newResourceId)
+        setUrlSearchParams(urlSearchParams)
+      }
+    }
+  }
+
+  const selectedResource = selectedResourceId ? resourceFoundById : undefined
 
   // ------------------------------------------------------------------------
   // initialization

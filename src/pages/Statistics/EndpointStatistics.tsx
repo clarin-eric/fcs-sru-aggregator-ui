@@ -5,10 +5,13 @@ import Badge from 'react-bootstrap/Badge'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Tooltip from 'react-bootstrap/Tooltip'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import slugify from 'react-slugify'
 import { Fragment } from 'react/jsx-runtime'
 
+import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import type { InstitutionEndpointInfo, StatisticsResourceInfo } from '@/utils/api'
+import { REQ_PARAM_RESOURCE_ID } from './utils'
 
 import exclamationTriangleIcon from 'bootstrap-icons/icons/exclamation-triangle.svg?raw'
 import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
@@ -33,6 +36,7 @@ function EndpointStatistics({
   isScan: boolean
 }) {
   const { t, i18n } = useTranslation()
+  const [, getLinkSearch] = useKeepSearchParams()
 
   const secondsFormatter = new Intl.NumberFormat(i18n.language, {
     style: 'unit',
@@ -44,9 +48,23 @@ function EndpointStatistics({
     const resourceInner = (
       <Highlight text={resInfo.title} ranges={statistics.matchResources?.[idx] ?? null} />
     )
+    const linkToResourceInfo = (
+      <Link
+        to={{
+          pathname: '/stats/resources',
+          search: getLinkSearch({ [REQ_PARAM_RESOURCE_ID]: resInfo.handle }),
+        }}
+      >
+        <i dangerouslySetInnerHTML={{ __html: eyeIcon }} className="align-baseline ms-2" />
+      </Link>
+    )
 
     if (resInfo.valid && resInfo.notes.length === 0) {
-      return resourceInner
+      return (
+        <>
+          {resourceInner} {linkToResourceInfo}
+        </>
+      )
     }
 
     return (
@@ -74,8 +92,7 @@ function EndpointStatistics({
             dangerouslySetInnerHTML={{ __html: exclamationTriangleIcon }}
             className="align-baseline me-2"
           />
-
-          {!resInfo.valid ? <s>{resourceInner}</s> : resourceInner}
+          {!resInfo.valid ? <s>{resourceInner}</s> : resourceInner} {linkToResourceInfo}
         </span>
       </OverlayTrigger>
     )

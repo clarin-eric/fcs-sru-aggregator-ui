@@ -240,6 +240,7 @@
       "resourcePid": "Resource Persistent Identifier",
       "resourceHierarchy": "Resource Hierarchy",
       "fcsVersion": "FCS Version",
+      "searchCapabilities": "Search Capabilities",
       "searchCapabilitiesOfEndpoint": "Search Capabilities of this endpoint",
       "searchCapabilitiesOfResource": "Search Capabilities relevant for this resource",
       "availabilityRestriction": "Availability Restriction",
