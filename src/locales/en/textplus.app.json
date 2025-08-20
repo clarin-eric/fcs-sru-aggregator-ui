@@ -8,5 +8,12 @@
       "urlServiceBy": "https://text-plus.org",
       "urlHostedBy": "https://www.saw-leipzig.de"
     }
+  },
+  "search": {
+    "intro": {
+      "textGeneral": "The Federated Content Search (FCS) is a search engine used in Text+ that allows researchers to search for specific patterns across collections of data. The search engine connects to the local data collections. The data itself stays at the institution where it is hosted – which is why the underlying technique is called <em>federated content search</em>.",
+      "textLearnMore": "To learn more about the FCS, please visit the page <0><em>Federated Content Search</em> at text-plus.org</0>.",
+      "url": "https://text-plus.org/en/daten-dienste/daten/#federated-content-search"
+    }
   }
 }
