@@ -29,7 +29,7 @@ function ViewLex({ data }: ViewLexProps) {
       {data.records.map((record, index) => (
         <Card
           key={`${record.pid ?? record.ref ?? data.resource.id}-${index}`}
-          className="flex-grow-1"
+          className="flex-grow-1 w-100"
         >
           <Card.Body>
             <Card.Title>
