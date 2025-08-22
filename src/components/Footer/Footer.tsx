@@ -39,7 +39,7 @@ function Footer() {
               </Link>
               {/* Center version on mobile */}
               <div className="version-info text-muted text-center-xs">
-                v{import.meta.env.PACKAGE_VERSION}
+                v{import.meta.env.APPLICATION_VERSION}
               </div>
             </div>
             <Link to={{ pathname: '/stats', search: linkSearch }}>

@@ -23,6 +23,7 @@ For development and building a few additional dependencies are required:
   - [picomatch](https://github.com/micromatch/picomatch#globbing-features) 4.0.3 for filename filters in output control
 - [TypeScript](https://www.typescriptlang.org/) 5.9.2 with `@types/*` definitions
 - [ESLint](https://eslint.org/) 9.33.0 with plugins
+- [simple-git](https://github.com/steveukx/git-js) 3.28.0 for source code information
 
 ## Features
 

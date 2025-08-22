@@ -10,6 +10,7 @@ import {
   type RollupOptions,
 } from 'rollup'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { simpleGit, type SimpleGit, type SimpleGitOptions } from 'simple-git'
 import {
   type BuildOptions,
   defineConfig,
@@ -17,7 +18,6 @@ import {
   loadEnv,
   type UserConfig,
 } from 'vite'
-import version from 'vite-plugin-package-version'
 
 import { existsSync, globSync } from 'node:fs'
 import { basename } from 'node:path'
@@ -66,8 +66,40 @@ function resolve(url: string | URL) {
   return fileURLToPath(new URL(url, import.meta.url))
 }
 
+interface GitInfo {
+  sha: string | null
+  branch: string | null
+  date: string | null
+}
+
+async function gitInfo(): Promise<GitInfo | null> {
+  const options: Partial<SimpleGitOptions> = {
+    baseDir: process.cwd(),
+    binary: 'git',
+    maxConcurrentProcesses: 6,
+    trimmed: false,
+  }
+  const git: SimpleGit = simpleGit(options)
+
+  try {
+    const branchSummary = await git.branch()
+    const sha = await git.revparse(['--short', 'HEAD'])
+    const commit = (await git.log(['-1'])).latest
+
+    const info: GitInfo = {
+      sha: sha,
+      branch: branchSummary.current,
+      date: commit!.date,
+    }
+    return info
+  } catch (error) {
+    console.warn(`Error trying to retrieve git info: ${error}`)
+    return null
+  }
+}
+
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   // merge local .env* files
   process.env = Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
 
@@ -137,7 +169,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
-      version(),
       // DEBUG
       visualizer({
         open: debug, // do not open by default (might get annoying)
@@ -153,7 +184,28 @@ export default defineConfig(({ mode }) => {
 
       'import.meta.env.APPLICATION_VERSION': process.env.VITE_APPLICATION_VERSION
         ? JSON.stringify(process.env.VITE_APPLICATION_VERSION)
+        : JSON.stringify(pkg.version),
+      'import.meta.env.UI_VERSION': JSON.stringify(pkg.version),
+
+      // source code information about backend/application server
+      'import.meta.env.GIT_APP_INFO_SHA': process.env.VITE_GIT_APP_INFO_SHA
+        ? JSON.stringify(process.env.VITE_GIT_APP_INFO_SHA)
         : undefined,
+      'import.meta.env.GIT_APP_INFO_DATE': process.env.VITE_GIT_APP_INFO_DATE
+        ? JSON.stringify(process.env.VITE_GIT_APP_INFO_DATE)
+        : undefined,
+      'import.meta.env.GIT_APP_INFO_REF': process.env.VITE_GIT_APP_INFO_REF
+        ? JSON.stringify(process.env.VITE_GIT_APP_INFO_REF)
+        : undefined,
+      'import.meta.env.GIT_APP_INFO_TAG': process.env.VITE_GIT_APP_INFO_TAG
+        ? JSON.stringify(process.env.VITE_GIT_APP_INFO_TAG)
+        : undefined,
+
+      // source code information about frontend (this)
+      // fallback, values injected below
+      'import.meta.env.GIT_UI_INFO_SHA': undefined,
+      'import.meta.env.GIT_UI_INFO_REF': undefined,
+      'import.meta.env.GIT_UI_INFO_DATE': undefined,
 
       // deployment on subpath, default is "/" for root
       // see also the "base" configuration on top
@@ -238,6 +290,16 @@ export default defineConfig(({ mode }) => {
       // extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.yaml'],
     },
   } satisfies UserConfig
+
+  // inject source code information (git stuff)
+  const gitinfo = await gitInfo()
+  if (gitinfo !== null) {
+    Object.assign(baseConfig.define, {
+      'import.meta.env.GIT_UI_INFO_SHA': JSON.stringify(gitinfo.sha),
+      'import.meta.env.GIT_UI_INFO_REF': JSON.stringify(gitinfo.branch),
+      'import.meta.env.GIT_UI_INFO_DATE': JSON.stringify(gitinfo.date),
+    })
+  }
 
   // extract evaluated parameter values to update build configuration
   const paramLocalePrefix = JSON.parse(baseConfig.define['import.meta.env.I18N_NS_CONTEXT_PREFIX'])

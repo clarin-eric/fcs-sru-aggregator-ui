@@ -5,12 +5,15 @@ import { Link } from 'react-router'
 
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import AppStore from '@/stores/app'
+import { useLocaleStore } from '@/stores/locale'
 import { people, technologiesBackend, technologiesFrontEnd, type Technology } from './data'
 
 // --------------------------------------------------------------------------
 
 function About() {
   const { t } = useTranslation()
+
+  const userLocale = useLocaleStore((state) => state.locale)
 
   const i18nKeyTerms = 'urls.termsUseAndDisclaimer'
   const urlTerms = t(i18nKeyTerms, { ns: 'common' })
@@ -21,6 +24,12 @@ function About() {
   const appTitleHead = AppStore.getState().appTitleHead
 
   const [linkSearch] = useKeepSearchParams()
+
+  const hasApplicationVersionInfo =
+    import.meta.env.VITE_GIT_APP_INFO_TAG ||
+    import.meta.env.VITE_GIT_APP_INFO_TAG ||
+    import.meta.env.VITE_GIT_APP_INFO_REF ||
+    import.meta.env.GIT_APP_INFO_DATE
 
   // ------------------------------------------------------------------------
 
@@ -52,6 +61,11 @@ function About() {
           ))}
       </ul>
     )
+  }
+
+  function renderDateTime(datetime: string) {
+    const date = Date.parse(datetime)
+    return Intl.DateTimeFormat(userLocale, { dateStyle: 'medium', timeStyle: 'long' }).format(date)
   }
 
   // ------------------------------------------------------------------------
@@ -123,6 +137,54 @@ function About() {
             />
           </p>
           <p>{t('about.sourceCode.licenseInfo')}</p>
+        </div>
+
+        <div>
+          <h2 className="h2">{t('about.versions.title')}</h2>
+          {hasApplicationVersionInfo && (
+            <>
+              <p>{t('about.versions.backend.text')}</p>
+              <dl className="ms-4">
+                <dt>{t('about.versions.backend.lblVersion')}</dt>
+                <dd>{import.meta.env.APPLICATION_VERSION}</dd>
+                {import.meta.env.GIT_APP_INFO_SHA && (
+                  <>
+                    <dt>{t('about.versions.backend.lblSHA')}</dt>
+                    <dd>{import.meta.env.GIT_APP_INFO_SHA}</dd>
+                  </>
+                )}
+                {import.meta.env.VITE_GIT_APP_INFO_TAG && (
+                  <>
+                    <dt>{t('about.versions.backend.lblTag')}</dt>
+                    <dd>{import.meta.env.VITE_GIT_APP_INFO_TAG}</dd>
+                  </>
+                )}
+                {import.meta.env.VITE_GIT_APP_INFO_REF && (
+                  <>
+                    <dt>{t('about.versions.backend.lblRef')}</dt>
+                    <dd>{import.meta.env.VITE_GIT_APP_INFO_REF}</dd>
+                  </>
+                )}
+                {import.meta.env.GIT_APP_INFO_DATE && (
+                  <>
+                    <dt>{t('about.versions.backend.lblDate')}</dt>
+                    <dd>{renderDateTime(import.meta.env.GIT_APP_INFO_DATE)}</dd>
+                  </>
+                )}
+              </dl>
+            </>
+          )}
+          {hasApplicationVersionInfo && <p>{t('about.versions.frontend.text')}</p>}
+          <dl className={hasApplicationVersionInfo ? 'ms-4' : ''}>
+            <dt>{t('about.versions.frontend.lblVersion')}</dt>
+            <dd>{import.meta.env.UI_VERSION}</dd>
+            <dt>{t('about.versions.frontend.lblSHA')}</dt>
+            <dd>{import.meta.env.GIT_UI_INFO_SHA}</dd>
+            <dt>{t('about.versions.frontend.lblRef')}</dt>
+            <dd>{import.meta.env.GIT_UI_INFO_REF}</dd>
+            <dt>{t('about.versions.frontend.lblDate')}</dt>
+            <dd>{renderDateTime(import.meta.env.GIT_UI_INFO_DATE)}</dd>
+          </dl>
         </div>
 
         <div>

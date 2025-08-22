@@ -205,6 +205,24 @@
       "termsInfo": "General information about data collection and terms of use can be found at <0>clarin.eu</0>.",
       "matomoInfo": "We collect anonymous user statistics with <0>Matomo</0> to continuously improve our website. You will automatically opt-out of tracking by using most script or ad blockers as well as enabling the Do-Not-Track option in your browser."
     },
+    "versions": {
+      "title": "Version Information",
+      "backend": {
+        "text": "Application (Web Server, FCS Aggregator)",
+        "lblVersion": "Application version number",
+        "lblSHA": "Last git commit id",
+        "lblTag": "Last git tag",
+        "lblRef": "Active git branch/ref",
+        "lblDate": "Date and time of change in the code base"
+      },
+      "frontend": {
+        "text": "Web Frontend",
+        "lblVersion": "Version",
+        "lblSHA": "Last git commit id",
+        "lblRef": "Active git branch/ref",
+        "lblDate": "Date and time of change in the code base"
+      }
+    },
     "sourceCode": {
       "title": "Source Code",
       "sourceInfo": {
