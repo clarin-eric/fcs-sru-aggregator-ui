@@ -1,6 +1,7 @@
 {
   "urls": {
     "contact": "https://www.text-plus.org/kontakt/",
-    "termsUseAndDisclaimer": "https://text-plus.org/privacy-policy/"
+    "termsUseAndDisclaimer": "https://text-plus.org/privacy-policy/",
+    "helpWithTranslations": "https://github.com/clarin-eric/fcs-sru-aggregator-ui/tree/main/src/locales"
   }
 }

@@ -11,8 +11,8 @@
   },
   "search": {
     "intro": {
-      "textGeneral": "Die Federated Content Search (FCS) ist eine Suchmaschine in Text+, mit der Forscher gezielt nach spezifischen Mustern in verteilten Datensammlungen suchen können. Die Daten selbst befinden sich dabei weiterhin an den Institutionen, in denen sie gehostet werden – daher wird die zugrunde liegende Technik als <em>“Federated Content Search”</em> (verteilte Inhaltssuche) bezeichnet.",
-      "textLearnMore": "Weitere Informationen zum FCS finden Sie auf der Seite <0><em>Föderierte Inhaltssuche</em> unter text-plus.org</0>.",
+      "textGeneral": "Die Federated Content Search (FCS) ist eine Suchmaschine in Text+ mit der Forscher gezielt nach spezifischen Mustern in verteilten Datensammlungen suchen können. Die Daten selbst befinden sich dabei weiterhin an den Institutionen, in denen sie gehostet werden – daher wird die zugrunde liegende Technik als <em>“Federated Content Search”</em> (verteilte Inhaltssuche) bezeichnet.",
+      "textLearnMore": "Weitere Informationen zur FCS finden Sie auf der Seite <0><em>Föderierte Inhaltssuche</em> unter text-plus.org</0>.",
       "url": "https://text-plus.org/daten-dienste/daten/#f%C3%B6derierte-inhaltssuche"
     }
   }
