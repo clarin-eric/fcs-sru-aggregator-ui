@@ -280,34 +280,36 @@ function ViewAdvancedTabular({ data, resource }: ViewAdvancedTabularProps) {
           </tr>
         </thead>
         <tbody>
-          {data.records.map((record, index) => (
-            <tr key={`${record.pid ?? record.ref ?? data.resource.id}-${index}`}>
-              <td scope="row" className="result-idx text-end text-muted d-none d-sm-table-cell">
-                {index + 1}
-              </td>
-              <td scope="row" className="result-refs">
-                {record.ref && (
-                  <a href={record.ref} className="matomo_link" target="_blank">
-                    <i dangerouslySetInnerHTML={{ __html: link45degIcon }} />
-                  </a>
-                )}{' '}
-                {record.pid && (
-                  <OverlayTrigger
-                    placement="auto-start"
-                    container={ref}
-                    delay={{ show: 250, hide: 400 }}
-                    overlay={<Tooltip id={`ttip-${record.pid}-${index}`}>{record.pid}</Tooltip>}
-                  >
-                    {/* TODO: maybe with on mouse-over stay? see: https://github.com/react-bootstrap/react-bootstrap/issues/1622*/}
-                    <Badge bg="secondary" className="pid-badge">
-                      PID
-                    </Badge>
-                  </OverlayTrigger>
-                )}
-              </td>
-              <td>{renderAdvancedLayers(record.adv)}</td>
-            </tr>
-          ))}
+          {data.records
+            .filter((record) => record.adv !== null)
+            .map((record, index) => (
+              <tr key={`${record.pid ?? record.ref ?? data.resource.id}-${index}`}>
+                <td scope="row" className="result-idx text-end text-muted d-none d-sm-table-cell">
+                  {index + 1}
+                </td>
+                <td scope="row" className="result-refs">
+                  {record.ref && (
+                    <a href={record.ref} className="matomo_link" target="_blank">
+                      <i dangerouslySetInnerHTML={{ __html: link45degIcon }} />
+                    </a>
+                  )}{' '}
+                  {record.pid && (
+                    <OverlayTrigger
+                      placement="auto-start"
+                      container={ref}
+                      delay={{ show: 250, hide: 400 }}
+                      overlay={<Tooltip id={`ttip-${record.pid}-${index}`}>{record.pid}</Tooltip>}
+                    >
+                      {/* TODO: maybe with on mouse-over stay? see: https://github.com/react-bootstrap/react-bootstrap/issues/1622*/}
+                      <Badge bg="secondary" className="pid-badge">
+                        PID
+                      </Badge>
+                    </OverlayTrigger>
+                  )}
+                </td>
+                <td>{renderAdvancedLayers(record.adv!)}</td>
+              </tr>
+            ))}
         </tbody>
       </Table>
       {/* overlay mounting point to avoid flickering due to redrawing */}
