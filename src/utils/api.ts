@@ -377,8 +377,8 @@ export interface ResultRecord {
   lang: string | null
 
   hits: Kwic
-  adv: AdvancedLayer[]
-  lex: LexEntry
+  adv: AdvancedLayer[] | null
+  lex: LexEntry | null
 }
 
 export interface Kwic {
