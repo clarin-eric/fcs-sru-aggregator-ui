@@ -8,6 +8,9 @@
     "type": "git",
     "url": "https://github.com/clarin-eric/fcs-sru-aggregator-ui.git"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "preview": "vite preview",
