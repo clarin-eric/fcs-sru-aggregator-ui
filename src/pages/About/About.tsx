@@ -1,4 +1,6 @@
+import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
 import { Helmet } from 'react-helmet-async'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -30,6 +32,9 @@ function About() {
     import.meta.env.VITE_GIT_APP_INFO_TAG ||
     import.meta.env.VITE_GIT_APP_INFO_REF ||
     import.meta.env.GIT_APP_INFO_DATE
+
+  // whether to show two column info with backend and frontend (or just the frontend)
+  const showBackendInfos = hasApplicationVersionInfo
 
   // ------------------------------------------------------------------------
 
@@ -141,58 +146,91 @@ function About() {
 
         <div>
           <h2 className="h2">{t('about.versions.title')}</h2>
-          {hasApplicationVersionInfo && (
-            <>
-              <p>{t('about.versions.backend.text')}</p>
-              <dl className="ms-4">
-                <dt>{t('about.versions.backend.lblVersion')}</dt>
-                <dd>{import.meta.env.APPLICATION_VERSION}</dd>
-                {import.meta.env.GIT_APP_INFO_SHA && (
-                  <>
-                    <dt>{t('about.versions.backend.lblSHA')}</dt>
-                    <dd>{import.meta.env.GIT_APP_INFO_SHA}</dd>
-                  </>
-                )}
-                {import.meta.env.VITE_GIT_APP_INFO_TAG && (
-                  <>
-                    <dt>{t('about.versions.backend.lblTag')}</dt>
-                    <dd>{import.meta.env.VITE_GIT_APP_INFO_TAG}</dd>
-                  </>
-                )}
-                {import.meta.env.VITE_GIT_APP_INFO_REF && (
-                  <>
-                    <dt>{t('about.versions.backend.lblRef')}</dt>
-                    <dd>{import.meta.env.VITE_GIT_APP_INFO_REF}</dd>
-                  </>
-                )}
-                {import.meta.env.GIT_APP_INFO_DATE && (
-                  <>
-                    <dt>{t('about.versions.backend.lblDate')}</dt>
-                    <dd>{renderDateTime(import.meta.env.GIT_APP_INFO_DATE)}</dd>
-                  </>
-                )}
+          <Row>
+            {showBackendInfos && hasApplicationVersionInfo && (
+              <Col md={12} lg={6}>
+                <p>{t('about.versions.backend.text')}</p>
+                <dl className="ms-4">
+                  <dt>{t('about.versions.backend.lblVersion')}</dt>
+                  <dd>
+                    <code>{import.meta.env.APPLICATION_VERSION}</code>
+                  </dd>
+                  {import.meta.env.GIT_APP_INFO_SHA && (
+                    <>
+                      <dt>{t('about.versions.backend.lblSHA')}</dt>
+                      <dd>
+                        <code>{import.meta.env.GIT_APP_INFO_SHA}</code>
+                      </dd>
+                    </>
+                  )}
+                  {import.meta.env.VITE_GIT_APP_INFO_TAG && (
+                    <>
+                      <dt>{t('about.versions.backend.lblTag')}</dt>
+                      <dd>
+                        <code>{import.meta.env.VITE_GIT_APP_INFO_TAG}</code>
+                      </dd>
+                    </>
+                  )}
+                  {import.meta.env.VITE_GIT_APP_INFO_REF && (
+                    <>
+                      <dt>{t('about.versions.backend.lblRef')}</dt>
+                      <dd>
+                        <code>{import.meta.env.VITE_GIT_APP_INFO_REF}</code>
+                      </dd>
+                    </>
+                  )}
+                  {import.meta.env.GIT_APP_INFO_DATE && (
+                    <>
+                      <dt>{t('about.versions.backend.lblDate')}</dt>
+                      <dd>{renderDateTime(import.meta.env.GIT_APP_INFO_DATE)}</dd>
+                    </>
+                  )}
+                </dl>
+              </Col>
+            )}
+            <Col md={12} lg={showBackendInfos && hasApplicationVersionInfo ? 6 : 12}>
+              {showBackendInfos && hasApplicationVersionInfo && (
+                <p>{t('about.versions.frontend.text')}</p>
+              )}
+              <dl className={hasApplicationVersionInfo ? 'ms-4' : ''}>
+                <dt>{t('about.versions.frontend.lblVersion')}</dt>
+                <dd>
+                  <code>{import.meta.env.UI_VERSION}</code>
+                </dd>
+                <dt>{t('about.versions.frontend.lblSHA')}</dt>
+                <dd>
+                  <code>{import.meta.env.GIT_UI_INFO_SHA}</code>
+                </dd>
+                {import.meta.env.GIT_UI_INFO_REF &&
+                  import.meta.env.GIT_UI_INFO_REF !== import.meta.env.GIT_UI_INFO_SHA && (
+                    <>
+                      <dt>{t('about.versions.frontend.lblRef')}</dt>
+                      <dd>
+                        <code>{import.meta.env.GIT_UI_INFO_REF}</code>
+                      </dd>
+                    </>
+                  )}
+                <dt>{t('about.versions.frontend.lblDate')}</dt>
+                <dd>{renderDateTime(import.meta.env.GIT_UI_INFO_DATE)}</dd>
               </dl>
-            </>
-          )}
-          {hasApplicationVersionInfo && <p>{t('about.versions.frontend.text')}</p>}
-          <dl className={hasApplicationVersionInfo ? 'ms-4' : ''}>
-            <dt>{t('about.versions.frontend.lblVersion')}</dt>
-            <dd>{import.meta.env.UI_VERSION}</dd>
-            <dt>{t('about.versions.frontend.lblSHA')}</dt>
-            <dd>{import.meta.env.GIT_UI_INFO_SHA}</dd>
-            <dt>{t('about.versions.frontend.lblRef')}</dt>
-            <dd>{import.meta.env.GIT_UI_INFO_REF}</dd>
-            <dt>{t('about.versions.frontend.lblDate')}</dt>
-            <dd>{renderDateTime(import.meta.env.GIT_UI_INFO_DATE)}</dd>
-          </dl>
+            </Col>
+          </Row>
         </div>
 
         <div>
           <h2 className="h2">{t('about.technology.title')}</h2>
-          <p>{t('about.technology.backendUses')}</p>
-          {renderTechnologiesList(technologiesBackend)}
-          <p>{t('about.technology.frontendUses')}</p>
-          {renderTechnologiesList(technologiesFrontEnd)}
+          <Row>
+            {showBackendInfos && (
+              <Col md={12} lg={6}>
+                <p>{t('about.technology.backendUses')}</p>
+                {renderTechnologiesList(technologiesBackend)}
+              </Col>
+            )}
+            <Col md={12} lg={showBackendInfos ? 6 : 12}>
+              <p>{t('about.technology.frontendUses')}</p>
+              {renderTechnologiesList(technologiesFrontEnd)}
+            </Col>
+          </Row>
           {/* TODO: [text] fancy FCS logo by ... */}
           <p>
             <Trans
