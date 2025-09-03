@@ -25,7 +25,11 @@ interface InstallScriptParams {
   srcUrl: string
 }
 
-export type SetupAndInstallScriptParams = SetupParams & InstallScriptParams
+interface OptOutScriptParams {
+  indexUrl?: string
+}
+
+export type SetupAndInstallScriptParams = SetupParams & InstallScriptParams & OptOutScriptParams
 
 // --------------------------------------------------------------------------
 
@@ -74,24 +78,41 @@ export function installScript({ srcUrl }: InstallScriptParams) {
   }
 }
 
-export function setupAndInstallFromConfigString(
-  configString?: string | SetupAndInstallScriptParams | null
-) {
-  if (!configString) return false
+export function getConfig(configString: string | SetupAndInstallScriptParams | null | undefined) {
+  if (!configString) return null
 
-  let params = null
+  let params: SetupAndInstallScriptParams | null = null
   if (typeof configString === 'string') {
     try {
       params = JSON.parse(configString)
       console.debug('tracking params', params)
     } catch (error) {
       console.error('Error trying to parse tracking params!', error)
-      return false
+      return null
     }
   } else if (typeof configString === 'object') {
     params = configString
     console.debug('tracking params (object)', params)
   }
+
+  if (params) {
+    if (!Object.hasOwn(params, 'indexUrl') && Object.hasOwn(params, 'srcUrl')) {
+      const srcUrl = params['srcUrl']
+      const baseUrl = srcUrl.split('/').slice(0, -1).join('/')
+      const indexUrl = `${baseUrl}/index.php`
+      console.debug('Computed matomo indexUrl=', indexUrl, ' from srcUrl=', srcUrl)
+      params['indexUrl'] = indexUrl
+    }
+  }
+
+  return params
+}
+
+export function setupAndInstallFromConfigString(
+  configString?: string | SetupAndInstallScriptParams | null
+) {
+  const params = getConfig(configString)
+  if (params === null) return false
 
   const siteId = params['siteId']
   const trackerUrl = params['trackerUrl']

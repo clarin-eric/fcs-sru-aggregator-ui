@@ -254,7 +254,7 @@ export default defineConfig(async ({ mode }) => {
       // params = { srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }
       'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': process.env
         .VITE_FEATURE_TRACKING_MATOMO_PARAMS
-        ? `${process.env.VITE_FEATURE_TRACKING_MATOMO_PARAMS}`
+        ? JSON.stringify(process.env.VITE_FEATURE_TRACKING_MATOMO_PARAMS)
         : JSON.stringify(null),
 
       // enable visual query builder

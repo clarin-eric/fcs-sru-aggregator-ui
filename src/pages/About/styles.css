@@ -1,0 +1,3 @@
+#matomo-opt-out-container:not(:has(#matomo-opt-out > *)) {
+  display: none;
+}

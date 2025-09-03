@@ -113,7 +113,9 @@ function Search() {
                 <br />
                 <ul className="ps-3">
                   {(resourcesByAuth.get(false) ?? []).map((rid) => (
-                    <li style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>{rid}</li>
+                    <li key={rid} style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>
+                      {rid}
+                    </li>
                   ))}
                 </ul>
               </>

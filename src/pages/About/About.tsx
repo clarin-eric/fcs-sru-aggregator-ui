@@ -1,3 +1,4 @@
+import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
@@ -6,9 +7,13 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
+import useScript from '@/hooks/useScript'
 import AppStore from '@/stores/app'
 import { useLocaleStore } from '@/stores/locale'
+import { getConfig } from '@/utils/matomo'
 import { people, technologiesBackend, technologiesFrontEnd, type Technology } from './data'
+
+import './styles.css'
 
 // --------------------------------------------------------------------------
 
@@ -22,6 +27,13 @@ function About() {
 
   const hasTerms = urlTerms !== i18nKeyTerms
   const hasMatomo = AppStore.getState().matomoTrackingEnabled
+  const matomoIndexUrl = getConfig(AppStore.getState().matomoTrackingParams)?.['indexUrl']
+  const matomoOptOutScript = matomoIndexUrl
+    ? `${matomoIndexUrl}?module=CoreAdminHome&action=optOutJS&language=auto&div=matomo-opt-out`
+    : null
+
+  // need to add script like this to work (add a bit of delay in case rending might take a bit)
+  useScript(matomoOptOutScript, { delay: 300 })
 
   const appTitleHead = AppStore.getState().appTitleHead
 
@@ -119,13 +131,21 @@ function About() {
               </p>
             )}
             {hasMatomo && (
-              <p>
-                <Trans
-                  i18nKey="about.privacyPolicy.matomoInfo"
-                  components={[<a href="https://matomo.org/">Matomo</a>]}
-                />
-                {/* TODO: [text] You can explicitely opt-out by using the following form ... */}
-              </p>
+              <>
+                <p>
+                  <Trans
+                    i18nKey="about.privacyPolicy.matomoInfo"
+                    components={[<a href="https://matomo.org/">Matomo</a>]}
+                  />
+                  {/* TODO: [text] You can explicitely opt-out by using the following form ... */}
+                </p>
+
+                {matomoOptOutScript && (
+                  <Card className="mb-3" id="matomo-opt-out-container">
+                    <Card.Body id="matomo-opt-out" />
+                  </Card>
+                )}
+              </>
             )}
           </div>
         )}
