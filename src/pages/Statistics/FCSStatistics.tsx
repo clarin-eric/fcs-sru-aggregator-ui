@@ -115,6 +115,23 @@ function sortBySURT(urlA: string, urlB: string) {
   return 0
 }
 
+const searchCapabilityPriority: Map<SearchCapability, number> = new Map([
+  ['BASIC_SEARCH', 0],
+  ['ADVANCED_SEARCH', 1],
+  ['LEX_SEARCH', 2],
+  ['AUTHENTICATED_SEARCH', 3],
+])
+
+function compareSearchCapability(capabilityA: SearchCapability, capabilityB: SearchCapability) {
+  const priorityA = searchCapabilityPriority.get(capabilityA)
+  const priorityB = searchCapabilityPriority.get(capabilityB)
+  // any unknown value is moved to end
+  if (priorityA === undefined) return +1
+  if (priorityB === undefined) return -1
+  // default sort (with lookup searchCapabilityPriority)
+  return priorityA - priorityB
+}
+
 // --------------------------------------------------------------------------
 // component
 
@@ -238,6 +255,13 @@ function FCSStatistics() {
     map.get(tld)!.push(url)
     return map
   }, new Map<string, string[]>())
+  const endpointURLsWithSearchCapabilities = flatResources.reduce((map, resource) => {
+    const url = resource.endpoint.url
+    if (!map.has(url)) map.set(url, new Set())
+    const searchCapabilities = map.get(url)!
+    resource.endpoint.searchCapabilities.forEach((capability) => searchCapabilities.add(capability))
+    return map
+  }, new Map<string, Set<SearchCapability>>())
 
   const institutionsWithResources = flatResources.reduce((map, resource) => {
     const institution =
@@ -316,6 +340,74 @@ function FCSStatistics() {
   // ------------------------------------------------------------------------
   // rendering
 
+  function shortCapabilitiesForUrls(urls: string[]) {
+    return (
+      Array.from(
+        urls
+          .map((url) => endpointURLsWithSearchCapabilities.get(url))
+          .filter((caps) => caps !== undefined)
+          .reduce((set, caps) => {
+            caps.forEach((cap) => set.add(cap))
+            return set
+          }, new Set<SearchCapability>())
+      )
+        // .filter((cap) => cap !== 'BASIC_SEARCH')
+        .toSorted(compareSearchCapability)
+        .map((cap) => (cap.endsWith('_SEARCH') ? cap.substring(0, cap.indexOf('_SEARCH')) : cap))
+    )
+  }
+
+  function renderInstitutionsTable() {
+    return (
+      <Table hover responsive className="mt-2">
+        <thead>
+          <tr>
+            <th scope="col">{t('statistics.fcs.thInstitutionName')}</th>
+            <th scope="col">{t('statistics.fcs.thCountResources')}</th>
+            <th scope="col">{t('statistics.fcs.thSearchCapabilities')}</th>
+            {import.meta.env.SHOW_CONSORTIA_INFO && (
+              <th scope="col">{t('statistics.fcs.thConsortia')}</th>
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from(
+            (selectedResourceInstitutionVariantOption === 'hoster'
+              ? endpointInstitutionsWithResources
+              : institutionsWithResources
+            ).entries()
+          )
+            .toSorted()
+            .map(([institution, resources]) => {
+              const urls = Array.from(
+                resources
+                  .map((resource) => resource.endpoint.url)
+                  .reduce((set, url) => set.add(url), new Set<string>())
+              )
+              const capabilities = shortCapabilitiesForUrls(urls)
+              const consortia = import.meta.env.SHOW_CONSORTIA_INFO
+                ? Array.from(
+                    resources
+                      .map((resource) => resource.endpointInstitution.consortium)
+                      .filter((consortium) => consortium !== undefined)
+                      .reduce((set, consortium) => set.add(consortium), new Set<string>())
+                  )
+                : []
+
+              return (
+                <tr key={institution}>
+                  <td>{institution}</td>
+                  <td>{resources.length}</td>
+                  <td>{capabilities.join(', ')}</td>
+                  {import.meta.env.SHOW_CONSORTIA_INFO && <td>{consortia.join(', ')}</td>}
+                </tr>
+              )
+            })}
+        </tbody>
+      </Table>
+    )
+  }
+
   function renderEndpointURLTable() {
     if (selectedEndpointURLVariantOption === 'tld') {
       return (
@@ -325,19 +417,37 @@ function FCSStatistics() {
               <th scope="col">{t('statistics.fcs.thEndpointDomain')}</th>
               <th scope="col">{t('statistics.fcs.thCountURLsForDomain')}</th>
               <th scope="col">{t('statistics.fcs.thCountResources')}</th>
+              <th scope="col">{t('statistics.fcs.thSearchCapabilities')}</th>
+              {import.meta.env.SHOW_CONSORTIA_INFO && (
+                <th scope="col">{t('statistics.fcs.thConsortia')}</th>
+              )}
             </tr>
           </thead>
           <tbody>
             {Array.from(endpointTLDsWithURLs.entries())
               .toSorted(([tldA], [tldB]) => sortBySURT(`http://${tldA}`, `http://${tldB}`))
               .map(([domain, urls]) => {
-                const resources = urls.map((url) => endpointURLsWithResources.get(url)).flat()
+                const resources = urls
+                  .map((url) => endpointURLsWithResources.get(url))
+                  .filter((list) => list !== undefined)
+                  .flat()
+                const capabilities = shortCapabilitiesForUrls(urls)
+                const consortia = import.meta.env.SHOW_CONSORTIA_INFO
+                  ? Array.from(
+                      resources
+                        .map((resource) => resource.endpointInstitution.consortium)
+                        .filter((consortium) => consortium !== undefined)
+                        .reduce((set, consortium) => set.add(consortium), new Set<string>())
+                    )
+                  : []
 
                 return (
                   <tr key={domain}>
                     <td>{domain}</td>
                     <td>{urls.length}</td>
                     <td>{resources.length}</td>
+                    <td>{capabilities.join(', ')}</td>
+                    {import.meta.env.SHOW_CONSORTIA_INFO && <td>{consortia.join(', ')}</td>}
                   </tr>
                 )
               })}
@@ -354,19 +464,37 @@ function FCSStatistics() {
               <th scope="col">{t('statistics.fcs.thEndpointDomain')}</th>
               <th scope="col">{t('statistics.fcs.thCountURLsForDomain')}</th>
               <th scope="col">{t('statistics.fcs.thCountResources')}</th>
+              <th scope="col">{t('statistics.fcs.thSearchCapabilities')}</th>
+              {import.meta.env.SHOW_CONSORTIA_INFO && (
+                <th scope="col">{t('statistics.fcs.thConsortia')}</th>
+              )}
             </tr>
           </thead>
           <tbody>
             {Array.from(endpointDomainsWithURLs.entries())
               .toSorted(([urlA], [urlB]) => sortBySURT(`http://${urlA}`, `http://${urlB}`))
               .map(([domain, urls]) => {
-                const resources = urls.map((url) => endpointURLsWithResources.get(url)).flat()
+                const resources = urls
+                  .map((url) => endpointURLsWithResources.get(url))
+                  .filter((list) => list !== undefined)
+                  .flat()
+                const capabilities = shortCapabilitiesForUrls(urls)
+                const consortia = import.meta.env.SHOW_CONSORTIA_INFO
+                  ? Array.from(
+                      resources
+                        .map((resource) => resource.endpointInstitution.consortium)
+                        .filter((consortium) => consortium !== undefined)
+                        .reduce((set, consortium) => set.add(consortium), new Set<string>())
+                    )
+                  : []
 
                 return (
                   <tr key={domain}>
                     <td>{domain}</td>
                     <td>{urls.length}</td>
                     <td>{resources.length}</td>
+                    <td>{capabilities.join(', ')}</td>
+                    {import.meta.env.SHOW_CONSORTIA_INFO && <td>{consortia.join(', ')}</td>}
                   </tr>
                 )
               })}
@@ -381,17 +509,35 @@ function FCSStatistics() {
           <tr>
             <th scope="col">{t('statistics.fcs.thEndpointUrl')}</th>
             <th scope="col">{t('statistics.fcs.thCountResources')}</th>
+            <th scope="col">{t('statistics.fcs.thSearchCapabilities')}</th>
+            {import.meta.env.SHOW_CONSORTIA_INFO && (
+              <th scope="col">{t('statistics.fcs.thConsortium')}</th>
+            )}
           </tr>
         </thead>
         <tbody>
           {Array.from(endpointURLsWithResources.entries())
             .toSorted(([urlA], [urlB]) => sortBySURT(urlA, urlB))
-            .map(([url, resources]) => (
-              <tr key={url}>
-                <td>{url}</td>
-                <td>{resources.length}</td>
-              </tr>
-            ))}
+            .map(([url, resources]) => {
+              const capabilities = shortCapabilitiesForUrls([url])
+              const consortia = import.meta.env.SHOW_CONSORTIA_INFO
+                ? Array.from(
+                    resources
+                      .map((resource) => resource.endpointInstitution.consortium)
+                      .filter((consortium) => consortium !== undefined)
+                      .reduce((set, consortium) => set.add(consortium), new Set<string>())
+                  )
+                : []
+
+              return (
+                <tr key={url}>
+                  <td>{url}</td>
+                  <td>{resources.length}</td>
+                  <td>{capabilities.join(', ')}</td>
+                  {import.meta.env.SHOW_CONSORTIA_INFO && <td>{consortia.join(', ')}</td>}
+                </tr>
+              )
+            })}
         </tbody>
       </Table>
     )
@@ -467,10 +613,16 @@ function FCSStatistics() {
               <td scope="row">{t('statistics.fcs.tdLabelInstitutionCount')}</td>
               <td>{endpointInstitutionsWithResources.size}</td>
             </tr>
+            {import.meta.env.SHOW_CONSORTIA_INFO && consortiaWithResources.size > 1 && (
+              <tr>
+                <td scope="row">{t('statistics.fcs.tdLabelConsortiaCount')}</td>
+                <td>{consortiaWithResources.size}</td>
+              </tr>
+            )}
           </tbody>
         </Table>
 
-        {import.meta.env.SHOW_CONSORTIA_INFO && (
+        {import.meta.env.SHOW_CONSORTIA_INFO && consortiaWithResources.size > 1 && (
           <>
             <h4 className="h5 pb-1 mb-3 border-bottom" id="consortia">
               {t('statistics.fcs.titleConsortia')}
@@ -485,36 +637,43 @@ function FCSStatistics() {
                       <th scope="col">{t('statistics.fcs.thConsortium')}</th>
                       <th scope="col">{t('statistics.fcs.thCountEndpoints')}</th>
                       <th scope="col">{t('statistics.fcs.thCountResources')}</th>
+                      <th scope="col">{t('statistics.fcs.thSearchCapabilities')}</th>
                       <th scope="col">{t('statistics.fcs.thActions')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Array.from(consortiaWithResources.entries()).map(
-                      ([consortium, { resources, endpoints }]) => (
-                        <tr
-                          key={consortium}
-                          className={
-                            consortium && consortia.includes(consortium)
-                              ? 'table-primary'
-                              : undefined
-                          }
-                        >
-                          <td>{consortium ?? t('statistics.fcs.tdNoConsortium')}</td>
-                          <td>{endpoints.size}</td>
-                          <td>{resources.length}</td>
-                          <td className={consortium === null ? '' : 'py-0 align-middle'}>
-                            {consortium === null ? (
-                              '–'
-                            ) : (
-                              <Button size="sm" onClick={() => toggleConsortium(consortium)}>
-                                {t('statistics.fcs.btnToggleConsortium', {
-                                  context: consortia.includes(consortium) ? 'remove' : 'add',
-                                })}
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      )
+                      ([consortium, { resources, endpoints }]) => {
+                        const urls = Array.from(endpoints)
+                        const capabilities = shortCapabilitiesForUrls(urls)
+
+                        return (
+                          <tr
+                            key={consortium}
+                            className={
+                              consortium && consortia.includes(consortium)
+                                ? 'table-primary'
+                                : undefined
+                            }
+                          >
+                            <td>{consortium ?? t('statistics.fcs.tdNoConsortium')}</td>
+                            <td>{endpoints.size}</td>
+                            <td>{resources.length}</td>
+                            <td>{capabilities.join(', ')}</td>
+                            <td className={consortium === null ? '' : 'py-0 align-middle'}>
+                              {consortium === null ? (
+                                '–'
+                              ) : (
+                                <Button size="sm" onClick={() => toggleConsortium(consortium)}>
+                                  {t('statistics.fcs.btnToggleConsortium', {
+                                    context: consortia.includes(consortium) ? 'remove' : 'add',
+                                  })}
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        )
+                      }
                     )}
                   </tbody>
                 </Table>
@@ -562,27 +721,7 @@ function FCSStatistics() {
               </Col>
             </Form>
 
-            <Table hover responsive className="mt-2">
-              <thead>
-                <tr>
-                  <th scope="col">{t('statistics.fcs.thInstitutionName')}</th>
-                  <th scope="col">{t('statistics.fcs.thCountResources')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from(
-                  (selectedResourceInstitutionVariantOption === 'hoster'
-                    ? endpointInstitutionsWithResources
-                    : institutionsWithResources
-                  ).entries()
-                ).map(([institution, resources]) => (
-                  <tr key={institution}>
-                    <td>{institution}</td>
-                    <td>{resources.length}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+            {renderInstitutionsTable()}
           </Card.Body>
         </Card>
 

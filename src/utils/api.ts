@@ -91,7 +91,11 @@ export type Consortium =
   | 'SWE-CLARIN'
   | string
 
-export type SearchCapability = 'BASIC_SEARCH' | 'ADVANCED_SEARCH' | 'LEX_SEARCH'
+export type SearchCapability =
+  | 'BASIC_SEARCH'
+  | 'ADVANCED_SEARCH'
+  | 'LEX_SEARCH'
+  | 'AUTHENTICATED_SEARCH'
 export type ProtocolVersion = 'VERSION_2' | 'VERSION_1' | 'LEGACY'
 export type AvailabilityRestriction = 'NONE' | 'AUTH_ONLY' | 'PERSONAL_IDENTIFIER'
 
