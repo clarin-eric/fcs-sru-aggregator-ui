@@ -83,9 +83,9 @@ The bundle can be pre-configured by adjusting the `import.meta.env.` constants f
       - `userId`: string, optional, will be hashed with [cyrb53](https://stackoverflow.com/a/52171480/9360161), for `setUserId`
       - `srcUrl`: URL for JS script source to load Matomo/Piwik script, required, likely something like `<baseUrl>/matomo.js`
       - NOTE: if not set or any required value is likely invalid, then tracking will not be configured!
-  - `FEATURE_QUERY_BUILDER`: boolean, whether to include a _Visual Query Builder_ (FCS-QL). If not specified (or explicitely set to `true`) then it will be excluded from the generated build. Enabling it, multiple output files will be generated, a `vendor/antlr.js` chunk as well as `*-query-builder-*.{js,css}` files that will be dynamically loaded when the UI requires them.
+  - `FEATURE_QUERY_BUILDER`: boolean, whether to include a _Visual Query Builder_ (FCS-QL). If not specified (or explicitely set to `true`) then it will be excluded from the generated build. Enabling it, multiple output files will be generated, a `vendor/antlr.js` chunk as well as `*-query-builder.{js,css}` files that will be dynamically loaded when the UI requires them.
 
-Runtime configuration can be set using the `window.MyAggregator` object and needs to be included before the application script [`fcs-sru-aggregator-ui-X.Y.Z.js`](dist/lib/) is being loaded. They are completely optional but can be used to override bundle configuration.
+Runtime configuration can be set using the `window.MyAggregator` object and needs to be included before the application script [`fcs-sru-aggregator-ui.js`](dist/lib/) is being loaded. They are completely optional but can be used to override bundle configuration.
 
 - `DEPLOY_PATH`: the basename of the application, e.g. if deployed on some subpath like `example.org/aggregator/` use `/aggregator`, by default `/`
 - `API_URL`: the base URL to the FCS SRU Aggregator REST API, e.g. `https://contentsearch.clarin.eu/rest/`

@@ -261,9 +261,14 @@ export default defineConfig(async ({ mode }) => {
       'import.meta.env.FEATURE_QUERY_BUILDER': process.env.VITE_FEATURE_QUERY_BUILDER
         ? `${process.env.VITE_FEATURE_QUERY_BUILDER}`
         : JSON.stringify(true),
-      // enable authentication (login/logout etc.)
+      // [build-time] enable authentication (login/logout etc.) - is included in bundle
       'import.meta.env.FEATURE_AUTHENTICATION': process.env.VITE_FEATURE_AUTHENTICATION
         ? `${process.env.VITE_FEATURE_AUTHENTICATION}`
+        : JSON.stringify(true),
+      // [run-time] enable auth features on site (only works if included in bundle with FEATURE_AUTHENTICATION)
+      // allows to disable auth features for prebuilt bundles
+      'import.meta.env.FEATURE_AUTHENTICATION_ENABLED': process.env.VITE_FEATURE_AUTHENTICATION_ENABLED
+        ? `${process.env.VITE_FEATURE_AUTHENTICATION_ENABLED}`
         : JSON.stringify(true),
 
       'import.meta.env.LOCALE': process.env.VITE_LOCALE

@@ -60,6 +60,7 @@ function Search() {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
   const appTitleHead = AppStore.getState().appTitleHead
+  const authEnabled = AppStore.getState().authEnabled
   const isAuthenticated = AppStore.getState().isAuthenticated
 
   // ------------------------------------------------------------------------
@@ -85,7 +86,7 @@ function Search() {
     setResources(newResources)
 
     // initialization (hack) to select all resources
-    if (import.meta.env.FEATURE_AUTHENTICATION) {
+    if (import.meta.env.FEATURE_AUTHENTICATION && authEnabled) {
       // filter resources by authentication, free === true, false otherwise
       const resourcesByAuth = getResourceIDsBySplit(newResources, (resource: Resource) =>
         resource.availabilityRestriction === 'NONE' ? true : false
@@ -129,7 +130,7 @@ function Search() {
     } else {
       setSearchResourceIDs(getResourceIDs(newResources))
     }
-  }, [data, isAuthenticated, t])
+  }, [data, authEnabled, isAuthenticated, t])
 
   useEffect(() => {
     console.debug('searchParams', urlSearchParams)

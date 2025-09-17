@@ -29,6 +29,7 @@ function Header() {
 
   // const AppStoreReactive = useStore(AppStore)
   // const authName = AppStoreReactive.authUsername
+  const authEnabled = AppStore.getState().authEnabled
   const authName = AppStore.getState().authUsername
   const isAuthenticated = AppStore.getState().isAuthenticated
 
@@ -56,6 +57,7 @@ function Header() {
 
   function renderAuth() {
     if (!import.meta.env.FEATURE_AUTHENTICATION) return null
+    if (!authEnabled) return null
 
     if (isAuthenticated) {
       return (
@@ -71,7 +73,7 @@ function Header() {
 
     // unauthorized
     return (
-      <Nav.Link href={`${loginPath}${linkSearch ?? ''}`}>
+      <Nav.Link href={`${loginPath}${linkSearch ?? ''}`} disabled={!authEnabled}>
         <i dangerouslySetInnerHTML={{ __html: personIcon }} className="d-md-inline d-none" />{' '}
         {t('header.login.login')}
       </Nav.Link>

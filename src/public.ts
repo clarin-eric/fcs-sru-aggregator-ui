@@ -12,6 +12,7 @@ type MyAggregatorConfiguration = {
   APP_TITLE: string
   APP_TITLE_HEAD: string
   MATOMO_TRACKING_PARAMS: string | MatomoSetupParams | null
+  AUTH_ENABLED: boolean
   AUTH_USERNAME: string | null
 }
 
@@ -71,6 +72,9 @@ export function configure() {
     }
   }
   if (import.meta.env.FEATURE_AUTHENTICATION) {
+    if (window.MyAggregator.AUTH_ENABLED !== undefined) {
+      AppStore.getState().setAuthEnabled(window.MyAggregator.AUTH_ENABLED)
+    }
     if (window.MyAggregator.AUTH_USERNAME !== undefined) {
       AppStore.getState().setAuthUsername(window.MyAggregator.AUTH_USERNAME)
     }
@@ -109,6 +113,14 @@ export function configure() {
           if (val === null || typeof val === 'string') {
             console.log('Updating AUTH_USERNAME ...')
             AppStore.getState().setAuthUsername(val)
+            return true
+          }
+          return false
+        }
+        if (prop === 'AUTH_ENABLED') {
+          if (typeof val === 'boolean') {
+            console.log('Updating AUTH_ENABLED ...')
+            AppStore.getState().setAuthEnabled(val)
             return true
           }
           return false

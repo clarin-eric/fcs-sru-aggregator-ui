@@ -19,6 +19,7 @@ type AppStoreState = {
   matomoTrackingEnabled: boolean
   matomoTrackingParams: string | MatomoSetupParams | null
 
+  authEnabled: boolean
   authUsername: string | null
   isAuthenticated: boolean
 }
@@ -64,6 +65,11 @@ type AppStoreActions = {
         ) => AppStoreState['matomoTrackingParams'])
   ) => void
 
+  setAuthEnabled: (
+    enabled:
+      | AppStoreState['authEnabled']
+      | ((isEnabled: AppStoreState['authEnabled']) => AppStoreState['authEnabled'])
+  ) => void
   setAuthUsername: (
     user:
       | AppStoreState['authUsername']
@@ -86,6 +92,8 @@ const appStore = createStore<AppStore>((set) => ({
   matomoTrackingParams: import.meta.env.FEATURE_TRACKING_MATOMO
     ? import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS
     : null,
+  authEnabled:
+    import.meta.env.FEATURE_AUTHENTICATION && import.meta.env.FEATURE_AUTHENTICATION_ENABLED,
   authUsername: null,
   isAuthenticated: false,
 
@@ -111,6 +119,12 @@ const appStore = createStore<AppStore>((set) => ({
       matomoTrackingParams:
         typeof params === 'function' ? params(state.matomoTrackingParams) : params,
     })),
+  setAuthEnabled: (enabled) =>
+    import.meta.env.FEATURE_AUTHENTICATION
+      ? set((state) => ({
+          authEnabled: typeof enabled === 'function' ? enabled(state.authEnabled) : enabled,
+        }))
+      : null,
   setAuthUsername: (user) =>
     set((state) => {
       const newUsername = typeof user === 'function' ? user(state.authUsername) : user
