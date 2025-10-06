@@ -232,8 +232,12 @@ export class LexParserListener implements ParseTreeListener {
    */
   exitSimple_name?: (ctx: Simple_nameContext) => void
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   visitTerminal(node: TerminalNode): void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   visitErrorNode(node: ErrorNode): void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enterEveryRule(node: ParserRuleContext): void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   exitEveryRule(node: ParserRuleContext): void {}
 }

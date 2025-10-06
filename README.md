@@ -5,9 +5,9 @@
 The frontend uses the following technologies:
 
 - [ReactJS](https://18.react.dev/) 18.3.1
-  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.9.1 for <abbr title="Single Page Application">SPA</abbr> routing
-  - [React Query](https://tanstack.com/query/latest) 5.89.0 with [Axios](https://github.com/axios/axios) 1.12.2 for web requests
-  - [react-i18next](https://react.i18next.com/) 15.7.3 and [i18next](https://www.i18next.com/) 25.5.2 for translation support, with [i18next-resources-to-backend](https://github.com/i18next/i18next-resources-to-backend) 1.2.1 for dynamic resource loading
+  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.9.3 for <abbr title="Single Page Application">SPA</abbr> routing
+  - [React Query](https://tanstack.com/query/latest) 5.90.2 with [Axios](https://github.com/axios/axios) 1.12.2 for web requests
+  - [react-i18next](https://react.i18next.com/) 16.0.0 and [i18next](https://www.i18next.com/) 25.5.3 for translation support, with [i18next-resources-to-backend](https://github.com/i18next/i18next-resources-to-backend) 1.2.1 for dynamic resource loading
 - [Bootstrap](https://getbootstrap.com/) 5.3.8 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.13.1, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.10
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
 - [react-slugify](https://github.com/martpie/react-slugify) 4.0.1 for generating hash urls
@@ -18,11 +18,11 @@ The frontend uses the following technologies:
 
 For development and building a few additional dependencies are required:
 
-- [Vite](https://vite.dev/) 7.1.5 with plugins
+- [Vite](https://vite.dev/) 7.1.9 with plugins
   - [estree-walker](https://github.com/Rich-Harris/estree-walker) 3.0.3 and [magic-string](https://github.com/rich-harris/magic-string) 0.30.19 for custom source code transformation (import rewriting, bundle building)
   - [picomatch](https://github.com/micromatch/picomatch#globbing-features) 4.0.3 for filename filters in output control
-- [TypeScript](https://www.typescriptlang.org/) 5.9.2 with `@types/*` definitions
-- [ESLint](https://eslint.org/) 9.35.0 with plugins
+- [TypeScript](https://www.typescriptlang.org/) 5.9.3 with `@types/*` definitions
+- [ESLint](https://eslint.org/) 9.37.0 with plugins
 - [simple-git](https://github.com/steveukx/git-js) 3.28.0 for source code information
 
 ## Features

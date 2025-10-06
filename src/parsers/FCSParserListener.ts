@@ -265,8 +265,12 @@ export class FCSParserListener implements ParseTreeListener {
    */
   exitRegexp_flag?: (ctx: Regexp_flagContext) => void
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   visitTerminal(node: TerminalNode): void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   visitErrorNode(node: ErrorNode): void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enterEveryRule(node: ParserRuleContext): void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   exitEveryRule(node: ParserRuleContext): void {}
 }
