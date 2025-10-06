@@ -335,7 +335,7 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
             max={numRequested}
             label={
               <span>
-                {t('search.results.progressBar.numWithResults', {
+                {t('search.results.progressBar.numWithoutResults', {
                   count: numNoResults + numNoResultsWithIssues,
                 })}
               </span>
