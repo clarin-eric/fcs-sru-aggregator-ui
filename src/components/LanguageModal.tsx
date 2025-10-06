@@ -141,7 +141,10 @@ function LanguageModal({
           <Highlight ranges={highlights[0]} text={code} />
         </sup>
         {showResourceCounts && languageToNumberOfResources.has(code) && (
-          <> ({languageToNumberOfResources.get(code)})</>
+          <>
+            {' '}
+            <span className="text-muted">({languageToNumberOfResources.get(code)})</span>
+          </>
         )}
       </Button>
     )
