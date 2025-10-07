@@ -391,15 +391,18 @@ function SearchInput({
   function handleChangeQuerySuggestion({
     query: newQuery,
     queryType: newQueryType,
+    resourceIDs: newResourceIDs,
     action,
   }: {
     query?: string
     queryType?: QueryTypeID
+    resourceIDs?: string[] | undefined
     action: string
   }) {
     console.debug('handleChangeQuerySuggestion', {
       query: newQuery,
       queryType: newQueryType,
+      resourceIDs: newResourceIDs,
       action,
     })
     // first close the modal
@@ -412,11 +415,38 @@ function SearchInput({
     if (!newQuery || !newQueryType) return
 
     // process user inputs
+    // check if suggested query has resource selection to use (and check if valid for query type/language selection)
+    const hasNewResourceSelection = newResourceIDs !== undefined && newResourceIDs.length > 0
+    let hasValidNewResourceSelection = hasNewResourceSelection
+    let newSelectedResourceIDs = newResourceIDs ?? []
+    if (hasNewResourceSelection) {
+      // check that the resources are valid
+      // TODO: do we need to reset the language? (in case the suggested resources are not available there?)
+      const availableResourceIDs = getAvailableResourceIDs(
+        resources,
+        newQueryType,
+        languageFilter === 'byGuess' ? MULTIPLE_LANGUAGE_CODE : language
+      )
+      newSelectedResourceIDs = newSelectedResourceIDs.filter((resourceID) =>
+        availableResourceIDs.includes(resourceID)
+      )
+      hasValidNewResourceSelection = newSelectedResourceIDs.length > 0
+    }
+    // update resource selection if required
     const hasQueryTypeChanged = newQueryType !== queryType
-    if (hasQueryTypeChanged) {
+    if (hasQueryTypeChanged && !hasValidNewResourceSelection) {
       // reset resource selection as it automatically changes due to options
       console.debug('handleChangeQuerySuggestion', 'reset resource selection')
       resetResourceSelection()
+    }
+    if (hasValidNewResourceSelection) {
+      // TODO: do we want to forcefully set the resource selection?
+      setSelectedResourceIDs(newSelectedResourceIDs)
+    } else if (hasNewResourceSelection) {
+      console.warn(
+        'Suggested query also had suggested resources but they do not fit the available resources (probably due to language filter)!',
+        { language, queryType: newQueryType, resourceIDs: newResourceIDs }
+      )
     }
     setQueryType(newQueryType)
     setQuery(newQuery)

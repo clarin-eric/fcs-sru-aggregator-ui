@@ -5,6 +5,7 @@ interface Example {
   queryType: QueryTypeID
   query: string
   description: string
+  resourceIDs?: string[] | undefined
 }
 
 export default [
@@ -33,6 +34,10 @@ export default [
     query: '[ word = "her.*" ] [ lemma = "Artznei" ] [ pos = "VERB" ]',
     description:
       'Phrase with three tokens: a word starting with "her", a lemmatized word, and a verb',
+    resourceIDs: [
+      // Deutsches Textarchiv (DTA) - Berlin-Brandenburg Academy of Sciences and Humanities
+      'https://clarin.bbaw.de/fcs/dta#http://hdl.handle.net/11858/00-203C-0000-0023-8324-0',
+    ],
   },
 
   {

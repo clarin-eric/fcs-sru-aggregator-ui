@@ -16,7 +16,12 @@ import exampleQueries from './examples'
 interface QuerySuggestionsModal {
   show: boolean
   queryTypes?: QueryTypeID[]
-  onModalClose: (result: { query?: string; queryType?: QueryTypeID; action: string }) => void
+  onModalClose: (result: {
+    query?: string
+    queryType?: QueryTypeID
+    resourceIDs?: string[]
+    action: string
+  }) => void
 }
 
 // --------------------------------------------------------------------------
@@ -45,18 +50,33 @@ function QuerySuggestionsModal({
   // event handlers
 
   function handleClose(action: string) {
-    onModalClose({ query: undefined, queryType: undefined, action: action })
+    onModalClose({ query: undefined, queryType: undefined, resourceIDs: undefined, action: action })
   }
 
-  function handleUseQueryClose(query: string, queryType: QueryTypeID) {
+  function handleUseQueryClose(
+    query: string,
+    queryType: QueryTypeID,
+    resourceIDs: string[] | undefined = undefined
+  ) {
     // TODO: better action name? "use"
-    onModalClose({ query: query, queryType: queryType, action: 'confirm' })
+    onModalClose({
+      query: query,
+      queryType: queryType,
+      resourceIDs: resourceIDs,
+      action: 'confirm',
+    })
   }
 
   // --------------------------------------------------------------
   // rendering
 
-  function renderExample(query: string, queryType: QueryTypeID, description?: string, nr?: number) {
+  function renderExample(
+    query: string,
+    queryType: QueryTypeID,
+    description?: string,
+    resourceIDs?: string[] | undefined,
+    nr?: number
+  ) {
     // TODO: get description from translation resource?
     return (
       <Row key={query}>
@@ -68,7 +88,7 @@ function QuerySuggestionsModal({
           <div dangerouslySetInnerHTML={{ __html: highlightSyntax(query, queryType) }} />
         </Col>
         <Col md={'auto'} className="d-flex justify-content-end align-items-baseline">
-          <Button size="sm" onClick={() => handleUseQueryClose(query, queryType)}>
+          <Button size="sm" onClick={() => handleUseQueryClose(query, queryType, resourceIDs)}>
             {t('search.suggestionsModal.buttonUseQuery')}
           </Button>
         </Col>
@@ -111,7 +131,13 @@ function QuerySuggestionsModal({
                   </Col>
                 </Row>
                 {examples.map((example, index) =>
-                  renderExample(example.query, example.queryType, example.description, index + 1)
+                  renderExample(
+                    example.query,
+                    example.queryType,
+                    example.description,
+                    example.resourceIDs,
+                    index + 1
+                  )
                 )}
               </Fragment>
             )
