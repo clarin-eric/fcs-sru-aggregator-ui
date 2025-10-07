@@ -245,7 +245,7 @@ export default defineConfig(async ({ mode }) => {
       // show consortia info and switcher (by default disabled for "scoped" deployments that restrict to a single consortium)
       'import.meta.env.SHOW_CONSORTIA_INFO': process.env.VITE_SHOW_CONSORTIA_INFO
         ? `${process.env.VITE_SHOW_CONSORTIA_INFO}`
-        : JSON.stringify(false),
+        : JSON.stringify(true),
 
       // matomo tracking
       'import.meta.env.FEATURE_TRACKING_MATOMO': process.env.VITE_FEATURE_TRACKING_MATOMO
