@@ -338,6 +338,7 @@ function ResourceSelectionModal({
                   <i dangerouslySetInnerHTML={{ __html: bankIcon }} /> {institution}
                 </>
               }
+              titleId={institution}
               resources={resources}
               selectedResourceIDs={selectedResourceIDs}
               resourceScores={filteredResourceScores}
@@ -386,6 +387,7 @@ function ResourceSelectionModal({
                   {languageCodeToName(language)} [{language}]
                 </>
               }
+              titleId={language}
               resources={resources}
               selectedResourceIDs={selectedResourceIDs}
               resourceScores={filteredResourceScores}
