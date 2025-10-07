@@ -164,6 +164,11 @@ function SearchInput({
     setSelectedResourceIDs(selectedResourcesProps ?? [])
   }, [selectedResourcesProps])
 
+  const resetResourceSelection = useCallback(
+    () => setSelectedResourceIDs(getAvailableResourceIDs(resources, 'cql', MULTIPLE_LANGUAGE_CODE)),
+    [resources]
+  )
+
   const getAvailableResourceIDsCallback = useCallback(
     (resources: Resource[]) => {
       const availableResourceIDs = getAvailableResourceIDs(
@@ -309,7 +314,17 @@ function SearchInput({
 
   function handleChangeQueryType(eventKey: string | null) {
     if (!eventKey) return
-    setQueryType(eventKey as QueryTypeID)
+
+    const newQueryType = eventKey as QueryTypeID
+
+    // process user inputs
+    const hasQueryTypeChanged = newQueryType !== queryType
+    if (hasQueryTypeChanged) {
+      // reset resource selection as it automatically changes due to options
+      console.debug('handleChangeQueryType', 'reset resource selection')
+      resetResourceSelection()
+    }
+    setQueryType(newQueryType)
   }
 
   function handleChangeNumberOfResults(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -324,22 +339,33 @@ function SearchInput({
   }
 
   function handleChangeLanguageSelection({
-    language,
-    filter,
+    language: newLanguage,
+    filter: newLanguageFilter,
     action,
   }: {
     language: string
     filter: LanguageFilterOptions
     action: LanguageModelCloseActions
   }) {
-    console.debug('onModalClose', { language, filter, action })
+    console.debug('handleChangeLanguageSelection', {
+      language: newLanguage,
+      filter: newLanguageFilter,
+      action,
+    })
     // first close the modal
     setShowLanguageSelectionModal(false)
     // if 'abort' do nothing
     if (action === 'abort') return
+
     // process user inputs
-    setLanguage(language)
-    setLanguageFilter(filter)
+    const hasLanguageChanged = newLanguage !== language || newLanguageFilter !== languageFilter
+    if (hasLanguageChanged) {
+      // reset resource selection as it automatically changes due to options
+      console.debug('handleChangeLanguageSelection', 'reset resource selection')
+      resetResourceSelection()
+    }
+    setLanguage(newLanguage)
+    setLanguageFilter(newLanguageFilter)
   }
 
   function handleChangeResourceSelection({
@@ -355,19 +381,27 @@ function SearchInput({
     // if 'abort' do nothing
     if (action === 'abort') return
     // process user inputs
+
+    const hasSelectionChanged = resourceIDs.length !== selectedResourceIDs.length
+    console.debug('handleChangeResourceSelection', { hasSelectionChanged })
+
     setSelectedResourceIDs(resourceIDs)
   }
 
   function handleChangeQuerySuggestion({
-    query,
-    queryType,
+    query: newQuery,
+    queryType: newQueryType,
     action,
   }: {
     query?: string
     queryType?: QueryTypeID
     action: string
   }) {
-    console.debug('onModalClose', { query, queryType, action })
+    console.debug('handleChangeQuerySuggestion', {
+      query: newQuery,
+      queryType: newQueryType,
+      action,
+    })
     // first close the modal
     setShowQuerySuggestionsModal(false)
     // if 'abort' do nothing
@@ -375,10 +409,17 @@ function SearchInput({
     // if 'close' (ESC / x button) then also do nothing
     if (action === 'close') return
     // if query/queryType is empty, do nothing
-    if (!query || !queryType) return
+    if (!newQuery || !newQueryType) return
+
     // process user inputs
-    setQueryType(queryType)
-    setQuery(query)
+    const hasQueryTypeChanged = newQueryType !== queryType
+    if (hasQueryTypeChanged) {
+      // reset resource selection as it automatically changes due to options
+      console.debug('handleChangeQuerySuggestion', 'reset resource selection')
+      resetResourceSelection()
+    }
+    setQueryType(newQueryType)
+    setQuery(newQuery)
   }
 
   function handleChangeQueryBuilderQuery({
