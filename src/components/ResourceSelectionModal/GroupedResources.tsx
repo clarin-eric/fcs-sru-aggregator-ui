@@ -6,6 +6,7 @@ import Container from 'react-bootstrap/Container'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import { useTranslation } from 'react-i18next'
+import slugify from 'react-slugify'
 
 import { type FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
 import { type Resource } from '@/utils/api'
@@ -132,7 +133,7 @@ function GroupedResources({
       <Row className="px-3">
         <Col md="auto" sm={1} className="mt-1" onClick={handleToggleSelectionClick}>
           <Form.Check
-            id={`resource-group-selection-${titleId}`}
+            id={`resource-group-selection-${slugify(titleId)}`}
             aria-label={t('search.results.resourceInfo.checkboxResourceAriaLabel', {
               title: titleId,
             })}
