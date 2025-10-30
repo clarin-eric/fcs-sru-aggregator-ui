@@ -23,6 +23,7 @@ import { useAxios } from '@/providers/AxiosContext'
 import { useLocaleStore } from '@/stores/locale'
 import {
   type ExtraScopingParams,
+  getLanguages,
   getResources,
   REQ_PARAM_CONSORTIA,
   type Resource,
@@ -95,6 +96,10 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['resources'],
     queryFn: getResources.bind(null, axios, extraParams),
+  })
+  const { data: languagesNames } = useQuery({
+    queryKey: ['languages'],
+    queryFn: getLanguages.bind(null, axios, extraParams),
   })
 
   useEffect(() => {
@@ -374,6 +379,21 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
               </Card.Body>
             </Card>
           )}
+          <Card className="my-2">
+            <Card.Header>{t('statistics.resources.cardHeaderLanguages')}</Card.Header>
+            <Card.Body>
+              <ul className="mb-0">
+                {selectedResource.languages.toSorted().map((language) => (
+                  <li key={language}>
+                    <strong>{language}</strong>
+                    {languagesNames && language in languagesNames && (
+                      <>: {languagesNames[language]}</>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </Card.Body>
+          </Card>
 
           <h4 className="h5 pb-1 mt-4 mb-3 border-bottom">
             {t('statistics.resources.titleTechnicalMetadata')}

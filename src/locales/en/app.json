@@ -305,6 +305,7 @@
       "cardHeaderTitle": "Titles",
       "cardHeaderDescription": "Descriptions",
       "cardHeaderInstitution": "Institutions",
+      "cardHeaderLanguages": "Languages",
       "cardHeaderLandingPage": "Landing Page",
       "cardHeaderEndpoint": "FCS Endpoint",
       "cardHeaderResource": "FCS Resource",
