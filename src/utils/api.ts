@@ -1,7 +1,7 @@
-import { type AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
 
-import { type LanguageCode2NameMap, type LanguageFilterOptions } from '@/utils/search'
-import { type DownloadFormats } from './constants'
+import type { LanguageCode2NameMap, LanguageFilterOptions } from '@/utils/search'
+import type { DownloadFormats, QueryTypeID } from './constants'
 
 // https://app.quicktype.io/?l=ts
 
@@ -25,6 +25,7 @@ export interface Resource {
   endpointInstitution: EndpointInstitution
   endpoint: Endpoint
   handle: string
+  id: string
   numberOfRecords: null
   languages: string[]
   landingPage: null | string
@@ -32,13 +33,13 @@ export interface Resource {
   description: null | string | { [language: string]: string }
   institution: string | { [language: string]: string }
   searchCapabilities: SearchCapability[]
+  searchCapabilitiesResolved: SearchCapability[]
   availabilityRestriction: AvailabilityRestriction
   availableDataViews: AvailableDataView[] | null
   availableLayers: AvailableLayer[] | null
   availableLexFields: AvailableLexField[] | null
   subResources: Resource[]
-  id: string
-  searchCapabilitiesResolved: SearchCapability[]
+  exampleQueries?: ExampleQuery[]
   // field will be set in resources.ts#fromApi
   rootResourceId: string | null
 }
@@ -68,14 +69,20 @@ export interface AvailableLayer {
   resultId: string
   layerType: LayerType
   encoding: Encoding
-  qualifier: null | string
-  altValueInfo: null
-  altValueInfoURI: null
+  qualifier?: null | string
+  altValueInfo?: null
+  altValueInfoURI?: null
 }
 
 export interface AvailableLexField {
   id: string
   type: LexFieldType
+}
+
+export interface ExampleQuery {
+  query: string
+  queryType: QueryTypeID
+  description: { [language: string]: string }
 }
 
 export type Consortium =
@@ -348,6 +355,7 @@ export interface ResourceSearchResultMetaOnly {
 
   exception: Exception | null
   diagnostics: Diagnostic[]
+  requestUrl?: string | null
 
   hasAdvResults: boolean
   hasLexResults: boolean
@@ -367,6 +375,7 @@ export interface ResourceSearchResult {
 
   exception: Exception | null
   diagnostics: Diagnostic[]
+  requestUrl?: string | null
 
   isLexHits: boolean
   hasAdvResults: boolean
@@ -439,6 +448,22 @@ export interface LexValue {
 }
 
 // --------------------------------------------------------------------------
+
+export function getSearchResultsURL(
+  axios: AxiosInstance,
+  searchID: string,
+  resourceID: string | undefined = undefined,
+  metaOnly: boolean = false
+) {
+  if (!searchID) throw new Error('Invalid "searchID" parameter!')
+
+  let url = `search/${searchID}`
+  if (metaOnly) url = `${url}/metaonly`
+
+  if (resourceID !== undefined) url = `${url}?resourceId=${encodeURIComponent(resourceID)}`
+
+  return axios.getUri({ url })
+}
 
 export async function getSearchResults(axios: AxiosInstance, searchID: string) {
   if (!searchID) throw new Error('Invalid "searchID" parameter!')

@@ -180,6 +180,13 @@
       "context": [
         "querybuilder"
       ]
+    },
+    "file-earmark-code": {
+      "label": "Developer Information",
+      "description": "Show information primarily for FCS developers",
+      "context": [
+        "developer"
+      ]
     }
   }
 }

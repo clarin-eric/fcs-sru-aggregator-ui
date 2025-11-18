@@ -19,6 +19,7 @@ import downloadIcon from 'bootstrap-icons/icons/download.svg?raw'
 import envelopeArrowUpIcon from 'bootstrap-icons/icons/envelope-arrow-up.svg?raw'
 import exclamationTriangleIcon from 'bootstrap-icons/icons/exclamation-triangle.svg?raw'
 import eyeIcon from 'bootstrap-icons/icons/eye.svg?raw'
+import fileEarmarkCodeIcon from 'bootstrap-icons/icons/file-earmark-code.svg?raw'
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
 import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
@@ -72,6 +73,11 @@ if (import.meta.env.FEATURE_AUTHENTICATION) {
     person: personIcon,
   } as { [iconKey: string]: string })
 }
+if (import.meta.env.SHOW_SEARCH_RESULT_DEV_URLS) {
+  Object.assign(iconMap, {
+    'file-earmark-code': fileEarmarkCodeIcon,
+  } as { [iconKey: string]: string })
+}
 
 interface I18NIconsLegendInfo {
   label: string
@@ -96,12 +102,18 @@ function Help() {
         // no context at front
         if (!idA.context || idA.context.length === 0) return -1
         if (!idB.context || idB.context.length === 0) return +1
-        // statistics at end
+        // developer at end
+        if (idA.context.includes('developer')) return +1
+        if (idB.context.includes('developer')) return -1
+        // statistics at end (before)
         if (idA.context.includes('statistics')) return +1
         if (idB.context.includes('statistics')) return -1
         // querybuilder before
         if (idA.context.includes('querybuilder')) return +1
         if (idB.context.includes('querybuilder')) return -1
+        // authentication before
+        if (idA.context.includes('authentication')) return +1
+        if (idB.context.includes('authentication')) return -1
         // otherwise alphabetical
         return idA.context[0].localeCompare(idB.context[0])
       })

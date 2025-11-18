@@ -242,6 +242,10 @@ export default defineConfig(async ({ mode }) => {
       'import.meta.env.SHOW_SEARCH_RESULT_LINK': process.env.VITE_SHOW_SEARCH_RESULT_LINK
         ? `${process.env.VITE_SHOW_SEARCH_RESULT_LINK}`
         : JSON.stringify(false),
+      // show developer info: search request url and search result url
+      'import.meta.env.SHOW_SEARCH_RESULT_DEV_URLS': process.env.VITE_SHOW_SEARCH_RESULT_DEV_URLS
+        ? `${process.env.VITE_SHOW_SEARCH_RESULT_DEV_URLS}`
+        : JSON.stringify(false),
       // show consortia info and switcher (by default disabled for "scoped" deployments that restrict to a single consortium)
       'import.meta.env.SHOW_CONSORTIA_INFO': process.env.VITE_SHOW_CONSORTIA_INFO
         ? `${process.env.VITE_SHOW_CONSORTIA_INFO}`
@@ -267,7 +271,8 @@ export default defineConfig(async ({ mode }) => {
         : JSON.stringify(true),
       // [run-time] enable auth features on site (only works if included in bundle with FEATURE_AUTHENTICATION)
       // allows to disable auth features for prebuilt bundles
-      'import.meta.env.FEATURE_AUTHENTICATION_ENABLED': process.env.VITE_FEATURE_AUTHENTICATION_ENABLED
+      'import.meta.env.FEATURE_AUTHENTICATION_ENABLED': process.env
+        .VITE_FEATURE_AUTHENTICATION_ENABLED
         ? `${process.env.VITE_FEATURE_AUTHENTICATION_ENABLED}`
         : JSON.stringify(true),
 

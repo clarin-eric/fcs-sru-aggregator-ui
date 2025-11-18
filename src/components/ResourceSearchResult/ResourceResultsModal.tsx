@@ -16,6 +16,7 @@ import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
 import {
+  getSearchResultsURL,
   getURLForDownload,
   getURLForWeblicht,
   type Resource,
@@ -39,6 +40,7 @@ import ViewPlain from './ViewPlain'
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
 import downloadIcon from 'bootstrap-icons/icons/download.svg?raw'
 import envelopeArrowUpIcon from 'bootstrap-icons/icons/envelope-arrow-up.svg?raw'
+import fileEarmarkCodeIcon from 'bootstrap-icons/icons/file-earmark-code.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 import infoCircleIcon from 'bootstrap-icons/icons/info-circle.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
@@ -342,6 +344,27 @@ function ResourceResultsModal({
               <i dangerouslySetInnerHTML={{ __html: envelopeArrowUpIcon }} />{' '}
               {t('search.results.buttonSendToWeblicht')}
             </Button>
+            {import.meta.env.SHOW_SEARCH_RESULT_DEV_URLS && (
+              <Dropdown>
+                <Dropdown.Toggle>
+                  <i dangerouslySetInnerHTML={{ __html: fileEarmarkCodeIcon }} />{' '}
+                  {t('search.results.buttonDevelopStuff')}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {result.requestUrl && (
+                    <Dropdown.Item href={result.requestUrl} target="_blank">
+                      {t('search.results.msgButtonDevelopStuffOptionSRURequestURL')}
+                    </Dropdown.Item>
+                  )}
+                  <Dropdown.Item
+                    href={getSearchResultsURL(axios, searchId, resourceId, false)}
+                    target="_blank"
+                  >
+                    {t('search.results.msgButtonDevelopStuffOptionSRUResponseParsed')}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
           </Col>
         </Row>
         <hr />
