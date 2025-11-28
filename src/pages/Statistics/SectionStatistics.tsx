@@ -10,7 +10,11 @@ import Row from 'react-bootstrap/Row'
 import { useTranslation } from 'react-i18next'
 import slugify from 'react-slugify'
 
-import type { InstitutionEndpointInfo, StatisticsSection } from '@/utils/api'
+import type {
+  InstitutionEndpointInfo,
+  StatisticsSection,
+} from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import EndpointStatistics from './EndpointStatistics'
 
 import './styles.css'

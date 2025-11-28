@@ -8,8 +8,8 @@ import Row from 'react-bootstrap/Row'
 import { useTranslation } from 'react-i18next'
 import slugify from 'react-slugify'
 
-import { type FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
-import { type Resource } from '@/utils/api'
+import type { FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
+import type { Resource } from '@/utils/api'
 import { getResourceIDs } from '@/utils/resources'
 import ResourceSelector from './ResourceSelector'
 

@@ -13,8 +13,8 @@ import { Trans, useTranslation } from 'react-i18next'
 import ContentEditable from '@/components/ContentEditable'
 import useDebounce from '@/hooks/useDebounce'
 import useDebouncedState from '@/hooks/useDebouncedState'
-import { type Resource } from '@/utils/api'
-import { type QueryTypeIDForQueryBuilder } from '@/utils/constants'
+import type { Resource } from '@/utils/api'
+import type { QueryTypeIDForQueryBuilder } from '@/utils/constants'
 import { flattenResources } from '@/utils/resources'
 import {
   FCSQueryBuilder,

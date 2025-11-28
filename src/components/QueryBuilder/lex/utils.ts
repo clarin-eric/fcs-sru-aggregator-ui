@@ -3,7 +3,7 @@ import { CharStream, CommonTokenStream, ParseTree, TokenStreamRewriter } from 'a
 import { LexLexer } from '@/parsers/LexLexer'
 import { IndexContext, LexParser, QueryContext } from '@/parsers/LexParser'
 import { LexParserVisitor } from '@/parsers/LexParserVisitor'
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
 import { _formatTreeItems, _getTreeItems, QuerySyntaxErrorListener } from '../utils'
 
 // --------------------------------------------------------------------------

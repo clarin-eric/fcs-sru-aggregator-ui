@@ -1,7 +1,8 @@
-import { createContext, type ReactNode, useContext } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
-import { FCSParser } from '@/parsers/FCSParser'
 import { FCSLexer } from '@/parsers/FCSLexer'
+import { FCSParser } from '@/parsers/FCSParser'
 
 // --------------------------------------------------------------------------
 

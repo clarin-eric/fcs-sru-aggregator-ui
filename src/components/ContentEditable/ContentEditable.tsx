@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 
 import useDebounce from '@/hooks/useDebounce'
-import { type QueryTypeID } from '@/utils/constants'
+import type { QueryTypeID } from '@/utils/constants'
 import { getAbsoluteTextCursorOffsets, getCursorPosition, setCursorPosition } from '@/utils/cursor'
 import { highlightSyntax } from '@/utils/prism'
 

@@ -1,23 +1,19 @@
 import react from '@vitejs/plugin-react'
-import {
-  type ExternalOption,
-  type InputOption,
-  type LogHandlerWithDefault,
-  type OutputOptions,
-  type PreRenderedAsset,
-  type PreRenderedChunk,
-  type RenderedChunk,
-  type RollupOptions,
+import type {
+  ExternalOption,
+  InputOption,
+  LogHandlerWithDefault,
+  OutputOptions,
+  PreRenderedAsset,
+  PreRenderedChunk,
+  RenderedChunk,
+  RollupOptions,
 } from 'rollup'
 import { visualizer } from 'rollup-plugin-visualizer'
-import { simpleGit, type SimpleGit, type SimpleGitOptions } from 'simple-git'
-import {
-  type BuildOptions,
-  defineConfig,
-  type ESBuildOptions,
-  loadEnv,
-  type UserConfig,
-} from 'vite'
+import type { SimpleGit, SimpleGitOptions } from 'simple-git'
+import { simpleGit } from 'simple-git'
+import type { BuildOptions, ESBuildOptions, UserConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
 import { existsSync, globSync } from 'node:fs'
 import { basename } from 'node:path'

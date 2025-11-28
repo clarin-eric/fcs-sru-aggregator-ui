@@ -1,7 +1,8 @@
-import { createContext, type ReactNode, useContext } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
-import { LexParser } from '@/parsers/LexParser'
 import { LexLexer } from '@/parsers/LexLexer'
+import { LexParser } from '@/parsers/LexParser'
 
 // --------------------------------------------------------------------------
 
@@ -29,7 +30,9 @@ function LexCQLParserLexerProvider({
   children,
 }: LexCQLParserLexerProviderProps) {
   const data = { parser, lexer, cursorPos }
-  return <LexCQLParserLexerContext.Provider value={data}>{children}</LexCQLParserLexerContext.Provider>
+  return (
+    <LexCQLParserLexerContext.Provider value={data}>{children}</LexCQLParserLexerContext.Provider>
+  )
 }
 
 // --------------------------------------------------------------------------

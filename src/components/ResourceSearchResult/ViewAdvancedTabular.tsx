@@ -4,12 +4,12 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Table from 'react-bootstrap/Table'
 import Tooltip from 'react-bootstrap/Tooltip'
 
-import {
-  type AvailableLayer,
-  type Resource,
-  type AdvancedLayer,
-  type ResourceSearchResult,
-} from '@/utils/api'
+import type {
+  AdvancedLayer,
+  AvailableLayer,
+  Resource,
+  ResourceSearchResult,
+} from 'fcs-sru-aggregator-api-adapter-typescript'
 
 import link45degIcon from 'bootstrap-icons/icons/link-45deg.svg?raw'
 

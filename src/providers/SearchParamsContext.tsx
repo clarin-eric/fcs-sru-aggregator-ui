@@ -1,7 +1,8 @@
-import { createContext, type ReactNode, useContext } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
-import { type NumberOfResults, type QueryTypeID } from '@/utils/constants'
-import { type LanguageFilterOptions } from '@/utils/search'
+import type { NumberOfResults, QueryTypeID } from '@/utils/constants'
+import type { LanguageFilterOptions } from '@/utils/search'
 
 // --------------------------------------------------------------------------
 

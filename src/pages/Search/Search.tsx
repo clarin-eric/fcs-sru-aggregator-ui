@@ -10,17 +10,18 @@ import { Helmet } from 'react-helmet-async'
 import { Trans, useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import type { ExtraScopingParams } from 'fcs-sru-aggregator-api-adapter-typescript'
+import {
+  getInitData,
+  postSearch,
+  REQ_PARAM_CONSORTIA,
+} from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { SearchParamsProvider } from '@/providers/SearchParamsContext'
 import AppStore from '@/stores/app'
-import {
-  type ExtraScopingParams,
-  getInitData,
-  postSearch,
-  REQ_PARAM_CONSORTIA,
-  type Resource,
-} from '@/utils/api'
+import type { Resource } from '@/utils/api'
 import { trackSiteSearch } from '@/utils/matomo'
 import {
   evaluateAggregationContext,
@@ -28,10 +29,11 @@ import {
   getResourceIDs,
   getResourceIDsBySplit,
 } from '@/utils/resources'
-import { type LanguageCode2NameMap } from '@/utils/search'
-import SearchInput, { type SearchData } from './SearchInput'
+import type { LanguageCode2NameMap } from '@/utils/search'
+import type { SearchData } from './SearchInput'
+import SearchInput from './SearchInput'
 import SearchResults from './SearchResults'
-import { type ToastMessage } from './utils'
+import type { ToastMessage } from './utils'
 
 import fcsLogoDarkModeUrl from '@images/logo-fcs-dark.png'
 import fcsLogoUrl from '@images/logo-fcs.png'

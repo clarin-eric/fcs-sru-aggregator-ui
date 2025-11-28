@@ -1,6 +1,7 @@
-import { createContext, type ReactNode, useContext } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
 
 // --------------------------------------------------------------------------
 
@@ -52,5 +53,6 @@ export {
   LexCQLResourceFieldInfoContext,
   LexCQLResourceFieldInfoProvider,
   // eslint-disable-next-line react-refresh/only-export-components
-  useLexCQLResourceFieldInfo,
+  useLexCQLResourceFieldInfo
 }
+

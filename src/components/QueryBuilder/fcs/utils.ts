@@ -3,7 +3,7 @@ import { CharStream, CommonTokenStream, ParseTree, TokenStreamRewriter } from 'a
 import { FCSLexer } from '@/parsers/FCSLexer'
 import { AttributeContext, FCSParser, QueryContext } from '@/parsers/FCSParser'
 import { FCSParserVisitor } from '@/parsers/FCSParserVisitor'
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
 import { _formatTreeItems, _getTreeItems, QuerySyntaxErrorListener } from '../utils'
 
 // --------------------------------------------------------------------------

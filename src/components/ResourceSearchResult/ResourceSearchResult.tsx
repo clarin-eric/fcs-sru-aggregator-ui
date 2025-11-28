@@ -9,23 +9,24 @@ import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { Trans, useTranslation } from 'react-i18next'
 
+import type {
+  Resource,
+  ResourceSearchResult,
+  ResourceSearchResultMetaOnly,
+} from 'fcs-sru-aggregator-api-adapter-typescript'
+import { getSearchResultDetails } from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
-import {
-  getSearchResultDetails,
-  type Resource,
-  type ResourceSearchResult,
-  type ResourceSearchResultMetaOnly,
-} from '@/utils/api'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import {
   findResourceByFilter,
   getBestFromMultilingualValuesTryByLanguage,
   getLanguagesFromResourceInfo,
 } from '@/utils/resources'
-import { type ResultsViewMode } from '@/utils/results'
+import type { ResultsViewMode } from '@/utils/results'
 import { languageCodeToName } from '@/utils/search'
 import ResourceResultsModal from './ResourceResultsModal'
 import ViewAdvancedTabular from './ViewAdvancedTabular'

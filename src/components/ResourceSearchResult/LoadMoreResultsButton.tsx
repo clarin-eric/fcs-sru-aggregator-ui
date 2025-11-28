@@ -4,13 +4,14 @@ import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
 import { useTranslation } from 'react-i18next'
 
-import { useAxios } from '@/providers/AxiosContext'
-// import { useSearchParams } from '@/providers/SearchParamsContext'
+import type { ResourceSearchResultMetaOnly } from 'fcs-sru-aggregator-api-adapter-typescript'
 import {
   getSearchResultsMetaOnlyForResource,
   postSearchMoreResults,
-  type ResourceSearchResultMetaOnly,
-} from '@/utils/api'
+} from 'fcs-sru-aggregator-api-adapter-typescript'
+
+import { useAxios } from '@/providers/AxiosContext'
+// import { useSearchParams } from '@/providers/SearchParamsContext'
 // import { trackSiteSearch } from '@/utils/matomo'
 
 import threeDotsIcon from 'bootstrap-icons/icons/three-dots.svg?raw'

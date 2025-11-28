@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import useFuzzySearchListWithHierarchy from '@/hooks/useFuzzySearchListWithHierarchy'
 import { useLocaleStore } from '@/stores/locale'
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
 import {
   getBestFromMultilingualValuesTryByLanguage,
   getLanguagesFromResourceInfo,
@@ -21,15 +21,17 @@ import {
   isResourceAvailableDueToSubResource,
   SORT_FNS,
 } from '@/utils/resources'
+import type {
+  LanguageCode2NameMap,
+  ResourceSelectionModalViewOptionGrouping,
+  ResourceSelectionModalViewOptionSorting,
+  ResourceSelectionModalViewOptionVisibility,
+} from '@/utils/search'
 import {
   DEFAULT_RESOURCE_VIEW_GROUPING,
   DEFAULT_RESOURCE_VIEW_SORTING,
   DEFAULT_RESOURCE_VIEW_VISIBILITY,
   languageCodeToName as languageCodeToNameHelper,
-  type LanguageCode2NameMap,
-  type ResourceSelectionModalViewOptionGrouping,
-  type ResourceSelectionModalViewOptionSorting,
-  type ResourceSelectionModalViewOptionVisibility,
 } from '@/utils/search'
 import GroupedResources from './GroupedResources'
 import ResourceSelector from './ResourceSelector'

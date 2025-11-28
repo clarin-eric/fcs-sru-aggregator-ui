@@ -1,11 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import {
-  createSearchParams,
-  useLocation,
-  useNavigate,
-  type SetURLSearchParams,
-  type URLSearchParamsInit,
-} from 'react-router'
+import type { SetURLSearchParams, URLSearchParamsInit } from 'react-router'
+import { createSearchParams, useLocation, useNavigate } from 'react-router'
 
 export default function useSearchParamsFromHash(): [URLSearchParams, SetURLSearchParams] {
   const routerNavigate = useNavigate()

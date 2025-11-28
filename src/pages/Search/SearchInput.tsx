@@ -1,4 +1,4 @@
-import { type AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
@@ -9,33 +9,34 @@ import { Trans, useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import ContentEditable from '@/components/ContentEditable'
-import LanguageModal, { type LanguageModelCloseActions } from '@/components/LanguageModal'
+import type { LanguageModelCloseActions } from '@/components/LanguageModal'
+import LanguageModal from '@/components/LanguageModal'
 import QuerySuggestionsModal from '@/components/QuerySuggestionsModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
 import useFlipOnceTrue from '@/hooks/useFlipOnceTrue'
 import useSearchParamsFromHash from '@/hooks/useSearchParamsFromHash'
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
+import type { NumberOfResults, QueryTypeID, QueryTypeIDForQueryBuilder } from '@/utils/constants'
 import {
   DEFAULT_QUERY_TYPE,
   NUMBER_OF_RESULTS,
   QUERY_TYPE_MAP,
   QUERY_TYPES,
   QUERY_TYPES_WITH_BUILDER_SUPPORT,
-  type NumberOfResults,
-  type QueryTypeID,
-  type QueryTypeIDForQueryBuilder,
 } from '@/utils/constants'
 import { getAvailableResourceIDs, getInstitutions } from '@/utils/resources'
+import type {
+  LanguageCode2NameMap,
+  LanguageFilterOptions,
+  ResourceSelectionModalViewOptionGrouping,
+} from '@/utils/search'
 import {
   DEFAULT_RESOURCE_VIEW_GROUPING,
   DEFAULT_SEARCH_LANGUAGE_FILTER,
   languageCodeToName,
   MULTIPLE_LANGUAGE_CODE,
-  type LanguageCode2NameMap,
-  type LanguageFilterOptions,
-  type ResourceSelectionModalViewOptionGrouping,
 } from '@/utils/search'
-import { type ToastMessage } from './utils'
+import type { ToastMessage } from './utils'
 
 // SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
 import balloonIcon from 'bootstrap-icons/icons/balloon.svg?raw'

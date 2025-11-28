@@ -11,24 +11,22 @@ import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { Trans, useTranslation } from 'react-i18next'
 
+import type { Resource, ResourceSearchResult } from 'fcs-sru-aggregator-api-adapter-typescript'
+import { getURLForDownload, getURLForWeblicht } from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
-import {
-  getSearchResultsURL,
-  getURLForDownload,
-  getURLForWeblicht,
-  type Resource,
-  type ResourceSearchResult,
-} from '@/utils/api'
+import { getSearchResultsURL } from '@/utils/api'
+
 import { DOWNLOAD_FORMATS, NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import {
   findResourceByFilter,
   getBestFromMultilingualValuesTryByLanguage,
   getLanguagesFromResourceInfo,
 } from '@/utils/resources'
-import { type ResultsViewMode } from '@/utils/results'
+import type { ResultsViewMode } from '@/utils/results'
 import { languageCodeToName, MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 import LoadMoreResultsButton from './LoadMoreResultsButton'
 import ViewAdvancedTabular from './ViewAdvancedTabular'
@@ -334,7 +332,7 @@ function ResourceResultsModal({
                 axios,
                 searchId,
                 resourceId,
-                languageForWeblicht,
+                languageForWeblicht ?? null,
                 language,
                 languageFilter
               )}

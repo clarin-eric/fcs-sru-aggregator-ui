@@ -5,7 +5,7 @@ import {
   Expression_notContext,
   Expression_orContext,
 } from '@/parsers/FCSParser'
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
 
 // --------------------------------------------------------------------------
 

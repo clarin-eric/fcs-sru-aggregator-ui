@@ -1,5 +1,7 @@
+import type { ResourceSearchResultMetaOnly } from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import LocaleStore from '@/stores/locale'
-import type { Resource, ResourceSearchResultMetaOnly } from '@/utils/api'
+import type { Resource } from './api'
 import { getBestFromMultilingualValuesTryByLanguage } from './resources'
 
 export type ResultsViewMode = 'plain' | 'kwic' | 'annotation-layers' | 'lexical-entry'

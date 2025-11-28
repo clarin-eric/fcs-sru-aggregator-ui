@@ -1,17 +1,17 @@
+import type { Resource as ResourceRaw } from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import LocaleStore from '@/stores/locale'
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
 import { QueryTypeID } from '@/utils/constants'
-import {
-  MULTIPLE_LANGUAGE_CODE,
-  type ResourceSelectionModalViewOptionSorting,
-} from '@/utils/search'
+import type { ResourceSelectionModalViewOptionSorting } from '@/utils/search'
+import { MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 
 // --------------------------------------------------------------------------
 
-export function fromApi(resources: Resource[]) {
+export function fromApi(resources: ResourceRaw[]) {
   const locale = LocaleStore.getState().locale
 
-  const prepareFn = (resource: Resource, rootResource: Resource | null = null): Resource => {
+  const prepareFn = (resource: ResourceRaw, rootResource: ResourceRaw | null = null): Resource => {
     return {
       // copy original
       ...resource,
@@ -21,7 +21,7 @@ export function fromApi(resources: Resource[]) {
       ),
       // apply a rootResourceId (pointing to the root element of any nested child)
       rootResourceId: rootResource?.id ?? null,
-    }
+    } satisfies Resource
   }
   const convertedResources = resources.map((resource) => prepareFn(resource, null))
 
@@ -322,7 +322,7 @@ export function getBestLanguageFromMultilingualValuesTryByLanguage(
  * @param defaultLanguage fallback language if not multilingual information set
  * @returns unique list of languages found for title/description/institution or fallback if no multilingual options
  */
-export function getLanguagesFromResourceInfo(resource: Resource, defaultLanguage = 'en') {
+export function getLanguagesFromResourceInfo(resource: ResourceRaw, defaultLanguage = 'en') {
   const languagesForTitle =
     typeof resource.title === 'string' || resource.title === null
       ? [defaultLanguage]

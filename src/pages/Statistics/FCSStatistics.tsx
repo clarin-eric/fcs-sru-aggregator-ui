@@ -11,26 +11,29 @@ import Table from 'react-bootstrap/Table'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
+import type {
+  AvailabilityRestriction,
+  Capability,
+  Consortium,
+  ExtraScopingParams,
+} from 'fcs-sru-aggregator-api-adapter-typescript'
+import {
+  getLanguages,
+  getResources,
+  REQ_PARAM_CONSORTIA,
+} from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import LanguageModal from '@/components/LanguageModal'
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import usePrevious from '@/hooks/usePrevious'
 import { useLocaleStore } from '@/stores/locale'
-import {
-  type AvailabilityRestriction,
-  type Consortium,
-  type ExtraScopingParams,
-  getLanguages,
-  getResources,
-  REQ_PARAM_CONSORTIA,
-  type Resource,
-  type SearchCapability,
-} from '@/utils/api'
+import type { Resource } from '@/utils/api'
 import {
   flattenResources,
   fromApi,
   getBestFromMultilingualValuesTryByLanguage,
 } from '@/utils/resources'
-import { type LanguageCode2NameMap } from '@/utils/search'
+import type { LanguageCode2NameMap } from '@/utils/search'
 import { REQ_PARAM_RESOURCE_ID } from './utils'
 
 import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
@@ -115,14 +118,14 @@ function sortBySURT(urlA: string, urlB: string) {
   return 0
 }
 
-const searchCapabilityPriority: Map<SearchCapability, number> = new Map([
+const searchCapabilityPriority: Map<Capability, number> = new Map([
   ['BASIC_SEARCH', 0],
   ['ADVANCED_SEARCH', 1],
   ['LEX_SEARCH', 2],
   ['AUTHENTICATED_SEARCH', 3],
 ])
 
-function compareSearchCapability(capabilityA: SearchCapability, capabilityB: SearchCapability) {
+function compareSearchCapability(capabilityA: Capability, capabilityB: Capability) {
   const priorityA = searchCapabilityPriority.get(capabilityA)
   const priorityB = searchCapabilityPriority.get(capabilityB)
   // any unknown value is moved to end
@@ -261,7 +264,7 @@ function FCSStatistics() {
     const searchCapabilities = map.get(url)!
     resource.endpoint.searchCapabilities.forEach((capability) => searchCapabilities.add(capability))
     return map
-  }, new Map<string, Set<SearchCapability>>())
+  }, new Map<string, Set<Capability>>())
 
   const institutionsWithResources = flatResources.reduce((map, resource) => {
     const institution =
@@ -285,7 +288,7 @@ function FCSStatistics() {
       map.get(capability)!.push(resource)
     }
     return map
-  }, new Map<SearchCapability, Resource[]>())
+  }, new Map<Capability, Resource[]>())
   const availabilityRestrictionsWithResources = flatResources.reduce((map, resource) => {
     const restriction = resource.availabilityRestriction
     if (!map.has(restriction)) map.set(restriction, [])
@@ -349,7 +352,7 @@ function FCSStatistics() {
           .reduce((set, caps) => {
             caps.forEach((cap) => set.add(cap))
             return set
-          }, new Set<SearchCapability>())
+          }, new Set<Capability>())
       )
         // .filter((cap) => cap !== 'BASIC_SEARCH')
         .toSorted(compareSearchCapability)

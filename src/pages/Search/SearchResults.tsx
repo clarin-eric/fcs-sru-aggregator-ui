@@ -10,22 +10,23 @@ import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 import { Trans, useTranslation } from 'react-i18next'
 
+import type { SearchResultsMetaOnly } from 'fcs-sru-aggregator-api-adapter-typescript'
+import { getSearchResultsMetaOnly } from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import ResourceSearchResult from '@/components/ResourceSearchResult'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
-import { getSearchResultsMetaOnly, type SearchResultsMetaOnly } from '@/utils/api'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import { trackSiteSearch } from '@/utils/matomo'
+import type { ResultsSorting, ResultsViewMode } from '@/utils/results'
 import {
   DEFAULT_SORTING,
   DEFAULT_VIEW_MODE,
   DEFAULT_VIEW_MODE_WHEN_FCS,
   DEFAULT_VIEW_MODE_WHEN_LEX,
   SORT_FNS,
-  type ResultsSorting,
-  type ResultsViewMode,
 } from '@/utils/results'
 
 import './styles.css'

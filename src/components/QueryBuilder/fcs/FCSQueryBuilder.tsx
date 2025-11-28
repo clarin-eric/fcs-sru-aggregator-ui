@@ -19,39 +19,41 @@ import {
   Query_simpleContext,
   QueryContext,
 } from '@/parsers/FCSParser'
-import { type Resource } from '@/utils/api'
-import { type ParseTree, TerminalNode, TokenStreamRewriter } from 'antlr4ng'
+import type { Resource } from '@/utils/api'
+import type { ParseTree, TerminalNode, TokenStreamRewriter } from 'antlr4ng'
 import { isCursorOnContext } from '../utils'
+import type {
+  ChangeToExpressionListType,
+  ExpressionChild,
+  LayerInfo,
+  NewExpressionType,
+  NewQuerySegmentType,
+  QuantifierChoicesType,
+  ResourceLayerIDInfo,
+  WrapExpressionType,
+} from './constants'
 import {
   ADVANCED_LAYERS,
   ADVANCED_LAYERS_MAP,
   CHANGE_TO_EXPRESSION_LIST,
   CHANGE_TO_EXPRESSION_LIST_MAP,
-  type ChangeToExpressionListType,
   DEFAULT_NEW_QUANTIFIER,
   EXPRESSION_OPERATORS,
   EXPRESSION_OPERATORS_MAP,
-  type ExpressionChild,
   LAYER_VALUE_OPTIONS_MAP,
-  type LayerInfo,
   NEW_EXPRESSIONS,
   NEW_EXPRESSIONS_MAP,
   NEW_QUERY_SEGMENTS,
   NEW_QUERY_SEGMENTS_MAP,
-  type NewExpressionType,
-  type NewQuerySegmentType,
   QUANTIFIER_CHOICES,
   QUANTIFIER_CHOICES_MAP,
-  type QuantifierChoicesType,
-  type ResourceLayerIDInfo,
   WITHIN_CHOICES,
   WRAP_EXPRESSION,
   WRAP_EXPRESSION_MAP,
-  type WrapExpressionType,
 } from './constants'
 import { FCSParserLexerProvider, useFCSParserLexer } from './FCSParserLexerContext'
+import type { FCSQueryBuilderConfig } from './FCSQueryBuilderConfigContext'
 import {
-  type FCSQueryBuilderConfig,
   FCSQueryBuilderConfigProvider,
   useFCSQueryBuilderConfig,
 } from './FCSQueryBuilderConfigContext'

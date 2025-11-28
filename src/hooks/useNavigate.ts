@@ -1,9 +1,6 @@
 import { useCallback } from 'react'
-import {
-  generatePath,
-  type NavigateOptions,
-  useNavigate as useReactRouterNavigate,
-} from 'react-router'
+import type { NavigateOptions } from 'react-router'
+import { generatePath, useNavigate as useReactRouterNavigate } from 'react-router'
 
 import useKeepSearchParams from './useKeepSearchParams'
 

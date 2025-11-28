@@ -1,6 +1,8 @@
-export interface LanguageCode2NameMap {
-  [code: string]: string
-}
+import type { LanguageCode2NameMap } from 'fcs-sru-aggregator-api-adapter-typescript'
+
+export type { LanguageCode2NameMap }
+
+// --------------------------------------------------------------------------
 
 export type LanguageFilterOptions = 'byMeta' | 'byGuess' | 'byMetaAndGuess'
 export type ResourceSelectionModalViewOptionVisibility = 'all' | 'selected'

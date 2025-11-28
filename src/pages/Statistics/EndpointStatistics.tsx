@@ -9,8 +9,9 @@ import { Link } from 'react-router'
 import slugify from 'react-slugify'
 import { Fragment } from 'react/jsx-runtime'
 
+import type { InstitutionEndpointInfo, StatisticsResourceInfo } from 'fcs-sru-aggregator-api-adapter-typescript'
+
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
-import type { InstitutionEndpointInfo, StatisticsResourceInfo } from '@/utils/api'
 import { REQ_PARAM_RESOURCE_ID } from './utils'
 
 import exclamationTriangleIcon from 'bootstrap-icons/icons/exclamation-triangle.svg?raw'

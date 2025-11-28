@@ -9,13 +9,9 @@ import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row'
 import { useTranslation } from 'react-i18next'
 
-import { type Resource } from '@/utils/api'
-import {
-  DEFAULT_SEARCH_LANGUAGE_FILTER,
-  MULTIPLE_LANGUAGE_CODE,
-  type LanguageCode2NameMap,
-  type LanguageFilterOptions,
-} from '@/utils/search'
+import type { Resource } from '@/utils/api'
+import type { LanguageCode2NameMap, LanguageFilterOptions } from '@/utils/search'
+import { DEFAULT_SEARCH_LANGUAGE_FILTER, MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 
 // --------------------------------------------------------------------------
 // types

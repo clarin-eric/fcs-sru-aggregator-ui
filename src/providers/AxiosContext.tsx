@@ -1,5 +1,6 @@
-import { type AxiosInstance } from 'axios'
-import { createContext, type ReactNode, useContext } from 'react'
+import type { AxiosInstance } from 'axios'
+import type { ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
 // --------------------------------------------------------------------------
 

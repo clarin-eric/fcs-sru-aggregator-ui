@@ -1,7 +1,8 @@
-import { createContext, type ReactNode, useContext } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
-import { type Resource } from '@/utils/api'
-import { type LanguageCode2NameMap } from '@/utils/search'
+import type { Resource } from '@/utils/api'
+import type { LanguageCode2NameMap } from '@/utils/search'
 
 // --------------------------------------------------------------------------
 

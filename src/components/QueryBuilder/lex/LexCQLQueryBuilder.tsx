@@ -13,22 +13,24 @@ import {
   Search_clauseContext,
   SubqueryContext,
 } from '@/parsers/LexParser'
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
 import { isCursorOnContext } from '../utils'
+import type {
+  FieldsType,
+  NewSearchClauseChoicesType,
+  RelationModifiersType,
+  RelationsType,
+} from './constants'
 import {
   BOOLEANS,
   DEFAULT_NEW_RELATION,
   FIELD_GROUPS,
   FIELDS_MAP,
-  type FieldsType,
   NEW_SEARCH_CLAUSE_CHOICES,
   NEW_SEARCH_CLAUSE_CHOICES_MAP,
-  type NewSearchClauseChoicesType,
   RELATION_MODIFIERS,
   RELATION_MODIFIERS_MUTUALLY_EXCLUSIVE,
-  type RelationModifiersType,
   RELATIONS,
-  type RelationsType,
 } from './constants'
 import { LexCQLParserLexerProvider, useLexCQLParserLexer } from './LexCQLParserLexerContext'
 import {

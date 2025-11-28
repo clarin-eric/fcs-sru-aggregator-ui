@@ -1,7 +1,8 @@
 import { useCallback, useMemo } from 'react'
-import { useSearchParams, createSearchParams, type URLSearchParamsInit } from 'react-router'
+import type { URLSearchParamsInit } from 'react-router'
+import { createSearchParams, useSearchParams } from 'react-router'
 
-import { REQ_PARAM_CONSORTIA } from '@/utils/api'
+import { REQ_PARAM_CONSORTIA } from 'fcs-sru-aggregator-api-adapter-typescript'
 
 // --------------------------------------------------------------------------
 

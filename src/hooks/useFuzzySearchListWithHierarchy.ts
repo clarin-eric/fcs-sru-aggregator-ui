@@ -1,7 +1,7 @@
-import { type HighlightRanges } from '@nozbe/microfuzz'
+import type { HighlightRanges } from '@nozbe/microfuzz'
 import { useFuzzySearchList } from '@nozbe/microfuzz/react'
 
-import { type Resource } from '@/utils/api'
+import type { Resource } from '@/utils/api'
 import { flattenResources, getBestFromMultilingualValuesTryByLanguage } from '@/utils/resources'
 
 export type ResourceSearchFields = 'title' | 'institution' | 'description'
