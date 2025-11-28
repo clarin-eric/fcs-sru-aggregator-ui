@@ -12,13 +12,12 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { Trans, useTranslation } from 'react-i18next'
 
 import type { Resource, ResourceSearchResult } from 'fcs-sru-aggregator-api-adapter-typescript'
-import { getURLForDownload, getURLForWeblicht } from 'fcs-sru-aggregator-api-adapter-typescript'
+import { getSearchResultsURL, getURLForDownload, getURLForWeblicht } from 'fcs-sru-aggregator-api-adapter-typescript'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
-import { getSearchResultsURL } from '@/utils/api'
 
 import { DOWNLOAD_FORMATS, NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import {
