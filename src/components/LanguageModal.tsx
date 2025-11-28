@@ -108,7 +108,7 @@ function LanguageModal({
 
   function renderLanguageOption(
     code: string,
-    language: string,
+    language: string | null,
     highlights?: FuzzyMatches,
     score?: number
   ) {
@@ -132,7 +132,7 @@ function LanguageModal({
         key={code}
       >
         {isSelected && <span className="selected-marker me-1">✓</span>}
-        <Highlight ranges={highlights[1]} text={language} />{' '}
+        <Highlight ranges={highlights[1]} text={language ?? code} />{' '}
         <sup>
           <Highlight ranges={highlights[0]} text={code} />
         </sup>
