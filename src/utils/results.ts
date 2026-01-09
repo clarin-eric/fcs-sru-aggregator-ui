@@ -1,4 +1,4 @@
-import type { ResourceSearchResultMetaOnly } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type { ResourceSearchResultMetaOnly } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import LocaleStore from '@/stores/locale'
 import type { Resource } from './api'

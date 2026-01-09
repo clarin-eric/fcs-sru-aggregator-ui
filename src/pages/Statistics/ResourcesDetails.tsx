@@ -15,12 +15,12 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
-import type { ExtraScopingParams } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type { ExtraScopingParams } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import {
   getLanguages,
   getResources,
   REQ_PARAM_CONSORTIA,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import type { FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
 import useFuzzySearchListWithHierarchy from '@/hooks/useFuzzySearchListWithHierarchy'

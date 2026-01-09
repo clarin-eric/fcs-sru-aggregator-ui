@@ -4,11 +4,11 @@ import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
 import { useTranslation } from 'react-i18next'
 
-import type { ResourceSearchResultMetaOnly } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type { ResourceSearchResultMetaOnly } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import {
   getSearchResultsMetaOnlyForResource,
   postSearchMoreResults,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import { useAxios } from '@/providers/AxiosContext'
 // import { useSearchParams } from '@/providers/SearchParamsContext'

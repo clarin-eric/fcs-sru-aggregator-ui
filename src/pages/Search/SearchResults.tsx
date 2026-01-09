@@ -10,8 +10,8 @@ import ProgressBar from 'react-bootstrap/ProgressBar'
 import Row from 'react-bootstrap/Row'
 import { Trans, useTranslation } from 'react-i18next'
 
-import type { SearchResultsMetaOnly } from 'fcs-sru-aggregator-api-adapter-typescript'
-import { getSearchResultsMetaOnly } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type { SearchResultsMetaOnly } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
+import { getSearchResultsMetaOnly } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import ResourceSearchResult from '@/components/ResourceSearchResult'

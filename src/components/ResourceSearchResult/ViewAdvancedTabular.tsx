@@ -9,7 +9,7 @@ import type {
   AvailableLayer,
   Resource,
   ResourceSearchResult,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import link45degIcon from 'bootstrap-icons/icons/link-45deg.svg?raw'
 

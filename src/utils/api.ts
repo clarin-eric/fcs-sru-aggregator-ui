@@ -1,7 +1,7 @@
 import type {
   Resource as ResourceRaw,
   StatisticsSection,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 // --------------------------------------------------------------------------
 

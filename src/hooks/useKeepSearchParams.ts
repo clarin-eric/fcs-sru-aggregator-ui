@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import type { URLSearchParamsInit } from 'react-router'
 import { createSearchParams, useSearchParams } from 'react-router'
 
-import { REQ_PARAM_CONSORTIA } from 'fcs-sru-aggregator-api-adapter-typescript'
+import { REQ_PARAM_CONSORTIA } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 // --------------------------------------------------------------------------
 

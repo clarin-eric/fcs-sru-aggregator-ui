@@ -4,7 +4,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Table from 'react-bootstrap/Table'
 import Tooltip from 'react-bootstrap/Tooltip'
 
-import type { ResourceSearchResult } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type { ResourceSearchResult } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import link45degIcon from 'bootstrap-icons/icons/link-45deg.svg?raw'
 

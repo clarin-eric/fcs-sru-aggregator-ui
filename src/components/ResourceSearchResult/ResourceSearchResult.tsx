@@ -13,8 +13,8 @@ import type {
   Resource,
   ResourceSearchResult,
   ResourceSearchResultMetaOnly,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
-import { getSearchResultDetails } from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
+import { getSearchResultDetails } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'

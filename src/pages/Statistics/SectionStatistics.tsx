@@ -13,7 +13,7 @@ import slugify from 'react-slugify'
 import type {
   InstitutionEndpointInfo,
   StatisticsSection,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import EndpointStatistics from './EndpointStatistics'
 

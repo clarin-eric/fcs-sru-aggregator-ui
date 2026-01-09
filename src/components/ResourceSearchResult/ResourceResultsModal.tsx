@@ -11,8 +11,15 @@ import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { Trans, useTranslation } from 'react-i18next'
 
-import type { Resource, ResourceSearchResult } from 'fcs-sru-aggregator-api-adapter-typescript'
-import { getSearchResultsURL, getURLForDownload, getURLForWeblicht } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type {
+  Resource,
+  ResourceSearchResult,
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
+import {
+  getSearchResultsURL,
+  getURLForDownload,
+  getURLForWeblicht,
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'

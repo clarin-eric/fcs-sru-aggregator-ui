@@ -1,4 +1,4 @@
-import type { LanguageCode2NameMap } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type { LanguageCode2NameMap } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 export type { LanguageCode2NameMap }
 

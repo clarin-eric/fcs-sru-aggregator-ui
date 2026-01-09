@@ -1,4 +1,4 @@
-import type { Resource as ResourceRaw } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type { Resource as ResourceRaw } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import LocaleStore from '@/stores/locale'
 import type { Resource } from '@/utils/api'

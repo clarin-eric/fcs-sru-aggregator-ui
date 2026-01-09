@@ -16,12 +16,12 @@ import type {
   Capability,
   Consortium,
   ExtraScopingParams,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import {
   getLanguages,
   getResources,
   REQ_PARAM_CONSORTIA,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import LanguageModal from '@/components/LanguageModal'
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'

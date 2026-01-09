@@ -9,7 +9,10 @@ import { Link } from 'react-router'
 import slugify from 'react-slugify'
 import { Fragment } from 'react/jsx-runtime'
 
-import type { InstitutionEndpointInfo, StatisticsResourceInfo } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type {
+  InstitutionEndpointInfo,
+  StatisticsResourceInfo,
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import { REQ_PARAM_RESOURCE_ID } from './utils'

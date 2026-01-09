@@ -9,8 +9,14 @@ import { Helmet } from 'react-helmet-async'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router'
 
-import type { ExtraScopingParams, StatisticsSection } from 'fcs-sru-aggregator-api-adapter-typescript'
-import { getStatisticsData, REQ_PARAM_CONSORTIA } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type {
+  ExtraScopingParams,
+  StatisticsSection,
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
+import {
+  getStatisticsData,
+  REQ_PARAM_CONSORTIA,
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import useNavigate from '@/hooks/useNavigate'
 import useRouteMatch from '@/hooks/useRouteMatch'

@@ -10,12 +10,12 @@ import { Helmet } from 'react-helmet-async'
 import { Trans, useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
-import type { ExtraScopingParams } from 'fcs-sru-aggregator-api-adapter-typescript'
+import type { ExtraScopingParams } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import {
   getInitData,
   postSearch,
   REQ_PARAM_CONSORTIA,
-} from 'fcs-sru-aggregator-api-adapter-typescript'
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
