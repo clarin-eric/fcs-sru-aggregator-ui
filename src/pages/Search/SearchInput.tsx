@@ -730,28 +730,34 @@ function SearchInput({
       </Form>
 
       {/* search input modals */}
-      <LanguageModal
-        languages={languages}
-        resources={resources}
-        searchLanguage={language}
-        show={showLanguageSelectionModal}
-        onModalClose={handleChangeLanguageSelection}
-      />
-      <ResourceSelectionModal
-        resources={resources}
-        languages={languages}
-        availableResources={validResourceIDs}
-        selectedResources={selectedResourceIDs ?? []}
-        show={showResourceSelectionModal}
-        showGrouping={showResourceSelectionModalGrouping}
-        onModalClose={handleChangeResourceSelection}
-      />
+      {showLanguageSelectionModal && (
+        <LanguageModal
+          languages={languages}
+          resources={resources}
+          searchLanguage={language}
+          show={showLanguageSelectionModal}
+          onModalClose={handleChangeLanguageSelection}
+        />
+      )}
+      {showResourceSelectionModal && (
+        <ResourceSelectionModal
+          resources={resources}
+          languages={languages}
+          availableResources={validResourceIDs}
+          selectedResources={selectedResourceIDs ?? []}
+          show={showResourceSelectionModal}
+          showGrouping={showResourceSelectionModalGrouping}
+          onModalClose={handleChangeResourceSelection}
+        />
+      )}
       {/* query suggestions modal */}
-      <QuerySuggestionsModal
-        queryTypes={[queryType]} // TODO: or show all always?
-        show={showQuerySuggestionsModal}
-        onModalClose={handleChangeQuerySuggestion}
-      />
+      {showQuerySuggestionsModal && (
+        <QuerySuggestionsModal
+          queryTypes={[queryType]} // TODO: or show all always?
+          show={showQuerySuggestionsModal}
+          onModalClose={handleChangeQuerySuggestion}
+        />
+      )}
       {/* query builder modal */}
       {import.meta.env.FEATURE_QUERY_BUILDER &&
         QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(queryType as QueryTypeIDForQueryBuilder) &&
@@ -768,14 +774,16 @@ function SearchInput({
               </>
             }
           >
-            <QueryBuilderModal
-              query={query}
-              queryType={queryType as QueryTypeIDForQueryBuilder}
-              resources={resources}
-              selectedResources={selectedResourceIDs}
-              show={showQueryBuilderModal}
-              onModalClose={handleChangeQueryBuilderQuery}
-            />
+            {showQueryBuilderModal && (
+              <QueryBuilderModal
+                query={query}
+                queryType={queryType as QueryTypeIDForQueryBuilder}
+                resources={resources}
+                selectedResources={selectedResourceIDs}
+                show={showQueryBuilderModal}
+                onModalClose={handleChangeQueryBuilderQuery}
+              />
+            )}
           </Suspense>
         )}
     </search>

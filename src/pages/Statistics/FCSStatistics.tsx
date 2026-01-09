@@ -872,14 +872,16 @@ function FCSStatistics() {
         )}
       </Card>
 
-      <LanguageModal
-        languages={languages}
-        resources={resources}
-        showResourceCounts={true}
-        showLanguageFilterOptions={false}
-        show={showLanguageSelectionModal}
-        onModalClose={() => setShowLanguageSelectionModal(false)}
-      />
+      {showLanguageSelectionModal && (
+        <LanguageModal
+          languages={languages}
+          resources={resources}
+          showResourceCounts={true}
+          showLanguageFilterOptions={false}
+          show={showLanguageSelectionModal}
+          onModalClose={() => setShowLanguageSelectionModal(false)}
+        />
+      )}
     </Container>
   )
 }

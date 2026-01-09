@@ -356,15 +356,17 @@ function ResourceSearchResult({
           </div>
         </Collapse>
       </Card>
-      <ResourceResultsModal
-        show={showModal}
-        searchId={searchId}
-        resourceId={resourceId}
-        result={data}
-        viewMode={viewMode}
-        showDiagnostics={showDiagnostics}
-        onModalClose={handleModalClose}
-      />
+      {showModal && (
+        <ResourceResultsModal
+          show={showModal}
+          searchId={searchId}
+          resourceId={resourceId}
+          result={data}
+          viewMode={viewMode}
+          showDiagnostics={showDiagnostics}
+          onModalClose={handleModalClose}
+        />
+      )}
     </>
   )
 }
