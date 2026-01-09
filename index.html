@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FCS Aggregator – Content Search</title>
+  <link rel="icon" type="image/png" sizes="40x40" href="./lib/assets/icon-services-fcs.png">
+
+  <script type="module" crossorigin src="./lib/fcs-sru-aggregator-ui.js"></script>
+  <link rel="modulepreload" crossorigin href="./lib/vendor/react.js">
+  <link rel="modulepreload" crossorigin href="./lib/vendor/react-ext.js">
+  <link rel="modulepreload" crossorigin href="./lib/vendor/bootstrap.js">
+  <link rel="modulepreload" crossorigin href="./lib/locales/en/default.js">
+  <link rel="modulepreload" crossorigin href="./lib/vendor/prism.js">
+  <link rel="stylesheet" crossorigin href="./lib/fcs-sru-aggregator-ui.css">
+  <link rel="stylesheet" crossorigin href="./lib/vendor/bootstrap.css">
+</head>
+
+<body>
+<!-- Start Single Page Apps for GitHub Pages -->
+<script type="text/javascript">
+  // Single Page Apps for GitHub Pages
+  // MIT License
+  // https://github.com/rafgraph/spa-github-pages
+  // This script checks to see if a redirect is present in the query string,
+  // converts it back into the correct url and adds it to the
+  // browser's history using window.history.replaceState(...),
+  // which won't cause the browser to attempt to load the new url.
+  // When the single page app is loaded further down in this file,
+  // the correct url will be waiting in the browser's history for
+  // the single page app to route accordingly.
+  (function(l) {
+    console.debug("SPA Github Pages Navigation Fixer", l, l.href);
+    var marker = "?githubpagesurl=";
+    if (l.search.startsWith(marker)) {
+      var decoded = l.search.slice(marker.length).split('&').map(function(s) { 
+        return s.replace(/~and~/g, '&')
+      }).join('?');
+      console.debug("SPA Github Pages Navigation Fixer", l.pathname.slice(0, -1) + decoded + l.hash);
+      window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + decoded + l.hash
+      );
+    }
+  }(window.location))
+</script>
+<!-- End Single Page Apps for GitHub Pages -->
+  <noscript>
+    <p>The FCS Aggregator requires JavaScript to be enabled!</p>
+  </noscript>
+  <div id="root"></div>
+
+  <!-- global configuration -->
+  <script>
+    /* move configuration before main 'fcs-sru-aggregator-ui-0.0.0.js' import! */
+    window.MyAggregator = window.MyAggregator || {};
+    window._paq = window._paq || [];
+
+    // API stuff
+    // window.MyAggregator.API_URL = "rest/";
+    // window.MyAggregator.DEPLOY_PATH = null; // null for default ("/")
+
+    // UI (updatable)
+    // window.MyAggregator.VALIDATOR_URL = "https://www.clarin.eu/fcsvalidator/";
+    // window.MyAggregator.SHOW_SEARCH_RESULT_LINK = false;
+
+    // UI
+    // window.MyAggregator.APP_TITLE = "Content Search"
+    // window.MyAggregator.APP_TITLE_HEAD = "FCS Aggregator – Content Search"
+
+    // matomo, set to null to disable; use double quotes so it is valid JSON! (if as string, quote keys, too)
+    // window.MyAggregator.MATOMO_TRACKING_PARAMS = { srcUrl: "", trackerUrl: "", siteId: -1, userId: "", domains: [] }
+
+    // user authentication status
+    // window.MyAggregator.AUTH_USERNAME = "<XYZ @ University>"
+  </script>
+
+</body>
+
+</html>
