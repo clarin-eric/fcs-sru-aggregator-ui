@@ -5,15 +5,16 @@
 The frontend uses the following technologies:
 
 - [ReactJS](https://18.react.dev/) 18.3.1
-  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.12.0 for <abbr title="Single Page Application">SPA</abbr> routing
-  - [React Query](https://tanstack.com/query/latest) 5.90.16 with [Axios](https://github.com/axios/axios) 1.13.2 for web requests
-  - [react-i18next](https://react.i18next.com/) 16.5.1 and [i18next](https://www.i18next.com/) 25.7.4 for translation support, with [i18next-resources-to-backend](https://github.com/i18next/i18next-resources-to-backend) 1.2.1 for dynamic resource loading
+  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.13.0 for <abbr title="Single Page Application">SPA</abbr> routing
+  - [React Query](https://tanstack.com/query/latest) 5.90.21 with [Axios](https://github.com/axios/axios) 1.13.5 for web requests
+    - [@clarin-eric/fcs-sru-aggregator-api-adapter-typescript](https://github.com/clarin-eric/fcs-sru-aggregator-api-adapter-typescript) 1.5.1 as REST API adapter for the FCS SRU Aggregator
+  - [react-i18next](https://react.i18next.com/) 16.5.4 and [i18next](https://www.i18next.com/) 25.8.10 for translation support, with [i18next-resources-to-backend](https://github.com/i18next/i18next-resources-to-backend) 1.2.1 for dynamic resource loading
 - [Bootstrap](https://getbootstrap.com/) 5.3.8 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.13.1, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.10
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
 - [react-slugify](https://github.com/martpie/react-slugify) 4.0.1 for generating hash urls
 - [PrismJS](https://github.com/PrismJS/prism) 1.29.0 for syntax highlighting
 - [ANTLR4ng](https://github.com/mike-lischke/antlr4ng) 3.0.16 for syntax parsing (visual query builder, syntax validation)
-- [Zustand](https://github.com/pmndrs/zustand) 5.0.9 for state management of external bundle configuration
+- [Zustand](https://github.com/pmndrs/zustand) 5.0.11 for state management of external bundle configuration
 - [React Helmet (Async Fork)](https://github.com/staylor/react-helmet-async) 2.0.5 for webpage meta information
 
 For development and building a few additional dependencies are required:
@@ -23,7 +24,7 @@ For development and building a few additional dependencies are required:
   - [picomatch](https://github.com/micromatch/picomatch#globbing-features) 4.0.3 for filename filters in output control
 - [TypeScript](https://www.typescriptlang.org/) 5.9.3 with `@types/*` definitions
 - [ESLint](https://eslint.org/) 9.39.2 with plugins
-- [simple-git](https://github.com/steveukx/git-js) 3.30.0 for source code information
+- [simple-git](https://github.com/steveukx/git-js) 3.31.1 for source code information
 
 ## Features
 
