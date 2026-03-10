@@ -39,3 +39,30 @@
     --bs-btn-disabled-border-color: #f8f9fa;
   }
 }
+
+/* *** ResourcesDetails.tsx *** */
+
+#statistics-resource-details .query-type-label {
+  /* see `Search/styles.css` - `#fcs-query-filters button.btn` */
+  --color: #226c2259;
+  border: none;
+  border-radius: 0;
+  border-bottom: 5px solid var(--color);
+  padding-inline: .25rem !important;
+}
+
+#statistics-resource-details .example-query-container+.example-query-container {
+  margin-top: .5rem;
+}
+
+#statistics-resource-details .example-query-container>.list-group-item {
+  padding-inline: 0;
+}
+
+#statistics-resource-details .example-query-container>.example-query>.example-query-code>pre {
+  display: inline;
+}
+
+#statistics-resource-details .example-query-container>.example-query code {
+  font-size: larger;
+}

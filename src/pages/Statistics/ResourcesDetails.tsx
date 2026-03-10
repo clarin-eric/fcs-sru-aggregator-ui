@@ -15,7 +15,10 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
-import type { ExtraScopingParams } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
+import type {
+  ExampleQuery,
+  ExtraScopingParams,
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import {
   getLanguages,
   getResources,
@@ -28,6 +31,8 @@ import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import { useAxios } from '@/providers/AxiosContext'
 import { useLocaleStore } from '@/stores/locale'
 import type { Resource } from '@/utils/api'
+import { QUERY_TYPE_MAP } from '@/utils/constants'
+import { highlightSyntax } from '@/utils/prism'
 import {
   findResourceByFilter,
   fromApi,
@@ -272,6 +277,70 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
     return <ul>{renderRecursiveResourceHierarchy(rootResource)}</ul>
   }
 
+  function renderResourceExampleQueries(exampleQueries?: ExampleQuery[]) {
+    if (!exampleQueries) return null
+
+    function renderSingleExampleQuery(exampleQuery: ExampleQuery) {
+      const queryType = exampleQuery.queryType
+      const query = exampleQuery.query
+      const descriptions = exampleQuery.description
+
+      const selectedLanguage = getBestLanguageFromMultilingualValuesTryByLanguage(
+        descriptions,
+        userLocale
+      )
+
+      return (
+        <li key={`${exampleQuery.queryType}|${exampleQuery.query}`}>
+          <ListGroup className="list-group-flush example-query-container">
+            <ListGroup.Item className="border-0 example-query">
+              <span
+                className="query-type-label me-3"
+                style={
+                  QUERY_TYPE_MAP[queryType]
+                    ? {
+                        '--color': QUERY_TYPE_MAP[queryType].color,
+                      }
+                    : {}
+                }
+              >
+                {t(`queryTypes.${queryType}.nameShort`, {
+                  ns: 'common',
+                  defaultValue: QUERY_TYPE_MAP[queryType]?.searchLabel ?? queryType.toUpperCase(),
+                })}{' '}
+                <sup>{queryType}</sup>
+              </span>{' '}
+              <span
+                className="example-query-code"
+                dangerouslySetInnerHTML={{ __html: highlightSyntax(query, queryType) }}
+              />
+            </ListGroup.Item>
+            {Object.entries(descriptions).map(([language, value]) => (
+              <ListGroup.Item key={language}>
+                <Badge
+                  bg={selectedLanguage === language ? 'primary' : 'secondary'}
+                  className="me-2"
+                >
+                  {langNames.of(language)} <sup>{language}</sup>
+                </Badge>{' '}
+                {value}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </li>
+      )
+    }
+
+    return (
+      <Card className="my-2">
+        <Card.Header>{t('statistics.resources.cardHeaderExampleQueries')}</Card.Header>
+        <Card.Body>
+          <ul className="mb-0">{exampleQueries.map(renderSingleExampleQuery)}</ul>
+        </Card.Body>
+      </Card>
+    )
+  }
+
   // ------------------------------------------------------------------------
 
   const showLexDVInfo =
@@ -289,7 +358,7 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
       (selectedResource.availableLayers && selectedResource.availableLayers.length > 0))
 
   return (
-    <Container className="d-grid gap-2 mt-3">
+    <Container id="statistics-resource-details" className="d-grid gap-2 mt-3">
       {(isPending || isError) && (
         <Row>
           <Col>
@@ -394,6 +463,7 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
               </ul>
             </Card.Body>
           </Card>
+          {renderResourceExampleQueries(selectedResource.exampleQueries)}
 
           <h4 className="h5 pb-1 mt-4 mb-3 border-bottom">
             {t('statistics.resources.titleTechnicalMetadata')}

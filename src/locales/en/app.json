@@ -310,6 +310,7 @@
       "cardHeaderInstitution": "Institutions",
       "cardHeaderLanguages": "Languages",
       "cardHeaderLandingPage": "Landing Page",
+      "cardHeaderExampleQueries": "Example Queries",
       "cardHeaderEndpoint": "FCS Endpoint",
       "cardHeaderResource": "FCS Resource",
       "cardHeaderDataViews": "Data Views",
