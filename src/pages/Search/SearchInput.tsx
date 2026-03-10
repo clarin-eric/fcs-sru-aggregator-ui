@@ -539,10 +539,11 @@ function SearchInput({
             variant="outline-secondary"
             type="button"
             id="fcs-search-query-suggestions-button"
-            aria-label={t('search.searchInput.buttonOpenQuerySuggestions')}
+            aria-label={t('search.searchInput.buttonOpenQuerySuggestionsAriaLabel')}
             onClick={() => setShowQuerySuggestionsModal(true)}
           >
-            <i dangerouslySetInnerHTML={{ __html: balloonIcon }} aria-hidden="true" />
+            <i dangerouslySetInnerHTML={{ __html: balloonIcon }} aria-hidden="true" />{' '}
+            {t('search.searchInput.buttonOpenQuerySuggestions')}
           </Button>
           {/* @ts-expect-error: typing does not work for onChange handler, is correct so */}
           <Form.Control
@@ -753,6 +754,7 @@ function SearchInput({
       {/* query suggestions modal */}
       {showQuerySuggestionsModal && (
         <QuerySuggestionsModal
+          resources={resources}
           queryTypes={[queryType]} // TODO: or show all always?
           show={showQuerySuggestionsModal}
           onModalClose={handleChangeQuerySuggestion}

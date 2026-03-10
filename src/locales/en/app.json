@@ -58,7 +58,8 @@
       "buttonEnhanceQueryAriaLabel_enabled": "Disable enhanced visual input support with syntax highlighting",
       "buttonEnhanceQueryAriaLabel_disabled": "Enable enhanced visual input support with syntax highlighting",
       "buttonOpenQueryBuilderAriaLabel": "Open modal to use the visual query builder to construct a search query",
-      "buttonOpenQuerySuggestions": "Open modal with suggestions for search queries",
+      "buttonOpenQuerySuggestions": "Suggestions",
+      "buttonOpenQuerySuggestionsAriaLabel": "Open modal with suggestions for search queries",
       "inputQueryAriaLabel": "Search query input",
       "filtersSummary": "Perform a <0/> in <1/> from <2/> in <3/> with up to <4/> results per endpoint.",
       "dropdownQueryTypeAriaLabel": "Search query type",
@@ -111,7 +112,12 @@
     "suggestionsModal": {
       "title": "Search Query Suggestions",
       "buttonUseQuery": "Use Query",
-      "buttonClose": "Close"
+      "buttonClose": "Close",
+      "msgApplicableResources_one": "Applicable to at least one resource",
+      "msgApplicableResources_other": "Applicable to at least {{count}} resources",
+      "labelChangeExampleDescriptionLanguage": "Change language of example description:",
+      "buttonChangeExampleDescriptionLanguageTitle_one": "Found 1 example with description in {{language}} language",
+      "buttonChangeExampleDescriptionLanguageTitle_other": "Found {{count}} examples with description in '{{language}}' ({{languageName}}) language"
     },
     "results": {
       "progressPopover": {

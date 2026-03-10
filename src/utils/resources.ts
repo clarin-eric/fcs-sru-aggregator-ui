@@ -366,6 +366,13 @@ export function isResourceAvailableForQueryType(resource: Resource, queryTypeId:
   return true
 }
 
+export function isResourceAvailableForAnyOfQueryTypes(
+  resource: Resource,
+  queryTypeIds: readonly QueryTypeID[]
+) {
+  return queryTypeIds.some((queryTypeId) => isResourceAvailableForQueryType(resource, queryTypeId))
+}
+
 export function isResourceAvailableForLanguage(resource: Resource, languageCode: string) {
   // yes for any language
   if (languageCode === MULTIPLE_LANGUAGE_CODE) {

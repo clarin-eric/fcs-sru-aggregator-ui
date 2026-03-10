@@ -3,6 +3,8 @@ import type {
   StatisticsSection,
 } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
+export type { MultilingualStrings } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
+
 // --------------------------------------------------------------------------
 
 export interface Resource extends ResourceRaw {

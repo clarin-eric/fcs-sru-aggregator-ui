@@ -1,0 +1,5 @@
+/* *** QuerySuggestionsModal.tsx *** */
+
+#search-query-suggestions-modal .query>pre {
+  margin-bottom: unset;
+}
