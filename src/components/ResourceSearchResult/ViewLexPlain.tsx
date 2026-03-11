@@ -4,7 +4,10 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Table from 'react-bootstrap/Table'
 import Tooltip from 'react-bootstrap/Tooltip'
 
-import type { ResourceSearchResult } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
+import type {
+  ResourceSearchResult,
+  ResultRecord,
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import link45degIcon from 'bootstrap-icons/icons/link-45deg.svg?raw'
 
@@ -23,6 +26,31 @@ export interface ViewLexPlainProps {
 function ViewLexPlain({ data }: ViewLexPlainProps) {
   const ref = useRef(null)
 
+  function renderResultRefs(record: ResultRecord, index?: number) {
+    return (
+      <>
+        {record.ref && (
+          <a href={record.ref} className="matomo_link" target="_blank">
+            <i dangerouslySetInnerHTML={{ __html: link45degIcon }} />
+          </a>
+        )}{' '}
+        {record.pid && (
+          <OverlayTrigger
+            placement="auto-start"
+            container={ref}
+            delay={{ show: 250, hide: 400 }}
+            overlay={<Tooltip id={`ttip-${record.pid}-${index}`}>{record.pid}</Tooltip>}
+          >
+            {/* TODO: maybe with on mouse-over stay? see: https://github.com/react-bootstrap/react-bootstrap/issues/1622*/}
+            <Badge bg="secondary" className="pid-badge" title={record.pid}>
+              PID
+            </Badge>
+          </OverlayTrigger>
+        )}
+      </>
+    )
+  }
+
   return (
     <>
       <Table hover responsive className="mb-0 results-lex-plain">
@@ -40,24 +68,7 @@ function ViewLexPlain({ data }: ViewLexPlainProps) {
                 {index + 1}
               </td>
               <td scope="row" className="result-refs">
-                {record.ref && (
-                  <a href={record.ref} className="matomo_link" target="_blank">
-                    <i dangerouslySetInnerHTML={{ __html: link45degIcon }} />
-                  </a>
-                )}{' '}
-                {record.pid && (
-                  <OverlayTrigger
-                    placement="auto-start"
-                    container={ref}
-                    delay={{ show: 250, hide: 400 }}
-                    overlay={<Tooltip id={`ttip-${record.pid}-${index}`}>{record.pid}</Tooltip>}
-                  >
-                    {/* TODO: maybe with on mouse-over stay? see: https://github.com/react-bootstrap/react-bootstrap/issues/1622*/}
-                    <Badge bg="secondary" className="pid-badge">
-                      PID
-                    </Badge>
-                  </OverlayTrigger>
-                )}
+                {renderResultRefs(record, index)}
               </td>
               <td>
                 {record.hits.fragments.map((fragment, index) =>

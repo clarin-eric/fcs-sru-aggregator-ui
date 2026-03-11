@@ -78,7 +78,7 @@ function ViewLex({ data }: ViewLexProps) {
                     overlay={<Tooltip id={`ttip-${record.pid}-${index}`}>{record.pid}</Tooltip>}
                   >
                     {/* TODO: maybe with on mouse-over stay? see: https://github.com/react-bootstrap/react-bootstrap/issues/1622*/}
-                    <Badge bg="secondary" className="pid-badge">
+                    <Badge bg="secondary" className="pid-badge" title={record.pid}>
                       PID
                     </Badge>
                   </OverlayTrigger>
