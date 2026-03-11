@@ -21,6 +21,8 @@ import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { SearchParamsProvider } from '@/providers/SearchParamsContext'
 import AppStore from '@/stores/app'
+import type { SearchData } from '@/stores/searchinput'
+import { useSearchInputStore } from '@/stores/searchinput'
 import type { Resource } from '@/utils/api'
 import { trackSiteSearch } from '@/utils/matomo'
 import {
@@ -30,7 +32,6 @@ import {
   getResourceIDsBySplit,
 } from '@/utils/resources'
 import type { LanguageCode2NameMap } from '@/utils/search'
-import type { SearchData } from './SearchInput'
 import SearchInput from './SearchInput'
 import SearchResults from './SearchResults'
 import type { ToastMessage } from './utils'
@@ -47,14 +48,16 @@ function Search() {
   const axios = useAxios()
   const { t } = useTranslation()
 
-  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
+  const [urlSearchParams] = useSearchParams()
+
+  const initialEndpointsResources = useSearchInputStore((state) => state.initialEndpointsResources)
 
   // REST API state
   const [resources, setResources] = useState<Resource[]>([])
   const [languages, setLanguages] = useState<LanguageCode2NameMap>({})
   const [weblichtLanguages, setWeblichtLanguages] = useState<string[]>([])
 
-  const [searchResourceIDs, setSearchResourceIDs] = useState<string[] | null>(null)
+  const setSearchResourceIDs = useSearchInputStore((state) => state.setResourceIDs)
 
   const [hasSearch, setHasSearch] = useState(false)
   const [searchParams, setSearchParams] = useState<SearchData | null>(null)
@@ -132,111 +135,100 @@ function Search() {
     } else {
       setSearchResourceIDs(getResourceIDs(newResources))
     }
-  }, [data, authEnabled, isAuthenticated, t])
+  }, [data, authEnabled, isAuthenticated, t, setSearchResourceIDs])
 
   useEffect(() => {
-    console.debug('searchParams', urlSearchParams)
     if (!resources || resources.length === 0) return
 
-    const aggregationContext = urlSearchParams.get('x-aggregation-context')
-    if (aggregationContext) {
-      try {
-        const endpoints2handles = JSON.parse(aggregationContext)
+    if (initialEndpointsResources) {
+      // try {
+      // TODO: evaluate if correct and what format
+      // TODO: support easier resource IDs list format
 
-        // TODO: evaluate if correct and what format
-        // TODO: support easier resource IDs list format
+      const { selected, unavailable } = evaluateAggregationContext(
+        resources,
+        initialEndpointsResources
+      )
+      console.debug('aggregationContext', {
+        resources,
+        endpoints2handles: initialEndpointsResources,
+        evaluated: { selected, unavailable },
+      })
 
-        const { selected, unavailable } = evaluateAggregationContext(resources, endpoints2handles)
-        console.debug('aggregationContext', {
-          aggregationContext,
-          resources,
-          endpoints2handles,
-          evaluated: { selected, unavailable },
-        })
+      // TODO: check if selected resources require auth and user is unauthenticated?
 
-        // TODO: check if selected resources require auth and user is unauthenticated?
+      if (selected.length > 0) {
+        setSearchResourceIDs(selected)
 
-        if (selected.length > 0) {
-          setSearchResourceIDs(selected)
-
-          setToasts((toasts) => [
-            ...toasts,
-            {
-              title: t('search.toasts.resourceSelection.title'),
-              body: (
-                <>
-                  <Trans
-                    i18nKey="search.toasts.resourceSelection.msgPreselectedResources"
-                    count={selected.length}
-                  />
-                  <br />
-                  <ul className="ps-3">
-                    {selected.map((rid) => (
-                      <li style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>{rid}</li>
-                    ))}
-                  </ul>
-                </>
-              ),
-              variant: 'success',
-            },
-          ])
-        }
-        if (unavailable.length > 0) {
-          setToasts((toasts) => [
-            ...toasts,
-            {
-              title: t('search.toasts.resourceSelection.title'),
-              body: (
-                <>
-                  <Trans
-                    i18nKey="search.toasts.resourceSelection.msgUnableToSelectResources"
-                    count={unavailable.length}
-                  />
-                  <br />
-                  <ul className="ps-3">
-                    {unavailable.map((rid) => (
-                      <li style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>{rid}</li>
-                    ))}
-                  </ul>
-                </>
-              ),
-              variant: 'warning',
-            },
-          ])
-        }
-      } catch (error) {
-        console.error(
-          'Error trying to parse "x-aggregation-context" search parameter!',
+        setToasts((toasts) => [
+          ...toasts,
           {
-            aggregationContext,
+            title: t('search.toasts.resourceSelection.title'),
+            body: (
+              <>
+                <Trans
+                  i18nKey="search.toasts.resourceSelection.msgPreselectedResources"
+                  count={selected.length}
+                />
+                <br />
+                <ul className="ps-3">
+                  {selected.map((rid) => (
+                    <li style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>{rid}</li>
+                  ))}
+                </ul>
+              </>
+            ),
+            variant: 'success',
           },
-          error
-        )
-        if (error instanceof Error) {
-          setToasts((toasts) => [
-            ...toasts,
-            {
-              title: t('search.toasts.resourceSelection.title'),
-              body: (
-                <>
-                  {t('search.toasts.resourceSelection.msgErrorUnableToSelectResources', {
-                    error: error.name,
-                  })}
-                  <br />
-                  <small>{error.message}</small>
-                </>
-              ),
-              variant: 'error',
-            },
-          ])
-        }
+        ])
       }
+      if (unavailable.length > 0) {
+        setToasts((toasts) => [
+          ...toasts,
+          {
+            title: t('search.toasts.resourceSelection.title'),
+            body: (
+              <>
+                <Trans
+                  i18nKey="search.toasts.resourceSelection.msgUnableToSelectResources"
+                  count={unavailable.length}
+                />
+                <br />
+                <ul className="ps-3">
+                  {unavailable.map((rid) => (
+                    <li style={{ wordBreak: 'break-all', fontSize: '0.7rem' }}>{rid}</li>
+                  ))}
+                </ul>
+              </>
+            ),
+            variant: 'warning',
+          },
+        ])
+      }
+      // } catch (error) {
+      // if (error instanceof Error) {
+      //   setToasts((toasts) => [
+      //     ...toasts,
+      //     {
+      //       title: t('search.toasts.resourceSelection.title'),
+      //       body: (
+      //         <>
+      //           {t('search.toasts.resourceSelection.msgErrorUnableToSelectResources', {
+      //             error: error.name,
+      //           })}
+      //           <br />
+      //           <small>{error.message}</small>
+      //         </>
+      //       ),
+      //       variant: 'error',
+      //     },
+      //   ])
+      // }
+      // }
       // remove after use, will trigger next evaluation of URLSearchParams ...
       // setUrlSearchParams((params) => (params.delete('x-aggregation-context'), params))
-      urlSearchParams.delete('x-aggregation-context')
-      setUrlSearchParams(urlSearchParams)
     }
-  }, [resources, urlSearchParams, setUrlSearchParams, t])
+  }, [resources, t, initialEndpointsResources, setSearchResourceIDs])
 
   // ------------------------------------------------------------------------
 
@@ -345,7 +337,6 @@ function Search() {
               resources={resources}
               languages={languages}
               availableResources={null}
-              selectedResources={searchResourceIDs}
               onSearch={handleSearch}
               onShowToast={handleShowToast}
               hasSearch={hasSearch}

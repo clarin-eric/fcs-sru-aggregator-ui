@@ -28,6 +28,8 @@ function App() {
     if (i18n.language !== locale) i18n.changeLanguage(locale)
   }, [locale])
 
+  // ------------------------------------------------------------------------
+
   if (import.meta.env.FEATURE_TRACKING_MATOMO) {
     /* eslint-disable react-hooks/rules-of-hooks */
     // https://react.dev/reference/rules/rules-of-hooks
@@ -45,6 +47,8 @@ function App() {
       }
     }, [location, pathname])
   }
+
+  // ------------------------------------------------------------------------
 
   return (
     <>

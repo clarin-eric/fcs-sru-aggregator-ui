@@ -1,5 +1,7 @@
-import { createStore } from 'zustand/vanilla'
+import type { UseBoundStore } from 'zustand/react'
 import { useStore } from 'zustand/react'
+import type { StateCreator, StoreApi } from 'zustand/vanilla'
+import { createStore } from 'zustand/vanilla'
 
 // --------------------------------------------------------------------------
 
@@ -23,7 +25,7 @@ export type LocaleStore = LocaleStoreState & LocaleStoreActions
 
 // --------------------------------------------------------------------------
 
-const localeStore = createStore<LocaleStore>((set) => ({
+export const createLocaleSlice: StateCreator<LocaleStore> = (set) => ({
   // state
   locale: import.meta.env.LOCALE ?? 'en',
   locales: import.meta.env.LOCALES ?? (import.meta.env.LOCALE ? [import.meta.env.LOCALE] : ['en']),
@@ -38,17 +40,21 @@ const localeStore = createStore<LocaleStore>((set) => ({
     set((state) => ({
       locales: typeof nextLocales === 'function' ? nextLocales(state.locales) : nextLocales,
     })),
-}))
+})
+
+// --------------------------------------------------------------------------
+
+const localeStore = createStore<LocaleStore>(createLocaleSlice)
 
 export default localeStore
 
 // --------------------------------------------------------------------------
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useLocaleStore = (selector?: (state: LocaleStore) => any) => {
+export const useLocaleStore = ((selector?: (state: LocaleStore) => any) => {
   const useBoundStore = useStore(localeStore, selector!)
-  Object.assign(useBoundStore, localeStore)
   return useBoundStore
-}
+}) as UseBoundStore<StoreApi<LocaleStore>>
+Object.assign(useLocaleStore, localeStore)
 
 // --------------------------------------------------------------------------

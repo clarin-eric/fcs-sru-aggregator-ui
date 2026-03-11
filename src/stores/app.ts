@@ -1,3 +1,4 @@
+import type { StateCreator } from 'zustand/vanilla'
 import { createStore } from 'zustand/vanilla'
 
 import { SetupAndInstallScriptParams as MatomoSetupParams } from '@/utils/matomo'
@@ -80,7 +81,7 @@ type AppStore = AppStoreState & AppStoreActions
 
 // --------------------------------------------------------------------------
 
-const appStore = createStore<AppStore>((set) => ({
+export const createAppSlice: StateCreator<AppStore> = (set) => ({
   // state
   deployPath: import.meta.env.DEPLOY_PATH,
   apiURL: import.meta.env.API_URL,
@@ -133,6 +134,12 @@ const appStore = createStore<AppStore>((set) => ({
         isAuthenticated: newUsername !== null && newUsername !== 'anonymous', // anonymous
       }
     }),
-}))
+})
+
+// --------------------------------------------------------------------------
+
+const appStore = createStore<AppStore>(createAppSlice)
 
 export default appStore
+
+// --------------------------------------------------------------------------

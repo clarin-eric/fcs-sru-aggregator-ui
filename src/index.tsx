@@ -15,6 +15,8 @@ import { AxiosProvider } from '@/providers/AxiosContext'
 import { configure, updateLocale } from '@/public'
 import AppStore from '@/stores/app'
 import LocaleStore from '@/stores/locale'
+import ModalsStore from '@/stores/modals'
+import SearchInputStore from '@/stores/searchinput'
 import { setupAndInstallFromConfigString } from '@/utils/matomo'
 
 // --------------------------------------------------------------------------
@@ -34,6 +36,40 @@ const apiURL = AppStore.getState().apiURL
 
 const language = LocaleStore.getState().locale
 i18n.changeLanguage(language)
+
+// --------------------------------------------------------------------------
+
+console.debug(
+  'SearchInputStore.getState()',
+  SearchInputStore.getInitialState(),
+  SearchInputStore.getState()
+)
+console.debug('ModalsStore.getState()', ModalsStore.getInitialState(), ModalsStore.getState())
+
+// query string evaluation to update search input
+// only need to happen once (on startup)
+const url = new URL(window.location.href)
+const searchParams = url.searchParams
+if (searchParams) {
+  let newSearchParams = searchParams
+  newSearchParams = SearchInputStore.getState().updateFromURLSearchParams(newSearchParams)
+  newSearchParams = ModalsStore.getState().updateFromURLSearchParams(newSearchParams)
+
+  searchParams.sort()
+  newSearchParams.sort()
+  const hasChanged = searchParams.toString() != newSearchParams.toString()
+  if (hasChanged) {
+    const newUrl = new URL(url)
+    newUrl.search = newSearchParams.toString()
+    console.debug(
+      'Updating search params:',
+      { oldSearchParams: searchParams, newSearchParams },
+      { oldUrl: url.toString(), newUrl: newUrl.toString() }
+    )
+    // location.search = newSearchParams.toString()
+    window.history.pushState({}, '', newUrl)
+  }
+}
 
 // --------------------------------------------------------------------------
 

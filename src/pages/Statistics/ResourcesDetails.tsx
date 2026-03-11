@@ -14,6 +14,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton'
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
+import { useShallow } from 'zustand/react/shallow'
 
 import type {
   ExampleQuery,
@@ -30,6 +31,7 @@ import useFuzzySearchListWithHierarchy from '@/hooks/useFuzzySearchListWithHiera
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
 import { useAxios } from '@/providers/AxiosContext'
 import { useLocaleStore } from '@/stores/locale'
+import { useSearchInputStore } from '@/stores/searchinput'
 import type { Resource } from '@/utils/api'
 import { QUERY_TYPE_MAP } from '@/utils/constants'
 import { highlightSyntax } from '@/utils/prism'
@@ -45,6 +47,7 @@ import { REQ_PARAM_RESOURCE_ID } from './utils'
 
 import eyeIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
+import searchIcon from 'bootstrap-icons/icons/search.svg?raw'
 
 import './styles.css'
 
@@ -67,6 +70,10 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
   const [filter, setFilter] = useState('')
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(
     urlSearchParams.get(REQ_PARAM_RESOURCE_ID)
+  )
+
+  const [setQuery, setQueryType, setResourceIDs] = useSearchInputStore(
+    useShallow((state) => [state.setQuery, state.setQueryType, state.setResourceIDs])
   )
 
   // iff resourceId is a resourceHandle
@@ -314,6 +321,20 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
                 className="example-query-code"
                 dangerouslySetInnerHTML={{ __html: highlightSyntax(query, queryType) }}
               />
+              <Link
+                to={{ pathname: '/' }}
+                onClick={() => {
+                  setQuery(query)
+                  setQueryType(queryType)
+                  setResourceIDs([selectedResourceId!])
+                }}
+                className="ms-3"
+              >
+                <i
+                  dangerouslySetInnerHTML={{ __html: searchIcon }}
+                  className="align-baseline ms-2"
+                />
+              </Link>
             </ListGroup.Item>
             {Object.entries(descriptions).map(([language, value]) => (
               <ListGroup.Item key={language}>

@@ -13,29 +13,20 @@ import type { LanguageModelCloseActions } from '@/components/LanguageModal'
 import LanguageModal from '@/components/LanguageModal'
 import QuerySuggestionsModal from '@/components/QuerySuggestionsModal'
 import ResourceSelectionModal from '@/components/ResourceSelectionModal'
-import useFlipOnceTrue from '@/hooks/useFlipOnceTrue'
-import useSearchParamsFromHash from '@/hooks/useSearchParamsFromHash'
+import { useModalsStore } from '@/stores/modals'
+import type { SearchData } from '@/stores/searchinput'
+import { useSearchInputStore } from '@/stores/searchinput'
 import type { Resource } from '@/utils/api'
 import type { NumberOfResults, QueryTypeID, QueryTypeIDForQueryBuilder } from '@/utils/constants'
 import {
-  DEFAULT_QUERY_TYPE,
   NUMBER_OF_RESULTS,
   QUERY_TYPE_MAP,
   QUERY_TYPES,
   QUERY_TYPES_WITH_BUILDER_SUPPORT,
 } from '@/utils/constants'
 import { getAvailableResourceIDs, getInstitutions } from '@/utils/resources'
-import type {
-  LanguageCode2NameMap,
-  LanguageFilterOptions,
-  ResourceSelectionModalViewOptionGrouping,
-} from '@/utils/search'
-import {
-  DEFAULT_RESOURCE_VIEW_GROUPING,
-  DEFAULT_SEARCH_LANGUAGE_FILTER,
-  languageCodeToName,
-  MULTIPLE_LANGUAGE_CODE,
-} from '@/utils/search'
+import type { LanguageCode2NameMap, LanguageFilterOptions } from '@/utils/search'
+import { languageCodeToName, MULTIPLE_LANGUAGE_CODE } from '@/utils/search'
 import type { ToastMessage } from './utils'
 
 // SVG, for inverted/specific colors: https://stackoverflow.com/a/52041765/9360161
@@ -62,7 +53,6 @@ export interface SearchProps {
 export interface SearchInputProps {
   resources: Resource[]
   availableResources: string[] | null
-  selectedResources: string[] | null
   languages?: LanguageCode2NameMap
   onSearch: (searchData: SearchData) => void
   onShowToast?: (toast: ToastMessage) => void
@@ -70,39 +60,9 @@ export interface SearchInputProps {
   disabled?: boolean
 }
 
-export interface SearchData {
-  language: string
-  languageFilter: LanguageFilterOptions
-  queryType: QueryTypeID
-  query: string
-  resourceIDs: string[]
-  numberOfResults: NumberOfResults
-}
-
 export interface queryError {
   msg: string
   details: unknown
-}
-
-// --------------------------------------------------------------------------
-
-function getQueryFromSearchParams(params: URLSearchParams, fallback: string = '') {
-  const newQuery = params.get('query')
-  if (newQuery) {
-    return newQuery
-  }
-  return fallback
-}
-
-function getQueryTypeFromSearchParams(params: URLSearchParams, fallback: QueryTypeID = 'cql') {
-  const newQueryType = params.get('queryType')
-  if (newQueryType) {
-    if (QUERY_TYPES.find((qt) => qt.id === newQueryType) !== undefined) {
-      return newQueryType as QueryTypeID
-    }
-    console.warn('Found unsupported queryType in search params', newQueryType)
-  }
-  return fallback
 }
 
 // --------------------------------------------------------------------------
@@ -114,43 +74,55 @@ function SearchInput({
   onSearch,
   onShowToast,
   availableResources: availableResourcesProps = null,
-  selectedResources: selectedResourcesProps = null,
   hasSearch = false,
   disabled = false,
 }: SearchInputProps) {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [hashSearchParams, setHashSearchParams] = useSearchParamsFromHash()
 
   // input modals (trigger)
-  const [showResourceSelectionModal, setShowResourceSelectionModal] = useState(false)
-  const [showResourceSelectionModalGrouping, setShowResourceSelectionModalGrouping] =
-    useState<ResourceSelectionModalViewOptionGrouping>(DEFAULT_RESOURCE_VIEW_GROUPING)
-  const [showLanguageSelectionModal, setShowLanguageSelectionModal] = useState(false)
-  const [showQuerySuggestionsModal, setShowQuerySuggestionsModal] = useState(false)
-  const [showQueryBuilderModal, setShowQueryBuilderModal] = useState(false)
-  const [isLoadQueryBuilderModalTriggered, triggerLoadQueryBuilderModal] = useFlipOnceTrue()
+  const showResourceSelectionModal = useModalsStore((state) => state.showResourceSelection)
+  const setShowResourceSelectionModal = useModalsStore((state) => state.setShowResourceSelection)
+  const showLanguageSelectionModal = useModalsStore((state) => state.showLanguageSelection)
+  const setShowLanguageSelectionModal = useModalsStore((state) => state.setShowLanguageSelection)
+  const showQuerySuggestionsModal = useModalsStore((state) => state.showQuerySuggestions)
+  const setShowQuerySuggestionsModal = useModalsStore((state) => state.setShowQuerySuggestions)
+  const showQueryBuilderModal = useModalsStore((state) => state.showQueryBuilder)
+  const setShowQueryBuilderModal = useModalsStore((state) => state.setShowQueryBuilder)
+
+  const showResourceSelectionModalGrouping = useModalsStore(
+    (state) => state.resourceSelectionGrouping
+  )
+  const setShowResourceSelectionModalGrouping = useModalsStore(
+    (state) => state.setResourceSelectionGrouping
+  )
 
   // user search input states
-  const [language, setLanguage] = useState(MULTIPLE_LANGUAGE_CODE)
-  const [languageFilter, setLanguageFilter] = useState<LanguageFilterOptions>(
-    DEFAULT_SEARCH_LANGUAGE_FILTER
-  )
+  const query = useSearchInputStore((state) => state.query)
+  const setQuery = useSearchInputStore((state) => state.setQuery)
+  const queryType = useSearchInputStore((state) => state.queryType)
+  const setQueryType = useSearchInputStore((state) => state.setQueryType)
 
-  const [queryType, setQueryType] = useState<QueryTypeID>(
-    getQueryTypeFromSearchParams(searchParams, DEFAULT_QUERY_TYPE)
-  )
+  // selected resource IDs for search
+  const selectedResourceIDs = useSearchInputStore((state) => state.resourceIDs)
+  const setSelectedResourceIDs = useSearchInputStore((state) => state.setResourceIDs)
+
+  const language = useSearchInputStore((state) => state.language)
+  const setLanguage = useSearchInputStore((state) => state.setLanguage)
+  const languageFilter = useSearchInputStore((state) => state.languageFilter)
+  const setLanguageFilter = useSearchInputStore((state) => state.setLanguageFilter)
+
+  const numberOfResults = useSearchInputStore((state) => state.numberOfResults)
+  const setNumberOfResults = useSearchInputStore((state) => state.setNumberOfResults)
+
+  const makeSearchRequestParams = useSearchInputStore((state) => state.makeSearchRequestParams)
+
+  const initialEndpointsResources = useSearchInputStore((state) => state.initialEndpointsResources)
+  const initialMode = useSearchInputStore((state) => state.initialMode)
 
   // resource IDs the user can select (based on pre-filtering and search language selection)
   const [validResourceIDs, setValidResourceIDs] = useState<string[]>(availableResourcesProps ?? [])
-  // selected resource IDs for search
-  const [selectedResourceIDs, setSelectedResourceIDs] = useState<string[]>(
-    selectedResourcesProps ?? []
-  )
 
-  const [numberOfResults, setNumberOfResults] = useState<NumberOfResults>(NUMBER_OF_RESULTS[0])
-
-  const [query, setQuery] = useState(getQueryFromSearchParams(searchParams, ''))
   // query input validation
   const [queryError] = useState<queryError | null>(null)
 
@@ -160,14 +132,9 @@ function SearchInput({
   // ------------------------------------------------------------------------
   // data updates/computation
 
-  // to update modal on open
-  useEffect(() => {
-    setSelectedResourceIDs(selectedResourcesProps ?? [])
-  }, [selectedResourcesProps])
-
   const resetResourceSelection = useCallback(
     () => setSelectedResourceIDs(getAvailableResourceIDs(resources, 'cql', MULTIPLE_LANGUAGE_CODE)),
-    [resources]
+    [resources, setSelectedResourceIDs]
   )
 
   const getAvailableResourceIDsCallback = useCallback(
@@ -213,56 +180,9 @@ function SearchInput({
     setSelectedResourceIDs((resourceIDs) =>
       resourceIDs.filter((id) => availableResourceIDs.includes(id))
     )
-  }, [resources, getAvailableResourceIDsCallback])
+  }, [resources, getAvailableResourceIDsCallback, setSelectedResourceIDs])
 
   // ------------------------------------------------------------------------
-
-  const doSearch = useCallback(() => {
-    const searchParams = {
-      language: language,
-      languageFilter: languageFilter,
-      queryType: queryType,
-      query: query,
-      resourceIDs: selectedResourceIDs ?? [],
-      numberOfResults: numberOfResults,
-    }
-    console.debug('search for', searchParams)
-
-    // validate and cancel if necessary
-    if (searchParams.query === '') return
-    if (searchParams.resourceIDs.length === 0) return
-
-    // TODO: query validation
-    // setQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
-
-    onSearch(searchParams)
-  }, [language, languageFilter, numberOfResults, onSearch, query, queryType, selectedResourceIDs])
-
-  useEffect(() => {
-    console.debug('searchParams', searchParams)
-
-    if (searchParams) {
-      setQuery((query) => getQueryFromSearchParams(searchParams, query))
-      setQueryType((queryType) => getQueryTypeFromSearchParams(searchParams, queryType))
-
-      const aggregationContext = searchParams.get('x-aggregation-context')
-      if (!aggregationContext) {
-        // wait until the aggregation context parameter has been evaluated (in another/parent component) (and then removed to trigger a reevaluation here)
-        // and only then trigger possible automatic search if requested
-        // this will (hopefully delay long enough to pre-select resources first before starting a search)
-        const mode = searchParams.get('mode')
-        if (mode) {
-          if (mode === 'search') {
-            console.log('Trigger search due to URL parameter!')
-            doSearch()
-          }
-          // setSearchParams((params) => (params.delete('mode'), params))
-          searchParams.delete('mode')
-          setSearchParams(searchParams)
-        }
-      }
-    }
-  }, [searchParams, setSearchParams, doSearch])
 
   // update URL with query params
   useEffect(() => {
@@ -278,21 +198,33 @@ function SearchInput({
     setSearchParams(searchParams)
   }, [queryType, searchParams, setSearchParams])
 
-  // some triggers for UI elements
+  // ------------------------------------------------------------------------
+
+  const doSearch = useCallback(() => {
+    const searchParams = makeSearchRequestParams()
+    console.debug('search for', searchParams)
+
+    // validate and cancel if necessary
+    if (searchParams.query === '') return
+    if (searchParams.resourceIDs.length === 0) return
+
+    // TODO: query validation
+    // setQueryError({ msg: 'something went wrong (sad face emoji)', details: {} })
+
+    onSearch(searchParams)
+  }, [makeSearchRequestParams, onSearch])
+
   useEffect(() => {
-    console.debug('hashSearchParams', hashSearchParams)
-
-    if (import.meta.env.FEATURE_QUERY_BUILDER) {
-      if (hashSearchParams.has('openQueryBuilder')) {
-        console.debug("Trigger Query Builder open due to 'openQueryBuilder' search param")
-        triggerLoadQueryBuilderModal()
-        setShowQueryBuilderModal(true)
-
-        hashSearchParams.delete('openQueryBuilder')
-        setHashSearchParams(hashSearchParams)
+    if (!initialEndpointsResources) {
+      // wait until the aggregation context parameter has been evaluated (in another/parent component) (and then removed to trigger a reevaluation here)
+      // and only then trigger possible automatic search if requested
+      // this will (hopefully delay long enough to pre-select resources first before starting a search)
+      if (initialMode === 'search') {
+        console.log('Trigger search due to URL parameter!')
+        doSearch()
       }
     }
-  }, [hashSearchParams, setHashSearchParams, triggerLoadQueryBuilderModal])
+  }, [doSearch, initialMode, initialEndpointsResources])
 
   // ------------------------------------------------------------------------
 
@@ -572,7 +504,6 @@ function SearchInput({
               aria-label={t('search.searchInput.buttonOpenQueryBuilderAriaLabel')}
               className="border-end-0 d-none d-md-block"
               onClick={() => {
-                triggerLoadQueryBuilderModal()
                 setShowQueryBuilderModal(true)
               }}
             >
@@ -763,9 +694,9 @@ function SearchInput({
       {/* query builder modal */}
       {import.meta.env.FEATURE_QUERY_BUILDER &&
         QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(queryType as QueryTypeIDForQueryBuilder) &&
-        isLoadQueryBuilderModalTriggered && (
+        showQueryBuilderModal && (
           // TODO: some fallback handling
-          // NOTE: that translation rsources might also be loading ...
+          // NOTE: that translation resources might also be loading ...
           <Suspense
             fallback={
               <>
