@@ -76,27 +76,35 @@ type AppStoreActions = {
       | AppStoreState['authUsername']
       | ((oldUser: AppStoreState['authUsername']) => AppStoreState['authUsername'])
   ) => void
+
+  reset: () => void
 }
 type AppStore = AppStoreState & AppStoreActions
 
 // --------------------------------------------------------------------------
 
-export const createAppSlice: StateCreator<AppStore> = (set) => ({
-  // state
+export const DEFAULT_STATE: AppStoreState = {
   deployPath: import.meta.env.DEPLOY_PATH,
   apiURL: import.meta.env.API_URL,
   validatorURL: import.meta.env.VALIDATOR_URL,
   showSearchResultLink: import.meta.env.SHOW_SEARCH_RESULT_LINK,
   appTitle: import.meta.env.APP_TITLE,
   appTitleHead: import.meta.env.APP_TITLE_HEAD,
+
   matomoTrackingEnabled: import.meta.env.FEATURE_TRACKING_MATOMO, // read-only
   matomoTrackingParams: import.meta.env.FEATURE_TRACKING_MATOMO
     ? import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS
     : null,
+
   authEnabled:
     import.meta.env.FEATURE_AUTHENTICATION && import.meta.env.FEATURE_AUTHENTICATION_ENABLED,
   authUsername: null,
   isAuthenticated: false,
+}
+
+export const createAppSlice: StateCreator<AppStore> = (set) => ({
+  // state
+  ...DEFAULT_STATE,
 
   // actions
   setDeployPath: (path) =>
@@ -134,6 +142,10 @@ export const createAppSlice: StateCreator<AppStore> = (set) => ({
         isAuthenticated: newUsername !== null && newUsername !== 'anonymous', // anonymous
       }
     }),
+
+  reset: () => {
+    set(() => ({ ...DEFAULT_STATE }) satisfies AppStoreState)
+  },
 })
 
 // --------------------------------------------------------------------------

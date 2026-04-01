@@ -20,15 +20,21 @@ type LocaleStoreActions = {
       | LocaleStoreState['locales']
       | ((currentLocales: LocaleStoreState['locales']) => LocaleStoreState['locales'])
   ) => void
+
+  reset: () => void
 }
 export type LocaleStore = LocaleStoreState & LocaleStoreActions
 
 // --------------------------------------------------------------------------
 
-export const createLocaleSlice: StateCreator<LocaleStore> = (set) => ({
-  // state
+export const DEFAULT_STATE: LocaleStoreState = {
   locale: import.meta.env.LOCALE ?? 'en',
   locales: import.meta.env.LOCALES ?? (import.meta.env.LOCALE ? [import.meta.env.LOCALE] : ['en']),
+}
+
+export const createLocaleSlice: StateCreator<LocaleStore> = (set) => ({
+  // state
+  ...DEFAULT_STATE,
 
   // actions
   setLocale: (nextLocale) =>
@@ -40,6 +46,10 @@ export const createLocaleSlice: StateCreator<LocaleStore> = (set) => ({
     set((state) => ({
       locales: typeof nextLocales === 'function' ? nextLocales(state.locales) : nextLocales,
     })),
+
+  reset: () => {
+    set(() => ({ ...DEFAULT_STATE }) satisfies LocaleStoreState)
+  },
 })
 
 // --------------------------------------------------------------------------

@@ -76,14 +76,15 @@ type SearchInputStoreActions = {
   updateFromURLSearchParams: (searchParams: URLSearchParams) => URLSearchParams
 
   makeSearchRequestParams: () => SearchData
+
+  reset: () => void
 }
 
 export type SearchInputStore = SearchInputStoreState & SearchInputStoreActions
 
 // --------------------------------------------------------------------------
 
-export const createSearchInputSlice: StateCreator<SearchInputStore> = (set, get) => ({
-  // state
+export const DEFAULT_STATE: SearchInputStoreState = {
   language: MULTIPLE_LANGUAGE_CODE,
   languageFilter: DEFAULT_SEARCH_LANGUAGE_FILTER,
   queryType: DEFAULT_QUERY_TYPE,
@@ -93,6 +94,11 @@ export const createSearchInputSlice: StateCreator<SearchInputStore> = (set, get)
 
   initialEndpointsResources: null,
   initialMode: null,
+}
+
+export const createSearchInputSlice: StateCreator<SearchInputStore> = (set, get) => ({
+  // state
+  ...DEFAULT_STATE,
 
   // actions
   setLanguage: (nextLanguage) =>
@@ -188,6 +194,10 @@ export const createSearchInputSlice: StateCreator<SearchInputStore> = (set, get)
       resourceIDs: storeState.resourceIDs ?? [],
       numberOfResults: storeState.numberOfResults,
     }
+  },
+
+  reset: () => {
+    set(() => ({ ...DEFAULT_STATE }) satisfies SearchInputStoreState)
   },
 })
 

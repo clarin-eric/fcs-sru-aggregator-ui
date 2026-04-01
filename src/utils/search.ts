@@ -29,6 +29,7 @@ export function languageCodeToName(
   codeToLanguageMapping: LanguageCode2NameMap = undefined as unknown as LanguageCode2NameMap,
   options: { defaultAnyLanguage?: string; defaultUnknownLanguage?: string } = {}
 ) {
+  // TODO: forward `t()` for translations
   if (code === MULTIPLE_LANGUAGE_CODE) return options?.defaultAnyLanguage ?? 'Any Language'
   return codeToLanguageMapping?.[code] || (options?.defaultUnknownLanguage ?? 'Unknown Language')
 }

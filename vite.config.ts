@@ -257,6 +257,12 @@ export default defineConfig(async ({ mode }) => {
         ? JSON.stringify(process.env.VITE_FEATURE_TRACKING_MATOMO_PARAMS)
         : JSON.stringify(null),
 
+      // stop search (on page visibility === hidden)
+      'import.meta.env.FEATURE_STOP_SEARCH_ON_HIDDEN': process.env
+        .VITE_FEATURE_STOP_SEARCH_ON_HIDDEN
+        ? JSON.stringify(process.env.VITE_FEATURE_STOP_SEARCH_ON_HIDDEN)
+        : JSON.stringify(false),
+
       // enable visual query builder
       'import.meta.env.FEATURE_QUERY_BUILDER': process.env.VITE_FEATURE_QUERY_BUILDER
         ? `${process.env.VITE_FEATURE_QUERY_BUILDER}`

@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
@@ -21,6 +21,7 @@ import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { SearchParamsProvider } from '@/providers/SearchParamsContext'
 import AppStore from '@/stores/app'
+import { useSearchesStore } from '@/stores/searches'
 import type { SearchData } from '@/stores/searchinput'
 import { useSearchInputStore } from '@/stores/searchinput'
 import type { Resource } from '@/utils/api'
@@ -58,6 +59,7 @@ function Search() {
   const [weblichtLanguages, setWeblichtLanguages] = useState<string[]>([])
 
   const setSearchResourceIDs = useSearchInputStore((state) => state.setResourceIDs)
+  const setSearchId = useSearchesStore((state) => state.setSearchId)
 
   const [hasSearch, setHasSearch] = useState(false)
   const [searchParams, setSearchParams] = useState<SearchData | null>(null)
@@ -258,6 +260,28 @@ function Search() {
       }),
   })
   console.debug('searchId', { searchId, searchError, isSearchPending, isSearchError })
+  setSearchId(searchId)
+
+  if (import.meta.env.FEATURE_STOP_SEARCH_ON_HIDDEN) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const searchIdRef = useRef<string>()
+    searchIdRef.current = searchId
+
+    // intended to trigger a stop search if the user leaves (closes) the page
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useLayoutEffect(() => {
+      // TODO: needs more testing what "hidden" means (it currently stops search even on tab switch, good?)
+      document.addEventListener('visibilitychange', () => {
+        const searchId = searchIdRef.current
+        if (document.visibilityState === 'hidden' && searchId !== undefined) {
+          const url = axios.getUri({ url: `search/${searchId}/stop` })
+          console.log('Send stop search beacon', url)
+          navigator.sendBeacon(url, null)
+        }
+      })
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+  }
 
   // ------------------------------------------------------------------------
   // event handlers

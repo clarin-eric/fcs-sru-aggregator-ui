@@ -1,0 +1,4 @@
+#help .icon-info .card-title {
+  line-height: 150%;
+  text-indent: calc(16px + 1rem + 0.35rem) hanging;
+}

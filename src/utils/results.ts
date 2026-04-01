@@ -2,6 +2,7 @@ import type { ResourceSearchResultMetaOnly } from '@clarin-eric/fcs-sru-aggregat
 
 import LocaleStore from '@/stores/locale'
 import type { Resource } from './api'
+import type { QueryTypeID } from './constants'
 import { getBestFromMultilingualValuesTryByLanguage } from './resources'
 
 export type ResultsViewMode = 'plain' | 'kwic' | 'annotation-layers' | 'lexical-entry'
@@ -18,6 +19,31 @@ export const DEFAULT_VIEW_MODE: ResultsViewMode = 'plain'
 export const DEFAULT_VIEW_MODE_WHEN_LEX: ResultsViewMode = 'lexical-entry'
 export const DEFAULT_VIEW_MODE_WHEN_FCS: ResultsViewMode = 'plain' // TODO: 'annotation-layers' might be quite UI expensive for unrestricted searches
 export const DEFAULT_SORTING: ResultsSorting = 'default'
+
+export function validViewModesForQueryType(
+  queryType: QueryTypeID,
+  { isAllLexHITS = false }: { isAllLexHITS?: boolean } = {}
+) {
+  if (queryType === 'lex') {
+    if (isAllLexHITS) {
+      return ['plain', 'lexical-entry']
+    }
+    return ['plain', 'kwic', 'lexical-entry']
+  }
+  if (queryType === 'fcs') {
+    return ['plain', 'kwic', 'annotation-layers']
+  }
+  return ['plain', 'kwic']
+}
+
+export function isValidViewModeForQueryType(
+  viewMode: ResultsViewMode,
+  queryType: QueryTypeID,
+  { isAllLexHITS = false }: { isAllLexHITS?: boolean } = {}
+) {
+  const validVieModes = validViewModesForQueryType(queryType, { isAllLexHITS })
+  return validVieModes.includes(viewMode)
+}
 
 // --------------------------------------------------------------------------
 

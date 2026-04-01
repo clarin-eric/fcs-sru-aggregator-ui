@@ -636,8 +636,8 @@ function SearchInput({
                 aria-disabled={disabled}
               >
                 {languageCodeToName(language, languages ?? {}, {
-                  defaultAnyLanguage: t('languageCodeToName.any', { ns: 'common' }),
-                  defaultUnknownLanguage: t('languageCodeToName.unknown', { ns: 'common' }),
+                  defaultAnyLanguage: t('languageCodeToName.any2', { ns: 'common' }),
+                  defaultUnknownLanguage: t('languageCodeToName.unknown2', { ns: 'common' }),
                 })}{' '}
                 <i dangerouslySetInnerHTML={{ __html: gearIcon }} aria-hidden="true" />
               </Button>,

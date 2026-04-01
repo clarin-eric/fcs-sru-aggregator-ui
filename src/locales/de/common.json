@@ -9,7 +9,7 @@
       "nameLong": "Federated Content Search Query Language (FCS-QL) auf Annotationsebenen"
     },
     "lex": {
-      "nameShort": "Suche auf lexikalischen Ressourcen",
+      "nameShort": "Lexikalische Suche",
       "nameLong": "Lexical Resources Contextual Query Language (LexCQL)"
     }
   },
@@ -32,7 +32,9 @@
   },
   "languageCodeToName": {
     "any": "Alle Sprachen",
-    "unknown": "Unbekannte Sprache"
+    "any2": "Allen Sprachen",
+    "unknown": "Unbekannte Sprache",
+    "unknown2": "Unbekannter Sprache"
   },
   "generic": {
     "loadingComponent": "Lade Komponente ..."

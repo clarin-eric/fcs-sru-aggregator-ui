@@ -37,7 +37,9 @@
   },
   "languageCodeToName": {
     "any": "Any Language",
-    "unknown": "Unknown Language"
+    "any2": "Any Language",
+    "unknown": "Unknown Language",
+    "unknown2": "Unknown Language"
   },
   "generic": {
     "loadingComponent": "Loading component ..."
@@ -161,6 +163,13 @@
       "description": "Resource has availability restriction and requires user authentication.",
       "context": [
         "authentication"
+      ]
+    },
+    "stop-circle": {
+      "label": "Stop search",
+      "description": "Stop an active search",
+      "context": [
+        "search-results"
       ]
     },
     "three-dots": {

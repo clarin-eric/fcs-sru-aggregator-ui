@@ -8,9 +8,6 @@ import { Trans, useTranslation } from 'react-i18next'
 
 import AppStore from '@/stores/app'
 
-import eyeFillIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
-import magicIcon from 'bootstrap-icons/icons/magic.svg?raw'
-
 import arrowClockwiseIcon from 'bootstrap-icons/icons/arrow-clockwise.svg?raw'
 import balloonIcon from 'bootstrap-icons/icons/balloon.svg?raw'
 import bankIcon from 'bootstrap-icons/icons/bank.svg?raw'
@@ -18,6 +15,7 @@ import bracesIcon from 'bootstrap-icons/icons/braces.svg?raw'
 import downloadIcon from 'bootstrap-icons/icons/download.svg?raw'
 import envelopeArrowUpIcon from 'bootstrap-icons/icons/envelope-arrow-up.svg?raw'
 import exclamationTriangleIcon from 'bootstrap-icons/icons/exclamation-triangle.svg?raw'
+import eyeFillIcon from 'bootstrap-icons/icons/eye-fill.svg?raw'
 import eyeIcon from 'bootstrap-icons/icons/eye.svg?raw'
 import fileEarmarkCodeIcon from 'bootstrap-icons/icons/file-earmark-code.svg?raw'
 import gearIcon from 'bootstrap-icons/icons/gear-fill.svg?raw'
@@ -25,15 +23,19 @@ import highlightsIcon from 'bootstrap-icons/icons/highlights.svg?raw'
 import houseDoorIcon from 'bootstrap-icons/icons/house-door.svg?raw'
 import infoCircleIcon from 'bootstrap-icons/icons/info-circle.svg?raw'
 import link45degIcon from 'bootstrap-icons/icons/link-45deg.svg?raw'
+import magicIcon from 'bootstrap-icons/icons/magic.svg?raw'
 import personIcon from 'bootstrap-icons/icons/person.svg?raw'
 import plusCircleIcon from 'bootstrap-icons/icons/plus-circle.svg?raw'
 import repeatIcon from 'bootstrap-icons/icons/repeat.svg?raw'
 import searchIcon from 'bootstrap-icons/icons/search.svg?raw'
 import shieldCheckIcon from 'bootstrap-icons/icons/shield-check.svg?raw'
 import shieldLockIcon from 'bootstrap-icons/icons/shield-lock.svg?raw'
+import stopCircleIcon from 'bootstrap-icons/icons/stop-circle.svg?raw'
 import threeDotsIcon from 'bootstrap-icons/icons/three-dots.svg?raw'
 import translateIcon from 'bootstrap-icons/icons/translate.svg?raw'
 import xCircleIcon from 'bootstrap-icons/icons/x-circle.svg?raw'
+
+import './styles.css'
 
 // a mapping of all icons used
 const iconMap: { [iconKey: string]: string } = {
@@ -45,6 +47,7 @@ const iconMap: { [iconKey: string]: string } = {
   'house-door': houseDoorIcon,
   'info-circle': infoCircleIcon,
   'link-45deg': link45degIcon,
+  'stop-circle': stopCircleIcon,
   'three-dots': threeDotsIcon,
   balloon: balloonIcon,
   bank: bankIcon,
@@ -129,7 +132,7 @@ function Help() {
           }) as string[] | string
           return (
             <Col key={iconKey}>
-              <Card className="border-0">
+              <Card className="icon-info border-0">
                 <Card.Body>
                   <Card.Title>
                     <i
@@ -164,7 +167,7 @@ function Help() {
       <Helmet>
         <title>{appTitleHead} – Help</title>
       </Helmet>
-      <Container className="my-4">
+      <Container id="help" className="my-4">
         <h1 className="h1">{t('help.title')}</h1>
         <h2 className="h2" id="performing-a-fcs-search-in-resources">
           {t('help.performSearch.title')}

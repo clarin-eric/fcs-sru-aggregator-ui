@@ -45,12 +45,20 @@
 
 /* *** SearchResults.tsx *** */
 
-#search-results>.progress {
-  --bs-progress-height: 1.4rem;
+#search-results i>svg.bi {
+  /* vertical-align: baseline; */
+  margin-bottom: 2px;
+
+  height: unset;
+  width: 0.9em;
+}
+
+#search-results .progress {
+  --bs-progress-height: 1.6rem;
   --bs-progress-font-size: 0.9rem;
 }
 
-#search-results>.progress>.progress-bar>span {
+#search-results .progress>.progress-bar>span {
   margin-inline: 0.5rem;
   overflow: hidden;
   text-overflow: ellipsis;

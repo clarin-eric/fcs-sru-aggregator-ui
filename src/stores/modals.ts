@@ -55,19 +55,25 @@ type ModalsStoreActions = {
   ) => void
 
   updateFromURLSearchParams: (searchParams: URLSearchParams) => URLSearchParams
+
+  reset: () => void
 }
 
 export type ModalsStore = ModalsStoreState & ModalsStoreActions
 
 // --------------------------------------------------------------------------
 
-const createModalsSlice: StateCreator<ModalsStore> = (set) => ({
-  // state
+export const DEFAULT_STATE: ModalsStoreState = {
   showResourceSelection: false,
   showLanguageSelection: false,
   showQuerySuggestions: false,
   showQueryBuilder: false,
   resourceSelectionGrouping: DEFAULT_RESOURCE_VIEW_GROUPING,
+}
+
+const createModalsSlice: StateCreator<ModalsStore> = (set) => ({
+  // state
+  ...DEFAULT_STATE,
 
   // actions
   setShowResourceSelection: (nextShowResourceSelection) =>
@@ -123,6 +129,10 @@ const createModalsSlice: StateCreator<ModalsStore> = (set) => ({
     const newSearchParams = new URLSearchParams(searchParams)
     newSearchParams.delete('openQueryBuilder')
     return newSearchParams
+  },
+
+  reset: () => {
+    set(() => ({ ...DEFAULT_STATE }) satisfies ModalsStoreState)
   },
 })
 

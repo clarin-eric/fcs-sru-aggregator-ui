@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
+import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import Col from 'react-bootstrap/Col'
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
@@ -11,23 +12,29 @@ import Row from 'react-bootstrap/Row'
 import { Trans, useTranslation } from 'react-i18next'
 
 import type { SearchResultsMetaOnly } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
-import { getSearchResultsMetaOnly } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
+import {
+  getSearchResultsMetaOnly,
+  postSearchStop,
+} from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
-import DebouncedFuzzySearchInput from '@/components/DebouncedFuzzySearchInput'
 import ResourceSearchResult from '@/components/ResourceSearchResult'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
+import { useSearchResultsStore } from '@/stores/searchresults'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import { trackSiteSearch } from '@/utils/matomo'
 import type { ResultsSorting, ResultsViewMode } from '@/utils/results'
 import {
-  DEFAULT_SORTING,
   DEFAULT_VIEW_MODE,
   DEFAULT_VIEW_MODE_WHEN_FCS,
   DEFAULT_VIEW_MODE_WHEN_LEX,
+  isValidViewModeForQueryType,
   SORT_FNS,
+  validViewModesForQueryType,
 } from '@/utils/results'
+
+import stopCircleIcon from 'bootstrap-icons/icons/stop-circle.svg?raw'
 
 import './styles.css'
 
@@ -53,17 +60,21 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
 
   // TODO: useTransition for changes?
 
-  const [viewMode, setViewMode] = useState<ResultsViewMode>(
+  const viewMode = useSearchResultsStore((state) => state.viewMode)
+  const setViewMode = useSearchResultsStore((state) => state.setViewMode)
+  const sorting = useSearchResultsStore((state) => state.sorting)
+  const setSorting = useSearchResultsStore((state) => state.setSorting)
+  const showResourceDetails = useSearchResultsStore((state) => state.showResourceDetails)
+  const setShowResourceDetails = useSearchResultsStore((state) => state.setShowResourceDetails)
+  const showDiagnostics = useSearchResultsStore((state) => state.showDiagnostics)
+  const setShowDiagnostics = useSearchResultsStore((state) => state.setShowDiagnostics)
+
+  const defaultViewMode =
     queryType === 'lex'
       ? DEFAULT_VIEW_MODE_WHEN_LEX
       : queryType === 'fcs'
-      ? DEFAULT_VIEW_MODE_WHEN_FCS
-      : DEFAULT_VIEW_MODE
-  )
-  const [sorting, setSorting] = useState<ResultsSorting>(DEFAULT_SORTING)
-  const [filter, setFilter] = useState('')
-  const [showResourceDetails, setShowResourceDetails] = useState(false)
-  const [showDiagnostics, setShowDiagnostics] = useState(false)
+        ? DEFAULT_VIEW_MODE_WHEN_FCS
+        : DEFAULT_VIEW_MODE
 
   const sortFn = useMemo(() => {
     const lookup = new Map()
@@ -98,8 +109,17 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
     queryType === 'lex' &&
     data?.results.every((result) => result.numberOfRecords <= 0 || result.isLexHits === true)
 
+  if (!isValidViewModeForQueryType(viewMode, queryType, { isAllLexHITS })) {
+    // TODO: keep last used view mode / check if current view mode is valid for (new) query type
+    setViewMode(defaultViewMode)
+  }
+
   const numRequested = resourceIDs.length
   const numInProgress = data?.inProgress ?? numRequested
+  const numCancelled = data?.cancelled ?? 0
+
+  const isFinished = numInProgress === 0 || numCancelled > 0
+
   const numWithResults = useMemo(
     () =>
       data?.results.filter(
@@ -171,6 +191,7 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
       ).length ?? 0,
     [data]
   )
+  // const numNoResultsDueCancellation = useMemo(() => data?.results.filter((result) => result.cancelled) ?? 0, [data])
 
   // TODO: this might not yet be completely correct?
   const numResultsTotalAvailable = useMemo(
@@ -222,8 +243,37 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
     setSorting(event.target.value as ResultsSorting)
   }
 
+  async function handleStopSearchClick() {
+    console.debug('Stop search', { searchId })
+    await postSearchStop(axios, searchId)
+  }
+
   // --------------------------------------------------------------
   // rendering
+
+  function renderViewModeOptions() {
+    const validViewModes = validViewModesForQueryType(queryType, { isAllLexHITS })
+
+    return (
+      <>
+        <option value="plain">{t('search.results.displayOptions.viewModeOptions.plain')}</option>
+        {/* maybe allow kwic for LexCQL if not a LexHITS data view */}
+        {validViewModes.includes('kwic') && (
+          <option value="kwic">{t('search.results.displayOptions.viewModeOptions.kwic')}</option>
+        )}
+        {validViewModes.includes('annotation-layers') && (
+          <option value="annotation-layers">
+            {t('search.results.displayOptions.viewModeOptions.annotation-layers')}
+          </option>
+        )}
+        {validViewModes.includes('lexical-entry') && (
+          <option value="lexical-entry">
+            {t('search.results.displayOptions.viewModeOptions.lexical-entry')}
+          </option>
+        )}
+      </>
+    )
+  }
 
   // TODO: add filter for exact vs. fuzzy/normalised search results
 
@@ -232,41 +282,51 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
       {/* TODO: add visually-hidden title for semantic site structure */}
       {/* TODO: add tooltip with easier to read information */}
       {/* TODO: mobile design: hide labels and maybe add below? */}
-      <OverlayTrigger
-        placement="auto"
-        overlay={
-          <Popover id="search-progress-information-popover">
-            <Popover.Header>{t('search.results.progressPopover.title')}</Popover.Header>
-            <Popover.Body style={{ textIndent: '2rem hanging' }}>
-              {/* XXX.toString().padStart(4, '\u00A0'), */}
-              <div>
-                <Trans
-                  i18nKey="search.results.progressPopover.numResourcesRequested"
-                  count={numRequested}
-                />
-              </div>
-              {numInProgress > 0 && (
-                <div>
-                  <Trans
-                    i18nKey="search.results.progressPopover.numResourcesRequestedPending"
-                    count={numInProgress}
-                  />
-                </div>
-              )}
-              <hr className="mt-2 mb-1" />
-              <div>
-                <Trans
-                  i18nKey="search.results.progressPopover.numResourcesWithoutResults"
-                  count={numNoResults + numNoResultsWithIssues}
-                />
-              </div>
-              <div>
-                <Trans
-                  i18nKey="search.results.progressPopover.numResourcesWithoutResultsOK"
-                  count={numNoResults}
-                />
-              </div>
-              {/*
+      <Row className="row-gap-2 mb-3 justify-content-center align-items-center">
+        <Col>
+          <OverlayTrigger
+            placement="auto"
+            overlay={
+              <Popover id="search-progress-information-popover">
+                <Popover.Header>{t('search.results.progressPopover.title')}</Popover.Header>
+                <Popover.Body style={{ textIndent: '2rem hanging' }}>
+                  {/* XXX.toString().padStart(4, '\u00A0'), */}
+                  <div>
+                    <Trans
+                      i18nKey="search.results.progressPopover.numResourcesRequested"
+                      count={numRequested}
+                    />
+                  </div>
+                  {numInProgress > 0 && (
+                    <div>
+                      <Trans
+                        i18nKey="search.results.progressPopover.numResourcesRequestedPending"
+                        count={numInProgress}
+                      />
+                    </div>
+                  )}
+                  <hr className="mt-2 mb-1" />
+                  <div>
+                    <Trans
+                      i18nKey="search.results.progressPopover.numResourcesWithoutResults"
+                      count={numNoResults + numNoResultsWithIssues}
+                    />
+                  </div>
+                  <div>
+                    <Trans
+                      i18nKey="search.results.progressPopover.numResourcesWithoutResultsOK"
+                      count={numNoResults}
+                    />
+                  </div>
+                  {numCancelled > 0 && (
+                    <div>
+                      <Trans
+                        i18nKey="search.results.progressPopover.numResourcesWithoutResultsDueCancellations"
+                        count={numCancelled}
+                      />
+                    </div>
+                  )}
+                  {/*
               <div>
                 <Trans
                   i18nKey="search.results.progressPopover.numResourcesWithoutResultsErrorsWarnings"
@@ -274,89 +334,99 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
                 />
               </div>
               */}
-              {numNoResultsWithWarnings > 0 && (
-                <div>
-                  <Trans
-                    i18nKey="search.results.progressPopover.numResourcesWithoutResultsWarnings"
-                    count={numNoResultsWithWarnings}
-                  />
-                </div>
-              )}
-              {numNoResultsWithExceptions > 0 && (
-                <div>
-                  <Trans
-                    i18nKey="search.results.progressPopover.numResourcesWithoutResultsErrors"
-                    count={numNoResultsWithExceptions}
-                  />
-                </div>
-              )}
-              <hr className="mt-2 mb-1" />
-              <div>
-                <Trans
-                  i18nKey="search.results.progressPopover.numResourcesWithResults"
-                  count={numWithResults}
-                />
-              </div>
-              {numWithResultsWithWarnings > 0 && (
-                <div>
-                  <Trans
-                    i18nKey="search.results.progressPopover.numResourcesWithResultsWarnings"
-                    count={numWithResultsWithWarnings}
-                  />
-                </div>
-              )}
-              <hr className="mt-2 mb-0" />
-              <hr className="mt-1 mb-1" />
-              <div>
-                <Trans
-                  i18nKey="search.results.progressPopover.numResourcesWithResultsTotal"
-                  count={numResultsTotalLoaded}
-                  values={{ available: numResultsTotalAvailable }}
-                />
-              </div>
-            </Popover.Body>
-          </Popover>
-        }
-      >
-        <ProgressBar className="mb-3">
-          <ProgressBar
-            variant="success"
-            now={numWithResults}
-            max={numRequested}
-            label={
-              <span>
-                {t('search.results.progressBar.numWithResults', { count: numWithResults })}
-              </span>
+                  {numNoResultsWithWarnings > 0 && (
+                    <div>
+                      <Trans
+                        i18nKey="search.results.progressPopover.numResourcesWithoutResultsWarnings"
+                        count={numNoResultsWithWarnings}
+                      />
+                    </div>
+                  )}
+                  {numNoResultsWithExceptions > 0 && (
+                    <div>
+                      <Trans
+                        i18nKey="search.results.progressPopover.numResourcesWithoutResultsErrors"
+                        count={numNoResultsWithExceptions}
+                      />
+                    </div>
+                  )}
+                  <hr className="mt-2 mb-1" />
+                  <div>
+                    <Trans
+                      i18nKey="search.results.progressPopover.numResourcesWithResults"
+                      count={numWithResults}
+                    />
+                  </div>
+                  {numWithResultsWithWarnings > 0 && (
+                    <div>
+                      <Trans
+                        i18nKey="search.results.progressPopover.numResourcesWithResultsWarnings"
+                        count={numWithResultsWithWarnings}
+                      />
+                    </div>
+                  )}
+                  <hr className="mt-2 mb-0" />
+                  <hr className="mt-1 mb-1" />
+                  <div>
+                    <Trans
+                      i18nKey="search.results.progressPopover.numResourcesWithResultsTotal"
+                      count={numResultsTotalLoaded}
+                      values={{ available: numResultsTotalAvailable }}
+                    />
+                  </div>
+                </Popover.Body>
+              </Popover>
             }
-            aria-label={t('search.results.progressBar.numWithResultsAriaLabel')}
-          />
-          <ProgressBar
-            variant="secondary"
-            now={numNoResults + numNoResultsWithIssues}
-            max={numRequested}
-            label={
-              <span>
-                {t('search.results.progressBar.numWithoutResults', {
-                  count: numNoResults + numNoResultsWithIssues,
-                })}
-              </span>
-            }
-            aria-label={t('search.results.progressBar.numWithoutResultsAriaLabel')}
-          />
-          <ProgressBar
-            striped
-            animated
-            now={numInProgress}
-            max={numRequested}
-            label={
-              <span>
-                {t('search.results.progressBar.numResultsPending', { count: numInProgress })}
-              </span>
-            }
-            aria-label={t('search.results.progressBar.numResultsPendingAriaLabel')}
-          />
-        </ProgressBar>
-      </OverlayTrigger>
+          >
+            <ProgressBar>
+              <ProgressBar
+                variant="success"
+                now={numWithResults}
+                max={numRequested}
+                label={
+                  <span>
+                    {t('search.results.progressBar.numWithResults', { count: numWithResults })}
+                  </span>
+                }
+                aria-label={t('search.results.progressBar.numWithResultsAriaLabel')}
+              />
+              <ProgressBar
+                variant="secondary"
+                now={numNoResults + numNoResultsWithIssues}
+                max={numRequested}
+                label={
+                  <span>
+                    {t('search.results.progressBar.numWithoutResults', {
+                      count: numNoResults + numNoResultsWithIssues,
+                    })}
+                  </span>
+                }
+                aria-label={t('search.results.progressBar.numWithoutResultsAriaLabel')}
+              />
+              <ProgressBar
+                striped
+                animated
+                now={numInProgress}
+                max={numRequested}
+                label={
+                  <span>
+                    {t('search.results.progressBar.numResultsPending', { count: numInProgress })}
+                  </span>
+                }
+                aria-label={t('search.results.progressBar.numResultsPendingAriaLabel')}
+              />
+            </ProgressBar>
+          </OverlayTrigger>
+        </Col>
+        {!isFinished && (
+          <Col lg={'auto'} className="d-flex justify-content-center">
+            <Button variant="danger" onClick={handleStopSearchClick}>
+              <i dangerouslySetInnerHTML={{ __html: stopCircleIcon }} />{' '}
+              {t('search.results.buttonStopSearch')}
+            </Button>
+          </Col>
+        )}
+      </Row>
 
       <Card
         className="mb-2"
@@ -371,25 +441,7 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
                 controlId="results-view-mode"
               >
                 <Form.Select value={viewMode} onChange={handleViewModeChange}>
-                  <option value="plain">
-                    {t('search.results.displayOptions.viewModeOptions.plain')}
-                  </option>
-                  {/* maybe allow kwic for LexCQL if not a LexHITS data view */}
-                  {(queryType !== 'lex' || !isAllLexHITS) && (
-                    <option value="kwic">
-                      {t('search.results.displayOptions.viewModeOptions.kwic')}
-                    </option>
-                  )}
-                  {queryType === 'fcs' && (
-                    <option value="annotation-layers">
-                      {t('search.results.displayOptions.viewModeOptions.annotation-layers')}
-                    </option>
-                  )}
-                  {queryType === 'lex' && (
-                    <option value="lexical-entry">
-                      {t('search.results.displayOptions.viewModeOptions.lexical-entry')}
-                    </option>
-                  )}
+                  {renderViewModeOptions()}
                 </Form.Select>
               </FloatingLabel>
             </Col>
@@ -417,6 +469,8 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
                 </Form.Select>
               </FloatingLabel>
             </Col>
+            {/*
+            NOTE: this is not yet implemented (efficiently, so do not render it)
             <Col lg={'auto'} md={12} sm={6} className="flex-fill order-xl-4">
               <FloatingLabel
                 label={t('search.results.displayOptions.resultFilterQueryLabel')}
@@ -429,6 +483,7 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
                 />
               </FloatingLabel>
             </Col>
+            */}
             <Col lg={'auto'} md={12} sm={12} className="align-content-center order-xl-3">
               <Form.Check
                 checked={showResourceDetails}
