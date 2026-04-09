@@ -1,4 +1,6 @@
-import type { StateCreator } from 'zustand/vanilla'
+import type { UseBoundStore } from 'zustand/react'
+import { useStore } from 'zustand/react'
+import type { StateCreator, StoreApi } from 'zustand/vanilla'
 import { createStore } from 'zustand/vanilla'
 
 import { SetupAndInstallScriptParams as MatomoSetupParams } from '@/utils/matomo'
@@ -13,6 +15,7 @@ type AppStoreState = {
   validatorURL: string | null
 
   showSearchResultLink: boolean
+  weblichtEnabled: boolean
 
   appTitle: string
   appTitleHead: string
@@ -45,6 +48,11 @@ type AppStoreActions = {
     show:
       | AppStoreState['showSearchResultLink']
       | ((oldShow: AppStoreState['showSearchResultLink']) => AppStoreState['showSearchResultLink'])
+  ) => void
+  setWeblichtEnabled: (
+    enabled:
+      | AppStoreState['weblichtEnabled']
+      | ((oldEnabled: AppStoreState['weblichtEnabled']) => AppStoreState['weblichtEnabled'])
   ) => void
 
   setAppTitle: (
@@ -88,6 +96,7 @@ export const DEFAULT_STATE: AppStoreState = {
   apiURL: import.meta.env.API_URL,
   validatorURL: import.meta.env.VALIDATOR_URL,
   showSearchResultLink: import.meta.env.SHOW_SEARCH_RESULT_LINK,
+  weblichtEnabled: import.meta.env.WEBLICHT_ENABLED,
   appTitle: import.meta.env.APP_TITLE,
   appTitleHead: import.meta.env.APP_TITLE_HEAD,
 
@@ -116,6 +125,10 @@ export const createAppSlice: StateCreator<AppStore> = (set) => ({
   setShowSearchResultLink: (show) =>
     set((state) => ({
       showSearchResultLink: typeof show === 'function' ? show(state.showSearchResultLink) : show,
+    })),
+  setWeblichtEnabled: (enabled) =>
+    set((state) => ({
+      weblichtEnabled: typeof enabled === 'function' ? enabled(state.weblichtEnabled) : enabled,
     })),
   setAppTitle: (title) =>
     set((state) => ({ appTitle: typeof title === 'function' ? title(state.appTitle) : title })),
@@ -153,5 +166,23 @@ export const createAppSlice: StateCreator<AppStore> = (set) => ({
 const appStore = createStore<AppStore>(createAppSlice)
 
 export default appStore
+
+// --------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useAppStore = ((selector?: (state: AppStore) => any) => {
+  const useBoundStore = useStore(appStore, selector!)
+  return useBoundStore
+}) as UseBoundStore<StoreApi<AppStore>>
+Object.assign(useAppStore, appStore)
+
+// --------------------------------------------------------------------------
+
+// both variants can be used to use reactive state
+
+// const validatorUrl = useAppStore((state) => state.validatorURL)
+//
+// const [validatorUrl, setValidatorUrl] = useState(AppStore.getState().validatorURL)
+// AppStore.subscribe((state) => setValidatorUrl(state.validatorURL))
 
 // --------------------------------------------------------------------------

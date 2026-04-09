@@ -9,12 +9,14 @@ type MyAggregatorConfiguration = {
   API_URL: string
   VALIDATOR_URL: string | null
   SHOW_SEARCH_RESULT_LINK: boolean
+  WEBLICHT_ENABLED: boolean
   APP_TITLE: string
   APP_TITLE_HEAD: string
   MATOMO_TRACKING_PARAMS: string | MatomoSetupParams | null
   AUTH_ENABLED: boolean
   AUTH_USERNAME: string | null
 }
+type MyAggregatorConfigurationKeys = keyof MyAggregatorConfiguration
 
 declare const window: Window &
   typeof globalThis & {
@@ -60,6 +62,9 @@ export function configure() {
   if (window.MyAggregator.SHOW_SEARCH_RESULT_LINK !== undefined) {
     AppStore.getState().setShowSearchResultLink(window.MyAggregator.SHOW_SEARCH_RESULT_LINK)
   }
+  if (window.MyAggregator.WEBLICHT_ENABLED !== undefined) {
+    AppStore.getState().setWeblichtEnabled(window.MyAggregator.WEBLICHT_ENABLED)
+  }
   if (window.MyAggregator.APP_TITLE !== undefined) {
     AppStore.getState().setAppTitle(window.MyAggregator.APP_TITLE)
   }
@@ -82,7 +87,7 @@ export function configure() {
 
   // observe and notify about invalid configuration changes
   window.MyAggregator = new Proxy(window.MyAggregator, {
-    get(target, prop: string) {
+    get(target, prop: MyAggregatorConfigurationKeys | string) {
       return target[prop]
     },
     set(target, prop: string, val: unknown) {
@@ -103,6 +108,14 @@ export function configure() {
         if (typeof val === 'boolean') {
           console.log('Updating SHOW_SEARCH_RESULT_LINK ...')
           AppStore.getState().setShowSearchResultLink(val)
+          return true
+        }
+        return false
+      }
+      if (prop === 'WEBLICHT_ENABLED') {
+        if (typeof val === 'boolean') {
+          console.log('Updating WEBLICHT_ENABLED ...')
+          AppStore.getState().setWeblichtEnabled(val)
           return true
         }
         return false

@@ -10,7 +10,7 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup'
 import { useTranslation } from 'react-i18next'
 
 import type { FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
-import appStore from '@/stores/app'
+import AppStore from '@/stores/app'
 import { useLocaleStore } from '@/stores/locale'
 import type { Resource } from '@/utils/api'
 import {
@@ -49,7 +49,7 @@ function ResourceSelector({
 }) {
   const { t } = useTranslation()
 
-  const isAuthenticated = appStore.getState().isAuthenticated
+  const isAuthenticated = AppStore.getState().isAuthenticated
 
   const [expanded, setExpanded] = useState(false)
   const [showSubResources, setShowSubResources] = useState(false)

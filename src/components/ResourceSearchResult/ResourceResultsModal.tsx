@@ -25,7 +25,7 @@ import { useAggregatorData } from '@/providers/AggregatorDataContext'
 import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
-
+import { useAppStore } from '@/stores/app'
 import { DOWNLOAD_FORMATS, NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import {
   findResourceByFilter,
@@ -79,6 +79,7 @@ function ResourceResultsModal({
   const axios = useAxios()
   const { t } = useTranslation()
   const userLocale = useLocaleStore((state) => state.locale)
+  const weblichtEnabled = useAppStore((state) => state.weblichtEnabled)
   const { languages, resources, weblichtLanguages } = useAggregatorData()
   const { numberOfResults, queryType, language, languageFilter } = useSearchParams()
 
@@ -113,8 +114,8 @@ function ResourceResultsModal({
   }
 
   let languageForWeblicht = null
-  let disableWeblicht = false
-  if (!weblichtLanguages.includes(language)) {
+  let disableWeblichtButton = false // !weblichtEnabled
+  if (weblichtEnabled && !weblichtLanguages.includes(language)) {
     // the search language is either AnyLanguage or unsupported
     if (language === MULTIPLE_LANGUAGE_CODE) {
       if (result.resource.languages && result.resource.languages.length === 1) {
@@ -132,7 +133,7 @@ function ResourceResultsModal({
     }
     if (!languageForWeblicht) {
       console.warn('Cannot use WebLicht: unsupported language', { language, languageFilter })
-      disableWeblicht = true
+      disableWeblichtButton = true
     }
   }
 
@@ -331,23 +332,25 @@ function ResourceResultsModal({
               </Dropdown.Menu>
             </Dropdown>
             {/* TODO: show more visible message to user? */}
-            <Button
-              disabled={disableWeblicht}
-              aria-disabled={disableWeblicht}
-              href={getURLForWeblicht(
-                axios,
-                searchId,
-                resourceId,
-                languageForWeblicht ?? null,
-                language,
-                languageFilter
-              )}
-              className="matomo_link"
-              target="_blank"
-            >
-              <i dangerouslySetInnerHTML={{ __html: envelopeArrowUpIcon }} />{' '}
-              {t('search.results.buttonSendToWeblicht')}
-            </Button>
+            {weblichtEnabled && (
+              <Button
+                disabled={disableWeblichtButton}
+                aria-disabled={disableWeblichtButton}
+                href={getURLForWeblicht(
+                  axios,
+                  searchId,
+                  resourceId,
+                  languageForWeblicht ?? null,
+                  language,
+                  languageFilter
+                )}
+                className="matomo_link"
+                target="_blank"
+              >
+                <i dangerouslySetInnerHTML={{ __html: envelopeArrowUpIcon }} />{' '}
+                {t('search.results.buttonSendToWeblicht')}
+              </Button>
+            )}
             {import.meta.env.SHOW_SEARCH_RESULT_DEV_URLS && (
               <Dropdown>
                 <Dropdown.Toggle>

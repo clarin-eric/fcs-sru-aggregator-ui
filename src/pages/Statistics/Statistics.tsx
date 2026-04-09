@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
@@ -21,7 +20,7 @@ import {
 import useNavigate from '@/hooks/useNavigate'
 import useRouteMatch from '@/hooks/useRouteMatch'
 import { useAxios } from '@/providers/AxiosContext'
-import AppStore from '@/stores/app'
+import AppStore, { useAppStore } from '@/stores/app'
 import FCSStatistics from './FCSStatistics'
 import ResourcesDetails from './ResourcesDetails'
 import SectionStatistics from './SectionStatistics'
@@ -66,9 +65,7 @@ function Statistics() {
     queryFn: getStatisticsData.bind(null, axios, extraParams),
   })
 
-  const [validatorUrl, setValidatorUrl] = useState(AppStore.getState().validatorURL)
-  AppStore.subscribe((state) => setValidatorUrl(state.validatorURL))
-
+  const validatorUrl = useAppStore((state) => state.validatorURL)
   const appTitleHead = AppStore.getState().appTitleHead
 
   const categoryKeys = [...(data !== undefined ? Object.keys(data).toSorted() : []), ...OTHER_TABS]
@@ -77,8 +74,8 @@ function Statistics() {
     categoryId != undefined && categoryKeys.includes(categoryId)
       ? categoryId
       : categoryKeys.length > 0
-      ? categoryKeys[0]
-      : undefined
+        ? categoryKeys[0]
+        : undefined
 
   // --------------------------------------------------------------
 

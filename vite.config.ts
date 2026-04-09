@@ -220,6 +220,10 @@ export default defineConfig(async ({ mode }) => {
       'import.meta.env.VALIDATOR_URL': process.env.VITE_VALIDATOR_URL
         ? JSON.stringify(process.env.VITE_VALIDATOR_URL)
         : JSON.stringify('https://www.clarin.eu/fcsvalidator/'),
+      // whether to show Weblicht integration in search results
+      'import.meta.env.WEBLICHT_ENABLED': process.env.VITE_WEBLICHT_ENABLED
+        ? `${process.env.VITE_WEBLICHT_ENABLED}`
+        : JSON.stringify(true),
 
       // application title
       'import.meta.env.APP_TITLE': process.env.VITE_APP_TITLE
