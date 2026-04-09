@@ -14,6 +14,7 @@ import type { ExtraScopingParams } from '@clarin-eric/fcs-sru-aggregator-api-ada
 import {
   getInitData,
   postSearch,
+  postSearchStop,
   REQ_PARAM_CONSORTIA,
 } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
@@ -286,7 +287,12 @@ function Search() {
   // ------------------------------------------------------------------------
   // event handlers
 
-  function handleSearch(searchData: SearchData) {
+  async function handleSearch(searchData: SearchData) {
+    if (searchId !== undefined) {
+      console.debug('stop previous search', searchId)
+      await postSearchStop(axios, searchId)
+    }
+
     console.debug('start search:', searchData)
 
     setSearchResourceIDs(searchData.resourceIDs)
