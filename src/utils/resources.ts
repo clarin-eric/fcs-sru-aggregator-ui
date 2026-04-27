@@ -318,7 +318,7 @@ export function getBestLanguageFromMultilingualValuesTryByLanguage(
 
 /**
  * Get languages/locales used in resource meta information.
- * @param resource Resource with meta information (title, description, institution, ...)
+ * @param resource Resource with meta information (title, description, institution (+ endpoint institution), ...)
  * @param defaultLanguage fallback language if not multilingual information set
  * @returns unique list of languages found for title/description/institution or fallback if no multilingual options
  */
@@ -335,6 +335,11 @@ export function getLanguagesFromResourceInfo(resource: ResourceRaw, defaultLangu
     typeof resource.institution === 'string' || resource.institution === null
       ? [defaultLanguage]
       : Object.getOwnPropertyNames(resource.institution)
+  const languagesForEndpointInstitution =
+    typeof resource.endpointInstitution.name === 'string' ||
+    resource.endpointInstitution.name === null
+      ? [defaultLanguage]
+      : Object.getOwnPropertyNames(resource.endpointInstitution.name)
 
   // TODO: only collect languages if values differ, else fallback to default?
 
@@ -342,6 +347,7 @@ export function getLanguagesFromResourceInfo(resource: ResourceRaw, defaultLangu
     ...languagesForTitle,
     ...languagesForDescription,
     ...languagesForInstitution,
+    ...languagesForEndpointInstitution,
   ]
 
   // TODO: order by count?

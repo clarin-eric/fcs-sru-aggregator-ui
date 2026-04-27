@@ -5,8 +5,8 @@
 The frontend uses the following technologies:
 
 - [ReactJS](https://18.react.dev/) 18.3.1
-  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.14.0 for <abbr title="Single Page Application">SPA</abbr> routing
-  - [React Query](https://tanstack.com/query/latest) 5.99.0 with [Axios](https://github.com/axios/axios) 1.15.0 for web requests
+  - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.14.2 for <abbr title="Single Page Application">SPA</abbr> routing
+  - [React Query](https://tanstack.com/query/latest) 5.100.5 with [Axios](https://github.com/axios/axios) 1.15.2 for web requests
     - [@clarin-eric/fcs-sru-aggregator-api-adapter-typescript](https://github.com/clarin-eric/fcs-sru-aggregator-api-adapter-typescript) 1.5.1 as REST API adapter for the FCS SRU Aggregator
   - [react-i18next](https://react.i18next.com/) 16.5.6 and [i18next](https://www.i18next.com/) 25.8.10 for translation support, with [i18next-resources-to-backend](https://github.com/i18next/i18next-resources-to-backend) 1.2.1 for dynamic resource loading
 - [Bootstrap](https://getbootstrap.com/) 5.3.8 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.13.1, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.10
