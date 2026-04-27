@@ -537,22 +537,38 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
                 <dt>{t('statistics.labels.searchCapabilitiesOfEndpoint')}</dt>
                 <dd>{selectedResource.endpoint.searchCapabilities.join(', ')}</dd>
                 <dt>{t('statistics.labels.endpointInstitution')}</dt>
-                <dd>
-                  {selectedResource.endpointInstitution.name}
-                  {selectedResource.endpointInstitution.link && (
-                    <>
-                      {' – '}
-                      <a
-                        href={selectedResource.endpointInstitution.link}
-                        className="matomo_link"
-                        target="_blank"
-                      >
-                        {t('statistics.labels.moreInformation')}{' '}
-                        <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />
-                      </a>
-                    </>
-                  )}
-                </dd>
+                {selectedResource.endpointInstitution.name !== null && (
+                  <dd>
+                    {typeof selectedResource.endpointInstitution.name === 'string' ? (
+                      selectedResource.endpointInstitution.name
+                    ) : (
+                      <ul className="mb-0">
+                        {Object.entries(selectedResource.endpointInstitution.name).map(
+                          ([language, name]) => (
+                            <li key={language}>
+                              <Badge bg={'secondary'} className="me-2">
+                                {langNames.of(language)} <sup>{language}</sup>
+                              </Badge>{' '}
+                              {name}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    )}
+                  </dd>
+                )}
+                {selectedResource.endpointInstitution.link && (
+                  <dd>
+                    <a
+                      href={selectedResource.endpointInstitution.link}
+                      className="matomo_link"
+                      target="_blank"
+                    >
+                      {t('statistics.labels.moreInformation')}{' '}
+                      <i dangerouslySetInnerHTML={{ __html: houseDoorIcon }} />
+                    </a>
+                  </dd>
+                )}
               </dl>
             </Card.Body>
           </Card>
