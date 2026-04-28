@@ -250,13 +250,17 @@ function SearchInput({
 
     const newQueryType = eventKey as QueryTypeID
 
-    // process user inputs
-    const hasQueryTypeChanged = newQueryType !== queryType
-    if (hasQueryTypeChanged) {
-      // reset resource selection as it automatically changes due to options
-      console.debug('handleChangeQueryType', 'reset resource selection')
-      resetResourceSelection()
+    // eslint-disable-next-line no-constant-condition
+    if (false) {
+      // process user inputs
+      const hasQueryTypeChanged = newQueryType !== queryType
+      if (hasQueryTypeChanged) {
+        // reset resource selection as it automatically changes due to options
+        console.debug('handleChangeQueryType', 'reset resource selection')
+        resetResourceSelection()
+      }
     }
+
     setQueryType(newQueryType)
   }
 
