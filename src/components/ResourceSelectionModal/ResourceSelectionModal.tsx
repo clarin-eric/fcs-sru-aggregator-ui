@@ -105,6 +105,14 @@ function ResourceSelectionModal({
   const [resourcesGroupedByLanguage, setResourcesGroupedByLanguage] =
     useState<ResourcesGroupedByKeyMap>({})
 
+  const isGrouping = viewResourcesGrouping !== 'resource'
+  const expandedAll =
+    viewResourcesGrouping === 'institution'
+      ? Object.values(resourcesGroupedByInstitute).every(({ expanded }) => expanded)
+      : viewResourcesGrouping === 'language'
+        ? Object.values(resourcesGroupedByLanguage).every(({ expanded }) => expanded)
+        : false
+
   useEffect(() => {
     if (showGrouping) setViewResourcesGrouping(showGrouping)
     // NOTE: remove `show` dependency to let modal keep last state when re-opened with same arguments
@@ -141,24 +149,30 @@ function ResourceSelectionModal({
       Object.entries(resourcesGroupedByInstitute).forEach(([institute, resources]) => {
         groupScore.set(
           institute,
-          resources.resources.reduce((score, resource) => {
-            const rScore = filteredResourceScores.get(resource.id)
-            if (rScore === undefined) return score
-            if (score === undefined) return rScore
-            return score < rScore ? score : rScore
-          }, undefined as unknown as number)
+          resources.resources.reduce(
+            (score, resource) => {
+              const rScore = filteredResourceScores.get(resource.id)
+              if (rScore === undefined) return score
+              if (score === undefined) return rScore
+              return score < rScore ? score : rScore
+            },
+            undefined as unknown as number
+          )
         )
       })
     } else if (viewResourcesGrouping === 'language') {
       Object.entries(resourcesGroupedByLanguage).forEach(([institute, resources]) => {
         groupScore.set(
           institute,
-          resources.resources.reduce((score, resource) => {
-            const rScore = filteredResourceScores.get(resource.id)
-            if (rScore === undefined) return score
-            if (score === undefined) return rScore
-            return score < rScore ? score : rScore
-          }, undefined as unknown as number)
+          resources.resources.reduce(
+            (score, resource) => {
+              const rScore = filteredResourceScores.get(resource.id)
+              if (rScore === undefined) return score
+              if (score === undefined) return rScore
+              return score < rScore ? score : rScore
+            },
+            undefined as unknown as number
+          )
         )
       })
     }
@@ -293,6 +307,29 @@ function ResourceSelectionModal({
     changeSelectedResourceIDs(getResourceIDs(resourcesInGroup), false)
   }
 
+  function handleToggleExpandAllButton() {
+    const expandValue = !expandedAll
+    if (viewResourcesGrouping === 'institution') {
+      setResourcesGroupedByInstitute(
+        Object.fromEntries(
+          Object.entries(resourcesGroupedByInstitute).map(([institution, entry]) => [
+            institution,
+            { ...entry, expanded: expandValue },
+          ])
+        )
+      )
+    } else if (viewResourcesGrouping === 'language') {
+      setResourcesGroupedByLanguage(
+        Object.fromEntries(
+          Object.entries(resourcesGroupedByLanguage).map(([language, entry]) => [
+            language,
+            { ...entry, expanded: expandValue },
+          ])
+        )
+      )
+    }
+  }
+
   // --------------------------------------------------------------
   // rendering
 
@@ -332,7 +369,7 @@ function ResourceSelectionModal({
         .map(
           ([institution, { expanded, resources }]: [
             string,
-            { expanded: boolean; resources: Resource[] }
+            { expanded: boolean; resources: Resource[] },
           ]) => (
             <GroupedResources
               title={
@@ -380,7 +417,7 @@ function ResourceSelectionModal({
         .map(
           ([language, { expanded, resources }]: [
             string,
-            { expanded: boolean; resources: Resource[] }
+            { expanded: boolean; resources: Resource[] },
           ]) => (
             <GroupedResources
               title={
@@ -543,14 +580,32 @@ function ResourceSelectionModal({
           </Container>
         </Form>
         {/* info */}
-        <p className="m-4 mb-0">
-          {t('search.resourcesModal.msgResourcesSelected', {
-            count: resourcesInfo.selected,
-            total: resourcesInfo.visible,
-            available: resourcesInfo.available,
-            context: resourcesInfo.available !== resourcesInfo.visible ? 'available' : null,
-          })}
-        </p>
+        <Container className="px-3">
+          <Row className="px-3 mt-4 mb-0">
+            <Col md={9}>
+              {t('search.resourcesModal.msgResourcesSelected', {
+                count: resourcesInfo.selected,
+                total: resourcesInfo.visible,
+                available: resourcesInfo.available,
+                context: resourcesInfo.available !== resourcesInfo.visible ? 'available' : null,
+              })}
+            </Col>
+            {isGrouping && (
+              <Col md={3} className="gap-1 d-inline-flex column-gap-2 justify-content-evenly">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleToggleExpandAllButton}
+                  aria-expanded={expandedAll}
+                >
+                  {t('search.resourcesModal.grouped.buttonExpandAll', {
+                    context: expandedAll ? 'hide' : 'show',
+                  })}
+                </Button>
+              </Col>
+            )}
+          </Row>
+        </Container>
         {/* resources */}
         <Container className="px-3 pt-3">{renderResources()}</Container>
       </Modal.Body>

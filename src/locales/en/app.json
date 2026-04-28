@@ -107,7 +107,9 @@
         "buttonSelectAll": "Select All",
         "buttonDeselectAll": "Deselect All",
         "buttonExpand_hide": "Hide Resources",
-        "buttonExpand_show": "Show Resources"
+        "buttonExpand_show": "Show Resources",
+        "buttonExpandAll_hide": "Hide All Resources",
+        "buttonExpandAll_show": "Show All Resources"
       }
     },
     "suggestionsModal": {
