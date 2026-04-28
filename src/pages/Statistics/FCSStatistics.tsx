@@ -269,15 +269,26 @@ function FCSStatistics() {
   const institutionsWithResources = flatResources.reduce((map, resource) => {
     const institution =
       getBestFromMultilingualValuesTryByLanguage(resource.institution, userLocale) ??
-      resource.endpointInstitution.name
-    if (!map.has(institution)) map.set(institution, [])
-    map.get(institution)!.push(resource)
+      getBestFromMultilingualValuesTryByLanguage(resource.endpointInstitution.name, userLocale)
+    if (institution !== null) {
+      if (!map.has(institution)) map.set(institution, [])
+      map.get(institution)!.push(resource)
+    } else {
+      console.warn('Invalid resource state, institution is null!', resource)
+    }
     return map
   }, new Map<string, Resource[]>())
   const endpointInstitutionsWithResources = flatResources.reduce((map, resource) => {
-    const institution = resource.endpointInstitution.name
-    if (!map.has(institution)) map.set(institution, [])
-    map.get(institution)!.push(resource)
+    const institution = getBestFromMultilingualValuesTryByLanguage(
+      resource.endpointInstitution.name,
+      userLocale
+    )
+    if (institution !== null) {
+      if (!map.has(institution)) map.set(institution, [])
+      map.get(institution)!.push(resource)
+    } else {
+      console.warn('Invalid resource state, institution is null!', resource)
+    }
     return map
   }, new Map<string, Resource[]>())
 
