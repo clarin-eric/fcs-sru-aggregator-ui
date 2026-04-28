@@ -296,15 +296,38 @@ function ResourceSelectionModal({
   }
 
   function handleResourceOnSelectClick(resource: Resource, selected: boolean) {
-    changeSelectedResourceIDs(getResourceIDs([resource]), selected)
+    const resourceIDs = getResourceIDs([resource])
+    const resourceIDsValid = resourceIDs.filter((resourceId) =>
+      availableResources.includes(resourceId)
+    )
+    console.log('[handleResourceOnSelectClick]', { resource, resourceIDs, resourceIDsValid })
+    changeSelectedResourceIDs(resourceIDsValid, selected)
   }
 
   function handleGroupedResourcesOnSelectAllClick(resourcesInGroup: Resource[]) {
-    changeSelectedResourceIDs(getResourceIDs(resourcesInGroup), true)
+    const resourceIDs = getResourceIDs(resourcesInGroup)
+    const resourceIDsValid = resourceIDs.filter((resourceId) =>
+      availableResources.includes(resourceId)
+    )
+    console.log('[handleGroupedResourcesOnSelectAllClick]', {
+      resourcesInGroup,
+      resourceIDs,
+      resourceIDsValid,
+    })
+    changeSelectedResourceIDs(resourceIDsValid, true)
   }
 
   function handleGroupedResourcesOnDeselectAllClick(resourcesInGroup: Resource[]) {
-    changeSelectedResourceIDs(getResourceIDs(resourcesInGroup), false)
+    const resourceIDs = getResourceIDs(resourcesInGroup)
+    const resourceIDsValid = resourceIDs.filter((resourceId) =>
+      availableResources.includes(resourceId)
+    )
+    console.log('[handleGroupedResourcesOnDeselectAllClick]', {
+      resourcesInGroup,
+      resourceIDs,
+      resourceIDsValid,
+    })
+    changeSelectedResourceIDs(resourceIDsValid, false)
   }
 
   function handleToggleExpandAllButton() {
@@ -380,6 +403,7 @@ function ResourceSelectionModal({
               titleId={institution}
               resources={resources}
               selectedResourceIDs={selectedResourceIDs}
+              availableResourceIDs={availableResources}
               resourceScores={filteredResourceScores}
               highlightings={filteredResourcesHighlights}
               expanded={expanded}
@@ -429,6 +453,7 @@ function ResourceSelectionModal({
               titleId={language}
               resources={resources}
               selectedResourceIDs={selectedResourceIDs}
+              availableResourceIDs={availableResources}
               resourceScores={filteredResourceScores}
               highlightings={filteredResourcesHighlights}
               expanded={expanded}

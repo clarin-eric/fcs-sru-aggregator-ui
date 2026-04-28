@@ -20,6 +20,7 @@ function GroupedResources({
   titleId,
   resources,
   selectedResourceIDs,
+  availableResourceIDs,
   resourceScores,
   highlightings,
   expanded: expandedProp,
@@ -35,6 +36,7 @@ function GroupedResources({
   titleId: string
   resources: Resource[]
   selectedResourceIDs: string[]
+  availableResourceIDs: string[]
   resourceScores?: Map<string, number>
   highlightings?: Map<string, FuzzyMatchesByField>
   expanded: boolean
@@ -55,7 +57,9 @@ function GroupedResources({
   }, [expandedProp])
 
   // checkbox state
-  const flatResourceIds = useMemo(() => getResourceIDs(resources), [resources])
+  const flatResourceIds = useMemo(() => getResourceIDs(resources), [resources]).filter(
+    (resourceId) => availableResourceIDs.includes(resourceId)
+  )
   const flatResourcesSelected = flatResourceIds.filter((resourceId) =>
     selectedResourceIDs.includes(resourceId)
   )
@@ -109,7 +113,9 @@ function GroupedResources({
   // rendering
 
   function renderResourceCounts() {
-    const rootResources = resources.filter((resource) => !resource.rootResourceId)
+    const rootResources = resources
+      .filter((resource) => !resource.rootResourceId)
+      .filter((resource) => availableResourceIDs.includes(resource.id))
     const numResources = getResourceIDs(rootResources).length
     const numResourcesRoot = rootResources.length
     const numResourcesSelected = getResourceIDs(rootResources).filter((rid) =>
