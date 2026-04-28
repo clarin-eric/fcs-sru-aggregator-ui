@@ -348,17 +348,21 @@ function Search() {
         </div>
 
         {/* logo image */}
-        {!hasSearch && (
-          <Row>
-            <Col className="text-center">
-              <picture>
-                <source srcSet={fcsLogoUrl} media="(prefers-color-scheme: light)" />
-                <source srcSet={fcsLogoDarkModeUrl} media="(prefers-color-scheme: dark)" />
-                <img src={fcsLogoUrl} className="logo" alt="FCS logo" />
-              </picture>
-            </Col>
-          </Row>
-        )}
+        {!hasSearch &&
+          (import.meta.env.SHOW_MAIN_LOGO ? (
+            <Row>
+              <Col className="text-center">
+                <picture>
+                  <source srcSet={fcsLogoUrl} media="(prefers-color-scheme: light)" />
+                  <source srcSet={fcsLogoDarkModeUrl} media="(prefers-color-scheme: dark)" />
+                  <img src={fcsLogoUrl} className="logo" alt="FCS logo" />
+                </picture>
+              </Col>
+            </Row>
+          ) : (
+            /* small spacer in case of no logo */
+            <div className="d-none d-md-block" style={{ height: '2rem' }} />
+          ))}
 
         {/* search input */}
         <Row className="mt-3">

@@ -233,10 +233,14 @@ export default defineConfig(async ({ mode }) => {
       'import.meta.env.APP_TITLE_HEAD': process.env.VITE_APP_TITLE_HEAD
         ? JSON.stringify(process.env.VITE_APP_TITLE_HEAD)
         : JSON.stringify('FCS Aggregator – Content Search'),
-      // application logo
+      // application logo (CLARIN/Text+)
       'import.meta.env.APP_LOGO_PATH': process.env.VITE_APP_LOGO_PATH
         ? JSON.stringify(process.env.VITE_APP_LOGO_PATH)
         : JSON.stringify('src/assets/images/clarin-logo-wide.png'),
+      // show main title logo (fancy FCS)
+      'import.meta.env.SHOW_MAIN_LOGO': process.env.VITE_SHOW_MAIN_LOGO
+        ? JSON.stringify(process.env.VITE_SHOW_MAIN_LOGO)
+        : JSON.stringify(true),
 
       // show direct link to search results
       'import.meta.env.SHOW_SEARCH_RESULT_LINK': process.env.VITE_SHOW_SEARCH_RESULT_LINK

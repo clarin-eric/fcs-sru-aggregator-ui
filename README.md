@@ -69,6 +69,8 @@ The bundle can be pre-configured by adjusting the `import.meta.env.` constants f
 - "branding" related configs:
   - `HEAD_TITLE`: the base application title for the browser
   - `CANONCIAL_URL`: the canonical URL to the application (head meta information), _unused for now?_
+  - `SHOW_MAIN_LOGO`: whether to display the non-CLARIN standard main logo on the front page
+  - `APP_LOGO_PATH`: application operator logo (CLARIN/Text+)
 - deployment base configuration
   - `DEPLOY_PATH`: the (sub-)path the application is served from, by default `/` for the root
   - `API_URL`: the backend FCS SRU Aggregator REST API endpoint, **required!**
