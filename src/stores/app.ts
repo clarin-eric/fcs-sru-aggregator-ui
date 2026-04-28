@@ -14,6 +14,17 @@ type AppStoreState = {
   apiURL: string
   validatorURL: string | null
 
+  appVersion: string
+  appGitCommitRef: string | null
+  appGitCommitSha: string | null
+  appGitCommitDate: string | null
+  appGitCommitTag: string | null
+
+  uiVersion: string
+  uiGitCommitSha: string
+  uiGitCommitRef: string | null
+  uiGitCommitDate: string
+
   showSearchResultLink: boolean
   weblichtEnabled: boolean
 
@@ -42,6 +53,32 @@ type AppStoreActions = {
     url:
       | AppStoreState['validatorURL']
       | ((currentURL: AppStoreState['validatorURL']) => AppStoreState['validatorURL'])
+  ) => void
+
+  setAppVersion: (
+    appVersion:
+      | AppStoreState['appVersion']
+      | ((currentAppVersion: AppStoreState['appVersion']) => AppStoreState['appVersion'])
+  ) => void
+  setAppGitCommitRef: (
+    ref:
+      | AppStoreState['appGitCommitRef']
+      | ((currentRef: AppStoreState['appGitCommitRef']) => AppStoreState['appGitCommitRef'])
+  ) => void
+  setAppGitCommitSha: (
+    sha:
+      | AppStoreState['appGitCommitSha']
+      | ((currentSha: AppStoreState['appGitCommitSha']) => AppStoreState['appGitCommitSha'])
+  ) => void
+  setAppGitCommitDate: (
+    date:
+      | AppStoreState['appGitCommitDate']
+      | ((currentDate: AppStoreState['appGitCommitDate']) => AppStoreState['appGitCommitDate'])
+  ) => void
+  setAppGitCommitTag: (
+    tag:
+      | AppStoreState['appGitCommitTag']
+      | ((currentTag: AppStoreState['appGitCommitTag']) => AppStoreState['appGitCommitTag'])
   ) => void
 
   setShowSearchResultLink: (
@@ -95,6 +132,18 @@ export const DEFAULT_STATE: AppStoreState = {
   deployPath: import.meta.env.DEPLOY_PATH,
   apiURL: import.meta.env.API_URL,
   validatorURL: import.meta.env.VALIDATOR_URL,
+
+  appVersion: import.meta.env.APPLICATION_VERSION,
+  appGitCommitRef: import.meta.env.GIT_APP_INFO_REF,
+  appGitCommitSha: import.meta.env.GIT_APP_INFO_SHA,
+  appGitCommitDate: import.meta.env.GIT_APP_INFO_DATE,
+  appGitCommitTag: import.meta.env.GIT_APP_INFO_TAG,
+
+  uiVersion: import.meta.env.UI_VERSION,
+  uiGitCommitSha: import.meta.env.GIT_UI_INFO_SHA,
+  uiGitCommitRef: import.meta.env.GIT_UI_INFO_REF,
+  uiGitCommitDate: import.meta.env.GIT_UI_INFO_DATE,
+
   showSearchResultLink: import.meta.env.SHOW_SEARCH_RESULT_LINK,
   weblichtEnabled: import.meta.env.WEBLICHT_ENABLED,
   appTitle: import.meta.env.APP_TITLE,
@@ -122,6 +171,26 @@ export const createAppSlice: StateCreator<AppStore> = (set) => ({
     set((state) => ({ apiURL: typeof url === 'function' ? url(state.apiURL) : url })),
   setValidatorURL: (url) =>
     set((state) => ({ validatorURL: typeof url === 'function' ? url(state.validatorURL) : url })),
+
+  setAppVersion: (url) =>
+    set((state) => ({ appVersion: typeof url === 'function' ? url(state.appVersion) : url })),
+  setAppGitCommitRef: (url) =>
+    set((state) => ({
+      appGitCommitRef: typeof url === 'function' ? url(state.appGitCommitRef) : url,
+    })),
+  setAppGitCommitSha: (url) =>
+    set((state) => ({
+      appGitCommitSha: typeof url === 'function' ? url(state.appGitCommitSha) : url,
+    })),
+  setAppGitCommitDate: (url) =>
+    set((state) => ({
+      appGitCommitDate: typeof url === 'function' ? url(state.appGitCommitDate) : url,
+    })),
+  setAppGitCommitTag: (url) =>
+    set((state) => ({
+      appGitCommitTag: typeof url === 'function' ? url(state.appGitCommitTag) : url,
+    })),
+
   setShowSearchResultLink: (show) =>
     set((state) => ({
       showSearchResultLink: typeof show === 'function' ? show(state.showSearchResultLink) : show,

@@ -37,13 +37,21 @@ function About() {
 
   const appTitleHead = AppStore.getState().appTitleHead
 
+  const appVersion = AppStore.getState().appVersion
+  const appGitCommitDate = AppStore.getState().appGitCommitDate
+  const appGitCommitRef = AppStore.getState().appGitCommitRef
+  const appGitCommitSha = AppStore.getState().appGitCommitSha
+  const appGitCommitTag = AppStore.getState().appGitCommitTag
+
+  const uiVersion = AppStore.getState().uiVersion
+  const uiGitCommitSha = AppStore.getState().uiGitCommitSha
+  const uiGitCommitRef = AppStore.getState().uiGitCommitRef
+  const uiGitCommitDate = AppStore.getState().uiGitCommitDate
+
   const [linkSearch] = useKeepSearchParams()
 
   const hasApplicationVersionInfo =
-    import.meta.env.VITE_GIT_APP_INFO_TAG ||
-    import.meta.env.VITE_GIT_APP_INFO_TAG ||
-    import.meta.env.VITE_GIT_APP_INFO_REF ||
-    import.meta.env.GIT_APP_INFO_DATE
+    appGitCommitDate || appGitCommitSha || appGitCommitRef || appGitCommitTag
 
   // whether to show two column info with backend and frontend (or just the frontend)
   const showBackendInfos = hasApplicationVersionInfo
@@ -173,36 +181,36 @@ function About() {
                 <dl className="ms-4">
                   <dt>{t('about.versions.backend.lblVersion')}</dt>
                   <dd>
-                    <code>{import.meta.env.APPLICATION_VERSION}</code>
+                    <code>{appVersion}</code>
                   </dd>
-                  {import.meta.env.GIT_APP_INFO_SHA && (
+                  {appGitCommitSha && (
                     <>
                       <dt>{t('about.versions.backend.lblSHA')}</dt>
                       <dd>
-                        <code>{import.meta.env.GIT_APP_INFO_SHA}</code>
+                        <code>{appGitCommitSha}</code>
                       </dd>
                     </>
                   )}
-                  {import.meta.env.VITE_GIT_APP_INFO_TAG && (
+                  {appGitCommitTag && (
                     <>
                       <dt>{t('about.versions.backend.lblTag')}</dt>
                       <dd>
-                        <code>{import.meta.env.VITE_GIT_APP_INFO_TAG}</code>
+                        <code>{appGitCommitTag}</code>
                       </dd>
                     </>
                   )}
-                  {import.meta.env.VITE_GIT_APP_INFO_REF && (
+                  {appGitCommitRef && (
                     <>
                       <dt>{t('about.versions.backend.lblRef')}</dt>
                       <dd>
-                        <code>{import.meta.env.VITE_GIT_APP_INFO_REF}</code>
+                        <code>{appGitCommitRef}</code>
                       </dd>
                     </>
                   )}
-                  {import.meta.env.GIT_APP_INFO_DATE && (
+                  {appGitCommitDate && (
                     <>
                       <dt>{t('about.versions.backend.lblDate')}</dt>
-                      <dd>{renderDateTime(import.meta.env.GIT_APP_INFO_DATE)}</dd>
+                      <dd>{renderDateTime(appGitCommitDate)}</dd>
                     </>
                   )}
                 </dl>
@@ -215,23 +223,22 @@ function About() {
               <dl className={hasApplicationVersionInfo ? 'ms-4' : ''}>
                 <dt>{t('about.versions.frontend.lblVersion')}</dt>
                 <dd>
-                  <code>{import.meta.env.UI_VERSION}</code>
+                  <code>{uiVersion}</code>
                 </dd>
                 <dt>{t('about.versions.frontend.lblSHA')}</dt>
                 <dd>
-                  <code>{import.meta.env.GIT_UI_INFO_SHA}</code>
+                  <code>{uiGitCommitSha}</code>
                 </dd>
-                {import.meta.env.GIT_UI_INFO_REF &&
-                  import.meta.env.GIT_UI_INFO_REF !== import.meta.env.GIT_UI_INFO_SHA && (
-                    <>
-                      <dt>{t('about.versions.frontend.lblRef')}</dt>
-                      <dd>
-                        <code>{import.meta.env.GIT_UI_INFO_REF}</code>
-                      </dd>
-                    </>
-                  )}
+                {uiGitCommitRef && uiGitCommitRef !== uiGitCommitSha && (
+                  <>
+                    <dt>{t('about.versions.frontend.lblRef')}</dt>
+                    <dd>
+                      <code>{uiGitCommitRef}</code>
+                    </dd>
+                  </>
+                )}
                 <dt>{t('about.versions.frontend.lblDate')}</dt>
-                <dd>{renderDateTime(import.meta.env.GIT_UI_INFO_DATE)}</dd>
+                <dd>{renderDateTime(uiGitCommitDate)}</dd>
               </dl>
             </Col>
           </Row>

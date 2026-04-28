@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
+import AppStore from '@/stores/app'
 
 import './styles.css'
 
@@ -12,6 +13,9 @@ import './styles.css'
 
 function Footer() {
   const { t } = useTranslation()
+
+  const appVersion = AppStore.getState().appVersion
+  const uiVersion = AppStore.getState().uiVersion
 
   const i18nKeyTerms = 'urls.termsUseAndDisclaimer'
   const urlTerms = t(i18nKeyTerms, { ns: 'common' })
@@ -39,7 +43,7 @@ function Footer() {
               </Link>
               {/* Center version on mobile */}
               <div className="version-info text-muted text-center-xs">
-                v{import.meta.env.APPLICATION_VERSION}
+                {appVersion} / {uiVersion}
               </div>
             </div>
             <Link to={{ pathname: '/stats', search: linkSearch }}>

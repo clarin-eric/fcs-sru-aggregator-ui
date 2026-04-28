@@ -8,6 +8,10 @@ type MyAggregatorConfiguration = {
   DEPLOY_PATH: string
   API_URL: string
   VALIDATOR_URL: string | null
+  SERVER_VERSION_STRING: string | null
+  SERVER_VERSION_GIT_COMMIT: string | null
+  SERVER_VERSION_GIT_BRANCH: string | null
+  SERVER_VERSION_GIT_DATE: string | null
   SHOW_SEARCH_RESULT_LINK: boolean
   WEBLICHT_ENABLED: boolean
   APP_TITLE: string
@@ -43,6 +47,11 @@ export const CONFIG_NAMES_ONLY_ON_INITIALIZATION = [
   'APP_TITLE',
   'APP_TITLE_HEAD',
   'MATOMO_TRACKING_PARAMS',
+  // either per 'import.meta.env' or via 'window.MyAggregator' injection
+  'SERVER_VERSION_STRING',
+  'SERVER_VERSION_GIT_COMMIT',
+  'SERVER_VERSION_GIT_BRANCH',
+  'SERVER_VERSION_GIT_DATE',
 ]
 
 /**
@@ -71,6 +80,32 @@ export function configure() {
   if (window.MyAggregator.APP_TITLE_HEAD !== undefined) {
     AppStore.getState().setAppTitleHead(window.MyAggregator.APP_TITLE_HEAD)
   }
+
+  if (
+    window.MyAggregator.SERVER_VERSION_STRING !== undefined &&
+    window.MyAggregator.SERVER_VERSION_STRING !== null
+  ) {
+    AppStore.getState().setAppVersion(window.MyAggregator.SERVER_VERSION_STRING)
+  }
+  if (
+    window.MyAggregator.SERVER_VERSION_GIT_COMMIT !== undefined &&
+    window.MyAggregator.SERVER_VERSION_GIT_COMMIT !== null
+  ) {
+    AppStore.getState().setAppGitCommitSha(window.MyAggregator.SERVER_VERSION_GIT_COMMIT)
+  }
+  if (
+    window.MyAggregator.SERVER_VERSION_GIT_BRANCH !== undefined &&
+    window.MyAggregator.SERVER_VERSION_GIT_BRANCH !== null
+  ) {
+    AppStore.getState().setAppGitCommitRef(window.MyAggregator.SERVER_VERSION_GIT_BRANCH)
+  }
+  if (
+    window.MyAggregator.SERVER_VERSION_GIT_DATE !== undefined &&
+    window.MyAggregator.SERVER_VERSION_GIT_DATE !== null
+  ) {
+    AppStore.getState().setAppGitCommitDate(window.MyAggregator.SERVER_VERSION_GIT_DATE)
+  }
+
   if (import.meta.env.FEATURE_TRACKING_MATOMO) {
     if (window.MyAggregator.MATOMO_TRACKING_PARAMS !== undefined) {
       AppStore.getState().setMatomoTrackingParams(window.MyAggregator.MATOMO_TRACKING_PARAMS)
