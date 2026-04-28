@@ -35,20 +35,20 @@ function Footer() {
     <footer className="text-muted">
       <Container>
         <Row>
-          <Col className="text-start d-flex flex-sm-row flex-column column-gap-3 row-gap-2">
+          <Col className="text-start d-flex flex-sm-column flex-column">
             {/* On smaller screen, show about link with contact link */}
-            <div>
+            <div className="d-flex flex-sm-row flex-column justify-content-sm-start column-gap-3">
               <Link to={{ pathname: '/about', search: linkSearch }} className="hidden-xs">
                 {t('footer.links.about')}
               </Link>
-              {/* Center version on mobile */}
-              <div className="version-info text-muted text-center-xs">
-                {appVersion} / {uiVersion}
-              </div>
+              <Link to={{ pathname: '/stats', search: linkSearch }}>
+                {t('footer.links.statistics')}
+              </Link>
             </div>
-            <Link to={{ pathname: '/stats', search: linkSearch }}>
-              {t('footer.links.statistics')}
-            </Link>
+            {/* Center version on mobile */}
+            <div className="version-info text-muted text-center-xs">
+              {appVersion !== uiVersion ? `${appVersion} / ${uiVersion}` : appVersion}
+            </div>
           </Col>
           <Col className="text-center">
             {/* CLARIN logo and copyright (center column on larger screens) */}
@@ -62,7 +62,7 @@ function Footer() {
               />
             )}
           </Col>
-          <Col className="hidden-xs text-end d-flex flex-sm-row flex-column justify-content-sm-end column-gap-3 row-gap-2">
+          <Col className="hidden-xs text-end d-flex flex-sm-row flex-column justify-content-sm-end column-gap-3">
             {/* Contact link in right column on larger screens */}
             {hasTerms && <a href={urlTerms}>{t('footer.links.termsUseAndDisclaimer')}</a>}
             {hasContact && <a href={urlContact}>{t('footer.links.contact')}</a>}
