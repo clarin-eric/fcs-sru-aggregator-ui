@@ -48,6 +48,7 @@
       "searchInput": {
         "title": "Resource Selection Changed",
         "msgResourcesChangedDueToQuery": "The selected resources have been changed due to their suitability with the search query.",
+        "msgResourcesChangedDueToNoValidResourcesLeft": "The resource selection has been reset. No resources were available due to filter changes.",
         "msgResourcesAmountChanged": "Selected resources: {{before}} → {{after}}",
         "buttonRevertSelection": "Revert to original resource selection"
       }

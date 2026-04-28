@@ -176,11 +176,46 @@ function SearchInput({
     //     : // incremental update
     //       resourceIDs.filter((id) => availableResourceIDs.includes(id))
     // )
+
+    function intersectionOrReset(resourceIDs: string[]) {
+      // init case, nothing yet available?
+      if (availableResourceIDs.length === 0) {
+        return resourceIDs
+      }
+
+      const remainingIDs = resourceIDs.filter((id) => availableResourceIDs.includes(id))
+
+      if (remainingIDs.length === 0) {
+        console.debug(
+          'Reset resource availability due to no remaining valid resource IDs (likely query type change)'
+        )
+
+        onShowToast?.({
+          title: t('search.toasts.searchInput.title'),
+          body: (
+            <>
+              <p>{t('search.toasts.searchInput.msgResourcesChangedDueToNoValidResourcesLeft')}</p>
+              <p>
+                {t('search.toasts.searchInput.msgResourcesAmountChanged', {
+                  before: resourceIDs.length,
+                  after: availableResourceIDs.length,
+                })}
+              </p>
+            </>
+          ),
+          variant: 'info',
+          delay: 5_000,
+        })
+
+        return availableResourceIDs
+      }
+
+      return remainingIDs
+    }
+
     // we update from outside (Search.tsx#useEffect#data)
-    setSelectedResourceIDs((resourceIDs) =>
-      resourceIDs.filter((id) => availableResourceIDs.includes(id))
-    )
-  }, [resources, getAvailableResourceIDsCallback, setSelectedResourceIDs])
+    setSelectedResourceIDs(intersectionOrReset)
+  }, [resources, getAvailableResourceIDsCallback, setSelectedResourceIDs, onShowToast, t])
 
   // ------------------------------------------------------------------------
 
@@ -241,6 +276,10 @@ function SearchInput({
   const showQueryBuilderButton = QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(
     queryType as QueryTypeIDForQueryBuilder
   )
+
+  const selectedResourcesCount = (selectedResourceIDs ?? []).length
+  const searchSubmitButtonDisabled =
+    disabled || query.trim().length === 0 || selectedResourcesCount === 0
 
   // ------------------------------------------------------------------------
   // event handlers
@@ -460,10 +499,15 @@ function SearchInput({
   // UI
 
   function renderSelectedResourcesMsg() {
-    const selected = (selectedResourceIDs ?? []).length
     const context =
-      resources.length === selected || validResourceIDs.length === selected ? 'all' : null
-    return t('search.searchInput.buttonSelectedResources', { count: selected, context })
+      resources.length === selectedResourcesCount ||
+      validResourceIDs.length === selectedResourcesCount
+        ? 'all'
+        : null
+    return t('search.searchInput.buttonSelectedResources', {
+      count: selectedResourcesCount,
+      context,
+    })
   }
 
   return (
@@ -483,7 +527,7 @@ function SearchInput({
           </Button>
           {/* @ts-expect-error: typing does not work for onChange handler, is correct so */}
           <Form.Control
-            placeholder="Elephant"
+            placeholder="Your search query ..."
             aria-label={t('search.searchInput.inputQueryAriaLabel')}
             aria-describedby="fcs-search-input-button"
             className="text-center search-query-input"
@@ -529,11 +573,11 @@ function SearchInput({
             <i dangerouslySetInnerHTML={{ __html: highlightsIcon }} aria-hidden="true" />
           </ToggleButton>
           <Button
-            variant="outline-primary"
+            variant="primary"
             type="submit"
             id="fcs-search-input-button"
-            disabled={disabled || query.trim().length === 0}
-            aria-disabled={disabled}
+            disabled={searchSubmitButtonDisabled}
+            aria-disabled={searchSubmitButtonDisabled}
             aria-label={t('search.searchInput.buttonSearchAriaLabel')}
           >
             {/* TODO: visually-hidden span with description? */}

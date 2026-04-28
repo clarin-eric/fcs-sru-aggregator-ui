@@ -3,6 +3,8 @@
   padding: 1.5em;
 }
 
+/* *** SearchInput.tsx *** */
+
 #fcs-query-filters button.btn {
   --bs-btn-border-radius: 0.75rem;
   --bs-btn-border-color: #212529ad;
@@ -41,6 +43,10 @@
 #fcs-query .form-control.is-invalid {
   /* disable, to avoid jumping text for */
   padding-right: unset;
+}
+
+#search .search-query-input::placeholder {
+  font-style: italic;
 }
 
 /* *** SearchResults.tsx *** */
