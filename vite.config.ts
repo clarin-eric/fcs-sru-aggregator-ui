@@ -221,9 +221,10 @@ export default defineConfig(async ({ mode }) => {
         ? JSON.stringify(process.env.VITE_VALIDATOR_URL)
         : JSON.stringify('https://www.clarin.eu/fcsvalidator/'),
       // whether to show Weblicht integration in search results
-      'import.meta.env.WEBLICHT_ENABLED': process.env.VITE_WEBLICHT_ENABLED
-        ? `${process.env.VITE_WEBLICHT_ENABLED}`
-        : JSON.stringify(true),
+      'import.meta.env.WEBLICHT_ENABLED':
+        process.env.VITE_WEBLICHT_ENABLED !== undefined
+          ? `${process.env.VITE_WEBLICHT_ENABLED}`
+          : JSON.stringify(true),
 
       // application title
       'import.meta.env.APP_TITLE': process.env.VITE_APP_TITLE
@@ -238,27 +239,32 @@ export default defineConfig(async ({ mode }) => {
         ? JSON.stringify(process.env.VITE_APP_LOGO_PATH)
         : JSON.stringify('src/assets/images/clarin-logo-wide.png'),
       // show main title logo (fancy FCS)
-      'import.meta.env.SHOW_MAIN_LOGO': process.env.VITE_SHOW_MAIN_LOGO
-        ? JSON.stringify(process.env.VITE_SHOW_MAIN_LOGO)
-        : JSON.stringify(true),
+      'import.meta.env.SHOW_MAIN_LOGO':
+        process.env.VITE_SHOW_MAIN_LOGO !== undefined
+          ? `${process.env.VITE_SHOW_MAIN_LOGO}`
+          : JSON.stringify(true),
 
       // show direct link to search results
-      'import.meta.env.SHOW_SEARCH_RESULT_LINK': process.env.VITE_SHOW_SEARCH_RESULT_LINK
-        ? `${process.env.VITE_SHOW_SEARCH_RESULT_LINK}`
-        : JSON.stringify(false),
+      'import.meta.env.SHOW_SEARCH_RESULT_LINK':
+        process.env.VITE_SHOW_SEARCH_RESULT_LINK !== undefined
+          ? `${process.env.VITE_SHOW_SEARCH_RESULT_LINK}`
+          : JSON.stringify(false),
       // show developer info: search request url and search result url
-      'import.meta.env.SHOW_SEARCH_RESULT_DEV_URLS': process.env.VITE_SHOW_SEARCH_RESULT_DEV_URLS
-        ? `${process.env.VITE_SHOW_SEARCH_RESULT_DEV_URLS}`
-        : JSON.stringify(false),
+      'import.meta.env.SHOW_SEARCH_RESULT_DEV_URLS':
+        process.env.VITE_SHOW_SEARCH_RESULT_DEV_URLS !== undefined
+          ? `${process.env.VITE_SHOW_SEARCH_RESULT_DEV_URLS}`
+          : JSON.stringify(false),
       // show consortia info and switcher (by default disabled for "scoped" deployments that restrict to a single consortium)
-      'import.meta.env.SHOW_CONSORTIA_INFO': process.env.VITE_SHOW_CONSORTIA_INFO
-        ? `${process.env.VITE_SHOW_CONSORTIA_INFO}`
-        : JSON.stringify(true),
+      'import.meta.env.SHOW_CONSORTIA_INFO':
+        process.env.VITE_SHOW_CONSORTIA_INFO !== undefined
+          ? `${process.env.VITE_SHOW_CONSORTIA_INFO}`
+          : JSON.stringify(true),
 
       // matomo tracking
-      'import.meta.env.FEATURE_TRACKING_MATOMO': process.env.VITE_FEATURE_TRACKING_MATOMO
-        ? JSON.stringify(process.env.VITE_FEATURE_TRACKING_MATOMO)
-        : JSON.stringify(true),
+      'import.meta.env.FEATURE_TRACKING_MATOMO':
+        process.env.VITE_FEATURE_TRACKING_MATOMO !== undefined
+          ? `${process.env.VITE_FEATURE_TRACKING_MATOMO}`
+          : JSON.stringify(true),
       // params = { srcUrl: '', trackerUrl: '', siteId: -1, userId: '', domains: [] }
       'import.meta.env.FEATURE_TRACKING_MATOMO_PARAMS': process.env
         .VITE_FEATURE_TRACKING_MATOMO_PARAMS
@@ -266,25 +272,27 @@ export default defineConfig(async ({ mode }) => {
         : JSON.stringify(null),
 
       // stop search (on page visibility === hidden)
-      'import.meta.env.FEATURE_STOP_SEARCH_ON_HIDDEN': process.env
-        .VITE_FEATURE_STOP_SEARCH_ON_HIDDEN
-        ? JSON.stringify(process.env.VITE_FEATURE_STOP_SEARCH_ON_HIDDEN)
-        : JSON.stringify(false),
+      'import.meta.env.FEATURE_STOP_SEARCH_ON_HIDDEN':
+        process.env.VITE_FEATURE_STOP_SEARCH_ON_HIDDEN !== undefined
+          ? `${process.env.VITE_FEATURE_STOP_SEARCH_ON_HIDDEN}`
+          : JSON.stringify(false),
 
       // enable visual query builder
-      'import.meta.env.FEATURE_QUERY_BUILDER': process.env.VITE_FEATURE_QUERY_BUILDER
-        ? `${process.env.VITE_FEATURE_QUERY_BUILDER}`
-        : JSON.stringify(true),
+      'import.meta.env.FEATURE_QUERY_BUILDER':
+        process.env.VITE_FEATURE_QUERY_BUILDER !== undefined
+          ? `${process.env.VITE_FEATURE_QUERY_BUILDER}`
+          : JSON.stringify(true),
       // [build-time] enable authentication (login/logout etc.) - is included in bundle
-      'import.meta.env.FEATURE_AUTHENTICATION': process.env.VITE_FEATURE_AUTHENTICATION
-        ? `${process.env.VITE_FEATURE_AUTHENTICATION}`
-        : JSON.stringify(true),
+      'import.meta.env.FEATURE_AUTHENTICATION':
+        process.env.VITE_FEATURE_AUTHENTICATION !== undefined
+          ? `${process.env.VITE_FEATURE_AUTHENTICATION}`
+          : JSON.stringify(true),
       // [run-time] enable auth features on site (only works if included in bundle with FEATURE_AUTHENTICATION)
       // allows to disable auth features for prebuilt bundles
-      'import.meta.env.FEATURE_AUTHENTICATION_ENABLED': process.env
-        .VITE_FEATURE_AUTHENTICATION_ENABLED
-        ? `${process.env.VITE_FEATURE_AUTHENTICATION_ENABLED}`
-        : JSON.stringify(true),
+      'import.meta.env.FEATURE_AUTHENTICATION_ENABLED':
+        process.env.VITE_FEATURE_AUTHENTICATION_ENABLED !== undefined
+          ? `${process.env.VITE_FEATURE_AUTHENTICATION_ENABLED}`
+          : JSON.stringify(true),
 
       'import.meta.env.LOCALE': process.env.VITE_LOCALE
         ? JSON.stringify(process.env.VITE_LOCALE)
