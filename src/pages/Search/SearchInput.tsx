@@ -178,6 +178,10 @@ function SearchInput({
     // )
 
     function intersectionOrReset(resourceIDs: string[]) {
+      if (resourceIDs === null || resourceIDs === undefined) {
+        resourceIDs = []
+      }
+
       // init case, nothing yet available?
       if (availableResourceIDs.length === 0) {
         return resourceIDs
