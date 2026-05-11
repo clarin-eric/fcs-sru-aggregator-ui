@@ -144,22 +144,33 @@ function Header() {
   function renderAppLogo() {
     if (!appLogoUrl) return null
 
-    return (
-      <Navbar.Brand className="ms-md-4">
-        <img
-          src={appLogoUrl}
-          alt={t('header.appLogoAlt')}
-          height={30}
-          className="d-inline-block align-top"
-          onError={({ currentTarget }) => {
-            // on error, simply disable the logo element
-            console.warn('Logo not found!')
-            currentTarget.onerror = null // prevents looping
-            currentTarget.parentElement!.style.display = 'none'
-          }}
-        />
-      </Navbar.Brand>
+    const i18nKeyAppLogoTarget = 'urls.appLogoTarget'
+    const urlAppLogoTarget = t(i18nKeyAppLogoTarget, { ns: 'common' })
+    const hasAppLogoTarget = urlAppLogoTarget !== i18nKeyAppLogoTarget
+
+    const img = (
+      <img
+        src={appLogoUrl}
+        alt={t('header.appLogoAlt')}
+        height={30}
+        className="d-inline-block align-top"
+        onError={({ currentTarget }) => {
+          // on error, simply disable the logo element
+          console.warn('Logo not found!')
+          currentTarget.onerror = null // prevents looping
+          currentTarget.parentElement!.style.display = 'none'
+        }}
+      />
     )
+
+    if (hasAppLogoTarget) {
+      return (
+        <Navbar.Brand className="ms-md-4" as={Link} to={urlAppLogoTarget}>
+          {img}
+        </Navbar.Brand>
+      )
+    }
+    return <Navbar.Brand className="ms-md-4">{img}</Navbar.Brand>
   }
 
   // ------------------------------------------------------------------------
@@ -182,9 +193,6 @@ function Header() {
           <Navbar.Toggle aria-controls="header-navbar-nav" />
           <Navbar.Collapse id="header-navbar-nav">
             <Nav className="w-100 d-flex">
-              <Nav.Link as={NavLink} to={{ pathname: '/', search: linkSearch }}>
-                {t('header.menu.home')}
-              </Nav.Link>
               <Nav.Link as={NavLink} to={{ pathname: '/help', search: linkSearch }}>
                 {t('header.menu.help')}
               </Nav.Link>

@@ -1,7 +1,7 @@
 {
   "footer": {
     "serviceInfo": {
-      "text": "Service provided by <serviceBy>CLARIN</serviceBy><br/>Hosted by CLARIN ERIC",
+      "text": "Service provided by <serviceBy>CLARIN</serviceBy>",
       "urlServiceBy": "https://www.clarin.eu"
     }
   }

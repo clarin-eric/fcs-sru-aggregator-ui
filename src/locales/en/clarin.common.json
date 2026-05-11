@@ -2,6 +2,7 @@
   "urls": {
     "contact": "mailto:fcs@clarin.eu",
     "termsUseAndDisclaimer": "https://www.clarin.eu/content/terms-use-and-disclaimer",
-    "helpWithTranslations": "https://github.com/clarin-eric/fcs-sru-aggregator-ui/tree/main/src/locales"
+    "helpWithTranslations": "https://github.com/clarin-eric/fcs-sru-aggregator-ui/tree/main/src/locales",
+    "appLogoTarget": "https://www.clarin.eu/"
   }
 }

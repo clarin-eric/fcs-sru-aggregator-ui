@@ -2,7 +2,8 @@
   "urls": {
     "contact": null,
     "termsUseAndDisclaimer": null,
-    "helpWithTranslations": null
+    "helpWithTranslations": null,
+    "appLogoTarget": null
   },
   "queryTypes": {
     "cql": {
