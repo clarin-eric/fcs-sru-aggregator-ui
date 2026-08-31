@@ -1,18 +1,21 @@
 import react from '@vitejs/plugin-react'
 import type {
+  CodeSplittingOptions,
   ExternalOption,
   InputOption,
-  LogHandlerWithDefault,
+  LogLevel,
+  LogOrStringHandler,
   OutputOptions,
   PreRenderedAsset,
   PreRenderedChunk,
   RenderedChunk,
-  RollupOptions,
-} from 'rollup'
+  RolldownLog,
+  RolldownOptions,
+} from 'rolldown'
 import { visualizer } from 'rollup-plugin-visualizer'
 import type { SimpleGit, SimpleGitOptions } from 'simple-git'
 import { simpleGit } from 'simple-git'
-import type { BuildOptions, ESBuildOptions, UserConfig } from 'vite'
+import type { BuildOptions, UserConfig } from 'vite'
 import { defineConfig, loadEnv } from 'vite'
 
 import { existsSync, globSync } from 'node:fs'
@@ -20,12 +23,11 @@ import { basename } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 
 // build customization
-import configurableAppLogoImagePlugin from './build/configurable-app-logo-image'
-import deleteGeneratedFilesPlugin from './build/delete-generated-files'
-import transformDynamicToStaticImportsPlugin from './build/transform-dynamic-to-static-imports'
-import transformEmbedLocalesResourcesPlugin from './build/transform-embed-locales-resources'
+import configurableAppLogoImagePlugin from './build/configurable-app-logo-image.ts'
+import deleteGeneratedFilesPlugin from './build/delete-generated-files.ts'
+import transformEmbedLocalesResourcesPlugin from './build/transform-embed-locales-resources.ts'
 
-import pkg from './package.json'
+import pkg from './package.json' with { type: 'json' }
 
 const bannerTemplate = [
   '/*!',
@@ -108,7 +110,7 @@ export default defineConfig(async ({ mode }) => {
     // https://vite.dev/guide/build.html#relative-base
     base: './',
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         // https://rollupjs.org/configuration-options/#input
         input: [
           // main entry point
@@ -136,7 +138,7 @@ export default defineConfig(async ({ mode }) => {
             return `[name].js`
           },
           banner: getBanner,
-        },
+        } as OutputOptions,
         treeshake: {
           moduleSideEffects(id: string, external: boolean) {
             // keep to defaults (-> true)
@@ -157,11 +159,11 @@ export default defineConfig(async ({ mode }) => {
       // NOTE: only used in dev-mode
       devSourcemap: true,
     },
-    esbuild: {
+    oxc: {
       // strip from production build, mostly for development only so simply remove it
       // see: https://github.com/vitejs/vite/discussions/7920
-      drop: ['debugger'],
-      pure: ['console.log', 'console.debug'],
+      // drop: ['debugger'],
+      // pure: ['console.log', 'console.debug'],
     },
     plugins: [
       react(),
@@ -347,36 +349,17 @@ export default defineConfig(async ({ mode }) => {
 
   if (isSingleChunk) {
     // keep a single chunk
-    // Object.assign(baseConfig.define, {} satisfies Record<string, unknown>)
 
     // TODO: inline assets? (i.e., images, each up to 100kB in size)
     // Object.assign(baseConfig.build, { assetsInlineLimit: 100 * 2 ** 10 } satisfies BuildEnvironmentOptions)
 
-    // rewrite dynamic imports into static import
-    baseConfig.plugins.push(transformDynamicToStaticImportsPlugin())
-    // include locale dynamic import into default chunk
-    baseConfig.plugins.push(
-      transformEmbedLocalesResourcesPlugin({
-        removeResourcesToBackend: true,
-        localesImportPrefix: '@locales/',
-        localesWithNamespaces: Object.assign(
-          {},
-          ...I18n_LANGUAGES.map((locale) => ({
-            [locale]: [
-              ...I18N_BASE_NS.map((ns) => `${paramLocalePrefix}.${ns}`),
-              ...I18N_BASE_NS,
-              ...i18nLazyLoadNs.map((ns) => `${paramLocalePrefix}.${ns}`),
-              ...i18nLazyLoadNs,
-            ].filter((ns) => existsSync(resolve(`${inputSrcLocales}/${locale}/${ns}.json`))),
-          }))
-        ),
-      })
-    )
+    // baseConfig.build.rolldownOptions.output.inlineDynamicImports
+    baseConfig.build.rolldownOptions.output.codeSplitting = false
   } else {
     // split into multiple chunks if not disabled
-    Object.assign(baseConfig.build.rollupOptions, {
+    Object.assign(baseConfig.build.rolldownOptions, {
       input: [
-        ...baseConfig.build.rollupOptions.input,
+        ...baseConfig.build.rolldownOptions.input,
         // separate output chunks (primarily for CSS)
         'bootstrap/dist/css/bootstrap.min.css',
         // separate out prismjs chunk
@@ -454,23 +437,24 @@ export default defineConfig(async ({ mode }) => {
           return `[name].js`
         },
         // https://rollupjs.org/configuration-options/#output-manualchunks
-        manualChunks: {
-          // vendor
-          [`${outputsLibVenderPath}react`]: ['react', 'react-dom', 'react/jsx-runtime'],
-          [`${outputsLibVenderPath}react-ext`]: [
-            '@nozbe/microfuzz/react',
-            '@tanstack/react-query',
-            'axios',
-            'i18next-resources-to-backend',
-            'i18next',
-            'react-helmet-async',
-            'react-i18next',
-            'react-router',
-            'react-slugify',
-            'zustand',
+        // https://rolldown.rs/in-depth/manual-code-splitting
+        codeSplitting: {
+          groups: [
+            // vendor
+            {
+              test: /node_modules\/(react|react-dom|react\/jsx-runtime)/,
+              name: `${outputsLibVenderPath}react`,
+            },
+            {
+              test: /node_modules\/(@nozbe\/microfuzz\/react|@tanstack\/react-query|axios|i18next-resources-to-backend|i18next|react-helmet-async|react-i18next|react-router|react-slugify|zustand)/,
+              name: `${outputsLibVenderPath}react-ext`,
+            },
+            // ui
+            {
+              test: /node_modules\/(react-bootstrap)/,
+              name: `${outputsLibVenderPath}bootstrap`,
+            },
           ],
-          // ui
-          [`${outputsLibVenderPath}bootstrap`]: ['react-bootstrap'],
         },
         banner: getBanner,
       } satisfies OutputOptions,
@@ -483,12 +467,15 @@ export default defineConfig(async ({ mode }) => {
       ] satisfies ExternalOption,
     })
 
-    const manualChunks = (baseConfig.build.rollupOptions.output as OutputOptions).manualChunks!
+    const manualChunks = (
+      baseConfig.build.rolldownOptions.output.codeSplitting as CodeSplittingOptions
+    ).groups!
 
     if (paramFeatureQueryBuilderEnabled) {
-      Object.assign(manualChunks, {
-        // lazy loaded chunk (querybuilder)
-        [`${outputsLibVenderPath}antlr4`]: ['antlr4ng'],
+      // lazy loaded chunk (querybuilder)
+      manualChunks.push({
+        test: /node_modules\/(antlr4ng)/,
+        name: `${outputsLibVenderPath}antlr4`,
       })
     }
 
@@ -535,6 +522,14 @@ export default defineConfig(async ({ mode }) => {
         if (!existsSync(resolve(fn))) return
         modules.push(fn)
       }
+      const modules2TestRegex = (modules: string[]) =>
+        new RegExp(
+          '(' +
+            modules
+              .map((module) => module.replaceAll(/\//g, '\\/').replaceAll(/\./g, '\\.'))
+              .join('|') +
+            ')'
+        )
 
       // standard locale chunks for active prefix and shared base stuff
       for (const namespace of I18N_BASE_NS) {
@@ -545,8 +540,10 @@ export default defineConfig(async ({ mode }) => {
         pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
       }
       if (modules.length > 0) {
-        Object.assign(manualChunks, {
-          [`${outputsLibLocalesPath}${language}/default`]: modules,
+        manualChunks.push({
+          // RegExp.escape
+          test: modules2TestRegex(modules),
+          name: `${outputsLibLocalesPath}${language}/default`,
         })
       }
 
@@ -559,8 +556,10 @@ export default defineConfig(async ({ mode }) => {
         )
         pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
         if (modules.length > 0) {
-          Object.assign(manualChunks, {
-            [`${outputsLibLocalesPath}${language}/${namespace}`]: modules,
+          manualChunks.push({
+            // RegExp.escape
+            test: modules2TestRegex(modules),
+            name: `${outputsLibLocalesPath}${language}/${namespace}`,
           })
         }
       }
@@ -583,8 +582,9 @@ export default defineConfig(async ({ mode }) => {
     //     }
     //   }
     //   if (toBeIgnoredModules.length > 0) {
-    //     Object.assign(manualChunks, {
-    //       [`${outputsLibLocalesPath}_ignoreme`]: toBeIgnoredModules,
+    //     manualChunks.push({
+    //       test: modules2TestRegex(toBeIgnoredModules),
+    //       name: `${outputsLibLocalesPath}_ignoreme`,
     //     })
     //   }
     // }
@@ -592,16 +592,16 @@ export default defineConfig(async ({ mode }) => {
 
   // debug options to print more logging messages (development stuff)
   if (debug) {
-    Object.assign(baseConfig.esbuild, {
+    Object.assign(baseConfig, {
       logLevel: 'verbose',
-    } satisfies ESBuildOptions)
-    Object.assign(baseConfig.build.rollupOptions, {
+    })
+    Object.assign(baseConfig.build.rolldownOptions, {
       logLevel: 'debug',
-      onLog: ((level, log, defaultHandler) => {
+      onLog: (level: LogLevel, log: RolldownLog, defaultHandler: LogOrStringHandler) => {
         console.log(`[${level}]: ${log}`)
         defaultHandler?.(level, log)
-      }) satisfies LogHandlerWithDefault,
-    } satisfies RollupOptions)
+      },
+    } satisfies RolldownOptions)
     Object.assign(baseConfig.build, {
       manifest: true,
       minify: false,

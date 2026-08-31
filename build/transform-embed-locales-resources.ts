@@ -1,5 +1,5 @@
 import type { AstNode } from 'rollup'
-import type { Plugin } from 'vite'
+import type { Plugin } from 'rollup'
 
 import { walk } from 'estree-walker'
 import MagicString from 'magic-string'

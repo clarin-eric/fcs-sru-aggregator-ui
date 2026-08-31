@@ -47,7 +47,7 @@
     "@types/prismjs": "^1.26.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^6.1.1",
     "antlr-ng": "^1.0.10",
     "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "^6.1.1",
@@ -56,10 +56,11 @@
     "globals": "^17.6.0",
     "magic-string": "^0.30.21",
     "picomatch": "^4.0.4",
+    "rollup": "^4.63.1",
     "rollup-plugin-visualizer": "^6.0.5",
     "simple-git": "^3.36.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.59.1",
-    "vite": "^7.3.1"
+    "vite": "^8.2.2"
   }
 }
