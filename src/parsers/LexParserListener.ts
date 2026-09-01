@@ -1,25 +1,25 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-import { ErrorNode, ParseTreeListener, ParserRuleContext, TerminalNode } from 'antlr4ng'
+import { ErrorNode, ParserRuleContext, ParseTreeListener, TerminalNode } from 'antlr4ng'
 
 import {
   Boolean_modifiedContext,
   Boolean_queryContext,
   IndexContext,
-  ModifierContext,
   Modifier_listContext,
   Modifier_nameContext,
   Modifier_relationContext,
   Modifier_valueContext,
-  PrefixContext,
+  ModifierContext,
   Prefix_nameContext,
+  PrefixContext,
   QueryContext,
   R_booleanContext,
-  RelationContext,
   Relation_modifiedContext,
   Relation_nameContext,
   Relation_symbolContext,
+  RelationContext,
   Search_clauseContext,
   Search_termContext,
   Simple_nameContext,

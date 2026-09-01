@@ -18,11 +18,13 @@ import { isCursorOnContext } from '../utils'
 import type {
   FieldsType,
   NewSearchClauseChoicesType,
+  RelationChoicesFieldTypes,
   RelationModifiersType,
   RelationsType,
 } from './constants'
 import {
   BOOLEANS,
+  CHOICES_IS_RELATION_BY_FIELD_TYPE,
   DEFAULT_NEW_RELATION,
   FIELD_GROUPS,
   FIELDS_MAP,
@@ -71,7 +73,7 @@ export function LexCQLQueryBuilder({
   const [query, setQuery] = useState(queryProp ?? '')
   useEffect(() => setQuery(queryProp ?? ''), [queryProp])
 
-  // let's again filter for resources that have the Lex Data View or LEX_SEARCH search capability (and at least one field?)
+  // let's again filter for resources that have the Lex Data View or LEX_SEARCH/... search capability (and at least one field?)
   const resources = useMemo(() => {
     const filtered =
       resourcesProp?.filter(
@@ -79,7 +81,10 @@ export function LexCQLQueryBuilder({
           (resource.availableDataViews?.find(
             (dataview) => dataview.mimeType === 'application/x-clarin-fcs-lex+xml'
           ) !== undefined ||
-            resource.searchCapabilitiesResolved.includes('LEX_SEARCH')) &&
+            resource.searchCapabilitiesResolved.includes('LEX_SEARCH') ||
+            // TODO: to be updated
+            (resource.searchCapabilitiesResolved as string[]).includes('LEXICAL_SEARCH') ||
+            (resource.searchCapabilitiesResolved as string[]).includes('LEXICAL_SEARCH_V1_0')) &&
           resource.availableLexFields !== null &&
           resource.availableLexFields.length > 0
       ) ?? []
@@ -526,6 +531,7 @@ function extractRelationModifierLangValueFromQuery(
 ) {
   // extract lang relation modifier from query
   const modifierLangCtx = getRelationModifierByName(relationModifiedCtx, 'lang')
+  if (modifierLangCtx === undefined) return ''
 
   if (!modifierLangCtx?.modifier_relation()?.relation_symbol().EQUAL()) {
     console.warn('Language relation modifier with unsupported relation!')
@@ -724,13 +730,30 @@ function SearchClause({
     onChange?.()
   }
 
-  function handleSearchTermChange() {
+  function handleSearchTermChange(value: string | undefined = undefined) {
     const newSearchTerm = maybeQuoteSearchTerm(
-      searchTerm,
+      value ?? searchTerm,
       forceSearchTermQuoting || searchTermCtx.QUOTED_STRING() !== null
     )
     rewriter.replace(searchTermCtx.start!, searchTermCtx.stop!, newSearchTerm)
     onChange?.()
+  }
+
+  function handleSearchTermInputBlur() {
+    handleSearchTermChange()
+  }
+
+  function handleSearchTermChoiceChange(eventKey: string | null) {
+    console.log('[handleSearchTermChoiceChange]', eventKey)
+
+    const newSearchTerm = eventKey
+    if (!newSearchTerm) return
+    if (newSearchTerm === searchTerm) return
+
+    console.log('[handleSearchTermChoiceChange]', newSearchTerm)
+    setSearchTerm(newSearchTerm)
+
+    handleSearchTermChange(newSearchTerm)
   }
 
   function handleRelationModifierLanguageChange() {
@@ -785,20 +808,44 @@ function SearchClause({
   // UI
 
   function renderSearchTermInput() {
+    // if "is"-relation and index is one with the UD default entity namespaces
+    if (
+      relation === 'is' &&
+      index !== null &&
+      Object.keys(CHOICES_IS_RELATION_BY_FIELD_TYPE).includes(index)
+    ) {
+      const values = CHOICES_IS_RELATION_BY_FIELD_TYPE[index as RelationChoicesFieldTypes]
+      return (
+        <Dropdown onSelect={handleSearchTermChoiceChange}>
+          <Dropdown.Toggle className="form-select">
+            {searchTerm || <em className="text-muted">(none)</em>}
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            {values.map((value) => (
+              <Dropdown.Item key={value.id} eventKey={value.id} active={value.id === searchTerm}>
+                <strong>{value.label}</strong>
+                {value.labelLong && `: ${value.labelLong}`}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
+      )
+    }
+
     return (
       <Form.Control
         className="d-inline"
         style={{ width: '10ch' }}
         value={searchTerm}
         onChange={(event) => setSearchTerm(event.target.value)}
-        onBlur={handleSearchTermChange}
+        onBlur={handleSearchTermInputBlur}
       />
     )
   }
 
   function renderRelationModifierLanguageInput() {
     // TODO: maybe pre-compute resource languages and only "allow" those languages
-    const isInvalid = !relationModifierLang.match(/^[a-z]{3}$/i)
+    const isInvalid = !relationModifierLang.match(/^[A-Za-z]{2,3}(-[A-Za-z0-9]+)*$/i)
 
     return (
       <InputGroup hasValidation>
@@ -810,8 +857,8 @@ function SearchClause({
             marginLeft: '1.5em',
           }}
           // maxLength={3}
-          placeholder="ISO638-3 Code"
-          pattern="[a-zA-Z]{3}"
+          placeholder="BCP47 Code"
+          pattern="[A-Za-z]{2,3}(-[A-Za-z0-9]+)*"
           required
           value={relationModifierLang}
           onChange={(event) => setRelationModifierLang(event.target.value)}
@@ -826,7 +873,7 @@ function SearchClause({
           }}
           type="invalid"
         >
-          Invalid ISO639-3 language code
+          Invalid BCP47 language code
         </Form.Control.Feedback>
       </InputGroup>
     )

@@ -31,11 +31,10 @@ export class LexParser extends Parser {
   public static readonly SLASH = 10
   public static readonly AND = 11
   public static readonly OR = 12
-  public static readonly NOT = 13
-  public static readonly DOT = 14
-  public static readonly QUOTED_STRING = 15
-  public static readonly SIMPLE_STRING = 16
-  public static readonly WS = 17
+  public static readonly DOT = 13
+  public static readonly QUOTED_STRING = 14
+  public static readonly SIMPLE_STRING = 15
+  public static readonly WS = 16
   public static readonly RULE_query = 0
   public static readonly RULE_boolean_query = 1
   public static readonly RULE_subquery = 2
@@ -71,7 +70,6 @@ export class LexParser extends Parser {
     "'/'",
     null,
     null,
-    null,
     "'.'",
   ]
 
@@ -89,7 +87,6 @@ export class LexParser extends Parser {
     'SLASH',
     'AND',
     'OR',
-    'NOT',
     'DOT',
     'QUOTED_STRING',
     'SIMPLE_STRING',
@@ -185,7 +182,7 @@ export class LexParser extends Parser {
         this.state = 49
         this.errorHandler.sync(this)
         _la = this.tokenStream.LA(1)
-        while ((_la & ~0x1f) === 0 && ((1 << _la) & 14336) !== 0) {
+        while (_la === 11 || _la === 12) {
           {
             {
               this.state = 44
@@ -294,7 +291,7 @@ export class LexParser extends Parser {
       {
         this.state = 66
         _la = this.tokenStream.LA(1)
-        if (!(_la === 15 || _la === 16)) {
+        if (!(_la === 14 || _la === 15)) {
           this.errorHandler.recoverInline(this)
         } else {
           this.errorHandler.reportMatch(this)
@@ -522,7 +519,7 @@ export class LexParser extends Parser {
       {
         this.state = 90
         _la = this.tokenStream.LA(1)
-        if (!((_la & ~0x1f) === 0 && ((1 << _la) & 14336) !== 0)) {
+        if (!(_la === 11 || _la === 12)) {
           this.errorHandler.recoverInline(this)
         } else {
           this.errorHandler.reportMatch(this)
@@ -661,7 +658,7 @@ export class LexParser extends Parser {
       {
         this.state = 107
         _la = this.tokenStream.LA(1)
-        if (!(_la === 15 || _la === 16)) {
+        if (!(_la === 14 || _la === 15)) {
           this.errorHandler.recoverInline(this)
         } else {
           this.errorHandler.reportMatch(this)
@@ -749,7 +746,7 @@ export class LexParser extends Parser {
   }
 
   public static readonly _serializedATN: number[] = [
-    4, 1, 17, 118, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
+    4, 1, 16, 118, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
     6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13,
     2, 14, 7, 14, 2, 15, 7, 15, 2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 1, 0, 1, 0,
     1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 48, 8, 1, 10, 1, 12, 1, 51, 9, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1,
@@ -758,7 +755,7 @@ export class LexParser extends Parser {
     9, 1, 9, 1, 10, 1, 10, 3, 10, 89, 8, 10, 1, 11, 1, 11, 1, 12, 4, 12, 94, 8, 12, 11, 12, 12, 12,
     95, 1, 13, 1, 13, 1, 13, 3, 13, 101, 8, 13, 1, 14, 1, 14, 1, 15, 1, 15, 1, 15, 1, 16, 1, 16, 1,
     17, 1, 17, 1, 17, 1, 17, 1, 18, 1, 18, 1, 19, 1, 19, 1, 19, 0, 0, 20, 0, 2, 4, 6, 8, 10, 12, 14,
-    16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 0, 3, 1, 0, 15, 16, 1, 0, 3, 9, 1, 0, 11, 13,
+    16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 0, 3, 1, 0, 14, 15, 1, 0, 3, 9, 1, 0, 11, 12,
     107, 0, 40, 1, 0, 0, 0, 2, 43, 1, 0, 0, 0, 4, 57, 1, 0, 0, 0, 6, 62, 1, 0, 0, 0, 8, 66, 1, 0, 0,
     0, 10, 70, 1, 0, 0, 0, 12, 72, 1, 0, 0, 0, 14, 78, 1, 0, 0, 0, 16, 82, 1, 0, 0, 0, 18, 84, 1, 0,
     0, 0, 20, 86, 1, 0, 0, 0, 22, 90, 1, 0, 0, 0, 24, 93, 1, 0, 0, 0, 26, 97, 1, 0, 0, 0, 28, 102,
@@ -780,8 +777,8 @@ export class LexParser extends Parser {
     25, 1, 0, 0, 0, 97, 98, 5, 10, 0, 0, 98, 100, 3, 28, 14, 0, 99, 101, 3, 30, 15, 0, 100, 99, 1,
     0, 0, 0, 100, 101, 1, 0, 0, 0, 101, 27, 1, 0, 0, 0, 102, 103, 3, 38, 19, 0, 103, 29, 1, 0, 0, 0,
     104, 105, 3, 18, 9, 0, 105, 106, 3, 32, 16, 0, 106, 31, 1, 0, 0, 0, 107, 108, 7, 0, 0, 0, 108,
-    33, 1, 0, 0, 0, 109, 110, 3, 36, 18, 0, 110, 111, 5, 14, 0, 0, 111, 112, 3, 38, 19, 0, 112, 35,
-    1, 0, 0, 0, 113, 114, 3, 38, 19, 0, 114, 37, 1, 0, 0, 0, 115, 116, 5, 16, 0, 0, 116, 39, 1, 0,
+    33, 1, 0, 0, 0, 109, 110, 3, 36, 18, 0, 110, 111, 5, 13, 0, 0, 111, 112, 3, 38, 19, 0, 112, 35,
+    1, 0, 0, 0, 113, 114, 3, 38, 19, 0, 114, 37, 1, 0, 0, 0, 115, 116, 5, 15, 0, 0, 116, 39, 1, 0,
     0, 0, 10, 49, 57, 62, 70, 74, 78, 82, 88, 95, 100,
   ]
 
@@ -1206,9 +1203,6 @@ export class R_booleanContext extends ParserRuleContext {
   }
   public OR(): TerminalNode | null {
     return this.getToken(LexParser.OR, 0)
-  }
-  public NOT(): TerminalNode | null {
-    return this.getToken(LexParser.NOT, 0)
   }
   public override get ruleIndex(): number {
     return LexParser.RULE_r_boolean

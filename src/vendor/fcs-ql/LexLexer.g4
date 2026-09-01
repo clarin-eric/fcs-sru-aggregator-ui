@@ -23,7 +23,6 @@ SLASH: '/';
 
 AND: [Aa][Nn][Dd];
 OR: [Oo][Rr];
-NOT: [Nn][Oo][Tt];
 
 /* terminals */
 
