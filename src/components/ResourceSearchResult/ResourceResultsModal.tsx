@@ -21,11 +21,11 @@ import {
   getURLForWeblicht,
 } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
+import { useAggregatorAPIClientParams } from '@/providers/AggregatorAPIClientParamsContext'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
-import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
-import { useLocaleStore } from '@/stores/locale'
 import { useAppStore } from '@/stores/app'
+import { useLocaleStore } from '@/stores/locale'
 import { DOWNLOAD_FORMATS, NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
 import {
   findResourceByFilter,
@@ -76,7 +76,7 @@ function ResourceResultsModal({
   showDiagnostics: showDiagnosticsProps,
   onModalClose,
 }: ResourceResultsModalProps) {
-  const axios = useAxios()
+  const clientParams = useAggregatorAPIClientParams()
   const { t } = useTranslation()
   const userLocale = useLocaleStore((state) => state.locale)
   const weblichtEnabled = useAppStore((state) => state.weblichtEnabled)
@@ -308,13 +308,13 @@ function ResourceResultsModal({
                 {DOWNLOAD_FORMATS.map(({ id: format, label }) => (
                   <Dropdown.Item
                     href={getURLForDownload(
-                      axios,
+                      clientParams,
                       searchId,
                       resourceId,
                       format,
                       language,
                       languageFilter
-                    )}
+                    ).toString()}
                     className="matomo_download"
                     key={format}
                   >
@@ -337,13 +337,13 @@ function ResourceResultsModal({
                 disabled={disableWeblichtButton}
                 aria-disabled={disableWeblichtButton}
                 href={getURLForWeblicht(
-                  axios,
+                  clientParams,
                   searchId,
                   resourceId,
                   languageForWeblicht ?? null,
                   language,
                   languageFilter
-                )}
+                ).toString()}
                 className="matomo_link"
                 target="_blank"
               >
@@ -364,7 +364,7 @@ function ResourceResultsModal({
                     </Dropdown.Item>
                   )}
                   <Dropdown.Item
-                    href={getSearchResultsURL(axios, searchId, resourceId, false)}
+                    href={getSearchResultsURL(clientParams, searchId, resourceId, false).toString()}
                     target="_blank"
                   >
                     {t('search.results.msgButtonDevelopStuffOptionSRUResponseParsed')}

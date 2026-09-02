@@ -13,13 +13,14 @@ import { useSearchParams } from 'react-router'
 import type { ExtraScopingParams } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import {
   getInitData,
+  makeURL as makeAPIURL,
   postSearch,
   postSearchStop,
   REQ_PARAM_CONSORTIA,
 } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
+import { useAggregatorAPIClientParams } from '@/providers/AggregatorAPIClientParamsContext'
 import { AggregatorDataProvider } from '@/providers/AggregatorDataContext'
-import { useAxios } from '@/providers/AxiosContext'
 import { SearchParamsProvider } from '@/providers/SearchParamsContext'
 import AppStore from '@/stores/app'
 import { useSearchesStore } from '@/stores/searches'
@@ -47,7 +48,7 @@ import './styles.css'
 // component
 
 function Search() {
-  const axios = useAxios()
+  const clientParams = useAggregatorAPIClientParams()
   const { t } = useTranslation()
 
   const [urlSearchParams] = useSearchParams()
@@ -79,7 +80,7 @@ function Search() {
   } satisfies ExtraScopingParams
   const { data, isLoading, isError } = useQuery({
     queryKey: ['init'],
-    queryFn: getInitData.bind(null, axios, extraParams),
+    queryFn: getInitData.bind(null, { ...clientParams, ...extraParams }),
   })
 
   useEffect(() => {
@@ -252,7 +253,7 @@ function Search() {
   } = useMutation({
     mutationKey: ['search'],
     mutationFn: ({ query, queryType, language, numberOfResults, resourceIDs }: SearchData) =>
-      postSearch(axios, {
+      postSearch(clientParams, {
         query,
         queryType,
         language,
@@ -275,7 +276,7 @@ function Search() {
       document.addEventListener('visibilitychange', () => {
         const searchId = searchIdRef.current
         if (document.visibilityState === 'hidden' && searchId !== undefined) {
-          const url = axios.getUri({ url: `search/${searchId}/stop` })
+          const url = makeAPIURL(`search/${searchId}/stop`, clientParams)
           console.log('Send stop search beacon', url)
           navigator.sendBeacon(url, null)
         }
@@ -290,7 +291,7 @@ function Search() {
   async function handleSearch(searchData: SearchData) {
     if (searchId !== undefined) {
       console.debug('stop previous search', searchId)
-      await postSearchStop(axios, searchId)
+      await postSearchStop(clientParams, searchId)
     }
 
     console.debug('start search:', searchData)

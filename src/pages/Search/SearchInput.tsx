@@ -1,4 +1,4 @@
-import type { AxiosInstance } from 'axios'
+import { ClientParams } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
@@ -46,8 +46,9 @@ const QueryBuilderModal = /*#__PURE__*/ lazy(() => import('@/components/QueryBui
 // --------------------------------------------------------------------------
 // types
 
+// TODO: is this even needed anymore? for what?
 export interface SearchProps {
-  axios: AxiosInstance
+  clientParams: ClientParams
 }
 
 export interface SearchInputProps {

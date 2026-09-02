@@ -1,5 +1,5 @@
+import { ClientParams } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import axios from 'axios'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
@@ -11,7 +11,7 @@ import './utils.css'
 
 import App from '@/App.tsx'
 import { i18n } from '@/i18n'
-import { AxiosProvider } from '@/providers/AxiosContext'
+import { AggregatorAPIClientParamsProvider } from '@/providers/AggregatorAPIClientParamsContext'
 import { configure, updateLocale } from '@/public'
 import AppStore from '@/stores/app'
 import LocaleStore from '@/stores/locale'
@@ -81,16 +81,10 @@ const queryClient = new QueryClient({
     },
   },
 })
-const axiosClient = axios.create({
+const clientParams = {
   baseURL: apiURL,
   timeout: 5000,
-  // throw if response is not JSON
-  // - https://stackoverflow.com/a/75785157/9360161
-  responseType: 'json',
-  transitional: {
-    silentJSONParsing: false,
-  },
-})
+} satisfies ClientParams
 
 // --------------------------------------------------------------------------
 
@@ -109,7 +103,7 @@ const root = createRoot(domRoot!)
 
 root.render(
   <StrictMode>
-    <AxiosProvider axios={axiosClient}>
+    <AggregatorAPIClientParamsProvider clientParams={clientParams}>
       <QueryClientProvider client={queryClient}>
         <HelmetProvider>
           <BrowserRouter basename={basename}>
@@ -117,6 +111,6 @@ root.render(
           </BrowserRouter>
         </HelmetProvider>
       </QueryClientProvider>
-    </AxiosProvider>
+    </AggregatorAPIClientParamsProvider>
   </StrictMode>
 )

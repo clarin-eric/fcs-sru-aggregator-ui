@@ -1,4 +1,4 @@
-import { useAxios } from '@/providers/AxiosContext'
+import { useAggregatorAPIClientParams } from '@/providers/AggregatorAPIClientParamsContext'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
@@ -139,7 +139,7 @@ function compareSearchCapability(capabilityA: Capability, capabilityB: Capabilit
 // component
 
 function FCSStatistics() {
-  const axios = useAxios()
+  const clientParams = useAggregatorAPIClientParams()
   const queryClient = useQueryClient()
   const { t } = useTranslation()
 
@@ -175,7 +175,7 @@ function FCSStatistics() {
     error: errorResources,
   } = useQuery({
     queryKey: ['resources'],
-    queryFn: getResources.bind(null, axios, extraParams),
+    queryFn: getResources.bind(null, { ...clientParams, ...extraParams }),
   })
   const {
     data: dataLanguages,
@@ -184,7 +184,7 @@ function FCSStatistics() {
     error: errorLanguages,
   } = useQuery({
     queryKey: ['languages'],
-    queryFn: getLanguages.bind(null, axios, extraParams),
+    queryFn: getLanguages.bind(null, { ...clientParams, ...extraParams }),
   })
 
   // conditional data
@@ -195,9 +195,7 @@ function FCSStatistics() {
     error: errorResourcesAll,
   } = useQuery({
     queryKey: ['resources-all'],
-    queryFn: import.meta.env.SHOW_CONSORTIA_INFO
-      ? getResources.bind(null, axios, undefined)
-      : () => [],
+    queryFn: import.meta.env.SHOW_CONSORTIA_INFO ? getResources.bind(null, clientParams) : () => [],
   })
 
   useEffect(() => {

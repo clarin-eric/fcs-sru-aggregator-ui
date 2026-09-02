@@ -10,7 +10,7 @@ import {
   postSearchMoreResults,
 } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
-import { useAxios } from '@/providers/AxiosContext'
+import { useAggregatorAPIClientParams } from '@/providers/AggregatorAPIClientParamsContext'
 // import { useSearchParams } from '@/providers/SearchParamsContext'
 // import { trackSiteSearch } from '@/utils/matomo'
 
@@ -38,7 +38,7 @@ function LoadMoreResultsButton({
   pollDelay = 1500,
 }: LoadMoreResultsButtonProps) {
   const { t } = useTranslation()
-  const axios = useAxios()
+  const clientParams = useAggregatorAPIClientParams()
   const queryClient = useQueryClient()
 
   const [isPolling, setIsPolling] = useState(false)
@@ -49,7 +49,10 @@ function LoadMoreResultsButton({
     mutate,
     reset,
   } = useMutation({
-    mutationFn: postSearchMoreResults.bind(null, axios, searchId, { resourceId, numberOfResults }),
+    mutationFn: postSearchMoreResults.bind(null, clientParams, searchId, {
+      resourceId,
+      numberOfResults,
+    }),
     mutationKey: ['search-result-load-more', searchId, resourceId],
     onSuccess: async (data) => {
       // console.debug('[onSuccess]', { searchId, resourceId }, { data, variables, context })
@@ -78,7 +81,7 @@ function LoadMoreResultsButton({
     isFetching: isFetchingPolling,
   } = useQuery<ResourceSearchResultMetaOnly>({
     queryKey: ['search-results', searchId, resourceId],
-    queryFn: getSearchResultsMetaOnlyForResource.bind(null, axios, searchId, resourceId),
+    queryFn: getSearchResultsMetaOnlyForResource.bind(null, clientParams, searchId, resourceId),
     enabled: isPolling,
     refetchInterval(query) {
       // console.debug('[refetchInterval]', { searchId, resourceId, query })

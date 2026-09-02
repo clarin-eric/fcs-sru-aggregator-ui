@@ -29,7 +29,7 @@ import {
 import type { FuzzyMatchesByField } from '@/hooks/useFuzzySearchListWithHierarchy'
 import useFuzzySearchListWithHierarchy from '@/hooks/useFuzzySearchListWithHierarchy'
 import useKeepSearchParams from '@/hooks/useKeepSearchParams'
-import { useAxios } from '@/providers/AxiosContext'
+import { useAggregatorAPIClientParams } from '@/providers/AggregatorAPIClientParamsContext'
 import { useLocaleStore } from '@/stores/locale'
 import { useSearchInputStore } from '@/stores/searchinput'
 import type { Resource } from '@/utils/api'
@@ -55,7 +55,7 @@ import './styles.css'
 // component
 
 function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
-  const axios = useAxios()
+  const clientParams = useAggregatorAPIClientParams()
   const { t } = useTranslation()
 
   const userLocale = useLocaleStore((state) => state.locale)
@@ -107,11 +107,11 @@ function ResourcesDetails({ validatorUrl }: { validatorUrl: string | null }) {
   } satisfies ExtraScopingParams
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['resources'],
-    queryFn: getResources.bind(null, axios, extraParams),
+    queryFn: getResources.bind(null, { ...clientParams, ...extraParams }),
   })
   const { data: languagesNames } = useQuery({
     queryKey: ['languages'],
-    queryFn: getLanguages.bind(null, axios, extraParams),
+    queryFn: getLanguages.bind(null, { ...clientParams, ...extraParams }),
   })
 
   useEffect(() => {

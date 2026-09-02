@@ -16,8 +16,8 @@ import type {
 } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 import { getSearchResultDetails } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
+import { useAggregatorAPIClientParams } from '@/providers/AggregatorAPIClientParamsContext'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
-import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useLocaleStore } from '@/stores/locale'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
@@ -65,7 +65,7 @@ function ResourceSearchResult({
   showResourceDetails,
   showDiagnostics,
 }: ResourceSearchResultProps) {
-  const axios = useAxios()
+  const clientParams = useAggregatorAPIClientParams()
   const { t } = useTranslation()
   const userLocale = useLocaleStore((state) => state.locale)
   const { languages, resources } = useAggregatorData()
@@ -92,7 +92,7 @@ function ResourceSearchResult({
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['search-result-details', searchId, resourceId],
-    queryFn: getSearchResultDetails.bind(null, axios, searchId, resourceId),
+    queryFn: getSearchResultDetails.bind(null, clientParams, searchId, resourceId),
     enabled: !inProgress, // && hasResults,
   })
   console.debug(

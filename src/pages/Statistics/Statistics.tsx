@@ -19,7 +19,7 @@ import {
 
 import useNavigate from '@/hooks/useNavigate'
 import useRouteMatch from '@/hooks/useRouteMatch'
-import { useAxios } from '@/providers/AxiosContext'
+import { useAggregatorAPIClientParams } from '@/providers/AggregatorAPIClientParamsContext'
 import AppStore, { useAppStore } from '@/stores/app'
 import FCSStatistics from './FCSStatistics'
 import ResourcesDetails from './ResourcesDetails'
@@ -47,7 +47,7 @@ const OTHER_TABS = ['resources', 'fcs']
 // component
 
 function Statistics() {
-  const axios = useAxios()
+  const clientParams = useAggregatorAPIClientParams()
   const queryClient = useQueryClient()
   const [urlSearchParams] = useSearchParams()
   const { t } = useTranslation()
@@ -62,7 +62,7 @@ function Statistics() {
   } satisfies ExtraScopingParams
   const { isPending, isError, data, error } = useQuery({
     queryKey: ['statistics'],
-    queryFn: getStatisticsData.bind(null, axios, extraParams),
+    queryFn: getStatisticsData.bind(null, { ...clientParams, ...extraParams }),
   })
 
   const validatorUrl = useAppStore((state) => state.validatorURL)

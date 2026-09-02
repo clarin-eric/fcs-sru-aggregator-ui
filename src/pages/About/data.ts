@@ -192,14 +192,6 @@ export const technologiesFrontEnd: readonly Technology[] = [
     usage: 'data loading via REST APIs',
   },
   {
-    id: 'axios',
-    name: 'Axios',
-    url: 'https://axios-http.com/',
-    license: 'MIT License',
-    licenseUrl: 'https://github.com/axios/axios/blob/v1.x/LICENSE',
-    usage: 'cross-browser support for REST API requests',
-  },
-  {
     id: 'antlr4ng',
     name: 'Next Generation TypeScript runtime for ANTLR4',
     url: 'https://github.com/mike-lischke/antlr4ng',

@@ -18,8 +18,8 @@ import {
 } from '@clarin-eric/fcs-sru-aggregator-api-adapter-typescript'
 
 import ResourceSearchResult from '@/components/ResourceSearchResult'
+import { useAggregatorAPIClientParams } from '@/providers/AggregatorAPIClientParamsContext'
 import { useAggregatorData } from '@/providers/AggregatorDataContext'
-import { useAxios } from '@/providers/AxiosContext'
 import { useSearchParams } from '@/providers/SearchParamsContext'
 import { useSearchResultsStore } from '@/stores/searchresults'
 import { NO_MORE_RECORDS_DIAGNOSTIC_URI } from '@/utils/constants'
@@ -54,7 +54,7 @@ export interface SearchResultsProps {
 // TODO: make it (search?) cancelable! (useEffect?)
 function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResultsProps) {
   const { t } = useTranslation()
-  const axios = useAxios()
+  const clientParams = useAggregatorAPIClientParams()
   const { resources } = useAggregatorData()
   const { query, queryType, resourceIDs } = useSearchParams()
 
@@ -92,7 +92,7 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
     // isError: isErrorSearchResults,
   } = useQuery<SearchResultsMetaOnly>({
     queryKey: ['search-results', searchId],
-    queryFn: getSearchResultsMetaOnly.bind(null, axios, searchId ?? ''),
+    queryFn: getSearchResultsMetaOnly.bind(null, clientParams, searchId ?? ''),
     enabled: !!searchId,
     refetchInterval(query) {
       // console.debug('[refetchInterval]', query, query.state.data)
@@ -245,7 +245,7 @@ function SearchResults({ searchId, pollDelay = DEFAULT_POLL_DELAY }: SearchResul
 
   async function handleStopSearchClick() {
     console.debug('Stop search', { searchId })
-    await postSearchStop(axios, searchId)
+    await postSearchStop(clientParams, searchId)
   }
 
   // --------------------------------------------------------------
