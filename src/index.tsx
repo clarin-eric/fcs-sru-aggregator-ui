@@ -32,7 +32,8 @@ console.debug('LocaleStore.getState()', LocaleStore.getInitialState(), LocaleSto
 
 // BrowserRouter#basename for subpath deployment
 const basename = AppStore.getState().deployPath
-const apiURL = AppStore.getState().apiURL
+// handle relative URLs by resolving with window.location
+const apiURL = new URL(AppStore.getState().apiURL, window.location.href).href
 
 const language = LocaleStore.getState().locale
 i18n.changeLanguage(language)
