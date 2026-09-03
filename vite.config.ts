@@ -434,6 +434,9 @@ export default defineConfig(async ({ mode }) => {
               return `${outputsLibLocalesPath}${language}/${chunkInfo.name}.js`
             }
           }
+          if (chunkInfo.name === 'rolldown-runtime') {
+            return `${outputsLibPath}${chunkInfo.name}.js`
+          }
           return `[name].js`
         },
         // https://rollupjs.org/configuration-options/#output-manualchunks
