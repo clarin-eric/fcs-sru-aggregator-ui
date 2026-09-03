@@ -442,16 +442,16 @@ export default defineConfig(async ({ mode }) => {
           groups: [
             // vendor
             {
-              test: /node_modules\/(react|react-dom|react\/jsx-runtime)/,
+              test: /node_modules\/(react|react-dom|react\/jsx-runtime)\//,
               name: `${outputsLibVenderPath}react`,
             },
             {
-              test: /node_modules\/(@nozbe\/microfuzz\/react|@tanstack\/react-query|axios|i18next-resources-to-backend|i18next|react-helmet-async|react-i18next|react-router|react-slugify|zustand)/,
+              test: /node_modules\/(@nozbe\/microfuzz\/react|@nozbe\/microfuzz|@tanstack\/react-query|@tanstack\/query-core|axios|i18next-resources-to-backend|i18next|react-helmet-async|react-i18next|react-router|react-slugify|zustand)\//,
               name: `${outputsLibVenderPath}react-ext`,
             },
             // ui
             {
-              test: /node_modules\/(react-bootstrap)/,
+              test: /node_modules\/(react-bootstrap)\//,
               name: `${outputsLibVenderPath}bootstrap`,
             },
           ],
@@ -467,14 +467,14 @@ export default defineConfig(async ({ mode }) => {
       ] satisfies ExternalOption,
     })
 
-    const manualChunks = (
+    const codeSplittingGroups = (
       baseConfig.build.rolldownOptions.output.codeSplitting as CodeSplittingOptions
     ).groups!
 
     if (paramFeatureQueryBuilderEnabled) {
       // lazy loaded chunk (querybuilder)
-      manualChunks.push({
-        test: /node_modules\/(antlr4ng)/,
+      codeSplittingGroups.push({
+        test: /node_modules\/(antlr4ng)\//,
         name: `${outputsLibVenderPath}antlr4`,
       })
     }
@@ -540,7 +540,7 @@ export default defineConfig(async ({ mode }) => {
         pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
       }
       if (modules.length > 0) {
-        manualChunks.push({
+        codeSplittingGroups.push({
           // RegExp.escape
           test: modules2TestRegex(modules),
           name: `${outputsLibLocalesPath}${language}/default`,
@@ -556,7 +556,7 @@ export default defineConfig(async ({ mode }) => {
         )
         pushIfExists(modules, `${inputSrcLocales}/${language}/${namespace}.json`)
         if (modules.length > 0) {
-          manualChunks.push({
+          codeSplittingGroups.push({
             // RegExp.escape
             test: modules2TestRegex(modules),
             name: `${outputsLibLocalesPath}${language}/${namespace}`,
