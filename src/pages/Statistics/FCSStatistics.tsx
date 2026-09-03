@@ -122,6 +122,8 @@ const searchCapabilityPriority: Map<Capability, number> = new Map([
   ['BASIC_SEARCH', 0],
   ['ADVANCED_SEARCH', 1],
   ['LEX_SEARCH', 2],
+  ['LEXICAL_SEARCH', 2.1],
+  ['LEXICAL_SEARCH_V1_0', 2.2],
   ['AUTHENTICATED_SEARCH', 3],
 ])
 

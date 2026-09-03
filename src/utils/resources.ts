@@ -364,8 +364,15 @@ export function isResourceAvailableForQueryType(resource: Resource, queryTypeId:
     // want 'fcs' but does not have 'ADVANCED_SEARCH' capability
     return false
   }
-  if (queryTypeId === 'lex' && !resource.endpoint.searchCapabilities.includes('LEX_SEARCH')) {
-    // want 'lex' but does not have 'LEX_SEARCH' capability
+  if (
+    queryTypeId === 'lex' &&
+    !(
+      resource.endpoint.searchCapabilities.includes('LEX_SEARCH') ||
+      resource.endpoint.searchCapabilities.includes('LEXICAL_SEARCH') ||
+      resource.endpoint.searchCapabilities.includes('LEXICAL_SEARCH_V1_0')
+    )
+  ) {
+    // want 'lex' but does not have 'LEX_SEARCH'/'LEXICAL_SEARCH'/... capability
     return false
   }
   // 'cql' is required default, so no check

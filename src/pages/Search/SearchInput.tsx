@@ -275,8 +275,12 @@ function SearchInput({
       resource.searchCapabilitiesResolved.includes('ADVANCED_SEARCH')
     ) !== undefined
   const hasResourcesForQueryLex =
-    resources.find((resource) => resource.searchCapabilitiesResolved.includes('LEX_SEARCH')) !==
-    undefined
+    resources.find(
+      (resource) =>
+        resource.searchCapabilitiesResolved.includes('LEX_SEARCH') ||
+        resource.searchCapabilitiesResolved.includes('LEXICAL_SEARCH') ||
+        resource.searchCapabilitiesResolved.includes('LEXICAL_SEARCH_V1_0')
+    ) !== undefined
 
   const showQueryBuilderButton = QUERY_TYPES_WITH_BUILDER_SUPPORT.includes(
     queryType as QueryTypeIDForQueryBuilder
