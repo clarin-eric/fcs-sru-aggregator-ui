@@ -11,6 +11,7 @@
     - Add `<>` (not equal) relation
     - Remove unused relation modifiers
     - Add searchterm choices (dropdown) for `is` relation and indexes with default entity namespaces (UD features and POS tags)
+  - **Breaking** (potentially): removed `axios`, use native `fetch`
 
 - Fixed:
   - Update `vite.config.ts` imports due to new vite8 warnings
@@ -22,6 +23,7 @@
   - Fix npm audit issues
   - Migrate to `vite` v8
   - Add `rollup` for custom build transformation scripts (to avoid unclear migration to vite8/rolldown/oxc/...?)
+  - Bumped `@clarin-eric/fcs-sru-aggregator-api-adapter-typescript` to `2.2.1`, removed `axios`
 
 ## [1.0.0] Initial Release of new UI – 2026-05-11
 

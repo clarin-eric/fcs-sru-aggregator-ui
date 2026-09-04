@@ -136,6 +136,7 @@ export const technologiesBackend: readonly Technology[] = [
   },
 ]
 
+// TODO: add fcs-sru-aggregator-api-adapter-typescript ?
 export const technologiesFrontEnd: readonly Technology[] = [
   {
     id: 'react',

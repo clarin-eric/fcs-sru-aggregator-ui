@@ -82,9 +82,8 @@ export function LexCQLQueryBuilder({
             (dataview) => dataview.mimeType === 'application/x-clarin-fcs-lex+xml'
           ) !== undefined ||
             resource.searchCapabilitiesResolved.includes('LEX_SEARCH') ||
-            // TODO: to be updated
-            (resource.searchCapabilitiesResolved as string[]).includes('LEXICAL_SEARCH') ||
-            (resource.searchCapabilitiesResolved as string[]).includes('LEXICAL_SEARCH_V1_0')) &&
+            resource.searchCapabilitiesResolved.includes('LEXICAL_SEARCH') ||
+            resource.searchCapabilitiesResolved.includes('LEXICAL_SEARCH_V1_0')) &&
           resource.availableLexFields !== null &&
           resource.availableLexFields.length > 0
       ) ?? []
