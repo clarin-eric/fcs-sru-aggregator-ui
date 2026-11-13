@@ -1,8 +1,15 @@
 # Changelog
 
-## Unreleased
+## [1.1.1] – 2026-11-13
 
-## [1.1.0]
+- Changed:
+  - Some `vite.config.ts` cleanup
+
+- Fixed:
+  - Update `vite.config.ts` to correctly generate query builder CSS assets
+  - Add JS license banner
+
+## [1.1.0] – 2026-11-13
 
 - Added:
   - Add `CHANGELOG.md` file with summary of changes
@@ -34,5 +41,6 @@
 
 See Commit log for details.
 
+[1.1.1]: https://github.com/clarin-eric/fcs-sru-aggregator-ui/releases/tag/1.1.1
 [1.1.0]: https://github.com/clarin-eric/fcs-sru-aggregator-ui/releases/tag/1.1.0
 [1.0.0]: https://github.com/clarin-eric/fcs-sru-aggregator-ui/releases/tag/1.0.0

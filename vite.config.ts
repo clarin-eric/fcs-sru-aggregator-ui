@@ -119,25 +119,14 @@ export default defineConfig(async ({ mode }) => {
         output: {
           assetFileNames(chunkInfo: PreRenderedAsset) {
             if (chunkInfo.names.includes('index.css')) {
-              // lazy import modules
-              if (chunkInfo.originalFileNames.includes(entryQueryBuilder)) {
-                return `${pkg.name}-querybuilder.[ext]`
-              }
               // main
               return `${pkg.name}.[ext]`
             }
             return `assets/[name].[ext]`
           },
           entryFileNames: `${pkg.name}.js`,
-          chunkFileNames(chunkInfo: PreRenderedChunk) {
-            if (chunkInfo.isDynamicEntry) {
-              if (chunkInfo.facadeModuleId?.endsWith(entryQueryBuilder)) {
-                return `${pkg.name}-querybuilder.js`
-              }
-            }
-            return `[name].js`
-          },
-          banner: getBanner,
+          chunkFileNames: `[name].js`, // NOTE: unused?
+          postBanner: getBanner,
         } as OutputOptions,
         treeshake: {
           moduleSideEffects(id: string, external: boolean) {
@@ -374,12 +363,13 @@ export default defineConfig(async ({ mode }) => {
             //   originalFileNames: chunkInfo.originalFileNames,
             //   sourceLen: chunkInfo.source.length,
             // })
-            // main output chunks
-            if (chunkInfo.names.includes('index.css')) {
+            if (chunkInfo.names.includes('QueryBuilder.css')) {
               // lazy import modules
               if (chunkInfo.originalFileNames.includes(entryQueryBuilder)) {
                 return `${outputsLibPath}${pkg.name}-querybuilder.[ext]`
               }
+            } else if (chunkInfo.names.includes('index.css')) {
+              // main output chunks
               // main
               return `${outputsLibPath}${pkg.name}.[ext]`
             }
@@ -459,7 +449,7 @@ export default defineConfig(async ({ mode }) => {
             },
           ],
         },
-        banner: getBanner,
+        postBanner: getBanner,
       } satisfies OutputOptions,
       // filter out locales from dynamic import detection
       // see: https://vite.dev/config/build-options.html#build-dynamicimportvarsoptions
