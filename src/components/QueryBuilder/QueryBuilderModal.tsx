@@ -560,7 +560,7 @@ function QueryBuilderModal({
               {t('msgResourcesUnavailable', {
                 count: unavailableResources,
                 total: queryTypeAvailableResources,
-                context: queryTypeAvailableResources === unavailableResources ? 'nothing' : null,
+                context: queryTypeAvailableResources === unavailableResources ? 'nothing' : undefined,
               })}
               {unavailableResourcesByValue && (
                 <ul className="mb-0">

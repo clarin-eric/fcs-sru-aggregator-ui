@@ -116,7 +116,7 @@ function Header() {
                 code: localeOption,
                 name: langNamesLocalized.of(localeOption),
                 // show translated language name in current active language
-                context: localeOption !== locale ? 'translated' : null,
+                context: localeOption !== locale ? 'translated' : undefined,
                 translated: langNames.of(localeOption),
               })}
             >

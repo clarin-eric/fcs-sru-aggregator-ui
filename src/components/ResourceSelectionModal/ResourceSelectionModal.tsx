@@ -612,7 +612,7 @@ function ResourceSelectionModal({
                 count: resourcesInfo.selected,
                 total: resourcesInfo.visible,
                 available: resourcesInfo.available,
-                context: resourcesInfo.available !== resourcesInfo.visible ? 'available' : null,
+                context: resourcesInfo.available !== resourcesInfo.visible ? 'available' : undefined,
               })}
             </Col>
             {isGrouping && (

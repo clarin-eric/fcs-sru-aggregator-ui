@@ -126,7 +126,7 @@ function GroupedResources({
       t('search.resourcesModal.grouped.msgResources', {
         count: numResourcesRoot,
         nested: numResources - numResourcesRoot,
-        context: numResources - numResourcesRoot ? 'nested' : null,
+        context: numResources - numResourcesRoot ? 'nested' : undefined,
       }) +
       (numResourcesSelected !== numResources
         ? t('search.resourcesModal.grouped.msgResourcesSelected', { count: numResourcesSelected })

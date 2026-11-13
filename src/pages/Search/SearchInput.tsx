@@ -512,7 +512,7 @@ function SearchInput({
       resources.length === selectedResourcesCount ||
       validResourceIDs.length === selectedResourcesCount
         ? 'all'
-        : null
+        : undefined
     return t('search.searchInput.buttonSelectedResources', {
       count: selectedResourcesCount,
       context,
