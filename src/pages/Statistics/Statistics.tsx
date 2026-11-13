@@ -40,6 +40,9 @@ const CATEGORY_LABELS = [
   { id: 'recent-searches', label: 'Recent Searches' },
 ] as const
 const CATEGORY_LABELS_MAP = Object.fromEntries(CATEGORY_LABELS.map((item) => [item.id, item]))
+const CATEGORY_LABELS_MAP_REV = Object.fromEntries(
+  CATEGORY_LABELS.map((item) => [item.label, item.id])
+)
 
 const OTHER_TABS = ['resources', 'fcs']
 
@@ -68,7 +71,10 @@ function Statistics() {
   const validatorUrl = useAppStore((state) => state.validatorURL)
   const appTitleHead = AppStore.getState().appTitleHead
 
-  const categoryKeys = [...(data !== undefined ? Object.keys(data).toSorted() : []), ...OTHER_TABS]
+  const categoryKeys = [
+    ...(data !== undefined ? Object.keys(data).toSorted().map(mapDataKeyToId) : []),
+    ...OTHER_TABS,
+  ]
   // check if path param of to-be-selected statistics category exists and is valid otherwise default
   const defaultCategoryTab =
     categoryId != undefined && categoryKeys.includes(categoryId)
@@ -78,6 +84,10 @@ function Statistics() {
         : undefined
 
   // --------------------------------------------------------------
+
+  function mapDataKeyToId(dataKey: string) {
+    return CATEGORY_LABELS_MAP_REV[dataKey] ?? dataKey
+  }
 
   function refreshData() {
     console.debug('Invalidate data and refresh ...')
@@ -133,15 +143,17 @@ function Statistics() {
             onSelect={handleTabChange}
           >
             <Nav className="nav-tabs" as="ul">
-              {Object.keys(data).map((section: string) => (
-                <Nav.Item as="li" role="presentation" key={section}>
-                  <Nav.Link as="button" eventKey={section}>
-                    {t(`statistics.tabs.${section}`, {
-                      defaultValue: CATEGORY_LABELS_MAP[section]?.label ?? section,
-                    })}
-                  </Nav.Link>
-                </Nav.Item>
-              ))}
+              {Object.keys(data)
+                .map(mapDataKeyToId)
+                .map((section: string) => (
+                  <Nav.Item as="li" role="presentation" key={section}>
+                    <Nav.Link as="button" eventKey={section}>
+                      {t(`statistics.tabs.${section}`, {
+                        defaultValue: CATEGORY_LABELS_MAP[section]?.label ?? section,
+                      })}
+                    </Nav.Link>
+                  </Nav.Item>
+                ))}
               <Nav.Item as="li" role="presentation" key="resources">
                 <Nav.Link as="button" eventKey="resources">
                   {t('statistics.tabs.resources')}
@@ -161,11 +173,16 @@ function Statistics() {
               </Nav.Item>
             </Nav>
             <Tab.Content>
-              {Object.entries(data).map(([section, contents]: [string, StatisticsSection]) => (
-                <Tab.Pane eventKey={section} key={section}>
-                  <SectionStatistics data={contents} validatorUrl={validatorUrl} />
-                </Tab.Pane>
-              ))}
+              {Object.entries(data)
+                .map(
+                  ([section, contents]: [string, StatisticsSection]) =>
+                    [mapDataKeyToId(section), contents] as const
+                )
+                .map(([section, contents]) => (
+                  <Tab.Pane eventKey={section} key={section}>
+                    <SectionStatistics data={contents} validatorUrl={validatorUrl} />
+                  </Tab.Pane>
+                ))}
               <Tab.Pane eventKey="resources" key="resources">
                 <ResourcesDetails validatorUrl={validatorUrl} />
               </Tab.Pane>
