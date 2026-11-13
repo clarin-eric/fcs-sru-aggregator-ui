@@ -8,19 +8,19 @@ The frontend uses the following technologies:
   - [React Router](https://reactrouter.com/start/library/installation) ("library") 7.14.2 for <abbr title="Single Page Application">SPA</abbr> routing
   - [React Query](https://tanstack.com/query/latest) 5.107.1 with [Axios](https://github.com/axios/axios) 1.16.0 for web requests
     - [@clarin-eric/fcs-sru-aggregator-api-adapter-typescript](https://github.com/clarin-eric/fcs-sru-aggregator-api-adapter-typescript) 1.5.1 as REST API adapter for the FCS SRU Aggregator
-  - [react-i18next](https://react.i18next.com/) 16.5.6 and [i18next](https://www.i18next.com/) 25.8.10 for translation support, with [i18next-resources-to-backend](https://github.com/i18next/i18next-resources-to-backend) 1.2.4 for dynamic resource loading
+  - [react-i18next](https://react.i18next.com/) 18.0.1 and [i18next](https://www.i18next.com/) 27.1.1 for translation support, with [i18next-resources-to-backend](https://github.com/i18next/i18next-resources-to-backend) 1.2.4 for dynamic resource loading
 - [Bootstrap](https://getbootstrap.com/) 5.3.9 with [Bootstrap Icons](https://icons.getbootstrap.com/) 1.13.2, integration with [React Bootstrap](https://react-bootstrap.netlify.app/) 2.10.10
 - [microfuzz](https://github.com/Nozbe/microfuzz) 1.0.0 for fuzzy searching
 - [react-slugify](https://github.com/martpie/react-slugify) 4.0.1 for generating hash urls
 - [PrismJS](https://github.com/PrismJS/prism) 1.29.0 for syntax highlighting
 - [ANTLR4ng](https://github.com/mike-lischke/antlr4ng) 3.0.16 for syntax parsing (visual query builder, syntax validation)
 - [Zustand](https://github.com/pmndrs/zustand) 5.1.0 for state management of external bundle configuration
-- [React Helmet (Async Fork)](https://github.com/staylor/react-helmet-async) 2.0.5 for webpage meta information
+- [React Helmet (Async Fork)](https://github.com/staylor/react-helmet-async) 3.1.0 for webpage meta information
 
 For development and building a few additional dependencies are required:
 
 - [Vite](https://vite.dev/) 8.3.8 with plugins
-  - [estree-walker](https://github.com/Rich-Harris/estree-walker) 3.0.3 and [magic-string](https://github.com/rich-harris/magic-string) 0.30.21 for custom source code transformation (import rewriting, bundle building)
+  - [estree-walker](https://github.com/Rich-Harris/estree-walker) 3.0.3 and [magic-string](https://github.com/rich-harris/magic-string) 1.4.5 for custom source code transformation (import rewriting, bundle building)
   - [picomatch](https://github.com/micromatch/picomatch#globbing-features) 4.0.7 for filename filters in output control
 - [TypeScript](https://www.typescriptlang.org/) 5.9.3 with `@types/*` definitions
 - [ESLint](https://eslint.org/) 9.39.2 with plugins

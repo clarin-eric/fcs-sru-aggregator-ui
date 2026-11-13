@@ -15,7 +15,7 @@ import type {
 import { visualizer } from 'rollup-plugin-visualizer'
 import type { SimpleGit, SimpleGitOptions } from 'simple-git'
 import { simpleGit } from 'simple-git'
-import type { BuildOptions, UserConfig } from 'vite'
+import type { BuildOptions, PluginOption, UserConfig } from 'vite'
 import { defineConfig, loadEnv } from 'vite'
 
 import { existsSync, globSync } from 'node:fs'
@@ -175,7 +175,7 @@ export default defineConfig(async ({ mode }) => {
         gzipSize: true,
         brotliSize: true,
       }),
-    ],
+    ] as PluginOption[],
     define: {
       // TODO: required?
       'process.env': {},
